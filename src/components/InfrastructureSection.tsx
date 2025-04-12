@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { 
   Brain, 
   FileText, 
@@ -9,17 +8,55 @@ import {
   CheckCircle,
   Zap,
   Database,
-  Code
+  Code,
+  Timer
 } from 'lucide-react';
 
 const InfrastructureSection = () => {
+  const sectionRef = useRef(null);
+  const titleRef = useRef(null);
+  const cardsRef = useRef([]);
+  const techRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-slide-up', 'opacity-100');
+          entry.target.classList.remove('opacity-0', 'translate-y-10');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    if (titleRef.current) observer.observe(titleRef.current);
+    if (cardsRef.current) {
+      cardsRef.current.forEach(card => {
+        if (card) observer.observe(card);
+      });
+    }
+    if (techRef.current) observer.observe(techRef.current);
+
+    return () => {
+      if (sectionRef.current) observer.unobserve(sectionRef.current);
+      if (titleRef.current) observer.unobserve(titleRef.current);
+      if (cardsRef.current) {
+        cardsRef.current.forEach(card => {
+          if (card) observer.unobserve(card);
+        });
+      }
+      if (techRef.current) observer.unobserve(techRef.current);
+    };
+  }, []);
+
   return (
     <section id="how-it-works" className="py-20 bg-gradient-to-b from-white to-resume-gray-light relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none"></div>
       <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent pointer-events-none"></div>
       
       <div className="container px-4 md:px-6 relative">
-        <div className="flex flex-col items-center text-center space-y-4 mb-16 opacity-0 animate-slide-up animate-delay-100">
+        <div ref={titleRef} className="flex flex-col items-center text-center space-y-4 mb-16 opacity-0 translate-y-10 transition-all duration-700">
           <div className="inline-flex items-center rounded-full bg-resume-violet/10 px-3 py-1 text-sm text-resume-violet max-w-fit mb-2">
             <Zap className="mr-1 h-3.5 w-3.5" />
             <span>AI Technology</span>
@@ -31,8 +68,10 @@ const InfrastructureSection = () => {
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          {/* Step 1 */}
-          <div className="flex flex-col items-center text-center p-8 bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group relative overflow-hidden opacity-0 animate-slide-up animate-delay-200">
+          <div 
+            ref={el => cardsRef.current[0] = el}
+            className="flex flex-col items-center text-center p-8 bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group relative overflow-hidden opacity-0 translate-y-10 transition-all duration-700"
+          >
             <div className="absolute top-0 right-0 w-32 h-32 bg-resume-purple/5 rounded-bl-full -mr-10 -mt-10 group-hover:bg-resume-purple/10 transition-colors duration-300"></div>
             <div className="w-16 h-16 rounded-full bg-resume-purple/10 flex items-center justify-center mb-5 group-hover:bg-resume-purple/20 transition-colors duration-300 relative z-10">
               <Search className="h-8 w-8 text-resume-purple" />
@@ -41,8 +80,10 @@ const InfrastructureSection = () => {
             <p className="text-resume-gray">Our AI scans the job description to identify key skills, requirements, and preferences</p>
           </div>
 
-          {/* Step 2 */}
-          <div className="flex flex-col items-center text-center p-8 bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group relative overflow-hidden opacity-0 animate-slide-up animate-delay-300">
+          <div 
+            ref={el => cardsRef.current[1] = el}
+            className="flex flex-col items-center text-center p-8 bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group relative overflow-hidden opacity-0 translate-y-10 transition-all duration-700 delay-100"
+          >
             <div className="absolute top-0 right-0 w-32 h-32 bg-resume-purple/5 rounded-bl-full -mr-10 -mt-10 group-hover:bg-resume-purple/10 transition-colors duration-300"></div>
             <div className="w-16 h-16 rounded-full bg-resume-purple/10 flex items-center justify-center mb-5 group-hover:bg-resume-purple/20 transition-colors duration-300 relative z-10">
               <Brain className="h-8 w-8 text-resume-purple" />
@@ -51,8 +92,10 @@ const InfrastructureSection = () => {
             <p className="text-resume-gray">AI generates tailored content that highlights your relevant skills and experience</p>
           </div>
 
-          {/* Step 3 */}
-          <div className="flex flex-col items-center text-center p-8 bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group relative overflow-hidden opacity-0 animate-slide-up animate-delay-400">
+          <div 
+            ref={el => cardsRef.current[2] = el}
+            className="flex flex-col items-center text-center p-8 bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group relative overflow-hidden opacity-0 translate-y-10 transition-all duration-700 delay-200"
+          >
             <div className="absolute top-0 right-0 w-32 h-32 bg-resume-purple/5 rounded-bl-full -mr-10 -mt-10 group-hover:bg-resume-purple/10 transition-colors duration-300"></div>
             <div className="w-16 h-16 rounded-full bg-resume-purple/10 flex items-center justify-center mb-5 group-hover:bg-resume-purple/20 transition-colors duration-300 relative z-10">
               <CheckCircle className="h-8 w-8 text-resume-purple" />
@@ -62,7 +105,10 @@ const InfrastructureSection = () => {
           </div>
         </div>
 
-        <div className="mt-20 bg-white rounded-xl p-8 md:p-10 shadow-xl border border-gray-100 backdrop-blur-sm relative overflow-hidden opacity-0 animate-slide-up animate-delay-500">
+        <div 
+          ref={techRef} 
+          className="mt-20 bg-white rounded-xl p-8 md:p-10 shadow-xl border border-gray-100 backdrop-blur-sm relative overflow-hidden opacity-0 translate-y-10 transition-all duration-700 delay-300"
+        >
           <div className="absolute -top-24 -right-24 w-64 h-64 bg-resume-violet/5 rounded-full blur-2xl"></div>
           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-resume-purple/5 rounded-full blur-2xl"></div>
           
