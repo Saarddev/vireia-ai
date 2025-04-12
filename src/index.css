@@ -107,6 +107,7 @@
     background-size: 40px 40px;
   }
   
+  /* Animation delays */
   .animate-delay-100 {
     animation-delay: 100ms;
   }
@@ -142,6 +143,18 @@
   .translate-y-10 {
     transform: translateY(40px);
   }
+  
+  /* Scroll reveal utilities */
+  .reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+  
+  .reveal-on-scroll.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .app-container {
@@ -176,3 +189,20 @@
 .animate-soft-pulse {
   animation: soft-pulse 3s infinite;
 }
+
+/* Dashboard specific animations */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out forwards;
+}
+
