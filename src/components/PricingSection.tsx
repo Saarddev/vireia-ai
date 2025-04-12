@@ -6,17 +6,17 @@ import { Check, Star, Building, User, ArrowRight, Sparkles } from 'lucide-react'
 const PricingSection = () => {
   return (
     <section id="pricing" className="py-20 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-resume-blue/5 to-resume-teal/5 z-0"></div>
-      <div className="absolute -top-40 -left-40 w-96 h-96 bg-resume-blue/5 rounded-full blur-3xl"></div>
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-resume-teal/5 rounded-full blur-3xl"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-resume-purple/5 to-resume-violet/5 z-0"></div>
+      <div className="absolute -top-40 -left-40 w-96 h-96 bg-resume-purple/5 rounded-full blur-3xl"></div>
+      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-resume-violet/5 rounded-full blur-3xl"></div>
 
       <div className="container px-4 md:px-6 relative z-10">
-        <div className="flex flex-col items-center text-center space-y-4 mb-16">
-          <div className="inline-flex items-center rounded-full bg-resume-blue/10 px-3 py-1 text-sm text-resume-blue max-w-fit mb-2">
+        <div className="flex flex-col items-center text-center space-y-4 mb-16 opacity-0 animate-slide-up animate-delay-100">
+          <div className="inline-flex items-center rounded-full bg-resume-purple/10 px-3 py-1 text-sm text-resume-purple max-w-fit mb-2">
             <Sparkles className="mr-1 h-3.5 w-3.5" />
             <span>Flexible Options</span>
           </div>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl bg-gradient-to-br from-resume-gray-dark to-resume-blue bg-clip-text text-transparent">Choose Your Plan</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl bg-gradient-to-br from-resume-gray-dark to-resume-purple bg-clip-text text-transparent">Choose Your Plan</h2>
           <p className="max-w-[700px] text-resume-gray md:text-lg">
             Select the perfect plan that suits your career needs and goals
           </p>
@@ -24,7 +24,7 @@ const PricingSection = () => {
 
         <div className="grid gap-8 md:grid-cols-3 z-10">
           {/* Free Plan */}
-          <div className="flex flex-col p-8 bg-white rounded-xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl group relative overflow-hidden">
+          <div className="flex flex-col p-8 bg-white rounded-xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl group relative overflow-hidden opacity-0 animate-slide-up animate-delay-200">
             <div className="absolute top-0 left-0 w-full h-2 bg-gray-200 group-hover:bg-gray-300 transition-colors duration-300"></div>
             <div className="mb-5">
               <h3 className="text-xl font-semibold">Free</h3>
@@ -66,16 +66,16 @@ const PricingSection = () => {
           </div>
 
           {/* Pro Plan */}
-          <div className="flex flex-col p-8 rounded-xl shadow-xl relative border border-resume-blue/20 bg-white scale-105 z-20">
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-resume-blue to-resume-teal"></div>
+          <div className="flex flex-col p-8 rounded-xl shadow-xl relative border border-resume-purple/20 bg-white scale-105 z-20 opacity-0 animate-slide-up animate-delay-300">
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-resume-purple to-resume-violet"></div>
             <div className="absolute -top-4 left-0 w-full flex justify-center">
-              <div className="bg-gradient-to-r from-resume-blue to-resume-teal text-white text-sm font-medium px-4 py-1 rounded-full flex items-center shadow-md">
+              <div className="bg-gradient-to-r from-resume-purple to-resume-violet text-white text-sm font-medium px-4 py-1 rounded-full flex items-center shadow-md">
                 <Star className="mr-1 h-3.5 w-3.5" />
                 Popular Choice
               </div>
             </div>
             <div className="mb-5">
-              <h3 className="text-xl font-semibold text-resume-blue">Pro</h3>
+              <h3 className="text-xl font-semibold text-resume-purple">Pro</h3>
               <div className="mt-2 flex items-baseline">
                 <span className="text-4xl font-bold">$15</span>
                 <span className="ml-1 text-resume-gray">/month</span>
@@ -84,44 +84,44 @@ const PricingSection = () => {
             </div>
             <ul className="space-y-4 py-6 text-resume-gray-dark flex-grow">
               <li className="flex">
-                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-resume-blue/10 shrink-0">
-                  <Check className="h-3.5 w-3.5 text-resume-blue" />
+                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-resume-purple/10 shrink-0">
+                  <Check className="h-3.5 w-3.5 text-resume-purple" />
                 </div>
                 <span>10 premium templates</span>
               </li>
               <li className="flex">
-                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-resume-blue/10 shrink-0">
-                  <Check className="h-3.5 w-3.5 text-resume-blue" />
+                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-resume-purple/10 shrink-0">
+                  <Check className="h-3.5 w-3.5 text-resume-purple" />
                 </div>
                 <span>Advanced AI job matching</span>
               </li>
               <li className="flex">
-                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-resume-blue/10 shrink-0">
-                  <Check className="h-3.5 w-3.5 text-resume-blue" />
+                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-resume-purple/10 shrink-0">
+                  <Check className="h-3.5 w-3.5 text-resume-purple" />
                 </div>
                 <span>Multiple export formats</span>
               </li>
               <li className="flex">
-                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-resume-blue/10 shrink-0">
-                  <Check className="h-3.5 w-3.5 text-resume-blue" />
+                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-resume-purple/10 shrink-0">
+                  <Check className="h-3.5 w-3.5 text-resume-purple" />
                 </div>
                 <span>Up to 5 different resumes</span>
               </li>
               <li className="flex">
-                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-resume-blue/10 shrink-0">
-                  <Check className="h-3.5 w-3.5 text-resume-blue" />
+                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-resume-purple/10 shrink-0">
+                  <Check className="h-3.5 w-3.5 text-resume-purple" />
                 </div>
                 <span>Cover letter assistance</span>
               </li>
             </ul>
-            <Button className="mt-auto bg-gradient-to-r from-resume-blue to-resume-teal hover:from-resume-blue-dark hover:to-resume-teal shadow-lg shadow-resume-blue/20 transition-all duration-300 hover:shadow-xl hover:shadow-resume-blue/30 group">
+            <Button className="mt-auto bg-gradient-to-r from-resume-purple to-resume-violet hover:from-resume-purple-dark hover:to-resume-violet shadow-lg shadow-resume-purple/20 transition-all duration-300 hover:shadow-xl hover:shadow-resume-purple/30 group">
               Subscribe Now
               <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
 
           {/* Enterprise Plan */}
-          <div className="flex flex-col p-8 bg-white rounded-xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl group relative overflow-hidden">
+          <div className="flex flex-col p-8 bg-white rounded-xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl group relative overflow-hidden opacity-0 animate-slide-up animate-delay-400">
             <div className="absolute top-0 left-0 w-full h-2 bg-resume-gray-dark/20 group-hover:bg-resume-gray-dark/30 transition-colors duration-300"></div>
             <div className="mb-5">
               <h3 className="text-xl font-semibold">Enterprise</h3>
@@ -175,9 +175,9 @@ const PricingSection = () => {
           </div>
         </div>
 
-        <div className="mt-16 text-center">
+        <div className="mt-16 text-center opacity-0 animate-slide-up animate-delay-500">
           <p className="text-resume-gray mb-4">Not sure which plan is right for you?</p>
-          <Button variant="link" className="text-resume-blue hover:text-resume-blue-dark">View Full Comparison</Button>
+          <Button variant="link" className="text-resume-purple hover:text-resume-purple-dark">View Full Comparison</Button>
         </div>
       </div>
     </section>
