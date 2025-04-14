@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Plus, Search, Filter } from 'lucide-react';
@@ -54,7 +53,7 @@ const Resume = () => {
     { id: 6, name: "Frontend Developer Resume", lastEdited: "Apr 4, 2025", tags: ["Tech", "ATS-Optimized"] },
   ];
 
-  const handleEditResume = (resumeId: number) => {
+  const handleEditResume = (resumeId) => {
     navigate(`/resume/builder/${resumeId}`);
   };
 
