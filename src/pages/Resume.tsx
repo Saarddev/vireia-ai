@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FileText, Plus, Search, Filter } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ const Resume = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   useEffect(() => {
     setIsLoaded(true);
@@ -51,6 +53,10 @@ const Resume = () => {
     { id: 5, name: "Marketing Specialist Resume", lastEdited: "Apr 6, 2025", tags: ["Marketing", "Creative"] },
     { id: 6, name: "Frontend Developer Resume", lastEdited: "Apr 4, 2025", tags: ["Tech", "ATS-Optimized"] },
   ];
+
+  const handleEditResume = (resumeId: number) => {
+    navigate(`/resume/builder/${resumeId}`);
+  };
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -215,7 +221,14 @@ const Resume = () => {
                   </CardContent>
                   <CardFooter className="flex justify-between">
                     <Button variant="ghost" size="sm" className="text-resume-gray hover:text-resume-purple">Preview</Button>
-                    <Button variant="outline" size="sm" className="border-resume-purple text-resume-purple hover:bg-resume-purple hover:text-white">Edit</Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="border-resume-purple text-resume-purple hover:bg-resume-purple hover:text-white"
+                      onClick={() => handleEditResume(resume.id)}
+                    >
+                      Edit
+                    </Button>
                   </CardFooter>
                 </Card>
               ))}
