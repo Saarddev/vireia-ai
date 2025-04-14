@@ -78,3 +78,57 @@ html {
     box-shadow: 0 0 0 0 rgba(155, 135, 245, 0);
   }
 }
+
+/* Custom color variables for our resume theme */
+:root {
+  --resume-purple: #9b87f5;
+  --resume-purple-dark: #7E69AB;
+  --resume-violet: #6E59A5;
+  --resume-dark: #1A1F2C;
+  --resume-light-purple: #D6BCFA;
+  --resume-gray: #64748b;
+}
+
+/* Add theme-specific color classes */
+.bg-resume-purple {
+  background-color: var(--resume-purple);
+}
+
+.bg-resume-purple-dark {
+  background-color: var(--resume-purple-dark);
+}
+
+.text-resume-purple {
+  color: var(--resume-purple);
+}
+
+.text-resume-gray {
+  color: var(--resume-gray);
+}
+
+.border-resume-purple {
+  border-color: var(--resume-purple);
+}
+
+/* Dialog animation overrides */
+.dialog-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.dialog-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.dialog-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.dialog-exit-active {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 300ms, transform 300ms;
+}

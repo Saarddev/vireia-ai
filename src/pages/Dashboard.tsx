@@ -1,8 +1,9 @@
 
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, ChevronUp, Users, BarChart3, Clock, Briefcase, PlusCircle, Home, Cog, User, BookOpen, Layers, Star, LogOut } from 'lucide-react';
+import { FileText, ChevronUp, Users, BarChart3, Clock, Briefcase, Home, Cog, User, BookOpen, Layers, LogOut } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import OnboardingFlow from '@/components/OnboardingFlow';
 import {
@@ -20,11 +21,13 @@ import {
   SidebarSeparator,
   SidebarInset,
 } from "@/components/ui/sidebar";
+import CreateResumeDialog from '@/components/CreateResumeDialog';
 
 const Dashboard = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [firstVisit, setFirstVisit] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const { toast } = useToast();
   
   useEffect(() => {
@@ -112,21 +115,27 @@ const Dashboard = () => {
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                       <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="My Resumes">
-                          <FileText className="h-5 w-5" />
-                          <span>My Resumes</span>
+                        <SidebarMenuButton tooltip="My Resumes" asChild>
+                          <Link to="/resume">
+                            <FileText className="h-5 w-5" />
+                            <span>My Resumes</span>
+                          </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                       <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="Applications">
-                          <Briefcase className="h-5 w-5" />
-                          <span>Applications</span>
+                        <SidebarMenuButton tooltip="Applications" asChild>
+                          <Link to="/applications">
+                            <Briefcase className="h-5 w-5" />
+                            <span>Applications</span>
+                          </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                       <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="Analytics">
-                          <BarChart3 className="h-5 w-5" />
-                          <span>Analytics</span>
+                        <SidebarMenuButton tooltip="Analytics" asChild>
+                          <Link to="/analytics">
+                            <BarChart3 className="h-5 w-5" />
+                            <span>Analytics</span>
+                          </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     </SidebarMenu>
@@ -146,9 +155,11 @@ const Dashboard = () => {
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                       <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="Templates">
-                          <Layers className="h-5 w-5" />
-                          <span>Templates</span>
+                        <SidebarMenuButton tooltip="Templates" asChild>
+                          <Link to="/templates">
+                            <Layers className="h-5 w-5" />
+                            <span>Templates</span>
+                          </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     </SidebarMenu>
@@ -191,7 +202,10 @@ const Dashboard = () => {
                     <p className="text-resume-gray mt-1">Welcome back! Here's your resume progress</p>
                   </div>
                   <div>
-                    <Button className="bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20">
+                    <Button 
+                      className="bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20"
+                      onClick={() => setShowCreateDialog(true)}
+                    >
                       Create Resume
                     </Button>
                   </div>
@@ -296,10 +310,15 @@ const Dashboard = () => {
                       </div>
                     </CardContent>
                     <CardFooter className="flex justify-between">
-                      <Button variant="ghost" className="hover:bg-resume-purple/10 text-resume-gray hover:text-resume-purple">
-                        View All Resumes
-                      </Button>
-                      <Button className="bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20">
+                      <Link to="/resume">
+                        <Button variant="ghost" className="hover:bg-resume-purple/10 text-resume-gray hover:text-resume-purple">
+                          View All Resumes
+                        </Button>
+                      </Link>
+                      <Button 
+                        className="bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20"
+                        onClick={() => setShowCreateDialog(true)}
+                      >
                         Create New Resume
                       </Button>
                     </CardFooter>
@@ -308,6 +327,9 @@ const Dashboard = () => {
               </div>
             </SidebarInset>
           </div>
+          
+          {/* Create Resume Dialog */}
+          <CreateResumeDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} />
         </SidebarProvider>
       )}
     </>
