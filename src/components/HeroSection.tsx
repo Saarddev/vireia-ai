@@ -1,19 +1,18 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, Sparkles, ArrowRight, Award, Clock, BarChart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
   
   useEffect(() => {
-    // Make components visible on load with a slight delay for better UX
     const timer = setTimeout(() => {
       setIsVisible(true);
     }, 200);
     
-    // Add scroll listener
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
       if (scrollPosition > 100) {
@@ -30,6 +29,10 @@ const HeroSection = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  const handleGetStarted = () => {
+    navigate('/dashboard');
+  };
 
   return (
     <section className="py-20 md:py-28 relative overflow-hidden">
@@ -51,7 +54,6 @@ const HeroSection = () => {
               Create professional, ATS-friendly resumes in minutes. Our AI analyzes job descriptions to tailor your resume for higher interview success rates.
             </p>
             
-            {/* Special Offer Banner */}
             <div className={`flex items-center p-3 rounded-lg bg-gradient-to-r from-resume-purple/10 to-resume-violet/10 border border-resume-purple/20 transition-all duration-700 delay-250 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               <Award className="h-5 w-5 text-resume-purple mr-2 flex-shrink-0" />
               <p className="text-sm font-medium">
@@ -60,7 +62,11 @@ const HeroSection = () => {
             </div>
             
             <div className={`flex flex-col gap-3 min-[400px]:flex-row transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <Button size="lg" className="bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20 transition-all duration-300 hover:shadow-xl hover:shadow-resume-purple/30 group">
+              <Button 
+                size="lg" 
+                className="bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20 transition-all duration-300 hover:shadow-xl hover:shadow-resume-purple/30 group"
+                onClick={handleGetStarted}
+              >
                 Create Your Resume
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -88,7 +94,6 @@ const HeroSection = () => {
               </div>
             </div>
             
-            {/* Success Metrics */}
             <div className={`grid grid-cols-3 gap-4 pt-4 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               <div className="text-center">
                 <div className="text-2xl font-bold text-resume-purple">85%</div>
@@ -122,7 +127,6 @@ const HeroSection = () => {
                     <div className="h-4 w-[75%] rounded-full bg-muted"></div>
                   </div>
                   
-                  {/* Add success score indicator */}
                   <div className="mt-2 border-t pt-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
