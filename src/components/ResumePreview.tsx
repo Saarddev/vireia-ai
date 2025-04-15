@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Eye, Maximize2 } from 'lucide-react';
+import { Download, Eye, Maximize2, ZoomIn, ZoomOut } from 'lucide-react';
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +18,9 @@ interface ResumePreviewProps {
 }
 
 const ResumePreview: React.FC<ResumePreviewProps> = ({ data, template, settings = {} }) => {
+  const { isMobile } = useIsMobile();
+  const [zoomLevel, setZoomLevel] = useState(1);
+
   const handleDownloadPDF = () => {
     const printWindow = window.open('', '', 'height=800,width=600');
     if (!printWindow) return;
@@ -82,6 +86,14 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ data, template, settings 
       printWindow.print();
       printWindow.close();
     }, 250);
+  };
+
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev + 0.25, 2));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev - 0.25, 0.5));
   };
 
   const ResumeContent = () => (
@@ -192,39 +204,74 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ data, template, settings 
 
   return (
     <div className="relative h-full flex flex-col">
-      <div className="flex justify-between items-center mb-4 sticky top-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-2 rounded-lg z-10">
+      <div className="flex justify-between items-center mb-4 sticky top-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl py-3 px-4 rounded-xl z-10 shadow-sm">
         <Dialog>
           <DialogTrigger asChild>
             <Button
               variant="outline"
               size="sm"
-              className="hover:border-resume-purple hover:text-resume-purple"
+              className="hover:border-resume-purple hover:text-resume-purple transition-all duration-300"
             >
               <Eye className="h-4 w-4 mr-2" /> Preview
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-7xl w-[95vw] h-[90vh] overflow-y-auto">
-            <Card className="h-full bg-white p-8">
+          <DialogContent className="max-w-7xl w-[95vw] h-[90vh] overflow-y-auto bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl">
+            <div className="flex justify-end gap-2 mb-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleDownloadPDF}
+                className="hover:border-resume-purple hover:text-resume-purple transition-all duration-300"
+              >
+                <Download className="mr-2 h-4 w-4" /> Download PDF
+              </Button>
+            </div>
+            <Card className="h-full bg-white p-8 shadow-md">
               <ResumeContent />
             </Card>
           </DialogContent>
         </Dialog>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleDownloadPDF}
-          className="hover:border-resume-purple hover:text-resume-purple"
-        >
-          <Download className="mr-2 h-4 w-4" /> Download PDF
-        </Button>
+        
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleZoomOut}
+            disabled={zoomLevel <= 0.5}
+            className="hover:border-resume-purple hover:text-resume-purple transition-all duration-300"
+          >
+            <ZoomOut className="h-4 w-4" />
+          </Button>
+          <span className="text-xs font-medium w-16 text-center">{Math.round(zoomLevel * 100)}%</span>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleZoomIn}
+            disabled={zoomLevel >= 2}
+            className="hover:border-resume-purple hover:text-resume-purple transition-all duration-300"
+          >
+            <ZoomIn className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleDownloadPDF}
+            className="ml-2 hover:border-resume-purple hover:text-resume-purple transition-all duration-300"
+          >
+            <Download className="mr-2 h-4 w-4" /> Download
+          </Button>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-auto relative">
+      <div className="flex-1 overflow-auto relative flex items-center justify-center bg-gray-50 dark:bg-gray-800/30 rounded-xl p-6">
         <Card className={cn(
-          "resume-content w-full bg-white rounded shadow-sm p-4 min-h-[842px] mx-auto transition-transform duration-200",
-          "hover:shadow-lg"
+          "resume-content bg-white rounded-lg shadow-lg p-0 transition-all duration-200",
+          "hover:shadow-xl"
         )} style={{ 
           maxWidth: '595px',
+          transform: `scale(${zoomLevel})`,
+          height: zoomLevel === 1 ? 'auto' : `${842 * zoomLevel}px`,
+          transformOrigin: 'center top',
         }}>
           <ResumeContent />
         </Card>

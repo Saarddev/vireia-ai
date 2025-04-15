@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -10,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { 
   FileText, 
-  CornerDownLeft, 
+  ArrowLeft, 
   Save, 
   Download, 
   Share2, 
@@ -26,8 +27,11 @@ import {
   GanttChartSquare,
   Globe,
   Sparkles,
-  Eye,
-  Palette
+  PanelLeft,
+  Palette,
+  MousePointerClick,
+  ShieldCheck,
+  MessageSquarePlus
 } from 'lucide-react';
 import ResumePreview from '@/components/ResumePreview';
 import PersonalInfoForm from '@/components/resume-builder/PersonalInfoForm';
@@ -38,11 +42,14 @@ import SummaryForm from '@/components/resume-builder/SummaryForm';
 import AIAssistant from '@/components/resume-builder/AIAssistant';
 import TemplateSelector from '@/components/resume-builder/TemplateSelector';
 import ResumeSettings from '@/components/resume-builder/ResumeSettings';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ResumeBuilder = () => {
   const { resumeId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isMobile, isTablet } = useIsMobile();
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [activeSection, setActiveSection] = useState("personal");
   const [resumeData, setResumeData] = useState({
     personal: {
@@ -123,14 +130,30 @@ const ResumeBuilder = () => {
     ]
   });
   const [aiEnabled, setAiEnabled] = useState(true);
+  const [aiGenerating, setAiGenerating] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState("modern");
+  const [resumeSettings, setResumeSettings] = useState({
+    fontFamily: "Inter",
+    fontSize: 10,
+    primaryColor: "#9b87f5",
+    paperSize: "a4",
+    margins: "normal"
+  });
   const [isSaving, setIsSaving] = useState(false);
+  const [progress, setProgress] = useState(20);
 
   useEffect(() => {
+    // Simulate progress bar advancement
+    const timer = setTimeout(() => {
+      setProgress(85);
+    }, 1000);
+    
     toast({
       title: "Resume loaded",
-      description: "Your resume data has been successfully loaded."
+      description: "Your resume data has been loaded. AI is ready to assist you."
     });
+    
+    return () => clearTimeout(timer);
   }, [resumeId, toast]);
 
   const handleSave = () => {
@@ -166,6 +189,13 @@ const ResumeBuilder = () => {
     }));
   };
 
+  const handleSettingsChange = (newSettings) => {
+    setResumeSettings(prev => ({
+      ...prev,
+      ...newSettings
+    }));
+  };
+
   const handleAIToggle = (enabled) => {
     setAiEnabled(enabled);
     toast({
@@ -174,16 +204,28 @@ const ResumeBuilder = () => {
     });
   };
 
+  const generateWithAI = () => {
+    setAiGenerating(true);
+    
+    setTimeout(() => {
+      setAiGenerating(false);
+      toast({
+        title: "AI Generation Complete",
+        description: "Your resume has been enhanced by our AI assistant."
+      });
+    }, 2500);
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 to-gray-50 dark:from-gray-900 dark:to-purple-950">
-      <header className="sticky top-0 z-50 p-4 border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-sm">
-        <div className="container max-w-[1600px] mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50/80 to-gray-50/80 dark:from-gray-900/80 dark:via-purple-950/30 dark:to-gray-900/80">
+      <header className="sticky top-0 z-50 p-4 border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-sm">
+        <div className="container max-w-[1800px] mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => navigate('/resume')} 
               className="text-resume-gray hover:text-resume-purple transition-colors flex items-center gap-1 hover:scale-105 transform duration-200"
             >
-              <CornerDownLeft className="h-4 w-4" /> Back
+              <ArrowLeft className="h-4 w-4" /> Back
             </button>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <h1 className="text-xl font-semibold flex items-center">
@@ -230,173 +272,246 @@ const ResumeBuilder = () => {
         </div>
       </header>
 
-      <div className="container max-w-[1800px] mx-auto px-6 py-8 flex-1 flex flex-col gap-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-[calc(100vh-12rem)]">
-          <div className="lg:col-span-3 h-full overflow-auto">
-            <Card className="shadow-lg h-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-resume-purple/10 hover:border-resume-purple/20 transition-colors">
-              <div className="p-4 flex flex-col h-full">
-                <h2 className="font-semibold mb-4 text-lg flex items-center">
-                  <GanttChartSquare className="mr-2 h-5 w-5 text-resume-purple" />
-                  Resume Sections
-                </h2>
-                <div className="space-y-1">
-                  <Button 
-                    variant={activeSection === "personal" ? "default" : "ghost"} 
-                    className={`w-full justify-start ${activeSection === "personal" ? "bg-resume-purple text-white" : ""}`}
-                    onClick={() => setActiveSection("personal")}
-                  >
-                    <UserRound className="mr-2 h-4 w-4" /> Personal Information
-                  </Button>
-                  <Button 
-                    variant={activeSection === "summary" ? "default" : "ghost"}
-                    className={`w-full justify-start ${activeSection === "summary" ? "bg-resume-purple text-white" : ""}`}
-                    onClick={() => setActiveSection("summary")}
-                  >
-                    <FileText className="mr-2 h-4 w-4" /> Professional Summary
-                  </Button>
-                  <Button 
-                    variant={activeSection === "experience" ? "default" : "ghost"}
-                    className={`w-full justify-start ${activeSection === "experience" ? "bg-resume-purple text-white" : ""}`}
-                    onClick={() => setActiveSection("experience")}
-                  >
-                    <Briefcase className="mr-2 h-4 w-4" /> Work Experience
-                  </Button>
-                  <Button 
-                    variant={activeSection === "education" ? "default" : "ghost"}
-                    className={`w-full justify-start ${activeSection === "education" ? "bg-resume-purple text-white" : ""}`}
-                    onClick={() => setActiveSection("education")}
-                  >
-                    <GraduationCap className="mr-2 h-4 w-4" /> Education
-                  </Button>
-                  <Button 
-                    variant={activeSection === "skills" ? "default" : "ghost"}
-                    className={`w-full justify-start ${activeSection === "skills" ? "bg-resume-purple text-white" : ""}`}
-                    onClick={() => setActiveSection("skills")}
-                  >
-                    <Code className="mr-2 h-4 w-4" /> Skills
-                  </Button>
-                  <Button 
-                    variant={activeSection === "languages" ? "default" : "ghost"}
-                    className={`w-full justify-start ${activeSection === "languages" ? "bg-resume-purple text-white" : ""}`}
-                    onClick={() => setActiveSection("languages")}
-                  >
-                    <Languages className="mr-2 h-4 w-4" /> Languages
-                  </Button>
-                  <Button 
-                    variant={activeSection === "certifications" ? "default" : "ghost"}
-                    className={`w-full justify-start ${activeSection === "certifications" ? "bg-resume-purple text-white" : ""}`}
-                    onClick={() => setActiveSection("certifications")}
-                  >
-                    <Award className="mr-2 h-4 w-4" /> Certifications
-                  </Button>
-                  <Button 
-                    variant={activeSection === "projects" ? "default" : "ghost"}
-                    className={`w-full justify-start ${activeSection === "projects" ? "bg-resume-purple text-white" : ""}`}
-                    onClick={() => setActiveSection("projects")}
-                  >
-                    <Globe className="mr-2 h-4 w-4" /> Projects
-                  </Button>
+      <div className="container max-w-[1800px] mx-auto px-4 py-6 flex-1 flex flex-col gap-6">
+        {/* Progress bar */}
+        <div className="w-full bg-white/50 dark:bg-gray-800/50 rounded-full h-2 mb-2">
+          <div 
+            className="bg-resume-purple h-2 rounded-full transition-all duration-1000 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        
+        {/* Quick AI Actions */}
+        {aiEnabled && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <Button 
+              variant="outline" 
+              className="h-auto py-3 px-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-resume-purple/20 hover:border-resume-purple hover:bg-resume-purple/5 shadow-sm group transition-all duration-300"
+              onClick={generateWithAI}
+              disabled={aiGenerating}
+            >
+              <div className="flex flex-col items-start text-left">
+                <div className="flex items-center mb-1">
+                  <Wand2 className={`h-4 w-4 mr-2 text-resume-purple ${aiGenerating ? 'animate-spin' : 'group-hover:animate-bounce'}`} />
+                  <span className="font-medium">Generate Complete Resume</span>
                 </div>
-
-                <Separator className="my-6" />
-
-                <h2 className="font-semibold mb-4 text-lg flex items-center">
-                  <Palette className="mr-2 h-5 w-5 text-resume-purple" />
-                  Appearance
-                </h2>
-                <div className="space-y-1">
-                  <Button 
-                    variant={activeSection === "templates" ? "default" : "ghost"}
-                    className={`w-full justify-start ${activeSection === "templates" ? "bg-resume-purple text-white" : ""}`}
-                    onClick={() => setActiveSection("templates")}
-                  >
-                    <LayoutPanelLeft className="mr-2 h-4 w-4" /> Templates
-                  </Button>
-                  <Button 
-                    variant={activeSection === "settings" ? "default" : "ghost"}
-                    className={`w-full justify-start ${activeSection === "settings" ? "bg-resume-purple text-white" : ""}`}
-                    onClick={() => setActiveSection("settings")}
-                  >
-                    <Settings className="mr-2 h-4 w-4" /> Settings
-                  </Button>
-                </div>
-
-                <div className="mt-auto">
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start text-resume-purple mt-6 border border-dashed border-resume-purple/30 hover:bg-resume-purple/10 hover:border-resume-purple"
-                    onClick={() => setActiveSection("ai")}
-                  >
-                    <Wand2 className="mr-2 h-4 w-4" /> AI Resume Review
-                  </Button>
-                </div>
+                <span className="text-xs text-muted-foreground">Create a full resume based on your profile</span>
               </div>
-            </Card>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="h-auto py-3 px-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-resume-purple/20 hover:border-resume-purple hover:bg-resume-purple/5 shadow-sm group transition-all duration-300"
+            >
+              <div className="flex flex-col items-start text-left">
+                <div className="flex items-center mb-1">
+                  <MessageSquarePlus className="h-4 w-4 mr-2 text-resume-purple group-hover:animate-pulse" />
+                  <span className="font-medium">Enhance Summary</span>
+                </div>
+                <span className="text-xs text-muted-foreground">Make your summary more impactful</span>
+              </div>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="h-auto py-3 px-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-resume-purple/20 hover:border-resume-purple hover:bg-resume-purple/5 shadow-sm group transition-all duration-300"
+            >
+              <div className="flex flex-col items-start text-left">
+                <div className="flex items-center mb-1">
+                  <MousePointerClick className="h-4 w-4 mr-2 text-resume-purple group-hover:animate-pulse" />
+                  <span className="font-medium">ATS Optimization</span>
+                </div>
+                <span className="text-xs text-muted-foreground">Optimize for applicant tracking systems</span>
+              </div>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="h-auto py-3 px-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-resume-purple/20 hover:border-resume-purple hover:bg-resume-purple/5 shadow-sm group transition-all duration-300"
+            >
+              <div className="flex flex-col items-start text-left">
+                <div className="flex items-center mb-1">
+                  <ShieldCheck className="h-4 w-4 mr-2 text-resume-purple group-hover:animate-pulse" />
+                  <span className="font-medium">Check for Errors</span>
+                </div>
+                <span className="text-xs text-muted-foreground">Find grammar and spelling mistakes</span>
+              </div>
+            </Button>
           </div>
+        )}
+        
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-14rem)]">
+          {/* Side navigation - collapsible on mobile */}
+          {(sidebarOpen || !isMobile) && (
+            <div className="lg:col-span-3 xl:col-span-2 h-full overflow-auto">
+              <Card className="shadow-lg h-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-resume-purple/10 hover:border-resume-purple/20 transition-colors p-2">
+                <div className="flex flex-col h-full">
+                  <div className="p-3">
+                    <h2 className="font-semibold mb-2 text-lg flex items-center">
+                      <GanttChartSquare className="mr-2 h-5 w-5 text-resume-purple" />
+                      Resume Sections
+                    </h2>
+                  </div>
+                  
+                  <div className="overflow-y-auto flex-1">
+                    <div className="space-y-1 px-2">
+                      <Button 
+                        variant={activeSection === "personal" ? "default" : "ghost"} 
+                        className={`w-full justify-start ${activeSection === "personal" ? "bg-resume-purple text-white" : ""}`}
+                        onClick={() => setActiveSection("personal")}
+                      >
+                        <UserRound className="mr-2 h-4 w-4" /> Personal Information
+                      </Button>
+                      <Button 
+                        variant={activeSection === "summary" ? "default" : "ghost"}
+                        className={`w-full justify-start ${activeSection === "summary" ? "bg-resume-purple text-white" : ""}`}
+                        onClick={() => setActiveSection("summary")}
+                      >
+                        <FileText className="mr-2 h-4 w-4" /> Professional Summary
+                      </Button>
+                      <Button 
+                        variant={activeSection === "experience" ? "default" : "ghost"}
+                        className={`w-full justify-start ${activeSection === "experience" ? "bg-resume-purple text-white" : ""}`}
+                        onClick={() => setActiveSection("experience")}
+                      >
+                        <Briefcase className="mr-2 h-4 w-4" /> Work Experience
+                      </Button>
+                      <Button 
+                        variant={activeSection === "education" ? "default" : "ghost"}
+                        className={`w-full justify-start ${activeSection === "education" ? "bg-resume-purple text-white" : ""}`}
+                        onClick={() => setActiveSection("education")}
+                      >
+                        <GraduationCap className="mr-2 h-4 w-4" /> Education
+                      </Button>
+                      <Button 
+                        variant={activeSection === "skills" ? "default" : "ghost"}
+                        className={`w-full justify-start ${activeSection === "skills" ? "bg-resume-purple text-white" : ""}`}
+                        onClick={() => setActiveSection("skills")}
+                      >
+                        <Code className="mr-2 h-4 w-4" /> Skills
+                      </Button>
+                    </div>
 
-          <div className="lg:col-span-5 h-full overflow-auto">
-            <Card className="shadow-lg h-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-resume-purple/10 hover:border-resume-purple/20 transition-colors">
-              <div className="p-6 h-full overflow-auto">
-                <div className="max-w-3xl mx-auto space-y-6">
-                  {activeSection === "personal" && (
-                    <PersonalInfoForm 
-                      data={resumeData.personal} 
-                      onChange={(data) => handleDataChange("personal", data)} 
-                    />
-                  )}
-                  {activeSection === "summary" && (
-                    <SummaryForm 
-                      data={resumeData.summary} 
-                      onChange={(data) => handleDataChange("summary", data)} 
-                    />
-                  )}
-                  {activeSection === "experience" && (
-                    <ExperienceForm 
-                      data={resumeData.experience} 
-                      onChange={(data) => handleDataChange("experience", data)} 
-                    />
-                  )}
-                  {activeSection === "education" && (
-                    <EducationForm 
-                      data={resumeData.education} 
-                      onChange={(data) => handleDataChange("education", data)} 
-                    />
-                  )}
-                  {activeSection === "skills" && (
-                    <SkillsForm 
-                      data={resumeData.skills} 
-                      onChange={(data) => handleDataChange("skills", data)} 
-                    />
-                  )}
-                  {activeSection === "templates" && (
-                    <TemplateSelector 
-                      selectedTemplate={selectedTemplate}
-                      onSelect={setSelectedTemplate}
-                    />
-                  )}
-                  {activeSection === "settings" && (
-                    <ResumeSettings />
-                  )}
-                  {activeSection === "ai" && (
-                    <AIAssistant 
-                      resumeData={resumeData}
-                      enabled={aiEnabled}
-                    />
-                  )}
+                    <Separator className="my-4 mx-2" />
+
+                    <div className="space-y-1 px-2">
+                      <Button 
+                        variant={activeSection === "templates" ? "default" : "ghost"}
+                        className={`w-full justify-start ${activeSection === "templates" ? "bg-resume-purple text-white" : ""}`}
+                        onClick={() => setActiveSection("templates")}
+                      >
+                        <LayoutPanelLeft className="mr-2 h-4 w-4" /> Templates
+                      </Button>
+                      <Button 
+                        variant={activeSection === "settings" ? "default" : "ghost"}
+                        className={`w-full justify-start ${activeSection === "settings" ? "bg-resume-purple text-white" : ""}`}
+                        onClick={() => setActiveSection("settings")}
+                      >
+                        <Settings className="mr-2 h-4 w-4" /> Settings
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="p-2 mt-2">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start text-resume-purple border border-dashed border-resume-purple/30 hover:bg-resume-purple/10 hover:border-resume-purple"
+                      onClick={() => setActiveSection("ai")}
+                    >
+                      <Wand2 className="mr-2 h-4 w-4" /> AI Resume Review
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </Card>
-          </div>
+              </Card>
+            </div>
+          )}
 
-          <div className="lg:col-span-4 h-full overflow-auto">
-            <Card className="shadow-lg h-full flex flex-col bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-resume-purple/10 hover:border-resume-purple/20 transition-colors">
-              <div className="flex-1 overflow-auto p-4">
-                <ResumePreview 
-                  data={resumeData} 
-                  template={selectedTemplate} 
-                />
+          {/* Content */}
+          <div className={`${sidebarOpen || !isMobile ? "lg:col-span-9 xl:col-span-10" : "lg:col-span-12"} h-full grid grid-cols-1 md:grid-cols-2 gap-6`}>
+            {/* Mobile sidebar toggle */}
+            {isMobile && (
+              <div className="fixed bottom-5 left-5 z-10">
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="rounded-full shadow-lg bg-resume-purple text-white hover:bg-resume-purple-dark"
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                >
+                  <PanelLeft className="h-4 w-4" />
+                </Button>
               </div>
-            </Card>
+            )}
+
+            {/* Main form content */}
+            <div className="h-full overflow-auto">
+              <Card className="shadow-lg h-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-resume-purple/10 hover:border-resume-purple/20 transition-colors">
+                <div className="p-6 h-full overflow-auto">
+                  <div className="mx-auto space-y-6">
+                    {activeSection === "personal" && (
+                      <PersonalInfoForm 
+                        data={resumeData.personal} 
+                        onChange={(data) => handleDataChange("personal", data)} 
+                      />
+                    )}
+                    {activeSection === "summary" && (
+                      <SummaryForm 
+                        data={resumeData.summary} 
+                        onChange={(data) => handleDataChange("summary", data)} 
+                      />
+                    )}
+                    {activeSection === "experience" && (
+                      <ExperienceForm 
+                        data={resumeData.experience} 
+                        onChange={(data) => handleDataChange("experience", data)} 
+                      />
+                    )}
+                    {activeSection === "education" && (
+                      <EducationForm 
+                        data={resumeData.education} 
+                        onChange={(data) => handleDataChange("education", data)} 
+                      />
+                    )}
+                    {activeSection === "skills" && (
+                      <SkillsForm 
+                        data={resumeData.skills} 
+                        onChange={(data) => handleDataChange("skills", data)} 
+                      />
+                    )}
+                    {activeSection === "templates" && (
+                      <TemplateSelector 
+                        selectedTemplate={selectedTemplate}
+                        onSelect={setSelectedTemplate}
+                      />
+                    )}
+                    {activeSection === "settings" && (
+                      <ResumeSettings 
+                        settings={resumeSettings}
+                        onChange={handleSettingsChange}
+                      />
+                    )}
+                    {activeSection === "ai" && (
+                      <AIAssistant 
+                        resumeData={resumeData}
+                        enabled={aiEnabled}
+                      />
+                    )}
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Resume preview */}
+            <div className="h-full overflow-auto">
+              <Card className="shadow-lg h-full flex flex-col bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-resume-purple/10 hover:border-resume-purple/20 transition-colors">
+                <div className="flex-1 overflow-auto p-4">
+                  <ResumePreview 
+                    data={resumeData} 
+                    template={selectedTemplate}
+                    settings={resumeSettings}
+                  />
+                </div>
+              </Card>
+            </div>
           </div>
         </div>
       </div>

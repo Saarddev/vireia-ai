@@ -1,5 +1,5 @@
 
-import * as React from "react"
+import * as React from "react";
 
 const BREAKPOINTS = {
   mobile: 640,  // sm
@@ -22,6 +22,7 @@ export function useIsMobile() {
   });
 
   React.useEffect(() => {
+    // Initial check
     const updateSize = () => {
       const width = window.innerWidth;
       setScreenSize({
@@ -32,13 +33,19 @@ export function useIsMobile() {
       });
     };
 
-    window.addEventListener('resize', updateSize);
+    // Set initial size
     updateSize();
+    
+    // Add event listener for resize
+    window.addEventListener('resize', updateSize);
+    
+    // Clean up
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
   return {
     ...screenSize,
-    isMobile: screenSize.isMobile
+    isMobileOrTablet: screenSize.isMobile || screenSize.isTablet,
+    isDesktopOrWide: screenSize.isDesktop || screenSize.isWide
   };
 }
