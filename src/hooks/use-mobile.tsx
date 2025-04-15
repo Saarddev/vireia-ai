@@ -33,5 +33,9 @@ export function useIsMobile() {
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  return screenSize;
+  // Return both the full object and a simple boolean for backward compatibility
+  return {
+    ...screenSize,
+    isMobile: screenSize.isMobile
+  };
 }
