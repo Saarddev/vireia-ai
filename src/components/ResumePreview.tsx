@@ -13,22 +13,68 @@ import {
 interface ResumePreviewProps {
   data: any;
   template: string;
+  settings?: any;
 }
 
-const ResumePreview: React.FC<ResumePreviewProps> = ({ data, template }) => {
+const ResumePreview: React.FC<ResumePreviewProps> = ({ data, template, settings = {} }) => {
   const handleDownloadPDF = () => {
-    // Create a new window with just the resume content
     const printWindow = window.open('', '', 'height=800,width=600');
     if (!printWindow) return;
     
-    // Write the resume content to the new window
+    // Apply settings to the print window
     printWindow.document.write('<html><head><title>Resume</title>');
     printWindow.document.write('<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">');
-    printWindow.document.write('</head><body>');
+    
+    // Apply font family
+    if (settings.fontFamily) {
+      printWindow.document.write(`
+        <link href="https://fonts.googleapis.com/css2?family=${settings.fontFamily}:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <style>
+          body { font-family: '${settings.fontFamily}', sans-serif; }
+        </style>
+      `);
+    }
+    
+    // Apply font size
+    if (settings.fontSize) {
+      printWindow.document.write(`
+        <style>
+          body { font-size: ${settings.fontSize}pt; }
+        </style>
+      `);
+    }
+    
+    // Apply primary color
+    if (settings.primaryColor) {
+      printWindow.document.write(`
+        <style>
+          .text-resume-purple { color: ${settings.primaryColor}; }
+          .border-resume-purple { border-color: ${settings.primaryColor}; }
+          .bg-purple-100 { background-color: ${settings.primaryColor}20; }
+        </style>
+      `);
+    }
+    
+    // Apply margins
+    const marginSizes = {
+      narrow: '0.5in',
+      normal: '1in',
+      wide: '1.5in'
+    };
+    const margin = marginSizes[settings.margins || 'normal'];
+    printWindow.document.write(`
+      <style>
+        @page {
+          margin: ${margin};
+          size: ${settings.paperSize || 'a4'};
+        }
+      </style>
+    `);
+    
+    printWindow.document.write('</head><body class="bg-white">');
     printWindow.document.write(document.querySelector('.resume-content')?.innerHTML || '');
     printWindow.document.write('</body></html>');
     
-    // Wait for content to load then print
     printWindow.document.close();
     printWindow.focus();
     
@@ -39,7 +85,11 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ data, template }) => {
   };
 
   const ResumeContent = () => (
-    <div className="p-4">
+    <div className={cn(
+      "p-4",
+      settings.fontFamily && `font-[${settings.fontFamily}]`,
+      settings.fontSize && `text-[${settings.fontSize}pt]`
+    )}>
       {/* Modern template */}
       {template === 'modern' && (
         <div className="p-4">

@@ -230,10 +230,10 @@ const ResumeBuilder = () => {
         </div>
       </header>
 
-      <div className="container max-w-[1600px] mx-auto px-4 py-6 flex-1 flex flex-col gap-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-12rem)]">
+      <div className="container max-w-[1800px] mx-auto px-6 py-8 flex-1 flex flex-col gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-[calc(100vh-12rem)]">
           <div className="lg:col-span-3 h-full overflow-auto">
-            <Card className="shadow-sm h-full bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg sticky top-0">
+            <Card className="shadow-lg h-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-resume-purple/10 hover:border-resume-purple/20 transition-colors">
               <div className="p-4 flex flex-col h-full">
                 <h2 className="font-semibold mb-4 text-lg flex items-center">
                   <GanttChartSquare className="mr-2 h-5 w-5 text-resume-purple" />
@@ -335,9 +335,9 @@ const ResumeBuilder = () => {
           </div>
 
           <div className="lg:col-span-5 h-full overflow-auto">
-            <Card className="shadow-sm h-full bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg">
-              <div className="p-4 h-full overflow-auto">
-                <div className="max-w-3xl mx-auto">
+            <Card className="shadow-lg h-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-resume-purple/10 hover:border-resume-purple/20 transition-colors">
+              <div className="p-6 h-full overflow-auto">
+                <div className="max-w-3xl mx-auto space-y-6">
                   {activeSection === "personal" && (
                     <PersonalInfoForm 
                       data={resumeData.personal} 
@@ -389,8 +389,8 @@ const ResumeBuilder = () => {
           </div>
 
           <div className="lg:col-span-4 h-full overflow-auto">
-            <Card className="shadow-sm h-full flex flex-col bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg">
-              <div className="flex-1 overflow-auto">
+            <Card className="shadow-lg h-full flex flex-col bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-resume-purple/10 hover:border-resume-purple/20 transition-colors">
+              <div className="flex-1 overflow-auto p-4">
                 <ResumePreview 
                   data={resumeData} 
                   template={selectedTemplate} 

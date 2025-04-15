@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -36,23 +35,21 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
   };
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold flex items-center">
-            <Brain className="mr-2 h-5 w-5 text-resume-purple animate-pulse" />
+          <h2 className="text-2xl font-semibold flex items-center">
+            <Brain className="mr-3 h-6 w-6 text-resume-purple animate-pulse" />
             AI Resume Review
           </h2>
-          <p className="text-sm text-resume-gray mt-1">
+          <p className="text-sm text-resume-gray mt-2">
             Get AI-powered insights to enhance your resume
           </p>
         </div>
         {enabled && !isAnalyzing && (
           <Button 
-            size="sm" 
             onClick={handleAnalyze} 
-            className="bg-resume-purple hover:bg-resume-purple/90"
-            disabled={isAnalyzing}
+            className="bg-resume-purple hover:bg-resume-purple/90 shadow-lg hover:shadow-xl transition-all"
           >
             <Sparkles className="mr-2 h-4 w-4" /> 
             {analysisComplete ? "Analyze Again" : "Analyze Resume"}
@@ -61,7 +58,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
       </div>
       
       {!enabled && (
-        <Card className="p-8 text-center space-y-6 bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-200">
+        <Card className="p-8 text-center space-y-6 bg-gradient-to-br from-yellow-50/80 to-amber-50/80 backdrop-blur-xl border-yellow-200/50">
           <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 mx-auto ring-8 ring-yellow-50">
             <AlertCircle className="h-8 w-8 text-yellow-600" />
           </div>
@@ -78,7 +75,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
       )}
       
       {enabled && isAnalyzing && (
-        <Card className="p-8 text-center space-y-6 bg-gradient-to-br from-purple-50 to-blue-50">
+        <Card className="p-8 text-center space-y-6 bg-gradient-to-br from-purple-50/80 to-blue-50/80 backdrop-blur-xl border-resume-purple/20">
           <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-resume-purple/10 mx-auto animate-pulse">
             <Sparkles className="h-8 w-8 text-resume-purple animate-bounce" />
           </div>
@@ -105,24 +102,24 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
       )}
       
       {enabled && analysisComplete && (
-        <div className="space-y-6">
-          <Card className="overflow-hidden">
-            <div className="p-6 bg-gradient-to-r from-resume-purple/5 to-purple-50 border-b">
+        <div className="space-y-8">
+          <Card className="overflow-hidden border-resume-purple/20 hover:border-resume-purple/40 transition-colors">
+            <div className="p-8 bg-gradient-to-r from-resume-purple/5 to-purple-50/80 backdrop-blur-xl border-b">
               <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <h3 className="font-semibold text-resume-purple flex items-center">
+                <div className="space-y-2">
+                  <h3 className="text-xl font-semibold text-resume-purple flex items-center">
                     <BarChart3 className="mr-2 h-5 w-5" /> Resume Score
                   </h3>
                   <p className="text-sm text-resume-gray">Based on industry standards and best practices</p>
                 </div>
                 <div className="text-right">
-                  <div className="text-4xl font-bold text-resume-purple">76<span className="text-xl">/100</span></div>
-                  <span className="text-sm text-green-600 font-medium">Above Average</span>
+                  <div className="text-5xl font-bold text-resume-purple">76<span className="text-2xl">/100</span></div>
+                  <Badge variant="outline" className="mt-2 bg-green-50 text-green-600 border-green-200">Above Average</Badge>
                 </div>
               </div>
             </div>
             
-            <div className="p-6 space-y-4">
+            <div className="p-8 space-y-6">
               {[
                 { name: "Content Quality", score: 85, color: "bg-green-500" },
                 { name: "ATS Compatibility", score: 92, color: "bg-blue-500" },
@@ -134,9 +131,9 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
                     <span className="font-medium">{metric.name}</span>
                     <span className="text-resume-gray">{metric.score}%</span>
                   </div>
-                  <div className="h-2 bg-gray-100 rounded-full">
+                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                     <div 
-                      className={`h-full rounded-full ${metric.color}`}
+                      className={`h-full ${metric.color} transition-all duration-1000 ease-out`}
                       style={{ width: `${metric.score}%` }}
                     />
                   </div>
@@ -145,9 +142,9 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
             </div>
           </Card>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
-              <div className="p-6">
+          <div className="grid gap-8 md:grid-cols-2">
+            <Card className="bg-gradient-to-br from-amber-50/80 to-orange-50/80 backdrop-blur-xl border-amber-200/50 hover:border-amber-300/50 transition-colors">
+              <div className="p-8">
                 <div className="flex items-center space-x-2 text-amber-800">
                   <Target className="h-5 w-5" />
                   <h3 className="font-semibold">Top Suggestions</h3>
@@ -171,8 +168,8 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
               </div>
             </Card>
 
-            <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
-              <div className="p-6">
+            <Card className="bg-gradient-to-br from-blue-50/80 to-purple-50/80 backdrop-blur-xl border-blue-200/50 hover:border-blue-300/50 transition-colors">
+              <div className="p-8">
                 <div className="flex items-center space-x-2 text-blue-800">
                   <MessageSquareDashed className="h-5 w-5" />
                   <h3 className="font-semibold">AI Feedback</h3>
@@ -189,7 +186,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
             </Card>
           </div>
 
-          <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+          <Card className="p-8 bg-gradient-to-br from-green-50/80 to-emerald-50/80 backdrop-blur-xl border-green-200/50 hover:border-green-300/50 transition-colors">
             <div className="flex items-start space-x-4">
               <div className="flex-shrink-0">
                 <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
