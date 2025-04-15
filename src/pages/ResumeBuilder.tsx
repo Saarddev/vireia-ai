@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -127,9 +126,7 @@ const ResumeBuilder = () => {
   const [selectedTemplate, setSelectedTemplate] = useState("modern");
   const [isSaving, setIsSaving] = useState(false);
 
-  // Simulate loading resume data
   useEffect(() => {
-    // In a real app, this would fetch the resume data based on resumeId
     toast({
       title: "Resume loaded",
       description: "Your resume data has been successfully loaded."
@@ -139,7 +136,6 @@ const ResumeBuilder = () => {
   const handleSave = () => {
     setIsSaving(true);
     
-    // Simulate API call
     setTimeout(() => {
       setIsSaving(false);
       toast({
@@ -179,25 +175,26 @@ const ResumeBuilder = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-purple-50 dark:from-gray-950 dark:to-purple-950">
-      {/* Header */}
-      <header className="p-4 border-b bg-white dark:bg-gray-900 shadow-sm">
-        <div className="container max-w-7xl mx-auto flex items-center justify-between">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 to-gray-50 dark:from-gray-900 dark:to-purple-950">
+      <header className="sticky top-0 z-50 p-4 border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-sm">
+        <div className="container max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => navigate('/resume')} 
-              className="text-resume-gray hover:text-resume-purple transition-colors flex items-center gap-1"
+              className="text-resume-gray hover:text-resume-purple transition-colors flex items-center gap-1 hover:scale-105 transform duration-200"
             >
               <CornerDownLeft className="h-4 w-4" /> Back
             </button>
-            <h1 className="text-xl font-semibold flex items-center">
-              <FileText className="mr-2 h-5 w-5 text-resume-purple" />
-              <span className="text-gray-800 dark:text-gray-200">{resumeData.personal.name}'s Resume</span>
-            </h1>
-            <Badge variant="outline" className="text-sm text-resume-purple border-resume-purple">Draft</Badge>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <h1 className="text-xl font-semibold flex items-center">
+                <FileText className="mr-2 h-5 w-5 text-resume-purple" />
+                <span className="text-gray-800 dark:text-gray-200">{resumeData.personal.name}'s Resume</span>
+              </h1>
+              <Badge variant="outline" className="text-sm text-resume-purple border-resume-purple">Draft</Badge>
+            </div>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <div className="flex items-center mr-4">
               <Switch 
                 id="ai-mode" 
@@ -210,33 +207,33 @@ const ResumeBuilder = () => {
               </Label>
             </div>
             
-            <Button variant="outline" size="sm" onClick={() => navigate('/resume')}>
-              Cancel
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleDownload} className="gap-1">
-              <Download className="h-4 w-4" /> Export
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleShare} className="gap-1">
-              <Share2 className="h-4 w-4" /> Share
-            </Button>
-            <Button 
-              size="sm" 
-              onClick={handleSave} 
-              disabled={isSaving}
-              className="bg-resume-purple hover:bg-resume-purple-dark gap-1"
-            >
-              <Save className="h-4 w-4" /> {isSaving ? "Saving..." : "Save"}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => navigate('/resume')} className="hover:border-resume-purple hover:text-resume-purple">
+                Cancel
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleDownload} className="gap-1 hover:border-resume-purple hover:text-resume-purple">
+                <Download className="h-4 w-4" /> Export
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleShare} className="gap-1 hover:border-resume-purple hover:text-resume-purple">
+                <Share2 className="h-4 w-4" /> Share
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={handleSave} 
+                disabled={isSaving}
+                className="bg-resume-purple hover:bg-resume-purple-dark gap-1 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+              >
+                <Save className="h-4 w-4" /> {isSaving ? "Saving..." : "Save"}
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
       <div className="container max-w-7xl mx-auto px-4 py-6 flex-1 flex flex-col gap-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-          {/* Left Sidebar - Sections */}
-          <div className="lg:col-span-1">
-            <Card className="shadow-sm h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-3">
+            <Card className="shadow-sm h-full bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg">
               <div className="p-4 flex flex-col h-full">
                 <h2 className="font-semibold mb-4 text-lg flex items-center">
                   <GanttChartSquare className="mr-2 h-5 w-5 text-resume-purple" />
@@ -327,7 +324,7 @@ const ResumeBuilder = () => {
                 <div className="mt-auto">
                   <Button 
                     variant="ghost" 
-                    className="w-full justify-start text-resume-purple mt-6 border border-dashed border-resume-purple/30"
+                    className="w-full justify-start text-resume-purple mt-6 border border-dashed border-resume-purple/30 hover:bg-resume-purple/10 hover:border-resume-purple"
                     onClick={() => setActiveSection("ai")}
                   >
                     <Wand2 className="mr-2 h-4 w-4" /> AI Resume Review
@@ -337,71 +334,76 @@ const ResumeBuilder = () => {
             </Card>
           </div>
 
-          {/* Middle - Form Section */}
-          <div className="lg:col-span-1">
-            <Card className="shadow-sm h-full">
+          <div className="lg:col-span-5">
+            <Card className="shadow-sm h-full bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg">
               <div className="p-4 h-full overflow-auto">
-                {activeSection === "personal" && (
-                  <PersonalInfoForm 
-                    data={resumeData.personal} 
-                    onChange={(data) => handleDataChange("personal", data)} 
-                  />
-                )}
-                {activeSection === "summary" && (
-                  <SummaryForm 
-                    data={resumeData.summary} 
-                    onChange={(data) => handleDataChange("summary", data)} 
-                  />
-                )}
-                {activeSection === "experience" && (
-                  <ExperienceForm 
-                    data={resumeData.experience} 
-                    onChange={(data) => handleDataChange("experience", data)} 
-                  />
-                )}
-                {activeSection === "education" && (
-                  <EducationForm 
-                    data={resumeData.education} 
-                    onChange={(data) => handleDataChange("education", data)} 
-                  />
-                )}
-                {activeSection === "skills" && (
-                  <SkillsForm 
-                    data={resumeData.skills} 
-                    onChange={(data) => handleDataChange("skills", data)} 
-                  />
-                )}
-                {activeSection === "templates" && (
-                  <TemplateSelector 
-                    selectedTemplate={selectedTemplate}
-                    onSelect={setSelectedTemplate}
-                  />
-                )}
-                {activeSection === "settings" && (
-                  <ResumeSettings />
-                )}
-                {activeSection === "ai" && (
-                  <AIAssistant 
-                    resumeData={resumeData}
-                    enabled={aiEnabled}
-                  />
-                )}
+                <div className="max-w-2xl mx-auto">
+                  {activeSection === "personal" && (
+                    <PersonalInfoForm 
+                      data={resumeData.personal} 
+                      onChange={(data) => handleDataChange("personal", data)} 
+                    />
+                  )}
+                  {activeSection === "summary" && (
+                    <SummaryForm 
+                      data={resumeData.summary} 
+                      onChange={(data) => handleDataChange("summary", data)} 
+                    />
+                  )}
+                  {activeSection === "experience" && (
+                    <ExperienceForm 
+                      data={resumeData.experience} 
+                      onChange={(data) => handleDataChange("experience", data)} 
+                    />
+                  )}
+                  {activeSection === "education" && (
+                    <EducationForm 
+                      data={resumeData.education} 
+                      onChange={(data) => handleDataChange("education", data)} 
+                    />
+                  )}
+                  {activeSection === "skills" && (
+                    <SkillsForm 
+                      data={resumeData.skills} 
+                      onChange={(data) => handleDataChange("skills", data)} 
+                    />
+                  )}
+                  {activeSection === "templates" && (
+                    <TemplateSelector 
+                      selectedTemplate={selectedTemplate}
+                      onSelect={setSelectedTemplate}
+                    />
+                  )}
+                  {activeSection === "settings" && (
+                    <ResumeSettings />
+                  )}
+                  {activeSection === "ai" && (
+                    <AIAssistant 
+                      resumeData={resumeData}
+                      enabled={aiEnabled}
+                    />
+                  )}
+                </div>
               </div>
             </Card>
           </div>
 
-          {/* Right - Preview */}
-          <div className="lg:col-span-1">
-            <Card className="shadow-sm h-full flex flex-col">
+          <div className="lg:col-span-4">
+            <Card className="shadow-sm h-full flex flex-col bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg">
               <div className="p-4 border-b flex justify-between items-center">
                 <h2 className="font-semibold flex items-center">
                   <Eye className="mr-2 h-5 w-5 text-resume-purple" /> Preview
                 </h2>
-                <Button variant="outline" size="sm" onClick={handleDownload}>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleDownload}
+                  className="hover:border-resume-purple hover:text-resume-purple"
+                >
                   <Download className="mr-2 h-4 w-4" /> Download PDF
                 </Button>
               </div>
-              <div className="p-4 flex-1 overflow-auto bg-gray-50 dark:bg-gray-900">
+              <div className="p-4 flex-1 overflow-auto bg-gray-50 dark:bg-gray-900 rounded-lg m-2">
                 <ResumePreview 
                   data={resumeData} 
                   template={selectedTemplate} 
