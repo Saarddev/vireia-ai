@@ -177,7 +177,7 @@ const ResumeBuilder = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 to-gray-50 dark:from-gray-900 dark:to-purple-950">
       <header className="sticky top-0 z-50 p-4 border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-sm">
-        <div className="container max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="container max-w-[1600px] mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => navigate('/resume')} 
@@ -230,10 +230,10 @@ const ResumeBuilder = () => {
         </div>
       </header>
 
-      <div className="container max-w-7xl mx-auto px-4 py-6 flex-1 flex flex-col gap-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-3">
-            <Card className="shadow-sm h-full bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg">
+      <div className="container max-w-[1600px] mx-auto px-4 py-6 flex-1 flex flex-col gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-12rem)]">
+          <div className="lg:col-span-3 h-full overflow-auto">
+            <Card className="shadow-sm h-full bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg sticky top-0">
               <div className="p-4 flex flex-col h-full">
                 <h2 className="font-semibold mb-4 text-lg flex items-center">
                   <GanttChartSquare className="mr-2 h-5 w-5 text-resume-purple" />
@@ -334,10 +334,10 @@ const ResumeBuilder = () => {
             </Card>
           </div>
 
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-5 h-full overflow-auto">
             <Card className="shadow-sm h-full bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg">
               <div className="p-4 h-full overflow-auto">
-                <div className="max-w-2xl mx-auto">
+                <div className="max-w-3xl mx-auto">
                   {activeSection === "personal" && (
                     <PersonalInfoForm 
                       data={resumeData.personal} 
@@ -388,22 +388,9 @@ const ResumeBuilder = () => {
             </Card>
           </div>
 
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-4 h-full overflow-auto">
             <Card className="shadow-sm h-full flex flex-col bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg">
-              <div className="p-4 border-b flex justify-between items-center">
-                <h2 className="font-semibold flex items-center">
-                  <Eye className="mr-2 h-5 w-5 text-resume-purple" /> Preview
-                </h2>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleDownload}
-                  className="hover:border-resume-purple hover:text-resume-purple"
-                >
-                  <Download className="mr-2 h-4 w-4" /> Download PDF
-                </Button>
-              </div>
-              <div className="p-4 flex-1 overflow-auto bg-gray-50 dark:bg-gray-900 rounded-lg m-2">
+              <div className="flex-1 overflow-auto">
                 <ResumePreview 
                   data={resumeData} 
                   template={selectedTemplate} 
