@@ -369,7 +369,6 @@ const ResumeBuilder = () => {
                     <SidebarMenuItem>
                       <SidebarMenuButton 
                         isActive={activeSection === "personal"}
-                        tooltip="Personal Information"
                         onClick={() => setActiveSection("personal")}
                       >
                         <UserRound className="h-4 w-4" />
@@ -380,7 +379,6 @@ const ResumeBuilder = () => {
                     <SidebarMenuItem>
                       <SidebarMenuButton 
                         isActive={activeSection === "summary"}
-                        tooltip="Professional Summary"
                         onClick={() => setActiveSection("summary")}
                       >
                         <FileText className="h-4 w-4" />
@@ -391,7 +389,6 @@ const ResumeBuilder = () => {
                     <SidebarMenuItem>
                       <SidebarMenuButton 
                         isActive={activeSection === "experience"}
-                        tooltip="Work Experience"
                         onClick={() => setActiveSection("experience")}
                       >
                         <Briefcase className="h-4 w-4" />
@@ -402,7 +399,6 @@ const ResumeBuilder = () => {
                     <SidebarMenuItem>
                       <SidebarMenuButton 
                         isActive={activeSection === "education"}
-                        tooltip="Education History"
                         onClick={() => setActiveSection("education")}
                       >
                         <GraduationCap className="h-4 w-4" />
@@ -413,7 +409,6 @@ const ResumeBuilder = () => {
                     <SidebarMenuItem>
                       <SidebarMenuButton 
                         isActive={activeSection === "skills"}
-                        tooltip="Skills & Expertise"
                         onClick={() => setActiveSection("skills")}
                       >
                         <Code className="h-4 w-4" />
@@ -433,7 +428,6 @@ const ResumeBuilder = () => {
                     <SidebarMenuItem>
                       <SidebarMenuButton 
                         isActive={activeSection === "templates"}
-                        tooltip="Resume Templates"
                         onClick={() => setActiveSection("templates")}
                       >
                         <LayoutPanelLeft className="h-4 w-4" />
@@ -444,33 +438,29 @@ const ResumeBuilder = () => {
                     <SidebarMenuItem>
                       <SidebarMenuButton 
                         isActive={activeSection === "settings"}
-                        tooltip="Resume Settings"
                         onClick={() => setActiveSection("settings")}
                       >
                         <Settings className="h-4 w-4" />
                         <span>Settings</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-              
-              <SidebarSeparator />
-              
-              <SidebarGroup>
-                <SidebarGroupLabel>AI Tools</SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <SidebarMenu>
+
                     <SidebarMenuItem>
                       <SidebarMenuButton 
                         isActive={activeSection === "ai"}
-                        tooltip="AI Resume Review"
                         onClick={() => setActiveSection("ai")}
-                        variant={activeSection === "ai" ? "default" : "outline"}
-                        className={activeSection === "ai" ? "bg-resume-purple text-white" : "border border-dashed border-resume-purple/30 text-resume-purple hover:bg-resume-purple/10"}
+                        className={cn(
+                          "w-full gap-2",
+                          activeSection === "ai" ? "text-resume-purple" : "text-muted-foreground"
+                        )}
                       >
-                        <Wand2 className="h-4 w-4" />
-                        <span>AI Resume Review</span>
+                        <div className="relative">
+                          <Wand2 className="h-4 w-4" />
+                          {aiEnabled && (
+                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-resume-purple rounded-full" />
+                          )}
+                        </div>
+                        <span>AI Assistant</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   </SidebarMenu>
@@ -498,7 +488,7 @@ const ResumeBuilder = () => {
 
           <SidebarInset className="flex flex-col p-6">
             {aiSuggestion && (
-              <div className="mb-6 animate-slide-up">
+              <div className="mb-6">
                 <Card className="bg-resume-purple/5 border border-resume-purple/20 shadow-lg overflow-hidden">
                   <div className="p-4 flex items-start gap-4">
                     <div className="bg-resume-purple text-white p-2 rounded-lg shadow-inner">
@@ -542,73 +532,7 @@ const ResumeBuilder = () => {
               </div>
             )}
             
-            {aiEnabled && (
-              <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                {[
-                  {
-                    title: "Complete Resume",
-                    description: "Create a full resume from your profile",
-                    icon: Wand2,
-                    onClick: generateWithAI,
-                    loading: aiGenerating
-                  },
-                  {
-                    title: "Enhance Summary",
-                    description: "Make your summary more impactful",
-                    icon: MessageSquarePlus
-                  },
-                  {
-                    title: "ATS Optimization",
-                    description: "Optimize for applicant tracking systems",
-                    icon: MousePointerClick
-                  },
-                  {
-                    title: "Check for Errors",
-                    description: "Find grammar and spelling mistakes",
-                    icon: ShieldCheck
-                  }
-                ].map((action, index) => (
-                  <Card
-                    key={action.title}
-                    className={cn(
-                      "group relative overflow-hidden transition-all duration-300",
-                      "hover:shadow-lg hover:border-resume-purple/30",
-                      "dark:hover:border-resume-purple-light/30",
-                      "animate-fade-in [animation-delay:var(--delay)]"
-                    )}
-                    style={{ '--delay': `${index * 100}ms` } as React.CSSProperties}
-                  >
-                    <button
-                      className="w-full h-full p-4 text-left"
-                      onClick={action.onClick}
-                      disabled={action.loading}
-                    >
-                      <div className="flex flex-col h-full">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="p-2 rounded-lg bg-resume-purple/10 text-resume-purple">
-                            <action.icon className={cn(
-                              "h-4 w-4",
-                              "transition-all duration-500",
-                              "group-hover:scale-110",
-                              action.loading && "animate-spin"
-                            )} />
-                          </div>
-                          <h3 className="font-medium text-foreground">
-                            {action.title}
-                          </h3>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {action.description}
-                        </p>
-                      </div>
-                      <div className="absolute inset-0 bg-resume-purple/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </button>
-                  </Card>
-                ))}
-              </div>
-            )}
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-16rem)]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-8rem)]">
               <div className="h-full overflow-auto rounded-xl">
                 <Card className="h-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 overflow-hidden shadow-xl">
                   <div className="p-6 h-full overflow-auto">
