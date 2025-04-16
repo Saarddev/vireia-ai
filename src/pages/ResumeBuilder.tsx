@@ -263,26 +263,33 @@ const ResumeBuilder = () => {
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50/80 via-indigo-50/40 to-purple-50/60 dark:from-gray-900 dark:via-purple-950/30 dark:to-gray-900">
-        <header className="sticky top-0 z-50 p-3 md:p-4 border-b bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-sm">
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50/80 via-background to-purple-50/60 dark:from-gray-900/90 dark:via-gray-900/50 dark:to-gray-900/90">
+        {/* Header */}
+        <header className="sticky top-0 z-50 px-4 py-3 border-b bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-sm">
           <div className="container max-w-[1800px] mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => navigate('/resume')} 
-                className="text-gray-600 hover:text-resume-purple dark:text-gray-300 dark:hover:text-resume-purple-light transition-colors flex items-center gap-1 hover:scale-105 transform duration-200"
+                className="text-muted-foreground hover:text-resume-purple dark:hover:text-resume-purple-light transition-colors flex items-center gap-1.5 hover:scale-105 transform duration-200"
               >
-                <ArrowLeft className="h-4 w-4" /> Back
+                <ArrowLeft className="h-4 w-4" />
+                <span className="font-medium">Back</span>
               </button>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                 <h1 className="text-xl font-semibold flex items-center">
                   <FileText className="mr-2 h-5 w-5 text-resume-purple" />
-                  <span className="text-gray-800 dark:text-gray-200 font-display">{resumeData.personal.name}'s Resume</span>
+                  <span className="text-foreground font-display">{resumeData.personal.name}'s Resume</span>
                 </h1>
-                <Badge variant="outline" className="text-sm text-resume-purple border-resume-purple py-1">Draft</Badge>
+                <Badge 
+                  variant="outline" 
+                  className="text-sm text-resume-purple border-resume-purple/30 bg-resume-purple/5 py-1"
+                >
+                  Draft
+                </Badge>
               </div>
             </div>
             
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
               <div className="flex items-center mr-4">
                 <Switch 
                   id="ai-mode" 
@@ -290,28 +297,45 @@ const ResumeBuilder = () => {
                   onCheckedChange={handleAIToggle} 
                   className="mr-2 data-[state=checked]:bg-resume-purple"
                 />
-                <Label htmlFor="ai-mode" className="text-sm font-medium cursor-pointer flex items-center">
-                  <Sparkles className="h-3 w-3 mr-1 text-resume-purple" /> AI Assistant
+                <Label 
+                  htmlFor="ai-mode" 
+                  className="text-sm font-medium cursor-pointer flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Sparkles className="h-3.5 w-3.5 mr-1.5 text-resume-purple" />
+                  AI Assistant
                 </Label>
               </div>
               
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => navigate('/resume')} className="hover:border-resume-purple hover:text-resume-purple">
-                  Cancel
-                </Button>
-                <Button variant="outline" size="sm" onClick={handleDownload} className="gap-1 hover:border-resume-purple hover:text-resume-purple">
-                  <Download className="h-4 w-4" /> Export
-                </Button>
-                <Button variant="outline" size="sm" onClick={handleShare} className="gap-1 hover:border-resume-purple hover:text-resume-purple">
-                  <Share2 className="h-4 w-4" /> Share
-                </Button>
                 <Button 
+                  variant="outline" 
                   size="sm" 
                   onClick={handleSave} 
+                  className="gap-1.5 border-resume-purple/20 text-resume-purple hover:bg-resume-purple/5 hover:border-resume-purple transition-all duration-300"
                   disabled={isSaving}
-                  className="bg-resume-purple hover:bg-resume-purple-dark gap-1 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                 >
-                  <Save className="h-4 w-4" /> {isSaving ? "Saving..." : "Save"}
+                  <Save className="h-4 w-4" />
+                  {isSaving ? "Saving..." : "Save"}
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleDownload}
+                  className="gap-1.5 border-resume-purple/20 text-resume-purple hover:bg-resume-purple/5 hover:border-resume-purple transition-all duration-300"
+                >
+                  <Download className="h-4 w-4" />
+                  Export PDF
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleShare}
+                  className="gap-1.5 border-resume-purple/20 text-resume-purple hover:bg-resume-purple/5 hover:border-resume-purple transition-all duration-300"
+                >
+                  <Share2 className="h-4 w-4" />
+                  Share
                 </Button>
               </div>
             </div>
@@ -321,15 +345,21 @@ const ResumeBuilder = () => {
         <div className="flex-1 flex">
           {/* Sidebar */}
           <Sidebar side="left" variant="floating" collapsible="icon">
-            <SidebarHeader className="p-3 flex flex-col gap-3">
+            <SidebarHeader className="p-4 flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-resume-purple dark:text-resume-purple-light font-display">Resume Builder</h3>
+                <h3 className="text-lg font-semibold text-resume-purple dark:text-resume-purple-light font-display">
+                  Resume Builder
+                </h3>
                 <SidebarTrigger />
               </div>
               
-              <div className="flex gap-2 items-center">
-                <Progress value={progress} className="h-2 bg-gray-100 dark:bg-gray-800" indicatorClassName="bg-resume-purple" />
-                <span className="text-xs font-medium">{progress}%</span>
+              <div className="flex gap-2 items-center bg-muted/30 rounded-lg p-2">
+                <Progress 
+                  value={progress} 
+                  className="h-2" 
+                  indicatorClassName="bg-resume-purple"
+                />
+                <span className="text-xs font-medium text-muted-foreground">{progress}%</span>
               </div>
             </SidebarHeader>
             
@@ -469,110 +499,127 @@ const ResumeBuilder = () => {
           </Sidebar>
 
           {/* Main Content */}
-          <SidebarInset className="flex flex-col px-4 py-6 md:p-6">
+          <SidebarInset className="flex flex-col p-6">
             {/* AI Suggestion Alert */}
             {aiSuggestion && (
               <div className="mb-6 animate-slide-up">
-                <div className="bg-resume-purple/10 dark:bg-resume-purple/20 border border-resume-purple/20 dark:border-resume-purple/30 rounded-xl p-4 shadow-lg">
-                  <div className="flex items-start gap-4">
-                    <div className="bg-resume-purple text-white p-2 rounded-full">
+                <Card className="bg-resume-purple/5 border border-resume-purple/20 shadow-lg overflow-hidden">
+                  <div className="p-4 flex items-start gap-4">
+                    <div className="bg-resume-purple text-white p-2 rounded-lg shadow-inner">
                       <Sparkles className="h-5 w-5" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-resume-purple dark:text-resume-purple-light mb-1 font-display">AI Suggestion</h3>
-                      <p className="text-sm text-gray-700 dark:text-gray-300">{aiSuggestion.content}</p>
+                      <h3 className="font-semibold text-resume-purple dark:text-resume-purple-light mb-1 font-display">
+                        AI Suggestion
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {aiSuggestion.content}
+                      </p>
                       <div className="mt-3 flex gap-2">
                         <Button 
                           size="sm" 
                           variant="outline"
-                          className="text-xs gap-1 border-resume-purple/20 hover:border-resume-purple hover:bg-resume-purple/5"
+                          className="text-xs gap-1.5 border-resume-purple/20 hover:border-resume-purple hover:bg-resume-purple/5"
                           onClick={dismissAiSuggestion}
                         >
-                          <X className="h-3 w-3" /> Dismiss
+                          <X className="h-3 w-3" />
+                          Dismiss
                         </Button>
                         <Button 
                           size="sm" 
-                          className="text-xs gap-1 bg-resume-purple hover:bg-resume-purple-dark"
+                          className="text-xs gap-1.5 bg-resume-purple hover:bg-resume-purple-dark"
                           onClick={applyAiSuggestion}
                         >
-                          <Check className="h-3 w-3" /> Apply Suggestion
+                          <Check className="h-3 w-3" />
+                          Apply Suggestion
                         </Button>
                       </div>
                     </div>
-                    <button onClick={dismissAiSuggestion} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <button 
+                      onClick={dismissAiSuggestion}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
                       <X className="h-4 w-4" />
                     </button>
                   </div>
-                </div>
+                </Card>
               </div>
             )}
             
             {/* AI Quick Actions */}
             {aiEnabled && (
-              <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 animate-fade-in">
-                <Button 
-                  variant="outline" 
-                  className="h-auto py-3 px-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-resume-purple/20 hover:border-resume-purple hover:bg-resume-purple/5 shadow-sm group transition-all duration-300"
-                  onClick={generateWithAI}
-                  disabled={aiGenerating}
-                >
-                  <div className="flex flex-col items-start text-left">
-                    <div className="flex items-center mb-1">
-                      <Wand2 className={`h-4 w-4 mr-2 text-resume-purple ${aiGenerating ? 'animate-spin' : 'group-hover:animate-bounce'}`} />
-                      <span className="font-medium">Complete Resume</span>
-                    </div>
-                    <span className="text-xs text-muted-foreground">Create a full resume from your profile</span>
-                  </div>
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="h-auto py-3 px-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-resume-purple/20 hover:border-resume-purple hover:bg-resume-purple/5 shadow-sm group transition-all duration-300"
-                >
-                  <div className="flex flex-col items-start text-left">
-                    <div className="flex items-center mb-1">
-                      <MessageSquarePlus className="h-4 w-4 mr-2 text-resume-purple group-hover:animate-pulse" />
-                      <span className="font-medium">Enhance Summary</span>
-                    </div>
-                    <span className="text-xs text-muted-foreground">Make your summary more impactful</span>
-                  </div>
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="h-auto py-3 px-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-resume-purple/20 hover:border-resume-purple hover:bg-resume-purple/5 shadow-sm group transition-all duration-300"
-                >
-                  <div className="flex flex-col items-start text-left">
-                    <div className="flex items-center mb-1">
-                      <MousePointerClick className="h-4 w-4 mr-2 text-resume-purple group-hover:animate-pulse" />
-                      <span className="font-medium">ATS Optimization</span>
-                    </div>
-                    <span className="text-xs text-muted-foreground">Optimize for applicant tracking systems</span>
-                  </div>
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="h-auto py-3 px-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-resume-purple/20 hover:border-resume-purple hover:bg-resume-purple/5 shadow-sm group transition-all duration-300"
-                >
-                  <div className="flex flex-col items-start text-left">
-                    <div className="flex items-center mb-1">
-                      <ShieldCheck className="h-4 w-4 mr-2 text-resume-purple group-hover:animate-pulse" />
-                      <span className="font-medium">Check for Errors</span>
-                    </div>
-                    <span className="text-xs text-muted-foreground">Find grammar and spelling mistakes</span>
-                  </div>
-                </Button>
+              <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                {[
+                  {
+                    title: "Complete Resume",
+                    description: "Create a full resume from your profile",
+                    icon: Wand2,
+                    onClick: generateWithAI,
+                    loading: aiGenerating
+                  },
+                  {
+                    title: "Enhance Summary",
+                    description: "Make your summary more impactful",
+                    icon: MessageSquarePlus
+                  },
+                  {
+                    title: "ATS Optimization",
+                    description: "Optimize for applicant tracking systems",
+                    icon: MousePointerClick
+                  },
+                  {
+                    title: "Check for Errors",
+                    description: "Find grammar and spelling mistakes",
+                    icon: ShieldCheck
+                  }
+                ].map((action, index) => (
+                  <Card
+                    key={action.title}
+                    className={cn(
+                      "group relative overflow-hidden transition-all duration-300",
+                      "hover:shadow-lg hover:border-resume-purple/30",
+                      "dark:hover:border-resume-purple-light/30",
+                      "animate-fade-in [animation-delay:var(--delay)]"
+                    )}
+                    style={{ '--delay': `${index * 100}ms` } as React.CSSProperties}
+                  >
+                    <button
+                      className="w-full h-full p-4 text-left"
+                      onClick={action.onClick}
+                      disabled={action.loading}
+                    >
+                      <div className="flex flex-col h-full">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="p-2 rounded-lg bg-resume-purple/10 text-resume-purple">
+                            <action.icon className={cn(
+                              "h-4 w-4",
+                              "transition-all duration-500",
+                              "group-hover:scale-110",
+                              action.loading && "animate-spin"
+                            )} />
+                          </div>
+                          <h3 className="font-medium text-foreground">
+                            {action.title}
+                          </h3>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {action.description}
+                        </p>
+                      </div>
+                      <div className="absolute inset-0 bg-resume-purple/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </button>
+                  </Card>
+                ))}
               </div>
             )}
             
             {/* Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-16rem)]">
               {/* Form Section */}
-              <div className="h-full overflow-auto rounded-xl shadow-xl">
-                <Card className="h-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 overflow-hidden">
-                  <div className="p-5 md:p-6 h-full overflow-auto">
-                    <div className="mx-auto space-y-6">
+              <div className="h-full overflow-auto rounded-xl">
+                <Card className="h-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 overflow-hidden shadow-xl">
+                  <div className="p-6 h-full overflow-auto">
+                    <div className="mx-auto max-w-2xl space-y-6">
                       {activeSection === "personal" && (
                         <PersonalInfoForm 
                           data={resumeData.personal} 
@@ -627,9 +674,9 @@ const ResumeBuilder = () => {
               </div>
 
               {/* Preview Section */}
-              <div className="h-full overflow-auto rounded-xl shadow-xl">
-                <Card className="h-full flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60">
-                  <div className="flex-1 overflow-auto p-5 md:p-6">
+              <div className="h-full overflow-auto rounded-xl">
+                <Card className="h-full flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 shadow-xl">
+                  <div className="flex-1 overflow-auto">
                     <ResumePreview 
                       data={resumeData} 
                       template={selectedTemplate}
