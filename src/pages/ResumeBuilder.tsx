@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -10,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 import { 
   FileText, 
   ArrowLeft, 
@@ -39,6 +39,7 @@ import {
   Clock,
   CloudLightning
 } from 'lucide-react';
+
 import ResumePreview from '@/components/ResumePreview';
 import PersonalInfoForm from '@/components/resume-builder/PersonalInfoForm';
 import ExperienceForm from '@/components/resume-builder/ExperienceForm';
@@ -165,7 +166,6 @@ const ResumeBuilder = () => {
   const [aiSuggestion, setAiSuggestion] = useState(null);
 
   useEffect(() => {
-    // Simulate progress bar advancement
     const timer = setTimeout(() => {
       setProgress(85);
     }, 1000);
@@ -264,7 +264,6 @@ const ResumeBuilder = () => {
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50/80 via-background to-purple-50/60 dark:from-gray-900/90 dark:via-gray-900/50 dark:to-gray-900/90">
-        {/* Header */}
         <header className="sticky top-0 z-50 px-4 py-3 border-b bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-sm">
           <div className="container max-w-[1800px] mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -343,7 +342,6 @@ const ResumeBuilder = () => {
         </header>
 
         <div className="flex-1 flex">
-          {/* Sidebar */}
           <Sidebar side="left" variant="floating" collapsible="icon">
             <SidebarHeader className="p-4 flex flex-col gap-3">
               <div className="flex items-center justify-between">
@@ -498,9 +496,7 @@ const ResumeBuilder = () => {
             </SidebarFooter>
           </Sidebar>
 
-          {/* Main Content */}
           <SidebarInset className="flex flex-col p-6">
-            {/* AI Suggestion Alert */}
             {aiSuggestion && (
               <div className="mb-6 animate-slide-up">
                 <Card className="bg-resume-purple/5 border border-resume-purple/20 shadow-lg overflow-hidden">
@@ -546,7 +542,6 @@ const ResumeBuilder = () => {
               </div>
             )}
             
-            {/* AI Quick Actions */}
             {aiEnabled && (
               <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 {[
@@ -613,9 +608,7 @@ const ResumeBuilder = () => {
               </div>
             )}
             
-            {/* Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-16rem)]">
-              {/* Form Section */}
               <div className="h-full overflow-auto rounded-xl">
                 <Card className="h-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 overflow-hidden shadow-xl">
                   <div className="p-6 h-full overflow-auto">
@@ -673,7 +666,6 @@ const ResumeBuilder = () => {
                 </Card>
               </div>
 
-              {/* Preview Section */}
               <div className="h-full overflow-auto rounded-xl">
                 <Card className="h-full flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 shadow-xl">
                   <div className="flex-1 overflow-auto">
