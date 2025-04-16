@@ -158,6 +158,8 @@ const ResumeBuilder = () => {
     fontFamily: "Inter",
     fontSize: 10,
     primaryColor: "#9b87f5",
+    secondaryColor: "#6E59A5",
+    accentColor: "#D6BCFA",
     paperSize: "a4",
     margins: "normal"
   });

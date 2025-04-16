@@ -263,14 +263,14 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ data, template, settings 
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto relative flex items-center justify-center bg-gray-50 dark:bg-gray-800/30 rounded-xl p-6">
+      <div className="flex-1 overflow-auto relative bg-gray-50 dark:bg-gray-800/30 rounded-xl p-6">
         <Card className={cn(
-          "resume-content bg-white rounded-lg shadow-lg p-0 transition-all duration-200",
+          "resume-content bg-white rounded-lg shadow-lg p-0 transition-all duration-200 mx-auto",
           "hover:shadow-xl"
         )} style={{ 
-          maxWidth: '595px',
+          width: '100%',
+          maxWidth: '1200px',
           transform: `scale(${zoomLevel})`,
-          height: zoomLevel === 1 ? 'auto' : `${842 * zoomLevel}px`,
           transformOrigin: 'center top',
         }}>
           <ResumeContent />
