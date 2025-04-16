@@ -488,7 +488,7 @@ const ResumeBuilder = () => {
             </SidebarFooter>
           </Sidebar>
 
-          <SidebarInset className="flex flex-col p-6">
+          <SidebarInset className="flex flex-col p-4 lg:p-6">
             {aiSuggestion && (
               <div className="mb-6">
                 <Card className="bg-resume-purple/5 border border-resume-purple/20 shadow-lg overflow-hidden">
@@ -534,73 +534,31 @@ const ResumeBuilder = () => {
               </div>
             )}
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-8rem)]">
-              <div className="h-full overflow-auto rounded-xl">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 h-[calc(100vh-8rem)]">
+              <div className="xl:col-span-3 h-full overflow-auto">
                 <Card className="h-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 overflow-hidden shadow-xl">
-                  <div className="p-6 h-full overflow-auto">
-                    <div className="mx-auto max-w-2xl space-y-6">
-                      {activeSection === "personal" && (
-                        <PersonalInfoForm 
-                          data={resumeData.personal} 
-                          onChange={(data) => handleDataChange("personal", data)} 
-                        />
-                      )}
-                      {activeSection === "summary" && (
-                        <SummaryForm 
-                          data={resumeData.summary} 
-                          onChange={(data) => handleDataChange("summary", data)} 
-                        />
-                      )}
-                      {activeSection === "experience" && (
-                        <ExperienceForm 
-                          data={resumeData.experience} 
-                          onChange={(data) => handleDataChange("experience", data)} 
-                        />
-                      )}
-                      {activeSection === "education" && (
-                        <EducationForm 
-                          data={resumeData.education} 
-                          onChange={(data) => handleDataChange("education", data)} 
-                        />
-                      )}
-                      {activeSection === "skills" && (
-                        <SkillsForm 
-                          data={resumeData.skills} 
-                          onChange={(data) => handleDataChange("skills", data)} 
-                        />
-                      )}
-                      {activeSection === "templates" && (
-                        <TemplateSelector 
-                          selectedTemplate={selectedTemplate}
-                          onSelect={setSelectedTemplate}
-                        />
-                      )}
-                      {activeSection === "settings" && (
-                        <ResumeSettings 
-                          settings={resumeSettings}
-                          onChange={handleSettingsChange}
-                        />
-                      )}
-                      {activeSection === "ai" && (
-                        <AIAssistant 
-                          resumeData={resumeData}
-                          enabled={aiEnabled}
-                        />
-                      )}
+                  <div className="p-4 lg:p-6 h-full overflow-auto">
+                    <div className="max-w-2xl space-y-6">
+                      {activeSection === "personal" && <PersonalInfoForm data={resumeData.personal} onChange={(data) => handleDataChange("personal", data)} />}
+                      {activeSection === "summary" && <SummaryForm data={resumeData.summary} onChange={(data) => handleDataChange("summary", data)} />}
+                      {activeSection === "experience" && <ExperienceForm data={resumeData.experience} onChange={(data) => handleDataChange("experience", data)} />}
+                      {activeSection === "education" && <EducationForm data={resumeData.education} onChange={(data) => handleDataChange("education", data)} />}
+                      {activeSection === "skills" && <SkillsForm data={resumeData.skills} onChange={(data) => handleDataChange("skills", data)} />}
+                      {activeSection === "templates" && <TemplateSelector selectedTemplate={selectedTemplate} onSelect={setSelectedTemplate} />}
+                      {activeSection === "settings" && <ResumeSettings settings={resumeSettings} onChange={handleSettingsChange} />}
+                      {activeSection === "ai" && <AIAssistant resumeData={resumeData} enabled={aiEnabled} />}
                     </div>
                   </div>
                 </Card>
               </div>
 
-              <div className="h-full overflow-auto rounded-xl">
+              <div className="xl:col-span-9 h-full overflow-auto">
                 <Card className="h-full flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 shadow-xl">
-                  <div className="flex-1 overflow-auto">
-                    <ResumePreview 
-                      data={resumeData} 
-                      template={selectedTemplate}
-                      settings={resumeSettings}
-                    />
-                  </div>
+                  <ResumePreview 
+                    data={resumeData} 
+                    template={selectedTemplate}
+                    settings={resumeSettings}
+                  />
                 </Card>
               </div>
             </div>
