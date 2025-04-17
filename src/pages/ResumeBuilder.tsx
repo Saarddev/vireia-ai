@@ -206,7 +206,7 @@ const ResumeBuilder = () => {
     });
   };
 
-  const handleDataChange = (section, data) => {
+  const handleDataChange = (section: any, data: any) => {
     setResumeData(prev => ({
       ...prev,
       [section]: data

@@ -16,7 +16,7 @@ interface ResumePreviewProps {
   data: any;
   template: string;
   settings?: any;
-  onDataChange?: (newData: any) => void;
+  onDataChange?: (section: string, data: any) => void;
 }
 
 const ResumePreview: React.FC<ResumePreviewProps> = ({ 
