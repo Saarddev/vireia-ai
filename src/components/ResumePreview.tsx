@@ -1,8 +1,8 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Eye, ZoomIn, ZoomOut, MousePointerClick, Edit, Check, X } from 'lucide-react';
+import { Download, Eye, ZoomIn, ZoomOut } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -10,27 +10,20 @@ import {
   DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import AICommandMenu from '@/components/AICommandMenu';
 
 interface ResumePreviewProps {
   data: any;
   template: string;
   settings?: any;
-  onDataChange?: (section: string, data: any) => void;
 }
 
 const ResumePreview: React.FC<ResumePreviewProps> = ({ 
   data, 
   template, 
-  settings = {},
-  onDataChange
+  settings = {}
 }) => {
   const { isMobile } = useIsMobile();
   const [zoomLevel, setZoomLevel] = useState(1);
-  const [editMode, setEditMode] = useState(false);
-  const [aiMenuVisible, setAiMenuVisible] = useState(false);
-  const [aiMenuPosition, setAiMenuPosition] = useState({ x: 0, y: 0 });
-  const [selectedText, setSelectedText] = useState('');
   const resumeContentRef = useRef<HTMLDivElement>(null);
 
   const handleDownloadPDF = () => {
@@ -102,97 +95,14 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
     setZoomLevel(prev => Math.max(prev - 0.25, 0.5));
   };
 
-  const toggleEditMode = () => {
-    setEditMode(prev => !prev);
-  };
-
-  const handleSelectionChange = () => {
-    if (!editMode) return;
-    
-    const selection = window.getSelection();
-    if (!selection || selection.isCollapsed || !selection.toString().trim()) {
-      setAiMenuVisible(false);
-      return;
-    }
-
-    const range = selection.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
-    
-    // Only show menu if selection is inside our content area
-    if (resumeContentRef.current?.contains(selection.anchorNode as Node)) {
-      setSelectedText(selection.toString());
-      
-      // Calculate position relative to the viewport
-      const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
-      
-      setAiMenuPosition({
-        x: rect.left + scrollLeft,
-        y: rect.bottom + scrollTop + 10 // Position below the selection
-      });
-      
-      setAiMenuVisible(true);
-    }
-  };
-
-  const handleAICommand = (command: string, text: string) => {
-    console.log(`Applying ${command} to: ${text}`);
-    
-    // In a real implementation, this would make an API call to process the text
-    // For now, we'll just simulate the effect with some basic transformations
-    let processedText = '';
-    
-    switch(command) {
-      case 'improve':
-        processedText = `${text} [improved with better phrasing]`;
-        break;
-      case 'shorten':
-        processedText = text.split(' ').slice(0, text.split(' ').length / 2).join(' ') + '...';
-        break;
-      case 'expand':
-        processedText = `${text} [with additional relevant details about your experience]`;
-        break;
-      case 'professional':
-        processedText = `${text} [adjusted to sound more professional]`;
-        break;
-      case 'keywords':
-        processedText = `${text} [with industry-specific keywords like "scalable", "leadership"]`;
-        break;
-      case 'rewrite':
-        processedText = `[Completely rewritten version of: ${text}]`;
-        break;
-      case 'format':
-        processedText = `${text} [with improved formatting]`;
-        break;
-      default:
-        processedText = text;
-    }
-    
-    // For demonstration only - in a real implementation, you would update the actual content
-    alert(`AI would transform: "${text}" to: "${processedText}"`);
-    
-    // Close the menu after applying a command
-    setAiMenuVisible(false);
-  };
-
-  useEffect(() => {
-    document.addEventListener('selectionchange', handleSelectionChange);
-    return () => {
-      document.removeEventListener('selectionchange', handleSelectionChange);
-    };
-  }, [editMode]);
-
   const ResumeContent = () => (
     <div 
       ref={resumeContentRef}
       className={cn(
         "p-4",
         settings.fontFamily && `font-[${settings.fontFamily}]`,
-        settings.fontSize && `text-[${settings.fontSize}pt]`,
-        editMode && "cursor-text"
+        settings.fontSize && `text-[${settings.fontSize}pt]`
       )}
-      contentEditable={editMode}
-      suppressContentEditableWarning={true}
     >
       {template === 'modern' && (
         <div className="p-4">
@@ -319,25 +229,6 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
         
         <div className="flex items-center gap-2">
           <Button 
-            variant={editMode ? "default" : "outline"}
-            size="sm" 
-            onClick={toggleEditMode}
-            className={cn(
-              "hover:border-resume-purple transition-all duration-300",
-              editMode ? "bg-resume-purple hover:bg-resume-purple-dark" : "hover:text-resume-purple"
-            )}
-          >
-            {editMode ? (
-              <>
-                <Check className="h-4 w-4 mr-1.5" /> Editing
-              </>
-            ) : (
-              <>
-                <Edit className="h-4 w-4 mr-1.5" /> Edit
-              </>
-            )}
-          </Button>
-          <Button 
             variant="outline" 
             size="sm" 
             onClick={handleZoomOut}
@@ -373,22 +264,13 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
           "hover:shadow-xl"
         )} style={{ 
           width: '100%',
-          maxWidth: '850px', // Made the preview smaller
+          maxWidth: '720px', // Made the preview smaller
           transform: `scale(${zoomLevel})`,
           transformOrigin: 'center top',
         }}>
           <ResumeContent />
         </Card>
       </div>
-
-      {/* AI Command Menu */}
-      <AICommandMenu 
-        isVisible={aiMenuVisible}
-        position={aiMenuPosition}
-        selectedText={selectedText}
-        onCommand={handleAICommand}
-        onClose={() => setAiMenuVisible(false)}
-      />
     </div>
   );
 };

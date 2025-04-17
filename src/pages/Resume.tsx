@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Plus, Search, Filter } from 'lucide-react';
+import { FileText, Plus, Search } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import {
   Sidebar,
   SidebarContent,
@@ -20,14 +21,14 @@ import {
   SidebarSeparator,
   SidebarInset,
 } from "@/components/ui/sidebar";
-import { Briefcase, Home, Cog, User, BookOpen, Layers, BarChart3, LogOut } from 'lucide-react';
+import { Briefcase, Home, Cog, User, BookOpen, Layers, BarChart3, LogOut, Filter } from 'lucide-react';
 import CreateResumeDialog from '@/components/CreateResumeDialog';
+import ResumeCard from '@/components/resume-listing/ResumeCard';
 
 const Resume = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
   
   useEffect(() => {
     setIsLoaded(true);
@@ -52,10 +53,6 @@ const Resume = () => {
     { id: 5, name: "Marketing Specialist Resume", lastEdited: "Apr 6, 2025", tags: ["Marketing", "Creative"] },
     { id: 6, name: "Frontend Developer Resume", lastEdited: "Apr 4, 2025", tags: ["Tech", "ATS-Optimized"] },
   ];
-
-  const handleEditResume = (resumeId) => {
-    navigate(`/resume/builder/${resumeId}`);
-  };
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -200,36 +197,10 @@ const Resume = () => {
             {/* Resumes Grid */}
             <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '200ms' }}>
               {resumes.map((resume, index) => (
-                <Card 
+                <ResumeCard 
                   key={resume.id} 
-                  className="border border-purple-100 hover:border-purple-200 shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-sm bg-white/80 dashboard-card-hover"
-                  style={{ animationDelay: `${index * 50 + 200}ms` }}
-                >
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">{resume.name}</CardTitle>
-                    <CardDescription>Last edited: {resume.lastEdited}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="pb-3">
-                    <div className="flex flex-wrap gap-2">
-                      {resume.tags.map((tag) => (
-                        <span key={tag} className="inline-block text-xs bg-purple-50 text-resume-purple rounded-full px-2 py-1">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between">
-                    <Button variant="ghost" size="sm" className="text-resume-gray hover:text-resume-purple">Preview</Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="border-resume-purple text-resume-purple hover:bg-resume-purple hover:text-white"
-                      onClick={() => handleEditResume(resume.id)}
-                    >
-                      Edit
-                    </Button>
-                  </CardFooter>
-                </Card>
+                  resume={resume}
+                />
               ))}
 
               {/* Add New Resume Card */}

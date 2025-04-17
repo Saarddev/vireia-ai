@@ -1,45 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
-import { 
-  FileText, 
-  ArrowLeft, 
-  Save, 
-  Download, 
-  Share2, 
-  Wand2, 
-  LayoutPanelLeft,
-  Settings,
-  UserRound,
-  Briefcase,
-  GraduationCap,
-  Award,
-  Code,
-  Languages,
-  GanttChartSquare,
-  Globe,
-  Sparkles,
-  PanelLeft,
-  Palette,
-  MousePointerClick,
-  ShieldCheck,
-  MessageSquarePlus,
-  Check,
-  X,
-  ExternalLink,
-  Clock,
-  CloudLightning
-} from 'lucide-react';
 
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { useToast } from "@/hooks/use-toast";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarInset,
+} from "@/components/ui/sidebar";
+
+import BuilderHeader from '@/components/resume-builder/BuilderHeader';
+import BuilderSidebar from '@/components/resume-builder/BuilderSidebar';
+import AISuggestion from '@/components/resume-builder/AISuggestion';
 import ResumePreview from '@/components/ResumePreview';
 import PersonalInfoForm from '@/components/resume-builder/PersonalInfoForm';
 import ExperienceForm from '@/components/resume-builder/ExperienceForm';
@@ -49,29 +23,11 @@ import SummaryForm from '@/components/resume-builder/SummaryForm';
 import AIAssistant from '@/components/resume-builder/AIAssistant';
 import TemplateSelector from '@/components/resume-builder/TemplateSelector';
 import ResumeSettings from '@/components/resume-builder/ResumeSettings';
-import { useIsMobile } from '@/hooks/use-mobile';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarTrigger,
-  SidebarFooter,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
-  SidebarSeparator,
-  SidebarInset
-} from "@/components/ui/sidebar";
 
 const ResumeBuilder = () => {
   const { resumeId } = useParams();
-  const navigate = useNavigate();
   const { toast } = useToast();
-  const { isMobile, isTablet } = useIsMobile();
+  const { isMobile } = useIsMobile();
   const [activeSection, setActiveSection] = useState("personal");
   const [resumeData, setResumeData] = useState({
     personal: {
@@ -206,21 +162,21 @@ const ResumeBuilder = () => {
     });
   };
 
-  const handleDataChange = (section: any, data: any) => {
+  const handleDataChange = (section: string, data: any) => {
     setResumeData(prev => ({
       ...prev,
       [section]: data
     }));
   };
 
-  const handleSettingsChange = (newSettings) => {
+  const handleSettingsChange = (newSettings: any) => {
     setResumeSettings(prev => ({
       ...prev,
       ...newSettings
     }));
   };
 
-  const handleAIToggle = (enabled) => {
+  const handleAIToggle = (enabled: boolean) => {
     setAiEnabled(enabled);
     toast({
       title: enabled ? "AI Assistant enabled" : "AI Assistant disabled",
@@ -263,302 +219,79 @@ const ResumeBuilder = () => {
     }
   };
 
+  // Render the appropriate form based on active section
+  const renderActiveForm = () => {
+    switch (activeSection) {
+      case "personal":
+        return <PersonalInfoForm data={resumeData.personal} onChange={(data) => handleDataChange("personal", data)} />;
+      case "summary":
+        return <SummaryForm data={resumeData.summary} onChange={(data) => handleDataChange("summary", data)} />;
+      case "experience":
+        return <ExperienceForm data={resumeData.experience} onChange={(data) => handleDataChange("experience", data)} />;
+      case "education":
+        return <EducationForm data={resumeData.education} onChange={(data) => handleDataChange("education", data)} />;
+      case "skills":
+        return <SkillsForm data={resumeData.skills} onChange={(data) => handleDataChange("skills", data)} />;
+      case "templates":
+        return <TemplateSelector selectedTemplate={selectedTemplate} onSelect={setSelectedTemplate} />;
+      case "settings":
+        return <ResumeSettings settings={resumeSettings} onChange={handleSettingsChange} />;
+      case "ai":
+        return <AIAssistant resumeData={resumeData} enabled={aiEnabled} />;
+      default:
+        return <PersonalInfoForm data={resumeData.personal} onChange={(data) => handleDataChange("personal", data)} />;
+    }
+  };
+
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50/80 via-background to-purple-50/60 dark:from-gray-900/90 dark:via-gray-900/50 dark:to-gray-900/90">
-        <header className="sticky top-0 z-50 px-4 py-3 border-b bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-sm">
-          <div className="container max-w-[1800px] mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => navigate('/resume')} 
-                className="text-muted-foreground hover:text-resume-purple dark:hover:text-resume-purple-light transition-colors flex items-center gap-1.5 hover:scale-105 transform duration-200"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span className="font-medium">Back</span>
-              </button>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                <h1 className="text-xl font-semibold flex items-center">
-                  <FileText className="mr-2 h-5 w-5 text-resume-purple" />
-                  <span className="text-foreground font-display">{resumeData.personal.name}'s Resume</span>
-                </h1>
-                <Badge 
-                  variant="outline" 
-                  className="text-sm text-resume-purple border-resume-purple/30 bg-resume-purple/5 py-1"
-                >
-                  Draft
-                </Badge>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="flex items-center mr-4">
-                <Switch 
-                  id="ai-mode" 
-                  checked={aiEnabled} 
-                  onCheckedChange={handleAIToggle} 
-                  className="mr-2 data-[state=checked]:bg-resume-purple"
-                />
-                <Label 
-                  htmlFor="ai-mode" 
-                  className="text-sm font-medium cursor-pointer flex items-center text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <Sparkles className="h-3.5 w-3.5 mr-1.5 text-resume-purple" />
-                  AI Assistant
-                </Label>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleSave} 
-                  className="gap-1.5 border-resume-purple/20 text-resume-purple hover:bg-resume-purple/5 hover:border-resume-purple transition-all duration-300"
-                  disabled={isSaving}
-                >
-                  <Save className="h-4 w-4" />
-                  {isSaving ? "Saving..." : "Save"}
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleDownload}
-                  className="gap-1.5 border-resume-purple/20 text-resume-purple hover:bg-resume-purple/5 hover:border-resume-purple transition-all duration-300"
-                >
-                  <Download className="h-4 w-4" />
-                  Export PDF
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleShare}
-                  className="gap-1.5 border-resume-purple/20 text-resume-purple hover:bg-resume-purple/5 hover:border-resume-purple transition-all duration-300"
-                >
-                  <Share2 className="h-4 w-4" />
-                  Share
-                </Button>
-              </div>
-            </div>
-          </div>
-        </header>
+        <BuilderHeader 
+          name={resumeData.personal.name}
+          isSaving={isSaving}
+          aiEnabled={aiEnabled}
+          onSave={handleSave}
+          onDownload={handleDownload}
+          onShare={handleShare}
+          onAIToggle={handleAIToggle}
+        />
 
         <div className="flex-1 flex">
           <Sidebar side="left" variant="floating" collapsible="icon">
-            <SidebarHeader className="p-4 flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-resume-purple dark:text-resume-purple-light font-display">
-                  Resume Builder
-                </h3>
-                <SidebarTrigger />
-              </div>
-              
-              <div className="flex gap-2 items-center bg-muted/30 rounded-lg p-2">
-                <Progress 
-                  value={progress} 
-                  className="h-2" 
-                  indicatorClassName="bg-resume-purple"
-                />
-                <span className="text-xs font-medium text-muted-foreground">{progress}%</span>
-              </div>
-            </SidebarHeader>
-            
-            <SidebarContent>
-              <SidebarGroup>
-                <SidebarGroupLabel>Resume Sections</SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton 
-                        isActive={activeSection === "personal"}
-                        onClick={() => setActiveSection("personal")}
-                      >
-                        <UserRound className="h-4 w-4" />
-                        <span>Personal Info</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    
-                    <SidebarMenuItem>
-                      <SidebarMenuButton 
-                        isActive={activeSection === "summary"}
-                        onClick={() => setActiveSection("summary")}
-                      >
-                        <FileText className="h-4 w-4" />
-                        <span>Summary</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    
-                    <SidebarMenuItem>
-                      <SidebarMenuButton 
-                        isActive={activeSection === "experience"}
-                        onClick={() => setActiveSection("experience")}
-                      >
-                        <Briefcase className="h-4 w-4" />
-                        <span>Experience</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    
-                    <SidebarMenuItem>
-                      <SidebarMenuButton 
-                        isActive={activeSection === "education"}
-                        onClick={() => setActiveSection("education")}
-                      >
-                        <GraduationCap className="h-4 w-4" />
-                        <span>Education</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    
-                    <SidebarMenuItem>
-                      <SidebarMenuButton 
-                        isActive={activeSection === "skills"}
-                        onClick={() => setActiveSection("skills")}
-                      >
-                        <Code className="h-4 w-4" />
-                        <span>Skills</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-              
-              <SidebarSeparator />
-              
-              <SidebarGroup>
-                <SidebarGroupLabel>Customization</SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton 
-                        isActive={activeSection === "templates"}
-                        onClick={() => setActiveSection("templates")}
-                      >
-                        <LayoutPanelLeft className="h-4 w-4" />
-                        <span>Templates</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    
-                    <SidebarMenuItem>
-                      <SidebarMenuButton 
-                        isActive={activeSection === "settings"}
-                        onClick={() => setActiveSection("settings")}
-                      >
-                        <Settings className="h-4 w-4" />
-                        <span>Settings</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-
-                    <SidebarMenuItem>
-                      <SidebarMenuButton 
-                        isActive={activeSection === "ai"}
-                        onClick={() => setActiveSection("ai")}
-                        className={cn(
-                          "w-full gap-2",
-                          activeSection === "ai" ? "text-resume-purple" : "text-muted-foreground"
-                        )}
-                      >
-                        <div className="relative">
-                          <Wand2 className="h-4 w-4" />
-                          {aiEnabled && (
-                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-resume-purple rounded-full" />
-                          )}
-                        </div>
-                        <span>AI Assistant</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            </SidebarContent>
-            
-            <SidebarFooter className="p-3">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="w-full justify-center gap-2 border-resume-purple/20 text-resume-purple hover:bg-resume-purple/10 hover:border-resume-purple dark:border-resume-purple-light/20 dark:text-resume-purple-light dark:hover:bg-resume-purple-light/10"
-                onClick={generateWithAI}
-                disabled={aiGenerating || !aiEnabled}
-              >
-                {aiGenerating ? (
-                  <CloudLightning className="h-4 w-4 animate-pulse" />
-                ) : (
-                  <Wand2 className="h-4 w-4" />
-                )}
-                {aiGenerating ? "Generating..." : "Generate with AI"}
-              </Button>
-            </SidebarFooter>
+            <BuilderSidebar 
+              progress={progress}
+              activeSection={activeSection}
+              aiEnabled={aiEnabled}
+              aiGenerating={aiGenerating}
+              onSectionChange={setActiveSection}
+              onGenerateWithAI={generateWithAI}
+            />
           </Sidebar>
 
           <SidebarInset className="flex flex-col p-4 lg:p-6">
-            {aiSuggestion && (
-              <div className="mb-6">
-                <Card className="bg-resume-purple/5 border border-resume-purple/20 shadow-lg overflow-hidden">
-                  <div className="p-4 flex items-start gap-4">
-                    <div className="bg-resume-purple text-white p-2 rounded-lg shadow-inner">
-                      <Sparkles className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-resume-purple dark:text-resume-purple-light mb-1 font-display">
-                        AI Suggestion
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {aiSuggestion.content}
-                      </p>
-                      <div className="mt-3 flex gap-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          className="text-xs gap-1.5 border-resume-purple/20 hover:border-resume-purple hover:bg-resume-purple/5"
-                          onClick={dismissAiSuggestion}
-                        >
-                          <X className="h-3 w-3" />
-                          Dismiss
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          className="text-xs gap-1.5 bg-resume-purple hover:bg-resume-purple-dark"
-                          onClick={applyAiSuggestion}
-                        >
-                          <Check className="h-3 w-3" />
-                          Apply Suggestion
-                        </Button>
-                      </div>
-                    </div>
-                    <button 
-                      onClick={dismissAiSuggestion}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                </Card>
-              </div>
-            )}
+            <AISuggestion 
+              suggestion={aiSuggestion}
+              onDismiss={dismissAiSuggestion}
+              onApply={applyAiSuggestion}
+            />
             
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 h-[calc(100vh-8rem)]">
-              <div className="xl:col-span-4 h-full overflow-auto">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 h-[calc(100vh-8rem)]">
+              <div className="xl:col-span-5 h-full overflow-auto">
                 <Card className="h-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 overflow-hidden shadow-xl">
                   <div className="p-4 lg:p-6 h-full overflow-auto">
                     <div className="max-w-2xl space-y-6">
-                      {activeSection === "personal" && <PersonalInfoForm data={resumeData.personal} onChange={(data) => handleDataChange("personal", data)} />}
-                      {activeSection === "summary" && <SummaryForm data={resumeData.summary} onChange={(data) => handleDataChange("summary", data)} />}
-                      {activeSection === "experience" && <ExperienceForm data={resumeData.experience} onChange={(data) => handleDataChange("experience", data)} />}
-                      {activeSection === "education" && <EducationForm data={resumeData.education} onChange={(data) => handleDataChange("education", data)} />}
-                      {activeSection === "skills" && <SkillsForm data={resumeData.skills} onChange={(data) => handleDataChange("skills", data)} />}
-                      {activeSection === "templates" && <TemplateSelector selectedTemplate={selectedTemplate} onSelect={setSelectedTemplate} />}
-                      {activeSection === "settings" && <ResumeSettings settings={resumeSettings} onChange={handleSettingsChange} />}
-                      {activeSection === "ai" && <AIAssistant resumeData={resumeData} enabled={aiEnabled} />}
+                      {renderActiveForm()}
                     </div>
                   </div>
                 </Card>
               </div>
 
-              <div className="xl:col-span-8 h-full overflow-auto">
+              <div className="xl:col-span-7 h-full overflow-auto">
                 <Card className="h-full flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 shadow-xl">
                   <ResumePreview 
                     data={resumeData} 
                     template={selectedTemplate}
                     settings={resumeSettings}
-                    onDataChange={handleDataChange}
                   />
                 </Card>
               </div>
