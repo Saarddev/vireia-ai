@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,25 @@ const ResumeSettings: React.FC<ResumeSettingsProps> = ({ settings, onChange }) =
 
   const handleColorChange = (color: string, type: 'primary' | 'secondary' | 'accent') => {
     onChange({ ...settings, [`${type}Color`]: color });
+  };
+  
+  // Add the missing handler functions
+  const handleFontFamilyChange = (value: string) => {
+    onChange({ ...settings, fontFamily: value });
+  };
+
+  const handleFontSizeChange = (values: number[]) => {
+    const newSize = values[0];
+    setFontSizeValue(newSize);
+    onChange({ ...settings, fontSize: newSize });
+  };
+
+  const handlePaperSizeChange = (value: string) => {
+    onChange({ ...settings, paperSize: value });
+  };
+
+  const handleMarginsChange = (value: string) => {
+    onChange({ ...settings, margins: value });
   };
 
   return (
