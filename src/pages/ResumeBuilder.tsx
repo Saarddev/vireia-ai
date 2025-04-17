@@ -558,6 +558,7 @@ const ResumeBuilder = () => {
                     data={resumeData} 
                     template={selectedTemplate}
                     settings={resumeSettings}
+                    onDataChange={handleDataChange}
                   />
                 </Card>
               </div>
