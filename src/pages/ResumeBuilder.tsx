@@ -535,7 +535,7 @@ const ResumeBuilder = () => {
             )}
             
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 h-[calc(100vh-8rem)]">
-              <div className="xl:col-span-3 h-full overflow-auto">
+              <div className="xl:col-span-4 h-full overflow-auto">
                 <Card className="h-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 overflow-hidden shadow-xl">
                   <div className="p-4 lg:p-6 h-full overflow-auto">
                     <div className="max-w-2xl space-y-6">
@@ -552,7 +552,7 @@ const ResumeBuilder = () => {
                 </Card>
               </div>
 
-              <div className="xl:col-span-9 h-full overflow-auto">
+              <div className="xl:col-span-8 h-full overflow-auto">
                 <Card className="h-full flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 shadow-xl">
                   <ResumePreview 
                     data={resumeData} 
