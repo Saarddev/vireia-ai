@@ -16,32 +16,33 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 
 const App = () => (
-  <TooltipProvider>
-    <Toaster />
-    <Sonner />
+  <div className="flex min-h-screen flex-col">
     <BrowserRouter>
       <RouteMiddleware>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Index />} />
-          <Route path="/sign-in/*" element={<SignIn />} />
-          <Route path="/sign-up/*" element={<SignUp />} />
-          
-          {/* Protected routes */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/resume" element={<Resume />} />
-          <Route path="/resume/builder/:resumeId" element={<ResumeBuilder />} />
-          <Route path="/applications" element={<Applications />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/templates" element={<Templates />} />
-          
-          {/* Catch-all route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/sign-in/*" element={<SignIn />} />
+            <Route path="/sign-up/*" element={<SignUp />} />
+            
+            {/* Protected routes */}
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/resume" element={<Resume />} />
+            <Route path="/resume/builder/:resumeId" element={<ResumeBuilder />} />
+            <Route path="/applications" element={<Applications />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/templates" element={<Templates />} />
+            
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </TooltipProvider>
       </RouteMiddleware>
     </BrowserRouter>
-  </TooltipProvider>
+  </div>
 );
 
 export default App;
-
