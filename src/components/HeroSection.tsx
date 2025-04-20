@@ -3,13 +3,29 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, Sparkles, ArrowRight, Award, Clock, BarChart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const HeroSection = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const navigate = useNavigate();
-  const { isSignedIn } = useAuth();
+  
+  // Check authentication status
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsSignedIn(!!session);
+    });
+    
+    // Initial check
+    supabase.auth.getSession().then(({ data: { session }}) => {
+      setIsSignedIn(!!session);
+    });
+    
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, []);
   
   useEffect(() => {
     const timer = setTimeout(() => {
