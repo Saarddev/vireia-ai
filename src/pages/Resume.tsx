@@ -30,6 +30,10 @@ const Resume = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [userData, setUserData] = useState<{ firstName?: string, email?: string } | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [resumes, setResumes] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -42,9 +46,20 @@ const Resume = () => {
           const firstName = user?.user_metadata?.first_name || user?.user_metadata?.name || '';
           const email = user?.email || '';
           setUserData({ firstName, email });
+          
+          // Fetch user's resumes (mock data for now)
+          fetchResumes();
+        } else {
+          // Redirect to login if not authenticated
+          navigate('/signin');
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load user data. Please try again.",
+          variant: "destructive"
+        });
       }
       
       setIsLoaded(true);
@@ -61,17 +76,26 @@ const Resume = () => {
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [toast]);
+  }, [toast, navigate]);
 
-  // Mock data for the resumes
-  const resumes = [
-    { id: 1, name: "Software Engineer Resume", lastEdited: "Apr 14, 2025", tags: ["Tech", "ATS-Optimized"] },
-    { id: 2, name: "Product Manager Resume", lastEdited: "Apr 12, 2025", tags: ["Management", "Creative"] },
-    { id: 3, name: "UX Designer Resume", lastEdited: "Apr 10, 2025", tags: ["Design", "Creative"] },
-    { id: 4, name: "Data Analyst Resume", lastEdited: "Apr 8, 2025", tags: ["Analytics", "ATS-Optimized"] },
-    { id: 5, name: "Marketing Specialist Resume", lastEdited: "Apr 6, 2025", tags: ["Marketing", "Creative"] },
-    { id: 6, name: "Frontend Developer Resume", lastEdited: "Apr 4, 2025", tags: ["Tech", "ATS-Optimized"] },
-  ];
+  const fetchResumes = () => {
+    setIsLoading(true);
+    
+    // Mock data for the resumes - in a real app, you would fetch this from your database
+    setTimeout(() => {
+      const mockResumes = [
+        { id: 1, name: "Software Engineer Resume", lastEdited: "Apr 14, 2025", tags: ["Tech", "ATS-Optimized"] },
+        { id: 2, name: "Product Manager Resume", lastEdited: "Apr 12, 2025", tags: ["Management", "Creative"] },
+        { id: 3, name: "UX Designer Resume", lastEdited: "Apr 10, 2025", tags: ["Design", "Creative"] },
+        { id: 4, name: "Data Analyst Resume", lastEdited: "Apr 8, 2025", tags: ["Analytics", "ATS-Optimized"] },
+        { id: 5, name: "Marketing Specialist Resume", lastEdited: "Apr 6, 2025", tags: ["Marketing", "Creative"] },
+        { id: 6, name: "Frontend Developer Resume", lastEdited: "Apr 4, 2025", tags: ["Tech", "ATS-Optimized"] },
+      ];
+      
+      setResumes(mockResumes);
+      setIsLoading(false);
+    }, 1000);
+  };
 
   const handleLogout = async () => {
     try {
@@ -86,6 +110,36 @@ const Resume = () => {
       });
     }
   };
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleFilterChange = (filter: string) => {
+    setActiveFilter(filter);
+  };
+
+  const handleDeleteResume = (resumeId: number) => {
+    // In a real app, you would delete the resume from your database
+    setResumes(prev => prev.filter(resume => resume.id !== resumeId));
+    
+    toast({
+      title: "Resume Deleted",
+      description: "The resume has been deleted successfully",
+    });
+  };
+
+  const handleEditResume = (resumeId: number) => {
+    // Navigate to the resume builder page with the selected resume ID
+    navigate(`/resume-builder/${resumeId}`);
+  };
+
+  // Apply filters and search
+  const filteredResumes = resumes.filter(resume => {
+    const matchesSearch = resume.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = activeFilter === 'all' || resume.tags.includes(activeFilter);
+    return matchesSearch && matchesFilter;
+  });
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -106,7 +160,7 @@ const Resume = () => {
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Home">
+                    <SidebarMenuButton tooltip="Home" onClick={() => navigate('/dashboard')}>
                       <Home className="h-5 w-5" />
                       <span>Home</span>
                     </SidebarMenuButton>
@@ -118,13 +172,13 @@ const Resume = () => {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Applications">
+                    <SidebarMenuButton tooltip="Applications" onClick={() => navigate('/applications')}>
                       <Briefcase className="h-5 w-5" />
                       <span>Applications</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Analytics">
+                    <SidebarMenuButton tooltip="Analytics" onClick={() => navigate('/analytics')}>
                       <BarChart3 className="h-5 w-5" />
                       <span>Analytics</span>
                     </SidebarMenuButton>
@@ -146,7 +200,7 @@ const Resume = () => {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Templates">
+                    <SidebarMenuButton tooltip="Templates" onClick={() => navigate('/templates')}>
                       <Layers className="h-5 w-5" />
                       <span>Templates</span>
                     </SidebarMenuButton>
@@ -196,7 +250,9 @@ const Resume = () => {
                   <Input 
                     type="search" 
                     placeholder="Search resumes..." 
-                    className="pl-8 w-full md:w-[200px] lg:w-[300px]" 
+                    className="pl-8 w-full md:w-[200px] lg:w-[300px]"
+                    value={searchTerm}
+                    onChange={handleSearch}
                   />
                 </div>
                 <Button 
@@ -210,43 +266,107 @@ const Resume = () => {
 
             {/* Filters */}
             <div className={`flex flex-wrap gap-2 mb-6 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '100ms' }}>
-              <Button variant="outline" size="sm" className="rounded-full">
+              <Button 
+                variant={activeFilter === 'all' ? "default" : "outline"} 
+                size="sm" 
+                className="rounded-full"
+                onClick={() => handleFilterChange('all')}
+              >
                 <Filter className="mr-2 h-3 w-3" /> All Resumes
               </Button>
-              <Button variant="outline" size="sm" className="rounded-full">
+              <Button 
+                variant={activeFilter === 'Recent' ? "default" : "outline"} 
+                size="sm" 
+                className="rounded-full"
+                onClick={() => handleFilterChange('Recent')}
+              >
                 Recent
               </Button>
-              <Button variant="outline" size="sm" className="rounded-full">
+              <Button 
+                variant={activeFilter === 'ATS-Optimized' ? "default" : "outline"} 
+                size="sm" 
+                className="rounded-full"
+                onClick={() => handleFilterChange('ATS-Optimized')}
+              >
                 ATS-Optimized
               </Button>
-              <Button variant="outline" size="sm" className="rounded-full">
+              <Button 
+                variant={activeFilter === 'Creative' ? "default" : "outline"} 
+                size="sm" 
+                className="rounded-full"
+                onClick={() => handleFilterChange('Creative')}
+              >
                 Creative
               </Button>
-              <Button variant="outline" size="sm" className="rounded-full">
+              <Button 
+                variant={activeFilter === 'Tech' ? "default" : "outline"} 
+                size="sm" 
+                className="rounded-full"
+                onClick={() => handleFilterChange('Tech')}
+              >
                 Tech
               </Button>
             </div>
 
             {/* Resumes Grid */}
             <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '200ms' }}>
-              {resumes.map((resume, index) => (
-                <ResumeCard 
-                  key={resume.id} 
-                  resume={resume}
-                />
-              ))}
-
-              {/* Add New Resume Card */}
-              <Card 
-                className="border border-dashed border-purple-200 hover:border-purple-300 bg-transparent hover:bg-purple-50/30 flex flex-col items-center justify-center p-6 cursor-pointer transition-all duration-300 dashboard-card-hover"
-                onClick={() => setShowCreateDialog(true)}
-              >
-                <div className="rounded-full bg-purple-100 p-3 mb-3">
-                  <Plus className="h-6 w-6 text-resume-purple" />
+              {isLoading ? (
+                // Loading skeleton
+                Array(3).fill(0).map((_, index) => (
+                  <Card key={index} className="border border-gray-200 p-6 h-64 animate-pulse">
+                    <div className="bg-gray-200 h-6 w-3/4 rounded mb-4"></div>
+                    <div className="bg-gray-200 h-4 w-1/2 rounded mb-6"></div>
+                    <div className="space-y-2">
+                      <div className="bg-gray-200 h-4 w-full rounded"></div>
+                      <div className="bg-gray-200 h-4 w-5/6 rounded"></div>
+                      <div className="bg-gray-200 h-4 w-4/6 rounded"></div>
+                    </div>
+                    <div className="mt-6 flex justify-end space-x-2">
+                      <div className="bg-gray-200 h-8 w-20 rounded"></div>
+                      <div className="bg-gray-200 h-8 w-20 rounded"></div>
+                    </div>
+                  </Card>
+                ))
+              ) : filteredResumes.length > 0 ? (
+                // Actual resume cards
+                filteredResumes.map((resume) => (
+                  <ResumeCard 
+                    key={resume.id} 
+                    resume={resume}
+                    onEdit={() => handleEditResume(resume.id)}
+                    onDelete={() => handleDeleteResume(resume.id)}
+                  />
+                ))
+              ) : (
+                // No results found
+                <div className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col items-center justify-center py-16 text-center">
+                  <FileText className="h-16 w-16 text-resume-gray/50 mb-4" />
+                  <h3 className="text-xl font-medium text-resume-gray">No resumes found</h3>
+                  <p className="text-resume-gray mt-2 mb-6">
+                    {searchTerm ? 'Try a different search term or filter' : 'Create your first resume to get started'}
+                  </p>
+                  <Button 
+                    className="bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20"
+                    onClick={() => setShowCreateDialog(true)}
+                  >
+                    <Plus className="mr-2 h-4 w-4" /> Create Resume
+                  </Button>
                 </div>
-                <p className="text-resume-purple font-medium">Create New Resume</p>
-                <p className="text-resume-gray text-sm text-center mt-2">Start from scratch or use a template</p>
-              </Card>
+              )}
+
+              {/* Add New Resume Card - only show when there are already some resumes */}
+              {!isLoading && filteredResumes.length > 0 && (
+                <Card 
+                  className="border border-dashed border-purple-200 hover:border-purple-300 bg-transparent hover:bg-purple-50/30 flex flex-col items-center justify-center p-6 cursor-pointer transition-all duration-300 dashboard-card-hover"
+                  onClick={() => setShowCreateDialog(true)}
+                >
+                  <div className="rounded-full bg-purple-100 p-3 mb-3">
+                    <Plus className="h-6 w-6 text-resume-purple" />
+                  </div>
+                  <p className="text-resume-purple font-medium">Create New Resume</p>
+                  <p className="text-resume-gray text-sm text-center mt-2">Start from scratch or use a template</p>
+                </Card>
+              )}
             </div>
           </div>
         </SidebarInset>
@@ -259,4 +379,3 @@ const Resume = () => {
 };
 
 export default Resume;
-

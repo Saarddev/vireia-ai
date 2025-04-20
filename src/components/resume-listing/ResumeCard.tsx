@@ -1,51 +1,78 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Edit, Trash, Download, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-interface ResumeCardProps {
+interface ResumeProps {
   resume: {
     id: number;
     name: string;
     lastEdited: string;
     tags: string[];
   };
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-const ResumeCard: React.FC<ResumeCardProps> = ({ resume }) => {
+const ResumeCard: React.FC<ResumeProps> = ({ resume, onEdit, onDelete }) => {
   const navigate = useNavigate();
-
+  
   const handleEdit = () => {
-    navigate(`/resume/builder/${resume.id}`);
+    if (onEdit) {
+      onEdit();
+    } else {
+      navigate(`/resume-builder/${resume.id}`);
+    }
+  };
+  
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDelete) {
+      onDelete();
+    }
+  };
+  
+  const handleDownload = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Handle download logic
   };
 
   return (
-    <Card 
-      className="border border-purple-100 hover:border-purple-200 shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-sm bg-white/80 dashboard-card-hover"
-    >
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">{resume.name}</CardTitle>
-        <CardDescription>Last edited: {resume.lastEdited}</CardDescription>
-      </CardHeader>
-      <CardContent className="pb-3">
-        <div className="flex flex-wrap gap-2">
-          {resume.tags.map((tag) => (
-            <span key={tag} className="inline-block text-xs bg-purple-50 text-resume-purple rounded-full px-2 py-1">
+    <Card className="border border-gray-200 hover:border-purple-200 transition-all duration-300 hover:shadow-lg cursor-pointer dashboard-card-hover"
+         onClick={handleEdit}>
+      <CardContent className="p-6">
+        <div className="flex justify-between items-start">
+          <div className="flex-1">
+            <h3 className="font-semibold text-lg truncate">{resume.name}</h3>
+            <p className="text-resume-gray text-sm mt-1">Last edited: {resume.lastEdited}</p>
+          </div>
+          <div className="rounded-full bg-purple-100 p-1.5 flex-shrink-0">
+            <FileText className="h-4 w-4 text-resume-purple" />
+          </div>
+        </div>
+        
+        <div className="mt-4 flex flex-wrap gap-2">
+          {resume.tags.map((tag, index) => (
+            <Badge key={index} variant="outline" className="bg-white hover:bg-white">
               {tag}
-            </span>
+            </Badge>
           ))}
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button variant="ghost" size="sm" className="text-resume-gray hover:text-resume-purple">Preview</Button>
+      
+      <CardFooter className="bg-gray-50 p-4 flex justify-end gap-2">
+        <Button variant="outline" size="sm" onClick={handleDelete}>
+          <Trash className="h-4 w-4 mr-1" /> Delete
+        </Button>
         <Button 
-          variant="outline" 
           size="sm" 
-          className="border-resume-purple text-resume-purple hover:bg-resume-purple hover:text-white"
+          className="bg-resume-purple hover:bg-resume-purple-dark"
           onClick={handleEdit}
         >
-          Edit
+          <Edit className="h-4 w-4 mr-1" /> Edit
         </Button>
       </CardFooter>
     </Card>

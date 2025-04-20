@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   SidebarProvider,
@@ -23,6 +22,7 @@ import SummaryForm from '@/components/resume-builder/SummaryForm';
 import AIAssistant from '@/components/resume-builder/AIAssistant';
 import TemplateSelector from '@/components/resume-builder/TemplateSelector';
 import ResumeSettings from '@/components/resume-builder/ResumeSettings';
+import { supabase } from '@/integrations/supabase/client';
 
 const ResumeBuilder = () => {
   const { resumeId } = useParams();
@@ -31,81 +31,24 @@ const ResumeBuilder = () => {
   const [activeSection, setActiveSection] = useState("personal");
   const [resumeData, setResumeData] = useState({
     personal: {
-      name: "John Smith",
-      title: "Software Engineer",
-      email: "john.smith@example.com",
-      phone: "(555) 123-4567",
-      location: "San Francisco, CA",
-      linkedin: "linkedin.com/in/johnsmith",
-      website: "johnsmith.dev"
+      name: "",
+      title: "",
+      email: "",
+      phone: "",
+      location: "",
+      linkedin: "",
+      website: ""
     },
-    summary: "Experienced software engineer with 5+ years of experience in full-stack development. Passionate about building scalable web applications and solving complex problems.",
-    experience: [
-      {
-        id: "exp1",
-        title: "Senior Software Engineer",
-        company: "Tech Solutions Inc.",
-        location: "San Francisco, CA",
-        startDate: "Jan 2022",
-        endDate: "Present",
-        description: "Lead developer for the company's flagship product. Managed a team of 5 engineers and implemented CI/CD pipelines that reduced deployment time by 40%."
-      },
-      {
-        id: "exp2",
-        title: "Software Engineer",
-        company: "Web Innovators",
-        location: "San Jose, CA",
-        startDate: "Jun 2019",
-        endDate: "Dec 2021",
-        description: "Developed and maintained RESTful APIs using Node.js and Express. Implemented new features that increased user engagement by 25%."
-      }
-    ],
-    education: [
-      {
-        id: "edu1",
-        degree: "Master of Science in Computer Science",
-        institution: "Stanford University",
-        location: "Stanford, CA",
-        startDate: "Sep 2017",
-        endDate: "May 2019",
-        description: "Specialization in Artificial Intelligence. GPA: 3.8/4.0"
-      },
-      {
-        id: "edu2",
-        degree: "Bachelor of Science in Computer Engineering",
-        institution: "University of California, Berkeley",
-        location: "Berkeley, CA",
-        startDate: "Sep 2013",
-        endDate: "May 2017",
-        description: "Dean's List, Graduated with Honors. GPA: 3.7/4.0"
-      }
-    ],
+    summary: "",
+    experience: [],
+    education: [],
     skills: {
-      technical: ["JavaScript", "TypeScript", "React", "Node.js", "Python", "AWS", "Docker", "Kubernetes", "SQL", "MongoDB"],
-      soft: ["Leadership", "Communication", "Problem Solving", "Team Management", "Agile Methodologies"]
+      technical: [],
+      soft: []
     },
-    languages: [
-      { language: "English", proficiency: "Native" },
-      { language: "Spanish", proficiency: "Intermediate" }
-    ],
-    certifications: [
-      { id: "cert1", name: "AWS Certified Solutions Architect", issuer: "Amazon Web Services", date: "2023" },
-      { id: "cert2", name: "Professional Scrum Master I", issuer: "Scrum.org", date: "2021" }
-    ],
-    projects: [
-      { 
-        id: "proj1", 
-        name: "E-commerce Platform", 
-        technologies: ["React", "Node.js", "MongoDB"], 
-        description: "Built a scalable e-commerce platform with real-time inventory management and payment processing integration." 
-      },
-      { 
-        id: "proj2", 
-        name: "Machine Learning Pipeline", 
-        technologies: ["Python", "TensorFlow", "AWS Lambda"], 
-        description: "Developed an automated ML pipeline that processes and analyzes customer data to predict buying behavior." 
-      }
-    ]
+    languages: [],
+    certifications: [],
+    projects: []
   });
   const [aiEnabled, setAiEnabled] = useState(true);
   const [aiGenerating, setAiGenerating] = useState(false);
@@ -122,18 +65,48 @@ const ResumeBuilder = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [progress, setProgress] = useState(20);
   const [aiSuggestion, setAiSuggestion] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setProgress(85);
-    }, 1000);
+    const fetchResumeData = async () => {
+      setIsLoading(true);
+      
+      try {
+        // In a production app, you would fetch the resume data from your database
+        // using the resumeId parameter
+        
+        // For now, we'll just simulate loading with a timer
+        setTimeout(() => {
+          setProgress(85);
+          setIsLoading(false);
+          
+          toast({
+            title: "Resume ready",
+            description: "Start building your professional resume. AI is ready to assist you."
+          });
+        }, 1500);
+        
+        // Check if user is authenticated
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          toast({
+            title: "Authentication required",
+            description: "Please sign in to create or edit resumes",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error('Error loading resume:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load resume data. Please try again.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+      }
+    };
     
-    toast({
-      title: "Resume loaded",
-      description: "Your resume data has been loaded. AI is ready to assist you."
-    });
-    
-    return () => clearTimeout(timer);
+    fetchResumeData();
   }, [resumeId, toast]);
 
   const handleSave = () => {
@@ -247,7 +220,7 @@ const ResumeBuilder = () => {
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50/80 via-background to-purple-50/60 dark:from-gray-900/90 dark:via-gray-900/50 dark:to-gray-900/90">
         <BuilderHeader 
-          name={resumeData.personal.name}
+          name={resumeData.personal.name || "New Resume"}
           isSaving={isSaving}
           aiEnabled={aiEnabled}
           onSave={handleSave}
@@ -280,7 +253,14 @@ const ResumeBuilder = () => {
                 <Card className="h-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 overflow-hidden shadow-xl">
                   <div className="p-4 lg:p-6 h-full overflow-auto">
                     <div className="max-w-2xl space-y-6">
-                      {renderActiveForm()}
+                      {isLoading ? (
+                        <div className="flex flex-col items-center justify-center h-full space-y-4 py-20">
+                          <div className="w-16 h-16 border-4 border-resume-purple border-t-transparent rounded-full animate-spin"></div>
+                          <p className="text-resume-gray text-lg">Loading resume...</p>
+                        </div>
+                      ) : (
+                        renderActiveForm()
+                      )}
                     </div>
                   </div>
                 </Card>

@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,10 +22,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { FileText, Briefcase, Linkedin, Mail } from "lucide-react";
+import { FileText, Briefcase, Linkedin } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { supabase } from '@/integrations/supabase/client';
 
 const formSchema = z.object({
   resumeName: z.string().min(3, {
@@ -33,7 +35,6 @@ const formSchema = z.object({
   company: z.string().optional(),
   jobTitle: z.string().optional(),
   linkedinProfile: z.string().optional(),
-  googleAccount: z.string().email().optional(),
   notes: z.string().optional(),
 });
 
@@ -45,6 +46,8 @@ type CreateResumeDialogProps = {
 const CreateResumeDialog = ({ open, onOpenChange }: CreateResumeDialogProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,26 +56,110 @@ const CreateResumeDialog = ({ open, onOpenChange }: CreateResumeDialogProps) => 
       company: "",
       jobTitle: "",
       linkedinProfile: "",
-      googleAccount: "",
       notes: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const importLinkedInData = async (linkedinUrl: string) => {
+    if (!linkedinUrl) {
+      toast({
+        title: "LinkedIn URL Required",
+        description: "Please enter a LinkedIn profile URL to import data.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsImporting(true);
+    
+    try {
+      const encodedUrl = encodeURIComponent(linkedinUrl);
+      const response = await fetch(`https://fresh-linkedin-profile-data.p.rapidapi.com/get-linkedin-profile?linkedin_url=${encodedUrl}&include_skills=false&include_certifications=false&include_publications=false&include_honors=false&include_volunteers=false&include_projects=false&include_patents=false&include_courses=false&include_organizations=false&include_profile_status=false&include_company_public_url=false`, {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-host': 'fresh-linkedin-profile-data.p.rapidapi.com',
+          'x-rapidapi-key': '0e8903e27emsh2333e866a960be6p1d76cbjsn8250ba0b208d'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch LinkedIn data');
+      }
+
+      const data = await response.json();
+      
+      // Auto-fill form with LinkedIn data
+      if (data) {
+        form.setValue('resumeName', `${data.full_name || ''} - Resume`);
+        
+        // If there's current employment data
+        if (data.experiences && data.experiences.length > 0) {
+          const currentJob = data.experiences[0];
+          form.setValue('jobTitle', currentJob.title || '');
+          form.setValue('company', currentJob.company || '');
+        }
+        
+        toast({
+          title: "Data Imported",
+          description: "LinkedIn data has been successfully imported",
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching LinkedIn data:', error);
+      toast({
+        title: "Import Failed",
+        description: "Could not import LinkedIn data. Please try again or enter details manually.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to create a resume",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      // Generate a unique resume ID
+      const resumeId = crypto.randomUUID();
+      
+      // In a real app, you would save this data to your database
+      // For now, we'll just simulate it with a timeout
+      setTimeout(() => {
+        setIsLoading(false);
+        onOpenChange(false);
+        
+        toast({
+          title: "Resume created!",
+          description: `${values.resumeName} has been created successfully.`,
+        });
+        
+        // Navigate to the resume builder with the new resume ID
+        navigate(`/resume-builder/${resumeId}`);
+        
+        form.reset();
+      }, 1500);
+    } catch (error) {
+      console.error('Error creating resume:', error);
       setIsLoading(false);
-      onOpenChange(false);
-      
       toast({
-        title: "Resume created!",
-        description: `${values.resumeName} has been created successfully.`,
+        title: "Error",
+        description: "Failed to create resume. Please try again.",
+        variant: "destructive",
       });
-      
-      form.reset();
-    }, 1500);
+    }
   }
 
   return (
@@ -144,33 +231,30 @@ const CreateResumeDialog = ({ open, onOpenChange }: CreateResumeDialogProps) => 
             <div className="space-y-4">
               <h3 className="text-sm font-medium">Import Data From</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col space-y-2">
                 <FormField
                   control={form.control}
                   name="linkedinProfile"
                   render={({ field }) => (
                     <FormItem>
-                      <FormControl>
-                        <div className="relative">
+                      <div className="flex space-x-2">
+                        <div className="relative flex-1">
                           <Linkedin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                          <Input className="pl-9" placeholder="LinkedIn profile URL" {...field} />
+                          <Input 
+                            className="pl-9" 
+                            placeholder="LinkedIn profile URL" 
+                            {...field} 
+                          />
                         </div>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="googleAccount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                          <Input className="pl-9" type="email" placeholder="Gmail address" {...field} />
-                        </div>
-                      </FormControl>
+                        <Button 
+                          type="button" 
+                          variant="outline"
+                          disabled={isImporting}
+                          onClick={() => importLinkedInData(field.value)}
+                        >
+                          {isImporting ? "Importing..." : "Import"}
+                        </Button>
+                      </div>
                     </FormItem>
                   )}
                 />
