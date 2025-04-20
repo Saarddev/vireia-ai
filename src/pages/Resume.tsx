@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { useUser } from '@clerk/clerk-react';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Sidebar,
   SidebarContent,
@@ -29,23 +29,39 @@ import ResumeCard from '@/components/resume-listing/ResumeCard';
 const Resume = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [userData, setUserData] = useState<{ firstName?: string, email?: string } | null>(null);
   const { toast } = useToast();
-  const { user } = useUser();
   const navigate = useNavigate();
   
   useEffect(() => {
-    setIsLoaded(true);
+    const fetchUserData = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data: { user } } = await supabase.auth.getUser();
+          const firstName = user?.user_metadata?.first_name || user?.user_metadata?.name || '';
+          const email = user?.email || '';
+          setUserData({ firstName, email });
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+      
+      setIsLoaded(true);
+    };
+    
+    fetchUserData();
     
     // Welcome toast
     const timer = setTimeout(() => {
       toast({
         title: "Resume Manager",
-        description: `Welcome ${user?.firstName || ''}! Create and manage your professional resumes`
+        description: `Welcome ${userData?.firstName || ''}! Create and manage your professional resumes`
       });
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [toast, user]);
+  }, [toast]);
 
   // Mock data for the resumes
   const resumes = [
@@ -58,8 +74,17 @@ const Resume = () => {
   ];
 
   const handleLogout = async () => {
-    // This will be handled by Clerk's UserButton
-    navigate('/');
+    try {
+      await supabase.auth.signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -234,3 +259,4 @@ const Resume = () => {
 };
 
 export default Resume;
+
