@@ -1,12 +1,15 @@
+
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, Sparkles, ArrowRight, Award, Clock, BarChart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@clerk/clerk-react';
 
 const HeroSection = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
+  const { isSignedIn } = useAuth();
   
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -31,7 +34,11 @@ const HeroSection = () => {
   }, []);
 
   const handleGetStarted = () => {
-    navigate('/dashboard');
+    if (isSignedIn) {
+      navigate('/dashboard');
+    } else {
+      navigate('/sign-up');
+    }
   };
 
   return (

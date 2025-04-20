@@ -3,12 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { FileText, Menu } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const isOnDashboard = location.pathname === '/dashboard';
+  const { isSignedIn } = useAuth();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -44,13 +46,33 @@ const Navbar = () => {
           <a href="#features" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">Features</a>
           <a href="#how-it-works" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">How It Works</a>
           <a href="#pricing" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">Pricing</a>
-          <Link to="/dashboard" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">Dashboard</Link>
+          <SignedIn>
+            <Link to="/dashboard" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">Dashboard</Link>
+          </SignedIn>
         </div>
         <div className="flex space-x-3 animate-slide-in-right">
-          <Button variant="ghost" className="hidden md:inline-flex hover:bg-resume-purple/10 text-resume-gray hover:text-resume-purple">Sign In</Button>
-          <Button className={`bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20 transition-all duration-300 hover:shadow-xl hover:shadow-resume-purple/30 ${scrolled ? 'px-5' : ''}`}>
-            {scrolled ? 'Try Free' : 'Get Started'}
-          </Button>
+          <SignedIn>
+            <UserButton 
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  avatarBox: "h-10 w-10"
+                }
+              }}
+            />
+          </SignedIn>
+          <SignedOut>
+            <Link to="/sign-in">
+              <Button variant="ghost" className="hidden md:inline-flex hover:bg-resume-purple/10 text-resume-gray hover:text-resume-purple">
+                Sign In
+              </Button>
+            </Link>
+            <Link to="/sign-up">
+              <Button className={`bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20 transition-all duration-300 hover:shadow-xl hover:shadow-resume-purple/30 ${scrolled ? 'px-5' : ''}`}>
+                {scrolled ? 'Try Free' : 'Get Started'}
+              </Button>
+            </Link>
+          </SignedOut>
           <Button 
             variant="ghost" 
             size="icon" 
@@ -69,12 +91,18 @@ const Navbar = () => {
             <a href="#features" className="text-resume-gray hover:text-resume-purple transition-colors font-medium py-2">Features</a>
             <a href="#how-it-works" className="text-resume-gray hover:text-resume-purple transition-colors font-medium py-2">How It Works</a>
             <a href="#pricing" className="text-resume-gray hover:text-resume-purple transition-colors font-medium py-2">Pricing</a>
-            <Link to="/dashboard" className="text-resume-gray hover:text-resume-purple transition-colors font-medium py-2">Dashboard</Link>
-            <div className="pt-2 flex">
-              <Button className="w-full bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20">
-                Get Started
-              </Button>
-            </div>
+            <SignedIn>
+              <Link to="/dashboard" className="text-resume-gray hover:text-resume-purple transition-colors font-medium py-2">Dashboard</Link>
+            </SignedIn>
+            <SignedOut>
+              <div className="pt-2 flex">
+                <Link to="/sign-up" className="w-full">
+                  <Button className="w-full bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20">
+                    Get Started
+                  </Button>
+                </Link>
+              </div>
+            </SignedOut>
           </div>
         </div>
       )}

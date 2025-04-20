@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
+import { useUser } from '@clerk/clerk-react';
 import {
   Sidebar,
   SidebarContent,
@@ -29,6 +30,8 @@ const Resume = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const { toast } = useToast();
+  const { user } = useUser();
+  const navigate = useNavigate();
   
   useEffect(() => {
     setIsLoaded(true);
@@ -37,12 +40,12 @@ const Resume = () => {
     const timer = setTimeout(() => {
       toast({
         title: "Resume Manager",
-        description: "Create and manage your professional resumes"
+        description: `Welcome ${user?.firstName || ''}! Create and manage your professional resumes`
       });
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [toast]);
+  }, [toast, user]);
 
   // Mock data for the resumes
   const resumes = [
@@ -53,6 +56,11 @@ const Resume = () => {
     { id: 5, name: "Marketing Specialist Resume", lastEdited: "Apr 6, 2025", tags: ["Marketing", "Creative"] },
     { id: 6, name: "Frontend Developer Resume", lastEdited: "Apr 4, 2025", tags: ["Tech", "ATS-Optimized"] },
   ];
+
+  const handleLogout = async () => {
+    // This will be handled by Clerk's UserButton
+    navigate('/');
+  };
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -138,7 +146,7 @@ const Resume = () => {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Log Out">
+                <SidebarMenuButton tooltip="Log Out" onClick={handleLogout}>
                   <LogOut className="h-5 w-5" />
                   <span>Log Out</span>
                 </SidebarMenuButton>
