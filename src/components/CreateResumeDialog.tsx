@@ -42,9 +42,10 @@ const formSchema = z.object({
 type CreateResumeDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onResumeCreated?: () => void;
 };
 
-const CreateResumeDialog = ({ open, onOpenChange }: CreateResumeDialogProps) => {
+const CreateResumeDialog = ({ open, onOpenChange, onResumeCreated }: CreateResumeDialogProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -195,8 +196,13 @@ const CreateResumeDialog = ({ open, onOpenChange }: CreateResumeDialogProps) => 
         description: `${values.resumeName} has been created successfully.`,
       });
       
+      // Call the callback to refresh the resumes list
+      if (onResumeCreated) {
+        onResumeCreated();
+      }
+      
       if (resume) {
-        navigate(`/resume-builder/${resume.id}`);
+        navigate(`/resume/builder/${resume.id}`);
       }
       
       form.reset();

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -27,6 +27,7 @@ import { supabase } from '@/integrations/supabase/client';
 const ResumeBuilder = () => {
   const { resumeId } = useParams();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { isMobile } = useIsMobile();
   const [activeSection, setActiveSection] = useState("personal");
   const [resumeData, setResumeData] = useState({
@@ -66,26 +67,13 @@ const ResumeBuilder = () => {
   const [progress, setProgress] = useState(20);
   const [aiSuggestion, setAiSuggestion] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [resumeTitle, setResumeTitle] = useState("");
 
   useEffect(() => {
     const fetchResumeData = async () => {
       setIsLoading(true);
       
       try {
-        // In a production app, you would fetch the resume data from your database
-        // using the resumeId parameter
-        
-        // For now, we'll just simulate loading with a timer
-        setTimeout(() => {
-          setProgress(85);
-          setIsLoading(false);
-          
-          toast({
-            title: "Resume ready",
-            description: "Start building your professional resume. AI is ready to assist you."
-          });
-        }, 1500);
-        
         // Check if user is authenticated
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
@@ -94,7 +82,126 @@ const ResumeBuilder = () => {
             description: "Please sign in to create or edit resumes",
             variant: "destructive",
           });
+          navigate('/sign-in');
+          return;
         }
+        
+        if (!resumeId) {
+          toast({
+            title: "Error",
+            description: "Resume ID is required",
+            variant: "destructive",
+          });
+          navigate('/resume');
+          return;
+        }
+        
+        // Fetch resume data from the database
+        const { data: resume, error } = await supabase
+          .from('resumes')
+          .select('*')
+          .eq('id', resumeId)
+          .single();
+          
+        if (error) {
+          throw error;
+        }
+        
+        if (!resume) {
+          toast({
+            title: "Resume not found",
+            description: "The requested resume could not be found",
+            variant: "destructive",
+          });
+          navigate('/resume');
+          return;
+        }
+        
+        // Set resume data
+        setResumeTitle(resume.title);
+        setResumeData(resume.content || resumeData);
+        setSelectedTemplate(resume.template || "modern");
+        setResumeSettings(resume.settings || resumeSettings);
+        
+        // If resume is empty, try to fetch LinkedIn data from user profile
+        if (!resume.content.personal.name) {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('linkedin_data')
+            .eq('id', session.user.id)
+            .single();
+            
+          if (!profileError && profile?.linkedin_data) {
+            // Use LinkedIn data to populate the resume
+            const linkedinData = profile.linkedin_data;
+            
+            // Update personal info
+            if (linkedinData.full_name) {
+              setResumeData(prev => ({
+                ...prev,
+                personal: {
+                  ...prev.personal,
+                  name: linkedinData.full_name || prev.personal.name,
+                  title: linkedinData.headline || prev.personal.title,
+                  location: linkedinData.location || prev.personal.location,
+                  linkedin: linkedinData.linkedin_url || prev.personal.linkedin
+                }
+              }));
+            }
+            
+            // Update summary
+            if (linkedinData.about) {
+              setResumeData(prev => ({
+                ...prev,
+                summary: linkedinData.about || prev.summary
+              }));
+            }
+            
+            // Update experience
+            if (linkedinData.experiences && linkedinData.experiences.length > 0) {
+              const formattedExperiences = linkedinData.experiences.map((exp: any, index: number) => ({
+                id: `exp-${index}`,
+                title: exp.title || '',
+                company: exp.company || '',
+                location: exp.location || '',
+                startDate: `${exp.start_month || ''} ${exp.start_year || ''}`.trim(),
+                endDate: exp.is_current ? 'Present' : `${exp.end_month || ''} ${exp.end_year || ''}`.trim(),
+                description: exp.description || ''
+              }));
+              
+              setResumeData(prev => ({
+                ...prev,
+                experience: formattedExperiences
+              }));
+            }
+            
+            // Update education
+            if (linkedinData.educations && linkedinData.educations.length > 0) {
+              const formattedEducation = linkedinData.educations.map((edu: any, index: number) => ({
+                id: `edu-${index}`,
+                institution: edu.school || '',
+                degree: edu.degree || '',
+                field: edu.field_of_study || '',
+                startDate: `${edu.start_month || ''} ${edu.start_year || ''}`.trim(),
+                endDate: `${edu.end_month || ''} ${edu.end_year || ''}`.trim(),
+                description: edu.activities || ''
+              }));
+              
+              setResumeData(prev => ({
+                ...prev,
+                education: formattedEducation
+              }));
+            }
+          }
+        }
+        
+        setProgress(calculateProgress(resume.content));
+        setIsLoading(false);
+        
+        toast({
+          title: "Resume loaded",
+          description: "Start building your professional resume. AI is ready to assist you."
+        });
       } catch (error) {
         console.error('Error loading resume:', error);
         toast({
@@ -103,22 +210,81 @@ const ResumeBuilder = () => {
           variant: "destructive",
         });
         setIsLoading(false);
+        navigate('/resume');
       }
     };
     
     fetchResumeData();
-  }, [resumeId, toast]);
+  }, [resumeId, toast, navigate]);
 
-  const handleSave = () => {
+  const calculateProgress = (content: any) => {
+    let progress = 0;
+    let total = 0;
+    
+    // Check personal info
+    if (content.personal) {
+      const personalFields = Object.values(content.personal).filter(val => val !== '').length;
+      progress += personalFields;
+      total += Object.keys(content.personal).length;
+    }
+    
+    // Check summary
+    if (content.summary) {
+      progress += 1;
+    }
+    total += 1;
+    
+    // Check experience
+    if (content.experience && content.experience.length > 0) {
+      progress += 1;
+    }
+    total += 1;
+    
+    // Check education
+    if (content.education && content.education.length > 0) {
+      progress += 1;
+    }
+    total += 1;
+    
+    // Check skills
+    if (content.skills && (content.skills.technical.length > 0 || content.skills.soft.length > 0)) {
+      progress += 1;
+    }
+    total += 1;
+    
+    return Math.round((progress / total) * 100);
+  };
+
+  const handleSave = async () => {
     setIsSaving(true);
     
-    setTimeout(() => {
-      setIsSaving(false);
+    try {
+      const { error } = await supabase
+        .from('resumes')
+        .update({
+          content: resumeData,
+          template: selectedTemplate,
+          settings: resumeSettings,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', resumeId);
+        
+      if (error) throw error;
+      
       toast({
         title: "Resume saved",
         description: "Your resume has been successfully saved."
       });
-    }, 1500);
+    } catch (error) {
+      console.error('Error saving resume:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save resume. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleDownload = () => {
@@ -138,6 +304,12 @@ const ResumeBuilder = () => {
   const handleDataChange = (section: string, data: any) => {
     setResumeData(prev => ({
       ...prev,
+      [section]: data
+    }));
+    
+    // Update progress
+    setProgress(calculateProgress({
+      ...resumeData,
       [section]: data
     }));
   };
@@ -220,7 +392,7 @@ const ResumeBuilder = () => {
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50/80 via-background to-purple-50/60 dark:from-gray-900/90 dark:via-gray-900/50 dark:to-gray-900/90">
         <BuilderHeader 
-          name={resumeData.personal.name || "New Resume"}
+          name={resumeTitle || resumeData.personal.name || "New Resume"}
           isSaving={isSaving}
           aiEnabled={aiEnabled}
           onSave={handleSave}

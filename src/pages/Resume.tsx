@@ -47,11 +47,11 @@ const Resume = () => {
           const email = user?.email || '';
           setUserData({ firstName, email });
           
-          // Fetch user's resumes (mock data for now)
+          // Fetch user's resumes from the database
           fetchResumes();
         } else {
           // Redirect to login if not authenticated
-          navigate('/signin');
+          navigate('/sign-in');
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -78,23 +78,44 @@ const Resume = () => {
     return () => clearTimeout(timer);
   }, [toast, navigate]);
 
-  const fetchResumes = () => {
+  const fetchResumes = async () => {
     setIsLoading(true);
     
-    // Mock data for the resumes - in a real app, you would fetch this from your database
-    setTimeout(() => {
-      const mockResumes = [
-        { id: 1, name: "Software Engineer Resume", lastEdited: "Apr 14, 2025", tags: ["Tech", "ATS-Optimized"] },
-        { id: 2, name: "Product Manager Resume", lastEdited: "Apr 12, 2025", tags: ["Management", "Creative"] },
-        { id: 3, name: "UX Designer Resume", lastEdited: "Apr 10, 2025", tags: ["Design", "Creative"] },
-        { id: 4, name: "Data Analyst Resume", lastEdited: "Apr 8, 2025", tags: ["Analytics", "ATS-Optimized"] },
-        { id: 5, name: "Marketing Specialist Resume", lastEdited: "Apr 6, 2025", tags: ["Marketing", "Creative"] },
-        { id: 6, name: "Frontend Developer Resume", lastEdited: "Apr 4, 2025", tags: ["Tech", "ATS-Optimized"] },
-      ];
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
       
-      setResumes(mockResumes);
+      const { data, error } = await supabase
+        .from('resumes')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (error) {
+        throw error;
+      }
+      
+      const formattedResumes = data.map(resume => ({
+        id: resume.id,
+        name: resume.title,
+        lastEdited: new Date(resume.updated_at).toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric', 
+          year: 'numeric' 
+        }),
+        tags: resume.template ? [resume.template.charAt(0).toUpperCase() + resume.template.slice(1)] : []
+      }));
+      
+      setResumes(formattedResumes);
+    } catch (error) {
+      console.error('Error fetching resumes:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load resumes. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleLogout = async () => {
@@ -119,19 +140,34 @@ const Resume = () => {
     setActiveFilter(filter);
   };
 
-  const handleDeleteResume = (resumeId: number) => {
-    // In a real app, you would delete the resume from your database
-    setResumes(prev => prev.filter(resume => resume.id !== resumeId));
-    
-    toast({
-      title: "Resume Deleted",
-      description: "The resume has been deleted successfully",
-    });
+  const handleDeleteResume = async (resumeId: string) => {
+    try {
+      const { error } = await supabase
+        .from('resumes')
+        .delete()
+        .eq('id', resumeId);
+        
+      if (error) throw error;
+      
+      setResumes(prev => prev.filter(resume => resume.id !== resumeId));
+      
+      toast({
+        title: "Resume Deleted",
+        description: "The resume has been deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting resume:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete resume. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleEditResume = (resumeId: number) => {
+  const handleEditResume = (resumeId: string) => {
     // Navigate to the resume builder page with the selected resume ID
-    navigate(`/resume-builder/${resumeId}`);
+    navigate(`/resume/builder/${resumeId}`);
   };
 
   // Apply filters and search
@@ -275,20 +311,12 @@ const Resume = () => {
                 <Filter className="mr-2 h-3 w-3" /> All Resumes
               </Button>
               <Button 
-                variant={activeFilter === 'Recent' ? "default" : "outline"} 
+                variant={activeFilter === 'Modern' ? "default" : "outline"} 
                 size="sm" 
                 className="rounded-full"
-                onClick={() => handleFilterChange('Recent')}
+                onClick={() => handleFilterChange('Modern')}
               >
-                Recent
-              </Button>
-              <Button 
-                variant={activeFilter === 'ATS-Optimized' ? "default" : "outline"} 
-                size="sm" 
-                className="rounded-full"
-                onClick={() => handleFilterChange('ATS-Optimized')}
-              >
-                ATS-Optimized
+                Modern
               </Button>
               <Button 
                 variant={activeFilter === 'Creative' ? "default" : "outline"} 
@@ -299,12 +327,12 @@ const Resume = () => {
                 Creative
               </Button>
               <Button 
-                variant={activeFilter === 'Tech' ? "default" : "outline"} 
+                variant={activeFilter === 'Professional' ? "default" : "outline"} 
                 size="sm" 
                 className="rounded-full"
-                onClick={() => handleFilterChange('Tech')}
+                onClick={() => handleFilterChange('Professional')}
               >
-                Tech
+                Professional
               </Button>
             </div>
 
@@ -373,7 +401,11 @@ const Resume = () => {
       </div>
       
       {/* Create Resume Dialog */}
-      <CreateResumeDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} />
+      <CreateResumeDialog 
+        open={showCreateDialog} 
+        onOpenChange={setShowCreateDialog} 
+        onResumeCreated={fetchResumes} 
+      />
     </SidebarProvider>
   );
 };

@@ -3,12 +3,11 @@ import React from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash, Download, FileText } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Edit, Trash, FileText } from 'lucide-react';
 
 interface ResumeProps {
   resume: {
-    id: number;
+    id: string;
     name: string;
     lastEdited: string;
     tags: string[];
@@ -18,13 +17,9 @@ interface ResumeProps {
 }
 
 const ResumeCard: React.FC<ResumeProps> = ({ resume, onEdit, onDelete }) => {
-  const navigate = useNavigate();
-  
   const handleEdit = () => {
     if (onEdit) {
       onEdit();
-    } else {
-      navigate(`/resume-builder/${resume.id}`);
     }
   };
   
@@ -33,11 +28,6 @@ const ResumeCard: React.FC<ResumeProps> = ({ resume, onEdit, onDelete }) => {
     if (onDelete) {
       onDelete();
     }
-  };
-  
-  const handleDownload = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    // Handle download logic
   };
 
   return (
