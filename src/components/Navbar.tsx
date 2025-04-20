@@ -3,14 +3,30 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { FileText, Menu } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const location = useLocation();
   const isOnDashboard = location.pathname === '/dashboard';
-  const { isSignedIn } = useAuth();
+  
+  // Check auth state
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsSignedIn(!!session);
+    });
+
+    // Initial check
+    supabase.auth.getSession().then(({ data: { session }}) => {
+      setIsSignedIn(!!session);
+    });
+    
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, []);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -29,6 +45,10 @@ const Navbar = () => {
     };
   }, []);
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+  };
+
   if (isOnDashboard) {
     return null; // Don't show navbar on dashboard as we have sidebar
   }
@@ -46,33 +66,40 @@ const Navbar = () => {
           <a href="#features" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">Features</a>
           <a href="#how-it-works" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">How It Works</a>
           <a href="#pricing" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">Pricing</a>
-          <SignedIn>
+          {isSignedIn && (
             <Link to="/dashboard" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">Dashboard</Link>
-          </SignedIn>
+          )}
         </div>
         <div className="flex space-x-3 animate-slide-in-right">
-          <SignedIn>
-            <UserButton 
-              afterSignOutUrl="/"
-              appearance={{
-                elements: {
-                  avatarBox: "h-10 w-10"
-                }
-              }}
-            />
-          </SignedIn>
-          <SignedOut>
-            <Link to="/sign-in">
-              <Button variant="ghost" className="hidden md:inline-flex hover:bg-resume-purple/10 text-resume-gray hover:text-resume-purple">
-                Sign In
+          {isSignedIn ? (
+            <div className="flex gap-2">
+              <Link to="/dashboard">
+                <Button variant="ghost" className="hover:bg-resume-purple/10 text-resume-gray hover:text-resume-purple">
+                  Dashboard
+                </Button>
+              </Link>
+              <Button 
+                variant="outline" 
+                className="text-resume-gray" 
+                onClick={handleSignOut}
+              >
+                Sign Out
               </Button>
-            </Link>
-            <Link to="/sign-up">
-              <Button className={`bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20 transition-all duration-300 hover:shadow-xl hover:shadow-resume-purple/30 ${scrolled ? 'px-5' : ''}`}>
-                {scrolled ? 'Try Free' : 'Get Started'}
-              </Button>
-            </Link>
-          </SignedOut>
+            </div>
+          ) : (
+            <>
+              <Link to="/sign-in">
+                <Button variant="ghost" className="hidden md:inline-flex hover:bg-resume-purple/10 text-resume-gray hover:text-resume-purple">
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/sign-up">
+                <Button className={`bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20 transition-all duration-300 hover:shadow-xl hover:shadow-resume-purple/30 ${scrolled ? 'px-5' : ''}`}>
+                  {scrolled ? 'Try Free' : 'Get Started'}
+                </Button>
+              </Link>
+            </>
+          )}
           <Button 
             variant="ghost" 
             size="icon" 
@@ -91,10 +118,10 @@ const Navbar = () => {
             <a href="#features" className="text-resume-gray hover:text-resume-purple transition-colors font-medium py-2">Features</a>
             <a href="#how-it-works" className="text-resume-gray hover:text-resume-purple transition-colors font-medium py-2">How It Works</a>
             <a href="#pricing" className="text-resume-gray hover:text-resume-purple transition-colors font-medium py-2">Pricing</a>
-            <SignedIn>
+            {isSignedIn && (
               <Link to="/dashboard" className="text-resume-gray hover:text-resume-purple transition-colors font-medium py-2">Dashboard</Link>
-            </SignedIn>
-            <SignedOut>
+            )}
+            {!isSignedIn && (
               <div className="pt-2 flex">
                 <Link to="/sign-up" className="w-full">
                   <Button className="w-full bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20">
@@ -102,7 +129,18 @@ const Navbar = () => {
                   </Button>
                 </Link>
               </div>
-            </SignedOut>
+            )}
+            {isSignedIn && (
+              <div className="pt-2 flex">
+                <Button 
+                  className="w-full text-resume-gray"
+                  variant="outline"
+                  onClick={handleSignOut}
+                >
+                  Sign Out
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       )}
