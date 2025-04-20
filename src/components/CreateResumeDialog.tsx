@@ -27,6 +27,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { supabase } from '@/integrations/supabase/client';
+import { fetchLinkedInProfile, transformLinkedInData } from '@/services/linkedinService';
 
 const formSchema = z.object({
   resumeName: z.string().min(3, {
@@ -73,20 +74,19 @@ const CreateResumeDialog = ({ open, onOpenChange }: CreateResumeDialogProps) => 
     setIsImporting(true);
     
     try {
-      const encodedUrl = encodeURIComponent(linkedinUrl);
-      const response = await fetch(`https://fresh-linkedin-profile-data.p.rapidapi.com/get-linkedin-profile?linkedin_url=${encodedUrl}&include_skills=false&include_certifications=false&include_publications=false&include_honors=false&include_volunteers=false&include_projects=false&include_patents=false&include_courses=false&include_organizations=false&include_profile_status=false&include_company_public_url=false`, {
-        method: 'GET',
-        headers: {
-          'x-rapidapi-host': 'fresh-linkedin-profile-data.p.rapidapi.com',
-          'x-rapidapi-key': '0e8903e27emsh2333e866a960be6p1d76cbjsn8250ba0b208d'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch LinkedIn data');
+      const data = await fetchLinkedInProfile(linkedinUrl);
+      
+      // Save LinkedIn data to user profile
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await supabase
+          .from('profiles')
+          .update({
+            linkedin_url: linkedinUrl,
+            linkedin_data: data
+          })
+          .eq('id', session.user.id);
       }
-
-      const data = await response.json();
       
       // Auto-fill form with LinkedIn data
       if (data) {
@@ -132,25 +132,74 @@ const CreateResumeDialog = ({ open, onOpenChange }: CreateResumeDialogProps) => 
         return;
       }
       
-      // Generate a unique resume ID
-      const resumeId = crypto.randomUUID();
+      let resumeContent = {
+        personal: {
+          name: "",
+          title: values.jobTitle || "",
+          email: "",
+          phone: "",
+          location: "",
+          linkedin: values.linkedinProfile || "",
+          website: ""
+        },
+        summary: "",
+        experience: [],
+        education: [],
+        skills: {
+          technical: [],
+          soft: []
+        },
+        languages: [],
+        certifications: [],
+        projects: []
+      };
+
+      // If LinkedIn URL is provided, transform the data
+      if (values.linkedinProfile) {
+        try {
+          const linkedinData = await fetchLinkedInProfile(values.linkedinProfile);
+          resumeContent = transformLinkedInData(linkedinData) || resumeContent;
+        } catch (error) {
+          console.error('Error importing LinkedIn data:', error);
+        }
+      }
+
+      // Create new resume in database
+      const { data: resume, error } = await supabase
+        .from('resumes')
+        .insert({
+          title: values.resumeName,
+          content: resumeContent,
+          template: 'modern',
+          user_id: session.user.id,
+          settings: {
+            fontFamily: "Inter",
+            fontSize: 10,
+            primaryColor: "#9b87f5",
+            secondaryColor: "#6E59A5",
+            accentColor: "#D6BCFA",
+            paperSize: "a4",
+            margins: "normal"
+          }
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setIsLoading(false);
+      onOpenChange(false);
       
-      // In a real app, you would save this data to your database
-      // For now, we'll just simulate it with a timeout
-      setTimeout(() => {
-        setIsLoading(false);
-        onOpenChange(false);
-        
-        toast({
-          title: "Resume created!",
-          description: `${values.resumeName} has been created successfully.`,
-        });
-        
-        // Navigate to the resume builder with the new resume ID
-        navigate(`/resume-builder/${resumeId}`);
-        
-        form.reset();
-      }, 1500);
+      toast({
+        title: "Resume created!",
+        description: `${values.resumeName} has been created successfully.`,
+      });
+      
+      if (resume) {
+        navigate(`/resume-builder/${resume.id}`);
+      }
+      
+      form.reset();
     } catch (error) {
       console.error('Error creating resume:', error);
       setIsLoading(false);
