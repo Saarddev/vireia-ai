@@ -9,7 +9,182 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      cover_letters: {
+        Row: {
+          company: string | null
+          content: string
+          created_at: string
+          id: string
+          position: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          company?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          position?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          company?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          position?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cover_letters_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_applications: {
+        Row: {
+          applied_date: string
+          company_name: string
+          cover_letter_id: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          position: string
+          response_date: string | null
+          resume_id: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          applied_date?: string
+          company_name: string
+          cover_letter_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          position: string
+          response_date?: string | null
+          resume_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          applied_date?: string
+          company_name?: string
+          cover_letter_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          position?: string
+          response_date?: string | null
+          resume_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_cover_letter_id_fkey"
+            columns: ["cover_letter_id"]
+            isOneToOne: false
+            referencedRelation: "cover_letters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_applications_resume_id_fkey"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "resumes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_applications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          linkedin_data: Json | null
+          linkedin_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+          linkedin_data?: Json | null
+          linkedin_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          linkedin_data?: Json | null
+          linkedin_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      resumes: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          settings: Json | null
+          template: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          id?: string
+          settings?: Json | null
+          template: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          settings?: Json | null
+          template?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resumes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

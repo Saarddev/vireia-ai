@@ -1,6 +1,7 @@
 
-import { useAuth } from '@clerk/clerk-react';
+import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 // Define public paths for middleware to use
 export const publicPaths = ['/', '/sign-in', '/sign-up'];
@@ -12,11 +13,23 @@ const isPublic = (path: string) => {
 
 // This is a React component that acts as middleware for route protection
 export const RouteMiddleware = ({ children }: { children: React.ReactNode }) => {
-  const { isSignedIn, isLoaded } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const location = useLocation();
   
-  // Wait for Clerk to load
-  if (!isLoaded) {
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+      setIsLoading(false);
+    });
+
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, []);
+  
+  // Wait for auth to load
+  if (isLoading) {
     return (
       <div className="h-screen w-full flex items-center justify-center">
         <div className="animate-pulse bg-resume-purple/20 p-4 rounded-lg">
@@ -32,7 +45,7 @@ export const RouteMiddleware = ({ children }: { children: React.ReactNode }) => 
   }
   
   // Protect private paths
-  if (!isSignedIn) {
+  if (!isAuthenticated) {
     return <Navigate to="/sign-in" replace />;
   }
   
@@ -41,3 +54,4 @@ export const RouteMiddleware = ({ children }: { children: React.ReactNode }) => 
 };
 
 export default RouteMiddleware;
+
