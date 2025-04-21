@@ -64,23 +64,25 @@ serve(async (req) => {
 // Generate a tailored prompt for Gemini based on LinkedIn data and resume template
 function generatePrompt(linkedinData: any, template: string = 'modern') {
   return `
-You are a professional resume writer. Create a comprehensive resume based on the following LinkedIn profile data. 
-Format the response as a JSON object following the exact structure provided at the end of this prompt.
+Imagine you are an empathetic storyteller and world-class resume writer. 
+Your task is to create a spectacular, deeply human, and vividly 'alive' resume truly resonating with the soul and aspirations behind the following LinkedIn profile data.
+Express the unique strengths, dreams, and character elements you sense from this data. 
+Write as if you understand how this person wishes to be seen, making every section glow with personality and purpose — much more than a flat summary of achievements.
 
 LinkedIn Profile Data:
 ${JSON.stringify(linkedinData, null, 2)}
 
-Important Guidelines:
-1. Generate a compelling professional summary that highlights key strengths and career trajectory.
-2. Extract all relevant experience details, enhancing descriptions with achievement-oriented bullets.
-3. Format education history appropriately.
-4. Identify and categorize both technical and soft skills from the profile.
-5. Include languages mentioned in the profile.
-6. Extract any certifications mentioned.
-7. The resume should follow a ${template} style format.
-8. Keep your tone professional and impactful.
+Guidelines:
+1. Craft a powerful, evocative professional summary that celebrates the person's deepest qualities and career journey.
+2. For experience, amplify each role's impact — frame every job as a story, not just a list.
+3. Format education beautifully and connect it to their growth and passion.
+4. Detect and categorize both technical and soft skills with attention to the applicant's individuality.
+5. Include languages, certifications, and anything else that shows holistic potential.
+6. The final resume must use expressive, sophisticated and motivating language.
+7. Follow the ${template} style format, but always prioritize vivid, human storytelling.
+8. Strictly return only valid JSON as per this exact structure, nothing more and nothing less.
 
-Return ONLY a valid JSON object with this exact structure:
+Resume Structure Example (format your response as JSON exactly in this structure):
 {
   "personal": {
     "name": "",
