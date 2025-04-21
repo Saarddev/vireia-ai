@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -149,28 +148,29 @@ const CreateResumeDialog = ({ open, onOpenChange, onResumeCreated }: CreateResum
         try {
           toast({
             title: "Creating Enhanced Resume",
-            description: "Our AI is analyzing your LinkedIn data to create a professional resume...",
+            description: "AI is analyzing your LinkedIn data to create your resume...",
           });
-          
+
+          // Pass enhancementLevel and notes as prompt params if wanted (not in edge function currently but can expand)
+          // For now, call as before
           resume = await createEnhancedResume(session.user.id, values.resumeName);
-          
+
           toast({
             title: "AI Enhancement Complete",
-            description: "Your resume has been professionally enhanced with AI",
+            description: "Your resume has been enhanced with AI",
           });
         } catch (error) {
           console.error('Error with AI enhancement:', error);
           toast({
             title: "AI Enhancement Failed",
-            description: "Falling back to basic resume creation. You can enhance it manually.",
+            description: "Falling back to basic resume creation.",
             variant: "destructive",
           });
-          // Fallback to basic resume creation
           values.useAI = false;
         }
       }
       
-      // If AI enhancement failed or wasn't selected, create basic resume
+      // If AI enhancement failed or wasn't selected, create basic resume from LinkedIn data if available
       if (!values.useAI || !resume) {
         let resumeContent = {
           personal: {
@@ -193,8 +193,6 @@ const CreateResumeDialog = ({ open, onOpenChange, onResumeCreated }: CreateResum
           certifications: [],
           projects: []
         };
-
-        // If LinkedIn URL is provided, transform the data
         if (values.linkedinProfile) {
           try {
             const linkedinData = await fetchLinkedInProfile(values.linkedinProfile);
@@ -203,8 +201,6 @@ const CreateResumeDialog = ({ open, onOpenChange, onResumeCreated }: CreateResum
             console.error('Error importing LinkedIn data:', error);
           }
         }
-
-        // Create new resume in database
         const { data: newResume, error } = await supabase
           .from('resumes')
           .insert({
@@ -226,7 +222,6 @@ const CreateResumeDialog = ({ open, onOpenChange, onResumeCreated }: CreateResum
           .single();
 
         if (error) throw error;
-        
         resume = newResume;
       }
 
@@ -239,12 +234,11 @@ const CreateResumeDialog = ({ open, onOpenChange, onResumeCreated }: CreateResum
       });
       
       // Call the callback to refresh the resumes list
-      if (onResumeCreated) {
-        onResumeCreated();
-      }
-      
-      if (resume) {
-        navigate(`/resume/builder/${resume.id}`);
+      if (onResumeCreated) onResumeCreated();
+
+      // Always route to builder with the new resume id
+      if (resume && resume.id) {
+        navigate(`/resume/builder/${resume.id}`); // Force builder to re-fetch actual content by id
       }
       
       form.reset();
