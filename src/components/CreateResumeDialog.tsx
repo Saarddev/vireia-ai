@@ -22,12 +22,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { FileText, Briefcase, Linkedin } from "lucide-react";
+import { FileText, Briefcase, Linkedin, Sparkles } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { supabase } from '@/integrations/supabase/client';
 import { fetchLinkedInProfile, transformLinkedInData } from '@/services/linkedinService';
+import { createEnhancedResume } from '@/services/resumeEnhancementService';
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const formSchema = z.object({
   resumeName: z.string().min(3, {
@@ -37,6 +40,8 @@ const formSchema = z.object({
   jobTitle: z.string().optional(),
   linkedinProfile: z.string().optional(),
   notes: z.string().optional(),
+  useAI: z.boolean().default(true),
+  enhancementLevel: z.enum(["basic", "standard", "professional"]).default("standard"),
 });
 
 type CreateResumeDialogProps = {
@@ -59,8 +64,12 @@ const CreateResumeDialog = ({ open, onOpenChange, onResumeCreated }: CreateResum
       jobTitle: "",
       linkedinProfile: "",
       notes: "",
+      useAI: true,
+      enhancementLevel: "standard",
     },
   });
+
+  const useAI = form.watch("useAI");
 
   const importLinkedInData = async (linkedinUrl: string) => {
     if (!linkedinUrl) {
@@ -133,60 +142,93 @@ const CreateResumeDialog = ({ open, onOpenChange, onResumeCreated }: CreateResum
         return;
       }
       
-      let resumeContent = {
-        personal: {
-          name: "",
-          title: values.jobTitle || "",
-          email: "",
-          phone: "",
-          location: "",
-          linkedin: values.linkedinProfile || "",
-          website: ""
-        },
-        summary: "",
-        experience: [],
-        education: [],
-        skills: {
-          technical: [],
-          soft: []
-        },
-        languages: [],
-        certifications: [],
-        projects: []
-      };
-
-      // If LinkedIn URL is provided, transform the data
-      if (values.linkedinProfile) {
+      let resume;
+      
+      // Use AI enhancement if selected
+      if (values.useAI) {
         try {
-          const linkedinData = await fetchLinkedInProfile(values.linkedinProfile);
-          resumeContent = transformLinkedInData(linkedinData) || resumeContent;
+          toast({
+            title: "Creating Enhanced Resume",
+            description: "Our AI is analyzing your LinkedIn data to create a professional resume...",
+          });
+          
+          resume = await createEnhancedResume(session.user.id, values.resumeName);
+          
+          toast({
+            title: "AI Enhancement Complete",
+            description: "Your resume has been professionally enhanced with AI",
+          });
         } catch (error) {
-          console.error('Error importing LinkedIn data:', error);
+          console.error('Error with AI enhancement:', error);
+          toast({
+            title: "AI Enhancement Failed",
+            description: "Falling back to basic resume creation. You can enhance it manually.",
+            variant: "destructive",
+          });
+          // Fallback to basic resume creation
+          values.useAI = false;
         }
       }
+      
+      // If AI enhancement failed or wasn't selected, create basic resume
+      if (!values.useAI || !resume) {
+        let resumeContent = {
+          personal: {
+            name: "",
+            title: values.jobTitle || "",
+            email: "",
+            phone: "",
+            location: "",
+            linkedin: values.linkedinProfile || "",
+            website: ""
+          },
+          summary: "",
+          experience: [],
+          education: [],
+          skills: {
+            technical: [],
+            soft: []
+          },
+          languages: [],
+          certifications: [],
+          projects: []
+        };
 
-      // Create new resume in database
-      const { data: resume, error } = await supabase
-        .from('resumes')
-        .insert({
-          title: values.resumeName,
-          content: resumeContent,
-          template: 'modern',
-          user_id: session.user.id,
-          settings: {
-            fontFamily: "Inter",
-            fontSize: 10,
-            primaryColor: "#9b87f5",
-            secondaryColor: "#6E59A5",
-            accentColor: "#D6BCFA",
-            paperSize: "a4",
-            margins: "normal"
+        // If LinkedIn URL is provided, transform the data
+        if (values.linkedinProfile) {
+          try {
+            const linkedinData = await fetchLinkedInProfile(values.linkedinProfile);
+            resumeContent = transformLinkedInData(linkedinData) || resumeContent;
+          } catch (error) {
+            console.error('Error importing LinkedIn data:', error);
           }
-        })
-        .select()
-        .single();
+        }
 
-      if (error) throw error;
+        // Create new resume in database
+        const { data: newResume, error } = await supabase
+          .from('resumes')
+          .insert({
+            title: values.resumeName,
+            content: resumeContent,
+            template: 'modern',
+            user_id: session.user.id,
+            settings: {
+              fontFamily: "Inter",
+              fontSize: 10,
+              primaryColor: "#9b87f5",
+              secondaryColor: "#6E59A5",
+              accentColor: "#D6BCFA",
+              paperSize: "a4",
+              margins: "normal"
+            }
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        
+        resume = newResume;
+      }
 
       setIsLoading(false);
       onOpenChange(false);
@@ -314,6 +356,76 @@ const CreateResumeDialog = ({ open, onOpenChange, onResumeCreated }: CreateResum
                   )}
                 />
               </div>
+            </div>
+            
+            <div className="space-y-4 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-200 dark:border-slate-800">
+              <FormField
+                control={form.control}
+                name="useAI"
+                render={({ field }) => (
+                  <FormItem className="flex items-center gap-2 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="flex items-center gap-1.5">
+                      <Sparkles className="h-4 w-4 text-resume-purple" />
+                      <FormLabel className="text-sm font-medium leading-none">
+                        Enhance with AI
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              {useAI && (
+                <FormField
+                  control={form.control}
+                  name="enhancementLevel"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>Enhancement Level</FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className="flex flex-col space-y-1"
+                        >
+                          <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="basic" />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              Basic - Structure and format LinkedIn data
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="standard" />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              Standard - Add professional summary and enhance descriptions
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="professional" />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              Professional - Comprehensive enhancements with keywords and skills
+                            </FormLabel>
+                          </FormItem>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormDescription>
+                        Select how much AI enhancement to apply to your resume
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
 
             <FormField

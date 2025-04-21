@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +22,39 @@ import AIAssistant from '@/components/resume-builder/AIAssistant';
 import TemplateSelector from '@/components/resume-builder/TemplateSelector';
 import ResumeSettings from '@/components/resume-builder/ResumeSettings';
 import { supabase } from '@/integrations/supabase/client';
+
+interface LinkedInExperience {
+  title?: string;
+  company?: string;
+  location?: string;
+  start_month?: string;
+  start_year?: string;
+  end_month?: string;
+  end_year?: string;
+  is_current?: boolean;
+  description?: string;
+}
+
+interface LinkedInEducation {
+  school?: string;
+  degree?: string;
+  field_of_study?: string;
+  start_month?: string;
+  start_year?: string;
+  end_month?: string;
+  end_year?: string;
+  activities?: string;
+}
+
+interface LinkedInData {
+  full_name?: string;
+  headline?: string;
+  location?: string;
+  linkedin_url?: string;
+  about?: string;
+  experiences?: LinkedInExperience[];
+  educations?: LinkedInEducation[];
+}
 
 const ResumeBuilder = () => {
   const { resumeId } = useParams();
@@ -74,7 +106,6 @@ const ResumeBuilder = () => {
       setIsLoading(true);
       
       try {
-        // Check if user is authenticated
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
           toast({
@@ -96,7 +127,6 @@ const ResumeBuilder = () => {
           return;
         }
         
-        // Fetch resume data from the database
         const { data: resume, error } = await supabase
           .from('resumes')
           .select('*')
@@ -117,14 +147,16 @@ const ResumeBuilder = () => {
           return;
         }
         
-        // Set resume data
         setResumeTitle(resume.title);
-        setResumeData(resume.content || resumeData);
-        setSelectedTemplate(resume.template || "modern");
-        setResumeSettings(resume.settings || resumeSettings);
         
-        // If resume is empty, try to fetch LinkedIn data from user profile
-        if (!resume.content.personal.name) {
+        const content = typeof resume.content === 'object' ? resume.content : resumeData;
+        const settings = typeof resume.settings === 'object' ? resume.settings : resumeSettings;
+        
+        setResumeData(content);
+        setSelectedTemplate(resume.template || "modern");
+        setResumeSettings(settings);
+        
+        if (!content.personal.name) {
           const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('linkedin_data')
@@ -132,11 +164,9 @@ const ResumeBuilder = () => {
             .single();
             
           if (!profileError && profile?.linkedin_data) {
-            // Use LinkedIn data to populate the resume
-            const linkedinData = profile.linkedin_data;
+            const linkedinData = profile.linkedin_data as LinkedInData;
             
-            // Update personal info
-            if (linkedinData.full_name) {
+            if (linkedinData?.full_name) {
               setResumeData(prev => ({
                 ...prev,
                 personal: {
@@ -149,17 +179,15 @@ const ResumeBuilder = () => {
               }));
             }
             
-            // Update summary
-            if (linkedinData.about) {
+            if (linkedinData?.about) {
               setResumeData(prev => ({
                 ...prev,
                 summary: linkedinData.about || prev.summary
               }));
             }
             
-            // Update experience
-            if (linkedinData.experiences && linkedinData.experiences.length > 0) {
-              const formattedExperiences = linkedinData.experiences.map((exp: any, index: number) => ({
+            if (linkedinData?.experiences && Array.isArray(linkedinData.experiences) && linkedinData.experiences.length > 0) {
+              const formattedExperiences = linkedinData.experiences.map((exp: LinkedInExperience, index: number) => ({
                 id: `exp-${index}`,
                 title: exp.title || '',
                 company: exp.company || '',
@@ -175,9 +203,8 @@ const ResumeBuilder = () => {
               }));
             }
             
-            // Update education
-            if (linkedinData.educations && linkedinData.educations.length > 0) {
-              const formattedEducation = linkedinData.educations.map((edu: any, index: number) => ({
+            if (linkedinData?.educations && Array.isArray(linkedinData.educations) && linkedinData.educations.length > 0) {
+              const formattedEducation = linkedinData.educations.map((edu: LinkedInEducation, index: number) => ({
                 id: `edu-${index}`,
                 institution: edu.school || '',
                 degree: edu.degree || '',
@@ -195,7 +222,7 @@ const ResumeBuilder = () => {
           }
         }
         
-        setProgress(calculateProgress(resume.content));
+        setProgress(calculateProgress(content));
         setIsLoading(false);
         
         toast({
@@ -221,32 +248,27 @@ const ResumeBuilder = () => {
     let progress = 0;
     let total = 0;
     
-    // Check personal info
     if (content.personal) {
       const personalFields = Object.values(content.personal).filter(val => val !== '').length;
       progress += personalFields;
       total += Object.keys(content.personal).length;
     }
     
-    // Check summary
     if (content.summary) {
       progress += 1;
     }
     total += 1;
     
-    // Check experience
     if (content.experience && content.experience.length > 0) {
       progress += 1;
     }
     total += 1;
     
-    // Check education
     if (content.education && content.education.length > 0) {
       progress += 1;
     }
     total += 1;
     
-    // Check skills
     if (content.skills && (content.skills.technical.length > 0 || content.skills.soft.length > 0)) {
       progress += 1;
     }
@@ -307,7 +329,6 @@ const ResumeBuilder = () => {
       [section]: data
     }));
     
-    // Update progress
     setProgress(calculateProgress({
       ...resumeData,
       [section]: data
@@ -364,7 +385,6 @@ const ResumeBuilder = () => {
     }
   };
 
-  // Render the appropriate form based on active section
   const renderActiveForm = () => {
     switch (activeSection) {
       case "personal":
