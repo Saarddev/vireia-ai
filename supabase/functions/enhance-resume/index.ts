@@ -64,25 +64,32 @@ serve(async (req) => {
 // Generate a tailored prompt for Gemini based on LinkedIn data and resume template
 function generatePrompt(linkedinData: any, template: string = 'modern') {
   return `
-Imagine you are an empathetic storyteller and world-class resume writer. 
-Your task is to create a spectacular, deeply human, and vividly 'alive' resume truly resonating with the soul and aspirations behind the following LinkedIn profile data.
-Express the unique strengths, dreams, and character elements you sense from this data. 
-Write as if you understand how this person wishes to be seen, making every section glow with personality and purpose — much more than a flat summary of achievements.
+You are an expert resume writer and career coach.
 
-LinkedIn Profile Data:
-${JSON.stringify(linkedinData, null, 2)}
+Your mission: using the provided LinkedIn profile data, generate a clean, simple, ATS-optimized resume that is concise, direct, and achievement-oriented.
+Avoid any overly vivid, flowery, or excessively “human” descriptions—keep language professional, clear, and to the point.
 
-Guidelines:
-1. Craft a powerful, evocative professional summary that celebrates the person's deepest qualities and career journey.
-2. For experience, amplify each role's impact — frame every job as a story, not just a list.
-3. Format education beautifully and connect it to their growth and passion.
-4. Detect and categorize both technical and soft skills with attention to the applicant's individuality.
-5. Include languages, certifications, and anything else that shows holistic potential.
-6. The final resume must use expressive, sophisticated and motivating language.
-7. Follow the ${template} style format, but always prioritize vivid, human storytelling.
-8. Strictly return only valid JSON as per this exact structure, nothing more and nothing less.
+Here are key takeaways and areas to focus on:
 
-Resume Structure Example (format your response as JSON exactly in this structure):
+Overall Strengths:
+- Strong Technical Skills: Proficient in programming languages, databases, frameworks, cloud technologies.
+- Significant Experience: Solid history as a Software Engineer at reputable companies.
+- Quantifiable Achievements: Highlight measurable results and impact.
+- Breadth of Experience: Includes front-end, back-end, full-stack, microservices, and game development.
+- Education and Mentorship: Strong academic background, mentoring experience.
+
+Key Generation Guidelines:
+1. Summarize strengths and experience precisely. Avoid excessive adjectives. No poetic/“vivid” language.
+2. Focus on integrating skills straight into achievements and experience (ex: “Developed microservices in C#...”).
+3. Quantify results wherever possible (e.g. “Reduced cloud costs by 15%”).
+4. Use strong action verbs and avoid passive language.
+5. Use clear, brief phrases. No fluff.
+6. Optimize for ATS: clean structure, standard fonts, no tables, no images, no graphics.
+7. Ensure each section is relevant, formatted for easy scanning.
+8. Only output a valid JSON resume as shown. Nothing else.
+
+Resume Structure (output exactly this JSON shape, strictly and only JSON):
+
 {
   "personal": {
     "name": "",
@@ -124,6 +131,9 @@ Resume Structure Example (format your response as JSON exactly in this structure
   "certifications": [],
   "projects": []
 }
+
+LinkedIn Profile Data:
+${JSON.stringify(linkedinData, null, 2)}
 `;
 }
 
