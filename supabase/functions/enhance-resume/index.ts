@@ -10,22 +10,25 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { linkedinData, resumeTemplate } = await req.json();
+    const { type, linkedinData, resumeTemplate, experience, skills, description } = await req.json();
     
-    if (!linkedinData) {
-      throw new Error('LinkedIn data is required');
+    let prompt = "";
+    
+    if (type === "summary") {
+      prompt = generateSummaryPrompt(experience, skills);
+    } else if (type === "skills") {
+      prompt = generateSkillsPrompt(experience);
+    } else if (type === "improve") {
+      prompt = generateImprovementPrompt(description);
+    } else {
+      prompt = generateFullResumePrompt(linkedinData, resumeTemplate);
     }
 
-    // Generate a prompt based on the LinkedIn data
-    const prompt = generatePrompt(linkedinData, resumeTemplate);
-
-    // Call the Gemini API
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
@@ -44,16 +47,13 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const enhancedResume = parseGeminiResponse(data);
+    const result = parseGeminiResponse(data, type);
     
-    return new Response(JSON.stringify({ 
-      enhancedResume,
-      originalPrompt: prompt 
-    }), {
+    return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error enhancing resume:', error);
+    console.error('Error:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -61,35 +61,68 @@ serve(async (req) => {
   }
 });
 
-// Generate a tailored prompt for Gemini based on LinkedIn data and resume template
-function generatePrompt(linkedinData: any, template: string = 'modern') {
+function generateSummaryPrompt(experience: string[], skills: string[]) {
   return `
-You are an expert resume writer and career coach.
+Generate a concise, professional summary that highlights key achievements and skills. Focus on:
+1. Keep it under 3-4 sentences
+2. Highlight quantifiable achievements
+3. Emphasize relevant skills
+4. Use clear, direct language
+5. Focus on impact and results
 
-Your mission: using the provided LinkedIn profile data, generate a clean, simple, ATS-optimized resume that is concise, direct, and achievement-oriented.
-Avoid any overly vivid, flowery, or excessively “human” descriptions—keep language professional, clear, and to the point.
+Experience context:
+${experience.join('\n')}
 
-Here are key takeaways and areas to focus on:
+Skills context:
+${skills.join(', ')}
 
-Overall Strengths:
-- Strong Technical Skills: Proficient in programming languages, databases, frameworks, cloud technologies.
-- Significant Experience: Solid history as a Software Engineer at reputable companies.
-- Quantifiable Achievements: Highlight measurable results and impact.
-- Breadth of Experience: Includes front-end, back-end, full-stack, microservices, and game development.
-- Education and Mentorship: Strong academic background, mentoring experience.
+Return only the summary text.`;
+}
 
-Key Generation Guidelines:
-1. Summarize strengths and experience precisely. Avoid excessive adjectives. No poetic/“vivid” language.
-2. Focus on integrating skills straight into achievements and experience (ex: “Developed microservices in C#...”).
-3. Quantify results wherever possible (e.g. “Reduced cloud costs by 15%”).
-4. Use strong action verbs and avoid passive language.
-5. Use clear, brief phrases. No fluff.
-6. Optimize for ATS: clean structure, standard fonts, no tables, no images, no graphics.
-7. Ensure each section is relevant, formatted for easy scanning.
-8. Only output a valid JSON resume as shown. Nothing else.
+function generateSkillsPrompt(experience: string[]) {
+  return `
+Extract technical and soft skills from the following experience:
 
-Resume Structure (output exactly this JSON shape, strictly and only JSON):
+${experience.join('\n')}
 
+Return as JSON in this format:
+{
+  "technical": ["skill1", "skill2"],
+  "soft": ["skill1", "skill2"]
+}`;
+}
+
+function generateImprovementPrompt(description: string) {
+  return `
+Improve this job description to be more impactful and achievement-oriented. Focus on:
+1. Use strong action verbs
+2. Add metrics where possible
+3. Highlight key achievements
+4. Keep it concise
+5. Focus on results and impact
+
+Original description:
+${description}
+
+Return only the improved description.`;
+}
+
+function generateFullResumePrompt(linkedinData: any, template: string = 'modern') {
+  return `
+You are an expert resume writer.
+
+Key Guidelines:
+1. Summarize strengths precisely
+2. Integrate skills into experience
+3. Quantify achievements
+4. Use clear, direct language
+5. Keep formatting ATS-friendly
+6. Focus on impact and results
+
+LinkedIn Data:
+${JSON.stringify(linkedinData, null, 2)}
+
+Return only a valid JSON resume:
 {
   "personal": {
     "name": "",
@@ -130,33 +163,34 @@ Resume Structure (output exactly this JSON shape, strictly and only JSON):
   "languages": [],
   "certifications": [],
   "projects": []
+}`;
 }
 
-LinkedIn Profile Data:
-${JSON.stringify(linkedinData, null, 2)}
-`;
-}
-
-// Parse the Gemini response and extract the JSON resume data
-function parseGeminiResponse(response: any): any {
+function parseGeminiResponse(response: any, type: string) {
+  const text = response.candidates[0].content.parts[0].text;
+  
   try {
-    // Get the text from Gemini's response
-    const text = response.candidates[0].content.parts[0].text;
-    
-    // Find JSON in the response (it might be embedded in explanatory text)
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    
-    if (jsonMatch) {
-      // Parse the JSON from the matched text
-      return JSON.parse(jsonMatch[0]);
+    if (type === "summary" || type === "improve") {
+      return { [type === "summary" ? "summary" : "improved"]: text.trim() };
     }
     
-    // If no JSON object was found, try to parse the entire response
-    return JSON.parse(text);
+    if (type === "skills") {
+      const skillsMatch = text.match(/\{[\s\S]*\}/);
+      if (skillsMatch) {
+        return JSON.parse(skillsMatch[0]);
+      }
+      throw new Error('No valid JSON found in skills response');
+    }
+    
+    // For full resume
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return { enhancedResume: JSON.parse(jsonMatch[0]) };
+    }
+    
+    throw new Error('No valid JSON found in response');
   } catch (error) {
     console.error('Error parsing Gemini response:', error);
-    
-    // Return a simplified error message
-    throw new Error('Failed to parse the AI-generated resume data');
+    throw new Error('Failed to parse the AI-generated data');
   }
 }

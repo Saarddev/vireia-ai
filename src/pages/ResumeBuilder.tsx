@@ -1,15 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useToast } from "@/hooks/use-toast";
-import { Card } from "@/components/ui/card";
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarInset,
-} from "@/components/ui/sidebar";
-
+import { SidebarProvider, Sidebar, SidebarInset } from "@/components/ui/sidebar";
+import { Card } from "@/components/ui/card";
 import BuilderHeader from '@/components/resume-builder/BuilderHeader';
 import BuilderSidebar from '@/components/resume-builder/BuilderSidebar';
 import AISuggestion from '@/components/resume-builder/AISuggestion';
@@ -22,372 +16,39 @@ import SummaryForm from '@/components/resume-builder/SummaryForm';
 import AIAssistant from '@/components/resume-builder/AIAssistant';
 import TemplateSelector from '@/components/resume-builder/TemplateSelector';
 import ResumeSettings from '@/components/resume-builder/ResumeSettings';
-import { supabase } from '@/integrations/supabase/client';
-
-interface LinkedInExperience {
-  title?: string;
-  company?: string;
-  location?: string;
-  start_month?: string;
-  start_year?: string;
-  end_month?: string;
-  end_year?: string;
-  is_current?: boolean;
-  description?: string;
-}
-
-interface LinkedInEducation {
-  school?: string;
-  degree?: string;
-  field_of_study?: string;
-  start_month?: string;
-  start_year?: string;
-  end_month?: string;
-  end_year?: string;
-  activities?: string;
-}
-
-interface LinkedInData {
-  full_name?: string;
-  headline?: string;
-  location?: string;
-  linkedin_url?: string;
-  about?: string;
-  experiences?: LinkedInExperience[];
-  educations?: LinkedInEducation[];
-}
+import { useResumeData } from '@/hooks/use-resume-data';
+import { useResumeAI } from '@/hooks/use-resume-ai';
 
 const ResumeBuilder = () => {
   const { resumeId } = useParams();
-  const { toast } = useToast();
-  const navigate = useNavigate();
   const { isMobile } = useIsMobile();
   const [activeSection, setActiveSection] = useState("personal");
-  const [resumeData, setResumeData] = useState({
-    personal: {
-      name: "",
-      title: "",
-      email: "",
-      phone: "",
-      location: "",
-      linkedin: "",
-      website: ""
-    },
-    summary: "",
-    experience: [],
-    education: [],
-    skills: {
-      technical: [],
-      soft: []
-    },
-    languages: [],
-    certifications: [],
-    projects: []
-  });
   const [aiEnabled, setAiEnabled] = useState(true);
-  const [aiGenerating, setAiGenerating] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState("modern");
-  const [resumeSettings, setResumeSettings] = useState({
-    fontFamily: "Inter",
-    fontSize: 10,
-    primaryColor: "#9b87f5",
-    secondaryColor: "#6E59A5",
-    accentColor: "#D6BCFA",
-    paperSize: "a4",
-    margins: "normal"
-  });
-  const [isSaving, setIsSaving] = useState(false);
-  const [progress, setProgress] = useState(20);
   const [aiSuggestion, setAiSuggestion] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [resumeTitle, setResumeTitle] = useState("");
 
-  useEffect(() => {
-    const fetchResumeData = async () => {
-      setIsLoading(true);
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          toast({
-            title: "Authentication required",
-            description: "Please sign in to create or edit resumes",
-            variant: "destructive",
-          });
-          navigate('/sign-in');
-          return;
-        }
-        if (!resumeId) {
-          toast({
-            title: "Error",
-            description: "Resume ID is required",
-            variant: "destructive",
-          });
-          navigate('/resume');
-          return;
-        }
-        const { data: resume, error } = await supabase
-          .from('resumes')
-          .select('*')
-          .eq('id', resumeId)
-          .single();
-        if (error) throw error;
-        if (!resume) {
-          toast({
-            title: "Resume not found",
-            description: "The requested resume could not be found",
-            variant: "destructive",
-          });
-          navigate('/resume');
-          return;
-        }
-        setResumeTitle(resume.title);
+  const {
+    isLoading,
+    resumeData,
+    setResumeData,
+    resumeTitle,
+    selectedTemplate,
+    setSelectedTemplate,
+    resumeSettings,
+    setResumeSettings,
+    calculateProgress,
+    handleSave
+  } = useResumeData(resumeId);
 
-        // --- PATCH/FIX: parse content and settings only if they are valid objects ---
-        let content: typeof resumeData;
-        try {
-          if (typeof resume.content === "string") {
-            content = JSON.parse(resume.content);
-          } else if (typeof resume.content === "object" && resume.content !== null && !Array.isArray(resume.content)) {
-            content = resume.content as typeof resumeData;
-          } else {
-            content = { ...resumeData };
-          }
-        } catch (e) {
-          content = { ...resumeData };
-        }
-        // Patch missing subfields
-        content = {
-          personal: {
-            name: content.personal?.name || "",
-            title: content.personal?.title || "",
-            email: content.personal?.email || "",
-            phone: content.personal?.phone || "",
-            location: content.personal?.location || "",
-            linkedin: content.personal?.linkedin || "",
-            website: content.personal?.website || ""
-          },
-          summary: content.summary || "",
-          experience: Array.isArray(content.experience) ? content.experience : [],
-          education: Array.isArray(content.education) ? content.education : [],
-          skills: {
-            technical: (content.skills && Array.isArray(content.skills.technical)) ? content.skills.technical : [],
-            soft: (content.skills && Array.isArray(content.skills.soft)) ? content.skills.soft : []
-          },
-          languages: Array.isArray(content.languages) ? content.languages : [],
-          certifications: Array.isArray(content.certifications) ? content.certifications : [],
-          projects: Array.isArray(content.projects) ? content.projects : []
-        };
-        setResumeData(content);
-
-        let settings: typeof resumeSettings;
-        try {
-          if (typeof resume.settings === "string") {
-            settings = JSON.parse(resume.settings);
-          } else if (typeof resume.settings === "object" && resume.settings !== null && !Array.isArray(resume.settings)) {
-            settings = resume.settings as typeof resumeSettings;
-          } else {
-            settings = { ...resumeSettings };
-          }
-        } catch (e) {
-          settings = { ...resumeSettings };
-        }
-        settings = {
-          fontFamily: settings.fontFamily || "Inter",
-          fontSize: settings.fontSize || 10,
-          primaryColor: settings.primaryColor || "#9b87f5",
-          secondaryColor: settings.secondaryColor || "#6E59A5",
-          accentColor: settings.accentColor || "#D6BCFA",
-          paperSize: settings.paperSize || "a4",
-          margins: settings.margins || "normal"
-        };
-        setResumeSettings(settings);
-        setSelectedTemplate(resume.template || "modern");
-
-        // Fix: LinkedIn data must be an object. Defensive parse if string.
-        if (
-          (!content.personal.name || !content.summary) && 
-          session.user &&
-          resume.user_id === session.user.id
-        ) {
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('linkedin_data')
-            .eq('id', session.user.id)
-            .single();
-
-          // Extra check: parse stringified linkedin_data if necessary
-          let linkedinData: LinkedInData | null = null;
-          if (!profileError && profile?.linkedin_data) {
-            if (typeof profile.linkedin_data === "string") {
-              try {
-                linkedinData = JSON.parse(profile.linkedin_data);
-              } catch {
-                linkedinData = null;
-              }
-            } else if (typeof profile.linkedin_data === "object" && profile.linkedin_data !== null) {
-              linkedinData = profile.linkedin_data;
-            }
-          }
-
-          if (linkedinData?.full_name) {
-            setResumeData(prev => ({
-              ...prev,
-              personal: {
-                ...prev.personal,
-                name: linkedinData!.full_name || prev.personal.name,
-                title: linkedinData!.headline || prev.personal.title,
-                location: linkedinData!.location || prev.personal.location,
-                linkedin: linkedinData!.linkedin_url || prev.personal.linkedin
-              }
-            }));
-          }
-          if (linkedinData?.about) {
-            setResumeData(prev => ({
-              ...prev,
-              summary: linkedinData!.about || prev.summary
-            }));
-          }
-          if (linkedinData?.experiences && Array.isArray(linkedinData.experiences) && linkedinData.experiences.length > 0) {
-            const formattedExperiences = linkedinData.experiences.map((exp: any, index: number) => ({
-              id: `exp-${index}`,
-              title: exp.title || "",
-              company: exp.company || "",
-              location: exp.location || "",
-              startDate: `${exp.start_month || ""} ${exp.start_year || ""}`.trim(),
-              endDate: exp.is_current ? "Present" : `${exp.end_month || ""} ${exp.end_year || ""}`.trim(),
-              description: exp.description || ""
-            }));
-            setResumeData(prev => ({
-              ...prev,
-              experience: formattedExperiences
-            }));
-          }
-          if (linkedinData?.educations && Array.isArray(linkedinData.educations) && linkedinData.educations.length > 0) {
-            const formattedEducation = linkedinData.educations.map((edu: any, index: number) => ({
-              id: `edu-${index}`,
-              institution: edu.school || "",
-              degree: edu.degree || "",
-              field: edu.field_of_study || "",
-              startDate: `${edu.start_month || ""} ${edu.start_year || ""}`.trim(),
-              endDate: `${edu.end_month || ""} ${edu.end_year || ""}`.trim(),
-              description: edu.activities || ""
-            }));
-            setResumeData(prev => ({
-              ...prev,
-              education: formattedEducation
-            }));
-          }
-        }
-
-        setProgress(calculateProgress(content));
-        setIsLoading(false);
-        toast({
-          title: "Resume loaded",
-          description: "Start building your resume. AI has pre-filled your details."
-        });
-
-      } catch (error) {
-        console.error('Error loading resume:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load resume data. Please try again.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        navigate('/resume');
-      }
-    };
-
-    fetchResumeData();
-  }, [resumeId, toast, navigate]);
-
-  const calculateProgress = (content: any) => {
-    let progress = 0;
-    let total = 0;
-    
-    if (content.personal) {
-      const personalFields = Object.values(content.personal).filter(val => val !== '').length;
-      progress += personalFields;
-      total += Object.keys(content.personal).length;
-    }
-    
-    if (content.summary) {
-      progress += 1;
-    }
-    total += 1;
-    
-    if (content.experience && content.experience.length > 0) {
-      progress += 1;
-    }
-    total += 1;
-    
-    if (content.education && content.education.length > 0) {
-      progress += 1;
-    }
-    total += 1;
-    
-    if (content.skills && (content.skills.technical.length > 0 || content.skills.soft.length > 0)) {
-      progress += 1;
-    }
-    total += 1;
-    
-    return Math.round((progress / total) * 100);
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    
-    try {
-      const { error } = await supabase
-        .from('resumes')
-        .update({
-          content: resumeData,
-          template: selectedTemplate,
-          settings: resumeSettings,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', resumeId);
-        
-      if (error) throw error;
-      
-      toast({
-        title: "Resume saved",
-        description: "Your resume has been successfully saved."
-      });
-    } catch (error) {
-      console.error('Error saving resume:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save resume. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleDownload = () => {
-    toast({
-      title: "Resume downloaded",
-      description: "Your resume has been downloaded as PDF."
-    });
-  };
-
-  const handleShare = () => {
-    toast({
-      title: "Share link created",
-      description: "A shareable link has been copied to your clipboard."
-    });
-  };
+  const {
+    isGenerating: aiGenerating,
+    generateSummary,
+    extractSkills,
+    improveDescription
+  } = useResumeAI();
 
   const handleDataChange = (section: string, data: any) => {
     setResumeData(prev => ({
       ...prev,
-      [section]: data
-    }));
-    
-    setProgress(calculateProgress({
-      ...resumeData,
       [section]: data
     }));
   };
@@ -401,27 +62,6 @@ const ResumeBuilder = () => {
 
   const handleAIToggle = (enabled: boolean) => {
     setAiEnabled(enabled);
-    toast({
-      title: enabled ? "AI Assistant enabled" : "AI Assistant disabled",
-      description: enabled ? "AI will now suggest improvements to your resume." : "AI suggestions have been turned off."
-    });
-  };
-
-  const generateWithAI = () => {
-    setAiGenerating(true);
-    
-    setTimeout(() => {
-      setAiGenerating(false);
-      setAiSuggestion({
-        type: "improvement",
-        section: "summary",
-        content: "Consider highlighting your experience with cloud technologies and microservices architecture to make your profile more appealing to modern tech companies."
-      });
-      toast({
-        title: "AI Generation Complete",
-        description: "Your resume has been enhanced by our AI assistant."
-      });
-    }, 2500);
   };
 
   const dismissAiSuggestion = () => {
@@ -431,29 +71,60 @@ const ResumeBuilder = () => {
   const applyAiSuggestion = () => {
     if (aiSuggestion) {
       if (aiSuggestion.section === "summary") {
-        const enhancedSummary = resumeData.summary + " " + aiSuggestion.content;
-        handleDataChange("summary", enhancedSummary);
+        handleDataChange("summary", aiSuggestion.content);
       }
       setAiSuggestion(null);
-      toast({
-        title: "AI Suggestion Applied",
-        description: "The suggestion has been applied to your resume."
-      });
     }
   };
 
   const renderActiveForm = () => {
+    const formProps = {
+      data: resumeData[activeSection],
+      onChange: (data: any) => handleDataChange(activeSection, data),
+      onGenerateWithAI: async (text: string) => {
+        const improved = await improveDescription(text);
+        if (improved) {
+          return improved;
+        }
+      }
+    };
+
     switch (activeSection) {
       case "personal":
-        return <PersonalInfoForm data={resumeData.personal} onChange={(data) => handleDataChange("personal", data)} />;
+        return <PersonalInfoForm {...formProps} />;
       case "summary":
-        return <SummaryForm data={resumeData.summary} onChange={(data) => handleDataChange("summary", data)} />;
+        return (
+          <SummaryForm 
+            {...formProps}
+            onGenerateWithAI={async () => {
+              const summary = await generateSummary(
+                resumeData.experience.map(exp => exp.description),
+                [...resumeData.skills.technical, ...resumeData.skills.soft]
+              );
+              if (summary) {
+                handleDataChange("summary", summary);
+              }
+            }}
+          />
+        );
       case "experience":
-        return <ExperienceForm data={resumeData.experience} onChange={(data) => handleDataChange("experience", data)} />;
+        return <ExperienceForm {...formProps} />;
       case "education":
-        return <EducationForm data={resumeData.education} onChange={(data) => handleDataChange("education", data)} />;
+        return <EducationForm {...formProps} />;
       case "skills":
-        return <SkillsForm data={resumeData.skills} onChange={(data) => handleDataChange("skills", data)} />;
+        return (
+          <SkillsForm 
+            {...formProps}
+            onExtractSkills={async () => {
+              const skills = await extractSkills(
+                resumeData.experience.map(exp => exp.description)
+              );
+              if (skills) {
+                handleDataChange("skills", skills);
+              }
+            }}
+          />
+        );
       case "templates":
         return <TemplateSelector selectedTemplate={selectedTemplate} onSelect={setSelectedTemplate} />;
       case "settings":
@@ -461,7 +132,7 @@ const ResumeBuilder = () => {
       case "ai":
         return <AIAssistant resumeData={resumeData} enabled={aiEnabled} />;
       default:
-        return <PersonalInfoForm data={resumeData.personal} onChange={(data) => handleDataChange("personal", data)} />;
+        return <PersonalInfoForm {...formProps} />;
     }
   };
 
@@ -470,23 +141,20 @@ const ResumeBuilder = () => {
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50/80 via-background to-purple-50/60 dark:from-gray-900/90 dark:via-gray-900/50 dark:to-gray-900/90">
         <BuilderHeader 
           name={resumeTitle || resumeData.personal.name || "New Resume"}
-          isSaving={isSaving}
+          isSaving={false}
           aiEnabled={aiEnabled}
           onSave={handleSave}
-          onDownload={handleDownload}
-          onShare={handleShare}
           onAIToggle={handleAIToggle}
         />
 
         <div className="flex-1 flex">
           <Sidebar side="left" variant="floating" collapsible="icon">
             <BuilderSidebar 
-              progress={progress}
+              progress={calculateProgress(resumeData)}
               activeSection={activeSection}
               aiEnabled={aiEnabled}
               aiGenerating={aiGenerating}
               onSectionChange={setActiveSection}
-              onGenerateWithAI={generateWithAI}
             />
           </Sidebar>
 
@@ -531,4 +199,5 @@ const ResumeBuilder = () => {
     </SidebarProvider>
   );
 };
+
 export default ResumeBuilder;
