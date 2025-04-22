@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Form,
@@ -40,30 +41,6 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
     onChange(formData.summary);
   };
 
-  const handleExplain = () => {
-    toast({
-      title: "Professional Summary",
-      description: "This section gives recruiters a quick overview of your skills and experience. Keep it concise and impactful.",
-    });
-  };
-
-  const handleAskAI = () => {
-    onGenerateWithAI();
-  };
-
-  const handleComment = () => {
-    toast({
-      description: "Comments feature coming soon!",
-    });
-  };
-
-  const handleIntroduction = () => {
-    toast({
-      title: "Writing Tips",
-      description: "Start with your professional identity, highlight key achievements, and end with your career goals.",
-    });
-  };
-
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4 flex items-center">
@@ -86,7 +63,10 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
               size="sm" 
               variant="outline" 
               className="mt-2 border-resume-purple text-resume-purple hover:bg-resume-purple hover:text-white transition-all duration-300"
-              onClick={onGenerateWithAI}
+              onClick={(e) => {
+                e.preventDefault();
+                onGenerateWithAI();
+              }}
               disabled={isGenerating}
             >
               {isGenerating ? (
@@ -118,10 +98,12 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
                   onMouseEnter={() => setShowToolkit(true)}
                   onMouseLeave={() => setShowToolkit(false)}
                 >
-                  <div className={`absolute -top-12 right-0 z-10 transform transition-all duration-300 ease-out ${showToolkit ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0 pointer-events-none'}`}>
+                  <div className={`absolute -top-12 right-0 z-10 transform transition-opacity transition-transform duration-300 ease-out ${showToolkit ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
                     <AIHoverToolkit 
-                      onComplete={onGenerateWithAI}
-                      onAddChanges={() => {
+                      onComplete={(e) => {
+                        onGenerateWithAI();
+                      }}
+                      onAddChanges={(e) => {
                         const currentText = form.getValues("summary");
                         form.setValue("summary", currentText + "\n");
                       }}
@@ -152,7 +134,10 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
               type="button" 
               variant="outline"
               size="sm"
-              onClick={() => form.reset({ summary: "" })}
+              onClick={(e) => {
+                e.preventDefault();
+                form.reset({ summary: "" });
+              }}
               className="text-resume-gray hover:text-resume-purple"
             >
               Clear
@@ -160,16 +145,6 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
           </div>
         </form>
       </Form>
-
-      <div className="mt-6">
-        <h3 className="text-sm font-medium mb-2">Writing Tips:</h3>
-        <ul className="list-disc list-inside text-sm text-resume-gray space-y-1">
-          <li>Start with your professional identity and years of experience</li>
-          <li>Highlight 2-3 key achievements or core skills relevant to the job</li>
-          <li>Mention any specialized knowledge or certifications that set you apart</li>
-          <li>End with your career goals or what you're passionate about</li>
-        </ul>
-      </div>
     </div>
   );
 };
