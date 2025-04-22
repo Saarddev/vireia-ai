@@ -85,7 +85,7 @@ const ResumeBuilder = () => {
     }
   };
 
-  const handleGenerateWithAI = async () => {
+  const handleGenerateWithAI = async (section: string) => {
     if (!aiEnabled) {
       toast({
         title: "AI is disabled",
@@ -96,7 +96,7 @@ const ResumeBuilder = () => {
     }
 
     try {
-      switch (activeSection) {
+      switch (section) {
         case "summary":
           const summary = await generateSummary(
             resumeData.experience.map(exp => exp.description),
@@ -117,7 +117,7 @@ const ResumeBuilder = () => {
         default:
           toast({
             title: "AI Generation",
-            description: `AI generation not available for ${activeSection} section`,
+            description: `AI generation not available for ${section} section`,
           });
       }
     } catch (error) {
@@ -146,13 +146,7 @@ const ResumeBuilder = () => {
             onChange={(data) => handleDataChange("summary", data)}
             isGenerating={isGenerating}
             onGenerateWithAI={async () => {
-              const summary = await generateSummary(
-                resumeData.experience.map(exp => exp.description),
-                [...resumeData.skills.technical, ...resumeData.skills.soft]
-              );
-              if (summary) {
-                handleDataChange("summary", summary);
-              }
+              await handleGenerateWithAI("summary");
             }}
           />
         );
@@ -161,7 +155,7 @@ const ResumeBuilder = () => {
           <ExperienceForm 
             data={resumeData.experience}
             onChange={(data) => handleDataChange("experience", data)}
-            onGenerateWithAI={async (text) => {
+            onGenerateWithAI={async (text: string) => {
               const improved = await improveDescription(text);
               return improved;
             }}
@@ -181,12 +175,7 @@ const ResumeBuilder = () => {
             onChange={(data) => handleDataChange("skills", data)}
             isGenerating={isGenerating}
             onExtractSkills={async () => {
-              const skills = await extractSkills(
-                resumeData.experience.map(exp => exp.description)
-              );
-              if (skills) {
-                handleDataChange("skills", skills);
-              }
+              await handleGenerateWithAI("skills");
             }}
           />
         );
@@ -241,7 +230,7 @@ const ResumeBuilder = () => {
               aiEnabled={aiEnabled}
               aiGenerating={isGenerating}
               onSectionChange={setActiveSection}
-              onGenerateWithAI={handleGenerateWithAI}
+              onGenerateWithAI={() => handleGenerateWithAI(activeSection)}
             />
           </Sidebar>
 
@@ -276,6 +265,8 @@ const ResumeBuilder = () => {
                     data={resumeData} 
                     template={selectedTemplate}
                     settings={resumeSettings}
+                    onDataChange={(section, data) => handleDataChange(section, data)}
+                    onGenerateWithAI={handleGenerateWithAI}
                   />
                 </Card>
               </div>

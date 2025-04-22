@@ -5,21 +5,28 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ModernTemplate from './resume-preview/ModernTemplate';
 import PreviewControls from './resume-preview/PreviewControls';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Eye, Edit } from 'lucide-react';
 
 interface ResumePreviewProps {
   data: any;
   template: string;
   settings?: any;
+  onDataChange?: (section: string, data: any) => void;
+  onGenerateWithAI?: (section: string) => Promise<void>;
 }
 
 const ResumePreview: React.FC<ResumePreviewProps> = ({ 
   data, 
   template, 
-  settings = {}
+  settings = {},
+  onDataChange,
+  onGenerateWithAI
 }) => {
   const { isMobile } = useIsMobile();
   const [zoomLevel, setZoomLevel] = useState(1);
   const resumeContentRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState<string>("view");
 
   const handleDownloadPDF = () => {
     const printWindow = window.open('', '_blank');
@@ -93,7 +100,13 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
   const ResumeContent = () => (
     <div ref={resumeContentRef}>
       {template === 'modern' ? (
-        <ModernTemplate data={data} settings={settings} />
+        <ModernTemplate 
+          data={data} 
+          settings={settings} 
+          isEditable={activeTab === "edit"} 
+          onUpdateData={onDataChange}
+          onGenerateWithAI={onGenerateWithAI}
+        />
       ) : (
         <div className="h-full flex items-center justify-center">
           <p className="text-gray-500">{template.charAt(0).toUpperCase() + template.slice(1)} template preview</p>
@@ -114,6 +127,21 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
       </PreviewControls>
 
       <div className="flex-1 overflow-auto relative bg-gray-50 dark:bg-gray-800/30 rounded-xl p-4">
+        <div className="mb-4 mx-auto" style={{ maxWidth: '720px' }}>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-[200px] grid-cols-2">
+              <TabsTrigger value="view" className="flex items-center gap-1">
+                <Eye className="h-4 w-4" />
+                <span>View</span>
+              </TabsTrigger>
+              <TabsTrigger value="edit" className="flex items-center gap-1">
+                <Edit className="h-4 w-4" />
+                <span>Edit</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        
         <Card className={cn(
           "resume-content bg-white rounded-lg shadow-lg p-0 transition-all duration-200 mx-auto",
           "hover:shadow-xl"

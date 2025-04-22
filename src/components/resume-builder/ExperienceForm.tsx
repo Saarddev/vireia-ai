@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Form,
@@ -9,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Briefcase, Plus, Trash2, GripVertical, ArrowUpDown, CalendarIcon, Wand2 } from 'lucide-react';
+import { Briefcase, Plus, Trash2, GripVertical, ArrowUpDown, CalendarIcon, Wand2, Loader } from 'lucide-react';
 import { useForm } from "react-hook-form";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -22,6 +23,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { v4 as uuidv4 } from 'uuid';
+import AIHoverToolkit from "@/components/AIHoverToolkit";
 
 interface Experience {
   id: string;
@@ -37,12 +39,16 @@ interface Experience {
 interface ExperienceFormProps {
   data: Experience[];
   onChange: (data: Experience[]) => void;
+  onGenerateWithAI?: (text: string) => Promise<string | null>;
 }
 
-const ExperienceForm: React.FC<ExperienceFormProps> = ({ data, onChange }) => {
+const ExperienceForm: React.FC<ExperienceFormProps> = ({ data, onChange, onGenerateWithAI }) => {
   const [experiences, setExperiences] = useState<Experience[]>(data);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showToolkit, setShowToolkit] = useState(false);
+  const [activeDescriptionId, setActiveDescriptionId] = useState<string | null>(null);
   
   const form = useForm({
     defaultValues: {
@@ -132,6 +138,28 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ data, onChange }) => {
     
     setExperiences(updatedExperiences);
     onChange(updatedExperiences);
+  };
+
+  const enhanceDescription = async (id: string) => {
+    if (!onGenerateWithAI) return;
+    
+    const exp = experiences.find(e => e.id === id);
+    if (!exp) return;
+    
+    setIsGenerating(true);
+    try {
+      const enhancedDescription = await onGenerateWithAI(exp.description);
+      if (enhancedDescription) {
+        if (editingId === id) {
+          form.setValue("description", enhancedDescription);
+        }
+        editExperience(id, { description: enhancedDescription });
+      }
+    } catch (error) {
+      console.error("Failed to enhance description:", error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -290,35 +318,56 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ data, onChange }) => {
                           name="description"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Description*</FormLabel>
                               <div className="flex justify-between">
                                 <FormLabel>Description*</FormLabel>
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 text-resume-purple">
-                                      <Wand2 className="mr-2 h-3 w-3" /> AI Enhance
-                                    </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent align="end" className="w-80">
-                                    <div className="space-y-4">
-                                      <h4 className="font-medium">Enhance with AI</h4>
-                                      <p className="text-sm text-muted-foreground">
-                                        Use AI to improve your job description with powerful action verbs and quantifiable achievements.
-                                      </p>
-                                      <Button size="sm" className="w-full bg-resume-purple">
-                                        Enhance Description
-                                      </Button>
-                                    </div>
-                                  </PopoverContent>
-                                </Popover>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-8 text-resume-purple"
+                                  onClick={() => enhanceDescription(exp.id)}
+                                  disabled={isGenerating}
+                                >
+                                  {isGenerating ? (
+                                    <>
+                                      <Loader className="mr-2 h-3 w-3 animate-spin" />
+                                      Enhancing...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Wand2 className="mr-2 h-3 w-3" /> 
+                                      Enhance with AI
+                                    </>
+                                  )}
+                                </Button>
                               </div>
-                              <FormControl>
-                                <Textarea 
-                                  placeholder="Describe your responsibilities, achievements, and skills used in this role" 
-                                  className="min-h-[120px]"
-                                  {...field} 
-                                />
-                              </FormControl>
+                              <div 
+                                className="relative"
+                                onMouseEnter={() => {
+                                  setShowToolkit(true);
+                                  setActiveDescriptionId(exp.id);
+                                }}
+                                onMouseLeave={() => {
+                                  setShowToolkit(false);
+                                  setActiveDescriptionId(null);
+                                }}
+                              >
+                                <div className={`absolute -top-12 right-0 z-10 transform transition-opacity transition-transform duration-300 ease-out ${showToolkit && activeDescriptionId === exp.id ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+                                  <AIHoverToolkit 
+                                    onComplete={() => enhanceDescription(exp.id)}
+                                    onAddChanges={() => {
+                                      const currentText = form.getValues("description");
+                                      form.setValue("description", currentText + "\n• ");
+                                    }}
+                                  />
+                                </div>
+                                <FormControl>
+                                  <Textarea 
+                                    placeholder="Describe your responsibilities, achievements, and skills used in this role" 
+                                    className="min-h-[120px]"
+                                    {...field} 
+                                  />
+                                </FormControl>
+                              </div>
                             </FormItem>
                           )}
                         />
@@ -401,8 +450,25 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ data, onChange }) => {
             <p className="text-sm text-gray-500 mt-1">
               Need help crafting compelling job descriptions? Our AI can help you highlight your achievements using strong action verbs and metrics.
             </p>
-            <Button className="mt-2 bg-white text-resume-purple border border-resume-purple hover:bg-resume-purple hover:text-white">
-              <Wand2 className="mr-2 h-4 w-4" /> Generate Description
+            <Button 
+              className="mt-2 bg-white text-resume-purple border border-resume-purple hover:bg-resume-purple hover:text-white"
+              onClick={() => {
+                if (experiences.length > 0 && editingId) {
+                  enhanceDescription(editingId);
+                }
+              }}
+              disabled={isGenerating || !editingId}
+            >
+              {isGenerating ? (
+                <>
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="mr-2 h-4 w-4" /> Generate Description
+                </>
+              )}
             </Button>
           </div>
         </div>

@@ -21,8 +21,7 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
           variant="ghost"
           size="sm"
           className="h-8 px-2.5 text-muted-foreground hover:text-green-600 hover:bg-green-50 flex items-center gap-1.5"
-          onClick={(e) => {
-            e.preventDefault(); // Prevent form submission
+          onClick={() => {
             if (onComplete) onComplete();
           }}
         >
@@ -36,8 +35,7 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
           variant="ghost"
           size="sm"
           className="h-8 px-2.5 text-muted-foreground hover:text-resume-purple hover:bg-purple-50 flex items-center gap-1.5"
-          onClick={(e) => {
-            e.preventDefault(); // Prevent form submission
+          onClick={() => {
             if (onAddChanges) onAddChanges();
           }}
         >

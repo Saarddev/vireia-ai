@@ -63,10 +63,7 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
               size="sm" 
               variant="outline" 
               className="mt-2 border-resume-purple text-resume-purple hover:bg-resume-purple hover:text-white transition-all duration-300"
-              onClick={(e) => {
-                e.preventDefault();
-                onGenerateWithAI();
-              }}
+              onClick={() => onGenerateWithAI()}
               disabled={isGenerating}
             >
               {isGenerating ? (
@@ -100,12 +97,11 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
                 >
                   <div className={`absolute -top-12 right-0 z-10 transform transition-opacity transition-transform duration-300 ease-out ${showToolkit ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
                     <AIHoverToolkit 
-                      onComplete={(e) => {
-                        onGenerateWithAI();
-                      }}
-                      onAddChanges={(e) => {
+                      onComplete={() => onGenerateWithAI()}
+                      onAddChanges={() => {
                         const currentText = form.getValues("summary");
                         form.setValue("summary", currentText + "\n");
+                        onChange(currentText + "\n");
                       }}
                     />
                   </div>
@@ -134,9 +130,9 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
               type="button" 
               variant="outline"
               size="sm"
-              onClick={(e) => {
-                e.preventDefault();
+              onClick={() => {
                 form.reset({ summary: "" });
+                onChange("");
               }}
               className="text-resume-gray hover:text-resume-purple"
             >
