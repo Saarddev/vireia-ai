@@ -10,6 +10,7 @@ interface ModernTemplateProps {
   onGenerateWithAI?: (section: string) => Promise<string>;
 }
 
+// For placeholders in case of empty fields
 const placeholderMap = {
   name: "John Smith",
   title: "Software Engineer",
@@ -67,101 +68,115 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
   return (
     <div
       className={cn(
-        "p-8 font-sans bg-white rounded-[22px] shadow-md max-w-[820px] mx-auto border border-[#ece6fb]",
+        "bg-white rounded-2xl shadow-sm border border-[#ece6fb] max-w-[850px] mx-auto",
+        "transition-all duration-300",
         settings.fontFamily && `font-[${settings.fontFamily}]`,
         settings.fontSize && `text-[${settings.fontSize}pt]`
       )}
+      style={{
+        padding: "2.7rem 2.2rem 2.4rem 2.2rem",
+        boxShadow: "0 4px 44px 0 rgba(155,135,245,0.12)",
+      }}
     >
-      {/* HEADER - Horizontal compact info */}
-      <div className="flex flex-col mb-1 pb-2 border-b border-[#eee]">
-        <div className="flex flex-row items-center w-full gap-6">
-          {/* Name & Title left-aligned */}
-          <div className="flex-1 min-w-0">
-            <EditableField
-              value={data.personal.name}
-              placeholder={placeholderMap.name}
-              className="text-[2.2rem] font-extrabold text-[#1a1f2c] leading-tight pl-1"
-              onSave={(val) => handleFieldUpdate("personal", "name", val)}
-              onGenerateWithAI={wrapAIPromise("personal-name")}
-              minRows={1}
-              maxRows={1}
-            />
-            <EditableField
-              value={data.personal.title}
-              placeholder={placeholderMap.title}
-              className="text-lg font-medium text-[#9b87f5] tracking-wide pl-1 mt-0.5"
-              onSave={(val) => handleFieldUpdate("personal", "title", val)}
-              onGenerateWithAI={wrapAIPromise("personal-title")}
-              minRows={1}
-              maxRows={1}
-            />
-          </div>
-          {/* Main contact */}
-          <div className="shrink-0 flex flex-col items-end gap-0.5 max-w-[350px]">
-            <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[0.98rem] text-gray-600 items-center">
-              <EditableField
-                value={data.personal.email}
-                placeholder={placeholderMap.email}
-                className="inline font-normal"
-                onSave={(val) => handleFieldUpdate("personal", "email", val)}
-                onGenerateWithAI={wrapAIPromise("personal-email")}
-                minRows={1}
-                maxRows={1}
-              />
-              <span className="font-light text-[19px] text-[#e5deff] -mx-0.5">•</span>
-              <EditableField
-                value={data.personal.phone}
-                placeholder={placeholderMap.phone}
-                className="inline font-normal"
-                onSave={(val) => handleFieldUpdate("personal", "phone", val)}
-                onGenerateWithAI={wrapAIPromise("personal-phone")}
-                minRows={1}
-                maxRows={1}
-              />
-            </div>
-            <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[0.98rem] text-gray-600 items-center">
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center border-b border-[#e2e1f9] pb-6 mb-6 gap-1.5 md:gap-0">
+        {/* Name & Title */}
+        <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+          <EditableField
+            value={data.personal.name}
+            placeholder={placeholderMap.name}
+            className="text-[2.15rem] md:text-[2.4rem] font-extrabold text-[#22223B] leading-tight tracking-tight"
+            onSave={(val) => handleFieldUpdate("personal", "name", val)}
+            onGenerateWithAI={wrapAIPromise("personal-name")}
+            minRows={1}
+            maxRows={1}
+          />
+          <EditableField
+            value={data.personal.title}
+            placeholder={placeholderMap.title}
+            className="text-lg font-medium text-[#9b87f5] tracking-wide"
+            onSave={(val) => handleFieldUpdate("personal", "title", val)}
+            onGenerateWithAI={wrapAIPromise("personal-title")}
+            minRows={1}
+            maxRows={1}
+          />
+        </div>
+        {/* Main contact, horizontal layout */}
+        <div className="flex flex-row flex-wrap items-center justify-end gap-5 text-gray-600 mt-2 md:mt-0 ml-0 md:ml-16 min-w-0 max-w-full">
+          <EditableField
+            value={data.personal.email}
+            placeholder={placeholderMap.email}
+            className="inline font-normal text-[0.98rem] min-w-[90px] max-w-[130px] truncate"
+            onSave={(val) => handleFieldUpdate("personal", "email", val)}
+            onGenerateWithAI={wrapAIPromise("personal-email")}
+            minRows={1}
+            maxRows={1}
+          />
+          <span className="h-4 w-[1.2px] bg-[#e2e1f9] rounded block"></span>
+          <EditableField
+            value={data.personal.phone}
+            placeholder={placeholderMap.phone}
+            className="inline font-normal text-[0.98rem] min-w-[70px] max-w-[110px] truncate"
+            onSave={(val) => handleFieldUpdate("personal", "phone", val)}
+            onGenerateWithAI={wrapAIPromise("personal-phone")}
+            minRows={1}
+            maxRows={1}
+          />
+          {data.personal.location && (
+            <>
+              <span className="h-4 w-[1.2px] bg-[#e2e1f9] rounded block"></span>
               <EditableField
                 value={data.personal.location}
                 placeholder={placeholderMap.location}
-                className="inline font-normal"
+                className="inline font-normal text-[0.98rem] min-w-[80px] max-w-[120px] truncate"
                 onSave={(val) => handleFieldUpdate("personal", "location", val)}
                 onGenerateWithAI={wrapAIPromise("personal-location")}
                 minRows={1}
                 maxRows={1}
               />
-              <span className="font-light text-[19px] text-[#e5deff] -mx-0.5">•</span>
+            </>
+          )}
+          {data.personal.linkedin && (
+            <>
+              <span className="h-4 w-[1.2px] bg-[#e2e1f9] rounded block"></span>
               <EditableField
                 value={data.personal.linkedin}
                 placeholder={placeholderMap.linkedin}
-                className="inline font-normal"
+                className="inline font-normal text-[0.98rem] min-w-[90px] max-w-[120px] truncate"
                 onSave={(val) => handleFieldUpdate("personal", "linkedin", val)}
                 onGenerateWithAI={wrapAIPromise("personal-linkedin")}
                 minRows={1}
                 maxRows={1}
               />
-              <span className="font-light text-[19px] text-[#e5deff] -mx-0.5">•</span>
+            </>
+          )}
+          {data.personal.website && (
+            <>
+              <span className="h-4 w-[1.2px] bg-[#e2e1f9] rounded block"></span>
               <EditableField
                 value={data.personal.website}
                 placeholder={placeholderMap.website}
-                className="inline font-normal"
+                className="inline font-normal text-[0.98rem] min-w-[90px] max-w-[120px] truncate"
                 onSave={(val) => handleFieldUpdate("personal", "website", val)}
                 onGenerateWithAI={wrapAIPromise("personal-website")}
                 minRows={1}
                 maxRows={1}
               />
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </div>
 
       {/* SUMMARY */}
-      <div className="mb-3 pt-3 flex flex-col">
-        <span className={secTitle}>Profile</span>
+      <div className="mb-7">
+        <h2 className="text-md font-semibold text-[#9b87f5] mb-1 tracking-wide uppercase leading-none">
+          Summary
+        </h2>
         <EditableField
           value={data.summary}
           placeholder={placeholderMap.summary}
           onSave={(val) => onUpdateData?.("summary", val)}
-          className="text-base text-gray-800 font-[500] py-0.5 pl-0.5"
+          className="text-base text-gray-700 font-[500] tracking-tight"
           onGenerateWithAI={wrapAIPromise("summary")}
           minRows={2}
           maxRows={3}
@@ -169,25 +184,27 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
       </div>
 
       {/* EXPERIENCE */}
-      <div className="mb-3 flex flex-col">
-        <span className={secTitle}>Experience</span>
-        <div className="flex flex-col gap-2">
+      <div className="mb-7">
+        <h2 className="text-md font-semibold text-[#9b87f5] mb-3 tracking-wide uppercase leading-none">
+          Experience
+        </h2>
+        <div className="flex flex-col gap-4">
         {data.experience.map((exp: any, index: number) => (
           <div
             key={exp.id}
-            className="bg-[#f1f0fb] rounded-xl p-4 pb-3 flex flex-col border border-[#ece6fb]"
+            className="bg-[#f1f0fb] rounded-2xl px-4 py-3 border border-[#e2e1f9] flex flex-col"
           >
             <div className="flex flex-row items-center gap-4">
               <EditableField
                 value={exp.title}
                 placeholder={placeholderMap.expTitle}
-                className="font-bold text-[1.08rem] text-[#1a1f2c]"
+                className="font-semibold text-[1.09rem] text-[#1a1f2c] tracking-tight"
                 onSave={(val) => handleNestedFieldUpdate("experience", index, "title", val)}
                 onGenerateWithAI={wrapAIPromise(`experience-title-${index}`)}
                 minRows={1}
                 maxRows={1}
               />
-              <span className="ml-auto text-sm text-gray-500 font-medium min-w-[115px] text-right">
+              <span className="ml-auto text-[0.98rem] text-gray-500 font-medium min-w-[115px] text-right">
                 <EditableField
                   value={`${exp.startDate} - ${exp.endDate}`}
                   placeholder="Jan 2022 - Present"
@@ -238,25 +255,27 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
       </div>
 
       {/* EDUCATION */}
-      <div className="mb-3 flex flex-col">
-        <span className={secTitle}>Education</span>
-        <div className="flex flex-col gap-2">
+      <div className="mb-7">
+        <h2 className="text-md font-semibold text-[#9b87f5] mb-3 tracking-wide uppercase leading-none">
+          Education
+        </h2>
+        <div className="flex flex-col gap-4">
         {data.education.map((edu: any, index: number) => (
           <div
             key={edu.id}
-            className="bg-[#f1f0fb] rounded-xl p-4 pb-3 flex flex-col border border-[#ece6fb]"
+            className="bg-[#f1f0fb] rounded-2xl px-4 py-3 border border-[#e2e1f9] flex flex-col"
           >
             <div className="flex flex-row items-center gap-4">
               <EditableField
                 value={edu.degree}
                 placeholder={placeholderMap.eduDegree}
-                className="font-bold text-[1.08rem] text-[#1a1f2c]"
+                className="font-semibold text-[1.09rem] text-[#1a1f2c] tracking-tight"
                 onSave={(val) => handleNestedFieldUpdate("education", index, "degree", val)}
                 onGenerateWithAI={wrapAIPromise(`education-degree-${index}`)}
                 minRows={1}
                 maxRows={1}
               />
-              <span className="ml-auto text-sm text-gray-500 font-medium min-w-[120px] text-right">
+              <span className="ml-auto text-[0.98rem] text-gray-500 font-medium min-w-[115px] text-right">
                 <EditableField
                   value={`${edu.startDate} - ${edu.endDate}`}
                   placeholder="Sep 2017 - May 2019"
@@ -307,22 +326,26 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
       </div>
 
       {/* SKILLS */}
-      <div className="mb-0 flex flex-col">
-        <span className={secTitle}>Skills</span>
+      <div>
+        <h2 className="text-md font-semibold text-[#9b87f5] mb-3 tracking-wide uppercase leading-none">
+          Skills
+        </h2>
         <div className="flex flex-col md:flex-row gap-4">
           {/* Technical */}
           <div className="flex-1">
             <div className="text-[13px] font-medium text-gray-700 mb-1.5">Technical</div>
-            <div className="flex flex-wrap gap-1.5 mb-1">
+            <div className="flex flex-wrap gap-2 mb-1">
               {data.skills.technical.map((skill: string, i: number) => (
                 <span
                   key={i}
-                  className="px-2.5 py-1 bg-[#e5deff] text-[#7e69ab] font-medium rounded-full text-xs border border-[#ece6fb] transition"
+                  className="px-3 py-1 bg-[#e5deff] text-[#7e69ab] font-medium rounded-full text-xs border border-[#ece6fb] shadow-sm transition whitespace-nowrap"
+                  style={{ background: "linear-gradient(90deg, #f1f0fb 0%, #e5deff 100%)", }}
                 >
                   {skill}
                 </span>
               ))}
             </div>
+            {/* sr-only textarea for editing skills */}
             <EditableField
               value={data.skills.technical.join(", ")}
               placeholder={placeholderMap.skillsTech}
@@ -339,11 +362,12 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           {/* Soft */}
           <div className="flex-1">
             <div className="text-[13px] font-medium text-gray-700 mb-1.5">Soft</div>
-            <div className="flex flex-wrap gap-1.5 mb-1">
+            <div className="flex flex-wrap gap-2 mb-1">
               {data.skills.soft.map((skill: string, i: number) => (
                 <span
                   key={i}
-                  className="px-2.5 py-1 bg-[#f1f0fb] text-[#1a1f2c] font-normal rounded-full text-xs border border-[#ece6fb] transition"
+                  className="px-3 py-1 bg-[#f1f0fb] text-[#1a1f2c] font-normal rounded-full text-xs border border-[#ece6fb] shadow-sm transition whitespace-nowrap"
+                  style={{ background: "linear-gradient(90deg, #f8f6fd 0%, #f1f0fb 100%)", }}
                 >
                   {skill}
                 </span>
