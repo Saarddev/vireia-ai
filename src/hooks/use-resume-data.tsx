@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
@@ -27,7 +26,7 @@ const defaultResumeData: ResumeData = {
   projects: []
 };
 
-export function useResumeData(resumeId: string | undefined) {
+export function useResumeData(resumeId?: string) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
@@ -204,28 +203,29 @@ export function useResumeData(resumeId: string | undefined) {
   };
 
   const handleSave = async () => {
+    if (!resumeId) return;
+
     try {
       const { error } = await supabase
         .from('resumes')
         .update({
           content: resumeData as any,
-          template: selectedTemplate,
           settings: resumeSettings as any,
           updated_at: new Date().toISOString()
         })
         .eq('id', resumeId);
-        
+
       if (error) throw error;
-      
+
       toast({
-        title: "Resume saved",
-        description: "Your resume has been successfully saved."
+        title: "Changes saved",
+        description: "Your resume has been updated successfully."
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error saving resume:', error);
       toast({
         title: "Error",
-        description: "Failed to save resume. Please try again.",
+        description: "Failed to save changes. Please try again.",
         variant: "destructive"
       });
     }

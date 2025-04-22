@@ -22,6 +22,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { v4 as uuidv4 } from 'uuid';
+import AIHoverMenu from './AIHoverMenu';
 
 interface Experience {
   id: string;
@@ -37,9 +38,10 @@ interface Experience {
 interface ExperienceFormProps {
   data: Experience[];
   onChange: (data: Experience[]) => void;
+  onGenerateWithAI?: (text: string) => Promise<string>;
 }
 
-const ExperienceForm: React.FC<ExperienceFormProps> = ({ data, onChange }) => {
+const ExperienceForm: React.FC<ExperienceFormProps> = ({ data, onChange, onGenerateWithAI }) => {
   const [experiences, setExperiences] = useState<Experience[]>(data);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -290,31 +292,27 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ data, onChange }) => {
                           name="description"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Description*</FormLabel>
-                              <div className="flex justify-between">
+                              <div className="flex justify-between items-center">
                                 <FormLabel>Description*</FormLabel>
-                                <Popover>
-                                  <PopoverTrigger asChild>
+                                <AIHoverMenu
+                                  onImprove={() => {
+                                    if (onGenerateWithAI) {
+                                      onGenerateWithAI(field.value).then(improved => {
+                                        field.onChange(improved);
+                                      });
+                                    }
+                                  }}
+                                  description="Enhance your job description with powerful action verbs and quantifiable achievements."
+                                  trigger={
                                     <Button variant="ghost" size="sm" className="h-8 text-resume-purple">
-                                      <Wand2 className="mr-2 h-3 w-3" /> AI Enhance
+                                      <Wand2 className="h-4 w-4" />
                                     </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent align="end" className="w-80">
-                                    <div className="space-y-4">
-                                      <h4 className="font-medium">Enhance with AI</h4>
-                                      <p className="text-sm text-muted-foreground">
-                                        Use AI to improve your job description with powerful action verbs and quantifiable achievements.
-                                      </p>
-                                      <Button size="sm" className="w-full bg-resume-purple">
-                                        Enhance Description
-                                      </Button>
-                                    </div>
-                                  </PopoverContent>
-                                </Popover>
+                                  }
+                                />
                               </div>
                               <FormControl>
                                 <Textarea 
-                                  placeholder="Describe your responsibilities, achievements, and skills used in this role" 
+                                  placeholder="Describe your responsibilities and achievements" 
                                   className="min-h-[120px]"
                                   {...field} 
                                 />
