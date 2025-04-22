@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Check, Edit3, Loader } from 'lucide-react';
+import { Check, Loader } from 'lucide-react';
 import AIHoverToolkit from "@/components/AIHoverToolkit";
 
 interface EditableContentProps {
@@ -30,7 +30,7 @@ export const EditableContent: React.FC<EditableContentProps> = ({
   };
 
   const handleGenerate = async () => {
-    if (!onGenerateWithAI) return "";
+    if (!onGenerateWithAI) return Promise.resolve("");
     
     setIsGenerating(true);
     try {
@@ -38,13 +38,13 @@ export const EditableContent: React.FC<EditableContentProps> = ({
     } finally {
       setIsGenerating(false);
     }
-    return "";
+    return Promise.resolve("");
   };
 
   const handleContinue = () => {
     const newText = editedContent + "\n";
     setEditedContent(newText);
-    return "";
+    return Promise.resolve("");
   };
 
   if (isEditing) {

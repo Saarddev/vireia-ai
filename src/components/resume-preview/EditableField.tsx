@@ -1,16 +1,16 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import AIHoverToolkit from "@/components/AIHoverToolkit";
-import { Loader2, SquarePen } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 interface EditableFieldProps {
   value: string;
   placeholder: string;
   className?: string;
   onSave: (val: string) => void;
-  onGenerateWithAI?: () => Promise<string | undefined>;
+  onGenerateWithAI?: () => Promise<string>;
   autoFocus?: boolean;
   maxRows?: number;
   minRows?: number;
@@ -33,21 +33,22 @@ const EditableField: React.FC<EditableFieldProps> = ({
   const [streamingText, setStreamingText] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setLocalValue(value);
   }, [value]);
 
-  // Auto-grow textarea, but max height
-  React.useEffect(() => {
+  // Auto-grow textarea
+  useEffect(() => {
     if (editing && textareaRef.current) {
       textareaRef.current.style.height = "auto";
       const scrollHeight = textareaRef.current.scrollHeight;
-      const rowHeight = 24;
+      const rowHeight = 20; // Approximate line height
       const maxHeight = rowHeight * maxRows;
-      const newHeight = Math.min(scrollHeight, maxHeight);
+      const minHeight = rowHeight * minRows;
+      const newHeight = Math.max(Math.min(scrollHeight, maxHeight), minHeight);
       textareaRef.current.style.height = newHeight + "px";
     }
-  }, [editing, localValue, maxRows]);
+  }, [editing, localValue, maxRows, minRows]);
 
   // Streaming effect for generated text
   const streamGeneratedText = (current: string, generated: string) => {
@@ -69,34 +70,36 @@ const EditableField: React.FC<EditableFieldProps> = ({
   const handleAIComplete = async () => {
     if (!onGenerateWithAI) return "";
     setIsGenerating(true);
-    let result: string | undefined = "";
     try {
-      result = await onGenerateWithAI();
-      // If streaming, show streaming effect instead of instant insert
+      const result = await onGenerateWithAI();
       if (result) {
         streamGeneratedText(localValue, result.replace(localValue, ""));
       }
+      return "";
+    } catch (error) {
+      console.error("AI generation failed:", error);
+      return "";
     } finally {
       setIsGenerating(false);
     }
-    return result || "";
   };
 
   const handleAIContinue = async () => {
     if (!onGenerateWithAI) return "";
     setIsGenerating(true);
-    let result: string | undefined = "";
     try {
-      result = await onGenerateWithAI();
-      // Simulate "continue": append only new content, smoothly
+      const result = await onGenerateWithAI();
       if (result && result.length > localValue.length) {
         const added = result.slice(localValue.length);
         streamGeneratedText(localValue, added);
       }
+      return "";
+    } catch (error) {
+      console.error("AI continuation failed:", error);
+      return "";
     } finally {
       setIsGenerating(false);
     }
-    return result || "";
   };
 
   const startEdit = () => {
@@ -124,16 +127,14 @@ const EditableField: React.FC<EditableFieldProps> = ({
   return (
     <div
       className={cn(
-        "relative w-full group transition-colors min-h-[24px]",
+        "relative w-full group transition-colors min-h-[20px]",
         className
       )}
-      tabIndex={0}
       onClick={startEdit}
       onMouseEnter={() => setShowToolkit(true)}
       onMouseLeave={() => setShowToolkit(false)}
       onFocus={() => setShowToolkit(true)}
       onBlur={(e) => {
-        // if focus moved outside (not within toolkit), save
         if (!e.currentTarget.contains(e.relatedTarget as Node)) {
           handleSave();
         }
@@ -144,24 +145,22 @@ const EditableField: React.FC<EditableFieldProps> = ({
           <textarea
             ref={textareaRef}
             className={cn(
-              "block w-full min-h-[24px] px-2 py-1 text-sm rounded border border-gray-200 focus:border-resume-purple focus:ring-1 focus:ring-resume-purple bg-white/95 shadow-sm transition-all outline-0 resize-none",
-              isGenerating && "opacity-70",
-              "placeholder:text-gray-400"
+              "block w-full px-1 py-0.5 text-sm rounded border border-gray-200 focus:border-resume-purple focus:ring-1 focus:ring-resume-purple bg-white/95 shadow-sm transition-all outline-0 resize-none",
+              isGenerating && "opacity-70"
             )}
             value={streamingText !== null ? streamingText : localValue}
             onChange={e => setLocalValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             readOnly={streamingText !== null}
-            style={{ fontFamily: "inherit", lineHeight: "1.5" }}
+            style={{ fontFamily: "inherit" }}
             autoFocus={autoFocus}
             rows={minRows}
-            aria-label={placeholder}
           />
-          {/* Save/Cancel reveal on focus */}
-          <div className="absolute -right-1 -top-8 z-20 flex gap-1 opacity-90 bg-white/95 rounded shadow-sm px-1 py-0.5 transition-all animate-fade-in pointer-events-auto">
-            <Button variant="ghost" size="sm" onClick={handleSave} disabled={isGenerating} tabIndex={-1} className="h-6 text-xs px-2">
-              <span className="font-semibold text-resume-purple">Save</span>
+          {/* Minimal save/cancel controls */}
+          <div className="absolute -right-2 -top-7 z-20 flex gap-1 opacity-90 bg-white shadow-sm rounded-md px-1 py-0.5 animate-fade-in">
+            <Button variant="ghost" size="sm" onClick={handleSave} disabled={isGenerating} className="h-5 text-xs px-2">
+              <span className="font-medium text-resume-purple">Save</span>
             </Button>
             <Button
               variant="ghost"
@@ -171,15 +170,15 @@ const EditableField: React.FC<EditableFieldProps> = ({
                 setLocalValue(value);
               }}
               disabled={isGenerating}
-              tabIndex={-1}
-              className="h-6 text-xs px-2"
+              className="h-5 text-xs px-2"
             >
               <span className="text-gray-500">Cancel</span>
             </Button>
           </div>
-          {/* AI toolkit always visible in edit mode */}
+          
+          {/* AI generation controls */}
           {onGenerateWithAI && (
-            <div className="absolute -right-1 -bottom-8 z-10 animate-fade-in">
+            <div className="absolute -right-2 -bottom-7 z-10 animate-fade-in">
               <AIHoverToolkit
                 onComplete={handleAIComplete}
                 onAddChanges={handleAIContinue}
@@ -187,31 +186,22 @@ const EditableField: React.FC<EditableFieldProps> = ({
               />
             </div>
           )}
+          
           {isGenerating && (
-            <span className="absolute -left-6 top-1.5 animate-spin text-resume-purple">
-              <Loader2 size={16} />
+            <span className="absolute -left-5 top-1 animate-spin text-resume-purple">
+              <Loader2 size={14} />
             </span>
           )}
         </div>
       ) : (
         <span
+          tabIndex={0}
           className={cn(
-            "block transition-all",
-            value ? "text-gray-900" : "text-gray-400 italic",
-            "relative"
+            "block transition-colors px-1 -mx-1 rounded cursor-text hover:bg-gray-50/70",
+            value ? "text-gray-800" : "text-gray-400 italic"
           )}
         >
-          {value ? (
-            <span className="py-0.5">{value}</span>
-          ) : (
-            <span className="py-0.5">{placeholder}</span>
-          )}
-          {/* Pen icon appears on hover/focus */}
-          <span className={cn(
-            "absolute right-0 top-0.5 text-resume-purple/60 opacity-0 group-hover:opacity-70 transition-opacity pointer-events-none"
-          )}>
-            <SquarePen className="w-3 h-3" />
-          </span>
+          {value || placeholder}
         </span>
       )}
     </div>

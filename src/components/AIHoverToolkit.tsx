@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Wand2, PlusCircle } from 'lucide-react';
 
 interface AIHoverToolkitProps {
-  onComplete?: () => void | Promise<string>;
-  onAddChanges?: () => void | Promise<string>;
+  onComplete?: () => Promise<string> | void;
+  onAddChanges?: () => Promise<string> | void;
   className?: string;
 }
 
@@ -15,12 +15,12 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
   className
 }) => {
   return (
-    <div className={`flex items-center gap-1 p-1 rounded-lg bg-white/95 border border-gray-100 shadow-sm backdrop-blur-sm transition-all duration-200 ${className}`}>
+    <div className={`flex items-center gap-1 p-1 rounded-md bg-white/95 border border-gray-100 shadow-sm backdrop-blur-sm transition-all duration-200 ${className}`}>
       {onComplete && (
         <Button
           variant="ghost"
           size="sm"
-          className="h-6 px-2 text-xs text-muted-foreground hover:text-resume-purple hover:bg-resume-purple/10 flex items-center gap-1"
+          className="h-5 px-2 text-xs text-muted-foreground hover:text-resume-purple hover:bg-resume-purple/10 flex items-center gap-1"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -36,7 +36,7 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
         <Button
           variant="ghost"
           size="sm"
-          className="h-6 px-2 text-xs text-muted-foreground hover:text-resume-purple hover:bg-resume-purple/10 flex items-center gap-1"
+          className="h-5 px-2 text-xs text-muted-foreground hover:text-resume-purple hover:bg-resume-purple/10 flex items-center gap-1"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
