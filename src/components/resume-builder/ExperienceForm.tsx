@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Form,
@@ -141,10 +140,10 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ data, onChange, onGener
   };
 
   const enhanceDescription = async (id: string) => {
-    if (!onGenerateWithAI) return;
+    if (!onGenerateWithAI) return "";
     
     const exp = experiences.find(e => e.id === id);
-    if (!exp) return;
+    if (!exp) return "";
     
     setIsGenerating(true);
     try {
@@ -155,8 +154,10 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ data, onChange, onGener
         }
         editExperience(id, { description: enhancedDescription });
       }
+      return enhancedDescription || "";
     } catch (error) {
       console.error("Failed to enhance description:", error);
+      return "";
     } finally {
       setIsGenerating(false);
     }
@@ -324,7 +325,9 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ data, onChange, onGener
                                   variant="ghost" 
                                   size="sm" 
                                   className="h-8 text-resume-purple"
-                                  onClick={() => enhanceDescription(exp.id)}
+                                  onClick={async () => {
+                                    await enhanceDescription(exp.id);
+                                  }}
                                   disabled={isGenerating}
                                 >
                                   {isGenerating ? (
@@ -353,10 +356,14 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ data, onChange, onGener
                               >
                                 <div className={`absolute -top-12 right-0 z-10 transform transition-opacity transition-transform duration-300 ease-out ${showToolkit && activeDescriptionId === exp.id ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
                                   <AIHoverToolkit 
-                                    onComplete={() => enhanceDescription(exp.id)}
+                                    onComplete={async () => {
+                                      const result = await enhanceDescription(exp.id);
+                                      return result;
+                                    }}
                                     onAddChanges={() => {
                                       const currentText = form.getValues("description");
                                       form.setValue("description", currentText + "\n• ");
+                                      return "";
                                     }}
                                   />
                                 </div>
@@ -452,9 +459,9 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ data, onChange, onGener
             </p>
             <Button 
               className="mt-2 bg-white text-resume-purple border border-resume-purple hover:bg-resume-purple hover:text-white"
-              onClick={() => {
+              onClick={async () => {
                 if (experiences.length > 0 && editingId) {
-                  enhanceDescription(editingId);
+                  await enhanceDescription(editingId);
                 }
               }}
               disabled={isGenerating || !editingId}

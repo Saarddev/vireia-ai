@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FileText, Mail, KeyRound, ArrowRight } from 'lucide-react';
+import { FileText, Mail, KeyRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -39,17 +40,22 @@ const SignUp = () => {
     }
 
     // Check if email already exists
-    const { data: users, error: userError } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("email", email)
-      .maybeSingle();
+    try {
+      const { data: users, error: userError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("email", email)
+        .single();
 
-    // If Supabase throws an error (like table doesn't have email), just proceed
-    if (!userError && users) {
-      setError('This email is already associated with an account.');
-      setLoading(false);
-      return;
+      // If Supabase throws an error (like table doesn't have email), just proceed
+      if (!userError && users) {
+        setError('This email is already associated with an account.');
+        setLoading(false);
+        return;
+      }
+    } catch (checkError) {
+      // If there's an error checking the email, just proceed with signup
+      console.log("Error checking email:", checkError);
     }
 
     try {

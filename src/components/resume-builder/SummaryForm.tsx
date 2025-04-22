@@ -19,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 interface SummaryFormProps {
   data: string;
   onChange: (data: string) => void;
-  onGenerateWithAI: () => Promise<void>;
+  onGenerateWithAI: () => Promise<string>;
   isGenerating?: boolean;
 }
 
@@ -97,11 +97,15 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
                 >
                   <div className={`absolute -top-12 right-0 z-10 transform transition-opacity transition-transform duration-300 ease-out ${showToolkit ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
                     <AIHoverToolkit 
-                      onComplete={() => onGenerateWithAI()}
+                      onComplete={async () => {
+                        const result = await onGenerateWithAI();
+                        return result;
+                      }}
                       onAddChanges={() => {
                         const currentText = form.getValues("summary");
                         form.setValue("summary", currentText + "\n");
                         onChange(currentText + "\n");
+                        return "";
                       }}
                     />
                   </div>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -131,7 +132,6 @@ const ResumeBuilder = () => {
         description: "Failed to generate with AI. Please try again.",
         variant: "destructive"
       });
-      return "";
     }
     return "";
   };
