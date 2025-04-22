@@ -155,6 +155,41 @@
     opacity: 1;
     transform: translateY(0);
   }
+  
+  /* Resume styles for PDF consistency */
+  @media print {
+    .resume-content {
+      padding: 30px 40px 26px 40px !important;
+      max-width: 100% !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    
+    body {
+      background: white !important;
+    }
+    
+    .section-gap {
+      margin-bottom: 16px !important;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 0 !important;
+      margin-bottom: 8px !important;
+    }
+    
+    .text-[#5d4dcd] { 
+      color: #5d4dcd !important;
+    }
+    
+    .bg-[#efeafc] {
+      background-color: #efeafc !important;
+    }
+    
+    .border-[#5d4dcd] {
+      border-color: #5d4dcd !important;
+    }
+  }
 }
 
 .app-container {
@@ -204,4 +239,9 @@
 
 .animate-slide-up {
   animation: slide-up 0.5s ease-out forwards;
+}
+
+/* Resume-specific styles */
+.resume-content {
+  padding: 30px 40px 26px 40px;
 }

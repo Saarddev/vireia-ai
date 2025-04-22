@@ -363,7 +363,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({ data, onChange, onGener
                                     onAddChanges={() => {
                                       const currentText = form.getValues("description");
                                       form.setValue("description", currentText + "\n• ");
-                                      return "";
+                                      return Promise.resolve("");
                                     }}
                                   />
                                 </div>

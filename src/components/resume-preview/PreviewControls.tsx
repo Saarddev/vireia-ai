@@ -43,7 +43,7 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
               <Download className="mr-2 h-4 w-4" /> Download PDF
             </Button>
           </div>
-          <Card className="h-full bg-white p-8 shadow-md">
+          <Card className="h-full bg-white p-8 shadow-md overflow-y-auto">
             {children}
           </Card>
         </DialogContent>

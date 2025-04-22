@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
@@ -21,15 +22,16 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
     }
   };
 
-  const nameClass = "text-[2rem] font-bold text-[#232323] leading-tight tracking-tight pb-0 mb-2";
-  const subtitleClass = "text-lg font-semibold text-[#7061e7] mt-1 transition-all";
-  const subtitleInputStyle = { color: '#7061e7', fontWeight: 600 };
-  const sectionHeaderClass = "text-base font-bold text-[#232323] mb-2 border-b border-[#e4e4e4] pb-1 tracking-normal";
-  const experienceTitleClass = "font-semibold text-gray-900 text-base";
-  const experienceDateClass = "text-sm text-gray-700 ml-4 whitespace-nowrap min-w-[120px] max-w-[180px]";
-  const experienceDescriptionClass = "text-sm text-gray-700 mt-0.5 font-normal";
-  const contactFieldClass = "inline px-2 py-0.5 rounded bg-transparent border-none text-sm focus:bg-gray-100 text-[#232323] min-w-[90px] max-w-[190px]";
-  const contactDivider = <span className="mx-2 text-[#aaa] font-semibold select-none">|</span>;
+  // More professional typography and colors
+  const nameClass = "text-lg font-semibold text-gray-900 leading-tight tracking-tight pb-0 mb-1";
+  const subtitleClass = "text-sm font-medium text-[#5d4dcd] mt-1 transition-all";
+  const subtitleInputStyle = { color: '#5d4dcd', fontWeight: 500 };
+  const sectionHeaderClass = "text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide";
+  const experienceTitleClass = "font-medium text-gray-800 text-sm";
+  const experienceDateClass = "text-xs text-gray-600 ml-3 whitespace-nowrap min-w-[100px] max-w-[160px]";
+  const experienceDescriptionClass = "text-xs text-gray-700 mt-1 font-normal leading-relaxed";
+  const contactFieldClass = "inline px-1.5 py-0.5 rounded bg-transparent border-none text-xs focus:bg-gray-100 text-gray-700 min-w-[90px] max-w-[180px]";
+  const contactDivider = <span className="mx-1.5 text-gray-400 font-normal select-none">|</span>;
 
   const contactItems = [
     {
@@ -67,16 +69,17 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
   return (
     <div
       className={cn(
-        "bg-white rounded-2xl shadow-lg border border-[#ede9f7] max-w-[720px] mx-auto",
-        settings.fontFamily && `font-[${settings.fontFamily}]`,
-        settings.fontSize && `text-[${settings.fontSize}pt]`
+        "bg-white rounded-lg border border-gray-200 max-w-[720px] mx-auto",
+        settings.fontFamily && `font-[${settings.fontFamily}]`
       )}
       style={{
-        padding: "48px 56px 38px 56px",
-        background: "#fff"
+        padding: "30px 40px 26px 40px",
+        background: "#fff",
+        fontSize: `${settings.fontSize || 11}pt`,
+        lineHeight: "1.5"
       }}
     >
-      <div className="pb-6 border-b-4 border-resume-purple mb-10">
+      <div className="pb-4 border-b-2 border-[#5d4dcd] mb-6">
         <EditableField
           value={data.personal.name}
           placeholder="John Smith"
@@ -97,8 +100,8 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           inputStyle={subtitleInputStyle}
           outputStyle={subtitleInputStyle}
         />
-        <div className="flex flex-wrap text-sm text-[#232323] mt-4 gap-y-2 items-center">
-          <div className="flex flex-wrap items-center gap-x-1">
+        <div className="flex flex-wrap text-xs text-gray-700 mt-3 gap-y-1 items-center">
+          <div className="flex flex-wrap items-center">
             {contactItems.map((item, idx) => (
               <React.Fragment key={item.key}>
                 {idx > 0 && contactDivider}
@@ -119,24 +122,24 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         </div>
       </div>
 
-      <div className="mb-12 section-gap">
+      <div className="mb-6 resume-section">
         <h2 className={sectionHeaderClass}>Summary</h2>
         <EditableField
           value={data.summary}
           placeholder="Experienced software engineer with 5+ years of experience in full-stack development. ..."
           onSave={val => onUpdateData?.("summary", val)}
-          className="text-sm text-gray-800 font-normal leading-normal"
+          className="text-xs text-gray-700 font-normal leading-relaxed"
           onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("summary") : undefined}
           minRows={2}
           maxRows={4}
         />
       </div>
 
-      <div className="mb-12 section-gap">
+      <div className="mb-6 resume-section">
         <h2 className={sectionHeaderClass}>Experience</h2>
         {data.experience.map((exp: any, index: number) => (
-          <div key={exp.id} className="mb-8 last:mb-0">
-            <div className="flex items-baseline justify-between flex-wrap gap-x-4">
+          <div key={exp.id} className="mb-5 last:mb-0 resume-item">
+            <div className="flex items-baseline justify-between flex-wrap gap-x-2">
               <EditableField
                 value={exp.title}
                 placeholder="Senior Software Engineer"
@@ -178,7 +181,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                   : exp.company || exp.location || ""
               }
               placeholder="Tech Solutions Inc., San Francisco, CA"
-              className="text-sm text-[#7061e7] font-medium my-0.5"
+              className="text-xs text-[#5d4dcd] font-medium my-0.5"
               onSave={val => {
                 let [company, ...locParts] = val.split(",");
                 const location = locParts.join(",").trim();
@@ -209,11 +212,11 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         ))}
       </div>
 
-      <div className="mb-12 section-gap">
+      <div className="mb-6 resume-section">
         <h2 className={sectionHeaderClass}>Education</h2>
         {data.education.map((edu: any, index: number) => (
-          <div key={edu.id} className="mb-8 last:mb-0">
-            <div className="flex items-baseline justify-between flex-wrap gap-x-4">
+          <div key={edu.id} className="mb-5 last:mb-0 resume-item">
+            <div className="flex items-baseline justify-between flex-wrap gap-x-2">
               <EditableField
                 value={edu.degree}
                 placeholder="Master of Science in Computer Science"
@@ -255,7 +258,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                   : edu.institution || edu.location || ""
               }
               placeholder="Stanford University, Stanford, CA"
-              className="text-sm text-[#7061e7] font-medium my-0.5"
+              className="text-xs text-[#5d4dcd] font-medium my-0.5"
               onSave={val => {
                 let [inst, ...locParts] = val.split(",");
                 const location = locParts.join(",").trim();
@@ -286,16 +289,15 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         ))}
       </div>
 
-      <div className="mb-2 pb-2 border-b border-[#e4e4e4] section-gap">
+      <div className="mb-2 pb-2 border-b border-gray-200 resume-section">
         <h2 className={sectionHeaderClass}>Skills</h2>
-        <div className="mb-2">
-          <div className="font-semibold text-gray-800 text-sm">Technical Skills</div>
-          <div className="flex flex-wrap gap-2 mt-2">
+        <div className="mb-3">
+          <div className="font-medium text-gray-700 text-xs mb-1.5">Technical Skills</div>
+          <div className="flex flex-wrap gap-1.5 mt-1">
             {data.skills.technical.map((skill: string, i: number) => (
               <span
                 key={i}
-                className="px-3 py-1 bg-[#e7e2fa] text-[#7061e7] font-semibold rounded-md text-xs border border-[#ebe7fd] shadow-xs transition whitespace-nowrap"
-                style={{ background: "#eee8ff" }}
+                className="px-2 py-0.5 bg-[#efeafc] text-[#5d4dcd] font-medium rounded-sm text-xs border-[0.5px] border-[#dad3f8] shadow-xs transition whitespace-nowrap"
               >
                 {skill}
               </span>
@@ -303,12 +305,12 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           </div>
         </div>
         <div>
-          <div className="font-semibold text-gray-800 text-sm">Soft Skills</div>
-          <div className="flex flex-wrap gap-2 mt-2">
+          <div className="font-medium text-gray-700 text-xs mb-1.5">Soft Skills</div>
+          <div className="flex flex-wrap gap-1.5 mt-1">
             {data.skills.soft.map((skill: string, i: number) => (
               <span
                 key={i}
-                className="px-3 py-1 bg-[#f3f3f3] text-[#333] font-medium rounded-md text-xs border border-[#eaeaea] transition whitespace-nowrap"
+                className="px-2 py-0.5 bg-[#f3f3f3] text-gray-600 font-medium rounded-sm text-xs border-[0.5px] border-[#e5e5e5] transition whitespace-nowrap"
               >
                 {skill}
               </span>

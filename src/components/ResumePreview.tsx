@@ -40,6 +40,9 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
       return;
     }
 
+    // Get font family from settings or use default
+    const fontFamily = settings.fontFamily || 'Inter';
+    
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
@@ -48,18 +51,8 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-          ${settings.fontFamily ?
-            `<link href="https://fonts.googleapis.com/css2?family=${settings.fontFamily}:wght@400;500;600;700&display=swap" rel="stylesheet">`
-            : ''
-          }
+          <link href="https://fonts.googleapis.com/css2?family=${fontFamily}:wght@400;500;600;700&display=swap" rel="stylesheet">
           <style>
-            body {
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-              margin: 0;
-              padding: 0;
-              background: #ede9f7;
-            }
             @page {
               size: ${settings.paperSize || 'a4'};
               margin: ${
@@ -68,23 +61,64 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
                 '1in'
               };
             }
+            body {
+              margin: 0;
+              padding: 0;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              background: white;
+            }
             .resume-content {
-              font-family: '${settings.fontFamily || 'Inter'}', sans-serif !important;
-              font-size: ${settings.fontSize || 10}pt !important;
-              line-height: 1.6 !important;
+              font-family: '${fontFamily}', sans-serif !important;
+              font-size: ${settings.fontSize || 11}pt !important;
+              line-height: 1.5 !important;
               color: #232323 !important;
               background: #fff !important;
-              box-shadow: 0 0 0 0 #0000;
-              border-radius: 16px;
-              padding: 48px 56px 38px 56px !important;
-              max-width: 720px;
-              margin:auto;
+              box-shadow: none !important;
+              border: none !important;
+              padding: 0 !important;
+              max-width: 100% !important;
+              margin: 0 !important;
             }
             .text-resume-purple { color: ${settings.primaryColor || '#7061e7'} !important; }
             .border-resume-purple { border-color: ${settings.primaryColor || '#7061e7'} !important; }
             .bg-purple-100 { background-color: ${settings.primaryColor || '#7061e7'}20 !important; }
             .highlight { background: ${settings.primaryColor || '#9b87f5'}22 !important; }
-            .section-gap { margin-bottom: 40px !important; }
+            
+            /* Section spacing */
+            .section-gap { margin-bottom: 16px !important; }
+            
+            h1, h2, h3, h4, h5, h6 {
+              margin-top: 0;
+              margin-bottom: 8px;
+              line-height: 1.2;
+            }
+            
+            /* Proper spacing for sections */
+            .resume-section {
+              margin-bottom: 16px;
+            }
+            
+            /* Proper spacing for experience and education items */
+            .resume-item {
+              margin-bottom: 12px;
+              page-break-inside: avoid;
+            }
+            
+            /* Print optimization */
+            @media print {
+              html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+              }
+              
+              .resume-content {
+                width: 100%;
+                box-shadow: none;
+              }
+            }
           </style>
         </head>
         <body>
@@ -120,8 +154,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
         onZoomOut={handleZoomOut}
         onDownload={handleDownloadPDF}
       >
-        {/* Preview in modal: uses same resume content */}
-        <div ref={resumeContentRef}>
+        <div className="resume-content">
           {template === 'modern' ? (
             <ModernTemplate
               data={data}
@@ -137,11 +170,10 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
         </div>
       </PreviewControls>
 
-      {/* Main card preview (no duplication, only here) */}
-      <div className="flex-1 overflow-auto relative bg-[#ede9f7] dark:bg-gray-800/30 rounded-xl p-4">
+      <div className="flex-1 overflow-auto relative bg-[#f9f7fd] dark:bg-gray-800/30 rounded-xl p-4">
         <Card className={cn(
-          "resume-content bg-white rounded-2xl shadow-xl p-0 transition-all duration-200 mx-auto",
-          "hover:shadow-2xl border border-[#ede9f7]"
+          "resume-content bg-white rounded-lg shadow-md p-0 transition-all duration-200 mx-auto",
+          "border border-gray-200"
         )} style={{
           width: '100%',
           maxWidth: '720px',
@@ -149,8 +181,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
           transformOrigin: 'center top',
           background: '#fff',
         }}>
-          {/* The actual resume content */}
-          <div ref={resumeContentRef}>
+          <div ref={resumeContentRef} className="resume-content">
             {template === 'modern' ? (
               <ModernTemplate
                 data={data}

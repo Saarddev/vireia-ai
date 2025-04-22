@@ -105,7 +105,7 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
                         const currentText = form.getValues("summary");
                         form.setValue("summary", currentText + "\n");
                         onChange(currentText + "\n");
-                        return "";
+                        return Promise.resolve("");
                       }}
                     />
                   </div>
