@@ -72,63 +72,84 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           minRows={1}
           maxRows={1}
         />
-        {/* Contact Row */}
-        <div className="flex flex-wrap text-[15px] text-[#232323] mt-3 items-center gap-x-2 gap-y-1">
-          <EditableField
-            value={data.personal.email}
-            placeholder="john.smith@example.com"
-            className="inline"
-            onSave={(val) => handleFieldUpdate("personal", "email", val)}
-            onGenerateWithAI={wrapAIPromise("personal-email")}
-            minRows={1}
-            maxRows={1}
-          />
-          <span className="mx-1 text-[#aaa] font-semibold select-none">|</span>
-          <EditableField
-            value={data.personal.phone}
-            placeholder="(555) 123-4567"
-            className="inline"
-            onSave={(val) => handleFieldUpdate("personal", "phone", val)}
-            onGenerateWithAI={wrapAIPromise("personal-phone")}
-            minRows={1}
-            maxRows={1}
-          />
-          <span className="mx-1 text-[#aaa] font-semibold select-none">|</span>
-          <EditableField
-            value={data.personal.location}
-            placeholder="San Francisco, CA"
-            className="inline"
-            onSave={(val) => handleFieldUpdate("personal", "location", val)}
-            onGenerateWithAI={wrapAIPromise("personal-location")}
-            minRows={1}
-            maxRows={1}
-          />
+        
+        {/* Contact Row - Modified to ensure horizontal layout */}
+        <div className="flex flex-wrap text-[15px] text-[#232323] mt-3 items-center">
+          <div className="flex items-center">
+            <EditableField
+              value={data.personal.email}
+              placeholder="john.smith@example.com"
+              className="inline"
+              onSave={(val) => handleFieldUpdate("personal", "email", val)}
+              onGenerateWithAI={wrapAIPromise("personal-email")}
+              minRows={1}
+              maxRows={1}
+            />
+          </div>
+          
+          <span className="mx-2 text-[#aaa] font-semibold select-none">|</span>
+          
+          <div className="flex items-center">
+            <EditableField
+              value={data.personal.phone}
+              placeholder="(555) 123-4567"
+              className="inline"
+              onSave={(val) => handleFieldUpdate("personal", "phone", val)}
+              onGenerateWithAI={wrapAIPromise("personal-phone")}
+              minRows={1}
+              maxRows={1}
+            />
+          </div>
+          
+          <span className="mx-2 text-[#aaa] font-semibold select-none">|</span>
+          
+          <div className="flex items-center">
+            <EditableField
+              value={data.personal.location}
+              placeholder="San Francisco, CA"
+              className="inline"
+              onSave={(val) => handleFieldUpdate("personal", "location", val)}
+              onGenerateWithAI={wrapAIPromise("personal-location")}
+              minRows={1}
+              maxRows={1}
+            />
+          </div>
+          
           {data.personal.linkedin && (
             <>
-              <span className="mx-1 text-[#aaa] font-semibold select-none">|</span>
-              <EditableField
-                value={data.personal.linkedin}
-                placeholder="linkedin.com/in/johnsmith"
-                className="inline"
-                onSave={(val) => handleFieldUpdate("personal", "linkedin", val)}
-                onGenerateWithAI={wrapAIPromise("personal-linkedin")}
-                minRows={1}
-                maxRows={1}
-              />
+              <span className="mx-2 text-[#aaa] font-semibold select-none">|</span>
+              <div className="flex items-center">
+                <EditableField
+                  value={data.personal.linkedin}
+                  placeholder="linkedin.com/in/johnsmith"
+                  className="inline"
+                  onSave={(val) => handleFieldUpdate("personal", "linkedin", val)}
+                  onGenerateWithAI={wrapAIPromise("personal-linkedin")}
+                  minRows={1}
+                  maxRows={1}
+                />
+              </div>
+            </>
+          )}
+          
+          {data.personal.website && (
+            <>
+              <span className="mx-2 text-[#aaa] font-semibold select-none">|</span>
+              <div className="flex items-center">
+                <EditableField
+                  value={data.personal.website}
+                  placeholder="johnsmith.dev"
+                  className="inline text-[15px] text-[#232323]"
+                  onSave={(val) => handleFieldUpdate("personal", "website", val)}
+                  onGenerateWithAI={wrapAIPromise("personal-website")}
+                  minRows={1}
+                  maxRows={1}
+                />
+              </div>
             </>
           )}
         </div>
-        <div className="mt-2">
-          <EditableField
-            value={data.personal.website}
-            placeholder="johnsmith.dev"
-            className="inline text-[15px] text-[#232323]"
-            onSave={(val) => handleFieldUpdate("personal", "website", val)}
-            onGenerateWithAI={wrapAIPromise("personal-website")}
-            minRows={1}
-            maxRows={1}
-          />
-        </div>
+        
         {/* Underline */}
         <div className="border-t border-[#7B61FF] mt-5" />
       </div>
@@ -267,7 +288,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         ))}
       </div>
 
-      {/* SKILLS */}
+      {/* SKILLS - Fixed to remove duplicated text */}
       <div className="mb-2 pb-2 border-b border-[#e4e4e4]">
         <h2 className="text-xl font-bold text-[#232323] mb-2">Skills</h2>
         <div className="mb-2">
@@ -283,7 +304,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
               </span>
             ))}
           </div>
-          {/* Hidden editable field for AI */}
+          {/* Hidden editable field for AI - Kept to maintain functionality */}
           <EditableField
             value={data.skills.technical.join(", ")}
             placeholder="JavaScript, TypeScript, React, Node.js, Python"
@@ -309,7 +330,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
               </span>
             ))}
           </div>
-          {/* Hidden editable field for AI */}
+          {/* Hidden editable field for AI - Kept to maintain functionality */}
           <EditableField
             value={data.skills.soft.join(", ")}
             placeholder="Leadership, Communication, Problem Solving"
@@ -329,4 +350,3 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
 };
 
 export default ModernTemplate;
-

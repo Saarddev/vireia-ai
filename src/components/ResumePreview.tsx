@@ -10,7 +10,7 @@ interface ResumePreviewProps {
   template: string;
   settings?: any;
   onDataChange?: (section: string, data: any) => void;
-  onGenerateWithAI?: (section: string) => Promise<void>;
+  onGenerateWithAI?: (section: string) => Promise<string>;
 }
 
 const ResumePreview: React.FC<ResumePreviewProps> = ({ 
@@ -23,6 +23,14 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
   const { isMobile } = useIsMobile();
   const [zoomLevel, setZoomLevel] = React.useState(1);
   const resumeContentRef = useRef<HTMLDivElement>(null);
+
+  const handleGenerateWithAI = async (section: string): Promise<string> => {
+    if (onGenerateWithAI) {
+      await onGenerateWithAI(section);
+      return "";
+    }
+    return "";
+  };
 
   const handleDownloadPDF = () => {
     const printWindow = window.open('', '_blank');
@@ -100,7 +108,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
           data={data} 
           settings={settings} 
           onUpdateData={onDataChange}
-          onGenerateWithAI={onGenerateWithAI}
+          onGenerateWithAI={handleGenerateWithAI}
         />
       ) : (
         <div className="h-full flex items-center justify-center">
