@@ -97,26 +97,27 @@ export const EditableContent: React.FC<EditableContentProps> = ({
 
   return (
     <div 
-      className="group relative p-2 rounded-md transition-all duration-200 hover:bg-gray-50 cursor-text"
+      className="group relative cursor-text rounded-md transition-all duration-200"
       onClick={() => setIsEditing(true)}
+      onMouseEnter={() => setShowToolkit(true)}
+      onMouseLeave={() => setShowToolkit(false)}
     >
-      <div className={`${className} relative`}>
+      <div className={`${className} relative hover:bg-gray-50/50 p-1 rounded`}>
         {content ? (
           <p className="whitespace-pre-line">{content}</p>
         ) : (
           <p className="text-gray-400 italic">No content. Click to add.</p>
         )}
-        <Button
-          size="sm"
-          variant="ghost"
-          className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsEditing(true);
-          }}
-        >
-          <Edit3 className="h-4 w-4 text-resume-purple" />
-        </Button>
+        {onGenerateWithAI && (
+          <div className={`absolute -top-12 left-0 z-10 transform transition-all duration-300 ease-out ${
+            showToolkit ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+          }`}>
+            <AIHoverToolkit 
+              onComplete={handleGenerate}
+              onAddChanges={handleContinue}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

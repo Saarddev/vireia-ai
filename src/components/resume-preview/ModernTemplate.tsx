@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from "@/lib/utils";
 import EditableContent from './EditableResumePreview';
@@ -15,9 +16,27 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
   onUpdateData,
   onGenerateWithAI
 }) => {
-  const handleSummaryUpdate = (newSummary: string) => {
+  const handleNameUpdate = (name: string) => {
     if (onUpdateData) {
-      onUpdateData("summary", newSummary);
+      onUpdateData("personal", { ...data.personal, name });
+    }
+  };
+
+  const handleTitleUpdate = (title: string) => {
+    if (onUpdateData) {
+      onUpdateData("personal", { ...data.personal, title });
+    }
+  };
+
+  const handleContactUpdate = (field: string, value: string) => {
+    if (onUpdateData) {
+      onUpdateData("personal", { ...data.personal, [field]: value });
+    }
+  };
+
+  const handleSummaryUpdate = (summary: string) => {
+    if (onUpdateData) {
+      onUpdateData("summary", summary);
     }
   };
 
@@ -51,24 +70,59 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
     )}>
       <div className="p-4">
         <div className="border-b border-resume-purple pb-4 mb-4">
-          <h1 className="text-2xl font-bold text-gray-800">{data.personal.name}</h1>
-          <p className="text-resume-purple font-medium">{data.personal.title}</p>
+          <EditableContent 
+            content={data.personal.name}
+            onSave={handleNameUpdate}
+            className="text-2xl font-bold text-gray-800"
+            onGenerateWithAI={() => onGenerateWithAI?.("personal-name")}
+          />
+          <EditableContent 
+            content={data.personal.title}
+            onSave={handleTitleUpdate}
+            className="text-resume-purple font-medium"
+            onGenerateWithAI={() => onGenerateWithAI?.("personal-title")}
+          />
           <div className="flex flex-wrap mt-2 text-sm text-gray-600 gap-3">
-            <span>{data.personal.email}</span>
+            <EditableContent 
+              content={data.personal.email}
+              onSave={(value) => handleContactUpdate("email", value)}
+              className="inline"
+              onGenerateWithAI={() => onGenerateWithAI?.("personal-contact")}
+            />
             <span>|</span>
-            <span>{data.personal.phone}</span>
+            <EditableContent 
+              content={data.personal.phone}
+              onSave={(value) => handleContactUpdate("phone", value)}
+              className="inline"
+              onGenerateWithAI={() => onGenerateWithAI?.("personal-contact")}
+            />
             <span>|</span>
-            <span>{data.personal.location}</span>
+            <EditableContent 
+              content={data.personal.location}
+              onSave={(value) => handleContactUpdate("location", value)}
+              className="inline"
+              onGenerateWithAI={() => onGenerateWithAI?.("personal-contact")}
+            />
             {data.personal.linkedin && (
               <>
                 <span>|</span>
-                <span>{data.personal.linkedin}</span>
+                <EditableContent 
+                  content={data.personal.linkedin}
+                  onSave={(value) => handleContactUpdate("linkedin", value)}
+                  className="inline"
+                  onGenerateWithAI={() => onGenerateWithAI?.("personal-contact")}
+                />
               </>
             )}
             {data.personal.website && (
               <>
                 <span>|</span>
-                <span>{data.personal.website}</span>
+                <EditableContent 
+                  content={data.personal.website}
+                  onSave={(value) => handleContactUpdate("website", value)}
+                  className="inline"
+                  onGenerateWithAI={() => onGenerateWithAI?.("personal-contact")}
+                />
               </>
             )}
           </div>
@@ -80,7 +134,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
             content={data.summary} 
             onSave={handleSummaryUpdate} 
             className="text-sm text-gray-700"
-            onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("summary") : undefined}
+            onGenerateWithAI={() => onGenerateWithAI?.("summary")}
           />
         </div>
 
@@ -89,15 +143,48 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           {data.experience.map((exp: any, index: number) => (
             <div key={exp.id} className="mb-3">
               <div className="flex justify-between">
-                <h3 className="font-semibold text-gray-800">{exp.title}</h3>
-                <span className="text-sm text-gray-600">{exp.startDate} - {exp.endDate}</span>
+                <EditableContent 
+                  content={exp.title}
+                  onSave={(value) => {
+                    const updatedExp = [...data.experience];
+                    updatedExp[index] = { ...exp, title: value };
+                    onUpdateData?.("experience", updatedExp);
+                  }}
+                  className="font-semibold text-gray-800"
+                  onGenerateWithAI={() => onGenerateWithAI?.(`experience-title-${index}`)}
+                />
+                <span className="text-sm text-gray-600">
+                  <EditableContent 
+                    content={`${exp.startDate} - ${exp.endDate}`}
+                    onSave={(value) => {
+                      const [startDate, endDate] = value.split(" - ");
+                      const updatedExp = [...data.experience];
+                      updatedExp[index] = { ...exp, startDate, endDate };
+                      onUpdateData?.("experience", updatedExp);
+                    }}
+                    className="inline"
+                    onGenerateWithAI={() => onGenerateWithAI?.(`experience-dates-${index}`)}
+                  />
+                </span>
               </div>
-              <div className="text-sm font-medium text-resume-purple">{exp.company}, {exp.location}</div>
+              <div className="text-sm font-medium text-resume-purple">
+                <EditableContent 
+                  content={`${exp.company}, ${exp.location}`}
+                  onSave={(value) => {
+                    const [company, location] = value.split(", ");
+                    const updatedExp = [...data.experience];
+                    updatedExp[index] = { ...exp, company, location };
+                    onUpdateData?.("experience", updatedExp);
+                  }}
+                  className="inline"
+                  onGenerateWithAI={() => onGenerateWithAI?.(`experience-company-${index}`)}
+                />
+              </div>
               <EditableContent 
                 content={exp.description} 
                 onSave={(content) => handleExperienceUpdate(index, content)} 
                 className="text-sm text-gray-700 mt-1"
-                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("experience") : undefined}
+                onGenerateWithAI={() => onGenerateWithAI?.(`experience-${index}`)}
               />
             </div>
           ))}
@@ -108,15 +195,48 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           {data.education.map((edu: any, index: number) => (
             <div key={edu.id} className="mb-3">
               <div className="flex justify-between">
-                <h3 className="font-semibold text-gray-800">{edu.degree}</h3>
-                <span className="text-sm text-gray-600">{edu.startDate} - {edu.endDate}</span>
+                <EditableContent 
+                  content={edu.degree}
+                  onSave={(value) => {
+                    const updatedEdu = [...data.education];
+                    updatedEdu[index] = { ...edu, degree: value };
+                    onUpdateData?.("education", updatedEdu);
+                  }}
+                  className="font-semibold text-gray-800"
+                  onGenerateWithAI={() => onGenerateWithAI?.(`education-degree-${index}`)}
+                />
+                <span className="text-sm text-gray-600">
+                  <EditableContent 
+                    content={`${edu.startDate} - ${edu.endDate}`}
+                    onSave={(value) => {
+                      const [startDate, endDate] = value.split(" - ");
+                      const updatedEdu = [...data.education];
+                      updatedEdu[index] = { ...edu, startDate, endDate };
+                      onUpdateData?.("education", updatedEdu);
+                    }}
+                    className="inline"
+                    onGenerateWithAI={() => onGenerateWithAI?.(`education-dates-${index}`)}
+                  />
+                </span>
               </div>
-              <div className="text-sm font-medium text-resume-purple">{edu.institution}, {edu.location || ""}</div>
+              <div className="text-sm font-medium text-resume-purple">
+                <EditableContent 
+                  content={`${edu.institution}, ${edu.location || ""}`}
+                  onSave={(value) => {
+                    const [institution, location] = value.split(", ");
+                    const updatedEdu = [...data.education];
+                    updatedEdu[index] = { ...edu, institution, location };
+                    onUpdateData?.("education", updatedEdu);
+                  }}
+                  className="inline"
+                  onGenerateWithAI={() => onGenerateWithAI?.(`education-institution-${index}`)}
+                />
+              </div>
               <EditableContent 
                 content={edu.description || ""} 
                 onSave={(content) => handleEducationUpdate(index, content)} 
                 className="text-sm text-gray-700 mt-1"
-                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("education") : undefined}
+                onGenerateWithAI={() => onGenerateWithAI?.(`education-${index}`)}
               />
             </div>
           ))}
@@ -126,23 +246,27 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           <h2 className="text-lg font-bold text-gray-800 mb-2 border-b pb-1">Skills</h2>
           <div className="mb-2">
             <h3 className="font-semibold text-gray-800 text-sm">Technical Skills</h3>
-            <div className="flex flex-wrap gap-1 mt-1">
-              {data.skills.technical.map((skill: string, index: number) => (
-                <span key={index} className="inline-block bg-purple-100 text-resume-purple rounded px-2 py-1 text-xs">
-                  {skill}
-                </span>
-              ))}
-            </div>
+            <EditableContent 
+              content={data.skills.technical.join(", ")}
+              onSave={(value) => {
+                const skills = value.split(",").map(s => s.trim()).filter(Boolean);
+                onUpdateData?.("skills", { ...data.skills, technical: skills });
+              }}
+              className="flex flex-wrap gap-1 mt-1"
+              onGenerateWithAI={() => onGenerateWithAI?.("skills-technical")}
+            />
           </div>
           <div>
             <h3 className="font-semibold text-gray-800 text-sm">Soft Skills</h3>
-            <div className="flex flex-wrap gap-1 mt-1">
-              {data.skills.soft.map((skill: string, index: number) => (
-                <span key={index} className="inline-block bg-gray-100 text-gray-700 rounded px-2 py-1 text-xs">
-                  {skill}
-                </span>
-              ))}
-            </div>
+            <EditableContent 
+              content={data.skills.soft.join(", ")}
+              onSave={(value) => {
+                const skills = value.split(",").map(s => s.trim()).filter(Boolean);
+                onUpdateData?.("skills", { ...data.skills, soft: skills });
+              }}
+              className="flex flex-wrap gap-1 mt-1"
+              onGenerateWithAI={() => onGenerateWithAI?.("skills-soft")}
+            />
           </div>
         </div>
       </div>
