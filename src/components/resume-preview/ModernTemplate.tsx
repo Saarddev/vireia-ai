@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
@@ -16,25 +15,22 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
   onUpdateData,
   onGenerateWithAI
 }) => {
-  // Helper to handle saving edits for section fields
   const handleFieldUpdate = (section: string, field: string, value: string) => {
     if (onUpdateData) {
       onUpdateData(section, { ...data[section], [field]: value });
     }
   };
 
-  // STYLE CONSTANTS
-  const nameClass = "text-[2.7rem] sm:text-5xl font-extrabold text-[#232323] leading-tight tracking-tight pb-0 mb-2";
-  const subtitleClass =
-    "text-xl font-semibold text-[#7061e7] mt-1 transition-all";
+  const nameClass = "text-[2rem] font-bold text-[#232323] leading-tight tracking-tight pb-0 mb-2";
+  const subtitleClass = "text-lg font-semibold text-[#7061e7] mt-1 transition-all";
   const subtitleInputStyle = { color: '#7061e7', fontWeight: 600 };
-  const contactFieldClass =
-    "inline px-2 py-0.5 rounded bg-transparent border-none text-[15px] focus:bg-gray-100 text-[#232323] min-w-[90px] max-w-[190px]";
+  const sectionHeaderClass = "text-base font-bold text-[#232323] mb-2 border-b border-[#e4e4e4] pb-1 tracking-normal";
+  const experienceTitleClass = "font-semibold text-gray-900 text-base";
+  const experienceDateClass = "text-sm text-gray-700 ml-4 whitespace-nowrap min-w-[120px] max-w-[180px]";
+  const experienceDescriptionClass = "text-sm text-gray-700 mt-0.5 font-normal";
+  const contactFieldClass = "inline px-2 py-0.5 rounded bg-transparent border-none text-sm focus:bg-gray-100 text-[#232323] min-w-[90px] max-w-[190px]";
   const contactDivider = <span className="mx-2 text-[#aaa] font-semibold select-none">|</span>;
-  const sectionHeader =
-    "text-lg font-bold text-[#232323] mb-2 border-b border-[#e4e4e4] pb-1 tracking-normal";
 
-  // Horizontal contact row layout for mobile/desktop
   const contactItems = [
     {
       key: 'email',
@@ -80,7 +76,6 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         background: "#fff"
       }}
     >
-      {/* HEADER */}
       <div className="pb-6 border-b-4 border-resume-purple mb-10">
         <EditableField
           value={data.personal.name}
@@ -91,7 +86,6 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           minRows={1}
           maxRows={1}
         />
-        {/* Subtitle - styled output & input both purple */}
         <EditableField
           value={data.personal.title}
           placeholder="Software Engineer"
@@ -103,8 +97,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           inputStyle={subtitleInputStyle}
           outputStyle={subtitleInputStyle}
         />
-        {/* Contact Row: horizontal, responsive, no vertical stacking except on mobile */}
-        <div className="flex flex-wrap text-[15px] text-[#232323] mt-4 gap-y-2 items-center">
+        <div className="flex flex-wrap text-sm text-[#232323] mt-4 gap-y-2 items-center">
           <div className="flex flex-wrap items-center gap-x-1">
             {contactItems.map((item, idx) => (
               <React.Fragment key={item.key}>
@@ -126,30 +119,28 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         </div>
       </div>
 
-      {/* SUMMARY */}
       <div className="mb-12 section-gap">
-        <h2 className={sectionHeader}>Summary</h2>
+        <h2 className={sectionHeaderClass}>Summary</h2>
         <EditableField
           value={data.summary}
           placeholder="Experienced software engineer with 5+ years of experience in full-stack development. ..."
           onSave={val => onUpdateData?.("summary", val)}
-          className="text-[15px] text-gray-800 font-normal leading-normal"
+          className="text-sm text-gray-800 font-normal leading-normal"
           onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("summary") : undefined}
           minRows={2}
           maxRows={4}
         />
       </div>
 
-      {/* EXPERIENCE */}
       <div className="mb-12 section-gap">
-        <h2 className={sectionHeader}>Experience</h2>
+        <h2 className={sectionHeaderClass}>Experience</h2>
         {data.experience.map((exp: any, index: number) => (
           <div key={exp.id} className="mb-8 last:mb-0">
             <div className="flex items-baseline justify-between flex-wrap gap-x-4">
               <EditableField
                 value={exp.title}
                 placeholder="Senior Software Engineer"
-                className="font-semibold text-gray-900 text-[1.07rem]"
+                className={experienceTitleClass}
                 onSave={val => onUpdateData?.("experience", [
                   ...data.experience.slice(0, index),
                   { ...exp, title: val },
@@ -162,7 +153,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
               <EditableField
                 value={`${exp.startDate} - ${exp.endDate}`}
                 placeholder="Jan 2022 - Present"
-                className="inline text-[15px] text-gray-700 ml-4 whitespace-nowrap min-w-[120px] max-w-[180px]"
+                className={experienceDateClass}
                 onSave={val => {
                   const [startDate, endDate] = val.split(" - ");
                   onUpdateData?.("experience", [
@@ -187,7 +178,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                   : exp.company || exp.location || ""
               }
               placeholder="Tech Solutions Inc., San Francisco, CA"
-              className="text-[15px] text-[#7061e7] font-medium my-0.5"
+              className="text-sm text-[#7061e7] font-medium my-0.5"
               onSave={val => {
                 let [company, ...locParts] = val.split(",");
                 const location = locParts.join(",").trim();
@@ -204,7 +195,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
             <EditableField
               value={exp.description}
               placeholder="Lead developer for the company's flagship product..."
-              className="text-[15px] text-gray-700 mt-0.5 font-normal"
+              className={experienceDescriptionClass}
               onSave={val => onUpdateData?.("experience", [
                 ...data.experience.slice(0, index),
                 { ...exp, description: val },
@@ -218,16 +209,15 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         ))}
       </div>
 
-      {/* EDUCATION */}
       <div className="mb-12 section-gap">
-        <h2 className={sectionHeader}>Education</h2>
+        <h2 className={sectionHeaderClass}>Education</h2>
         {data.education.map((edu: any, index: number) => (
           <div key={edu.id} className="mb-8 last:mb-0">
             <div className="flex items-baseline justify-between flex-wrap gap-x-4">
               <EditableField
                 value={edu.degree}
                 placeholder="Master of Science in Computer Science"
-                className="font-semibold text-gray-900 text-[1.07rem]"
+                className={experienceTitleClass}
                 onSave={val => onUpdateData?.("education", [
                   ...data.education.slice(0, index),
                   { ...edu, degree: val },
@@ -240,7 +230,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
               <EditableField
                 value={`${edu.startDate} - ${edu.endDate}`}
                 placeholder="Sep 2017 - May 2019"
-                className="inline text-[15px] text-gray-700 ml-4 whitespace-nowrap min-w-[120px] max-w-[180px]"
+                className={experienceDateClass}
                 onSave={val => {
                   const [startDate, endDate] = val.split(" - ");
                   onUpdateData?.("education", [
@@ -265,7 +255,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                   : edu.institution || edu.location || ""
               }
               placeholder="Stanford University, Stanford, CA"
-              className="text-[15px] text-[#7061e7] font-medium my-0.5"
+              className="text-sm text-[#7061e7] font-medium my-0.5"
               onSave={val => {
                 let [inst, ...locParts] = val.split(",");
                 const location = locParts.join(",").trim();
@@ -282,7 +272,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
             <EditableField
               value={edu.description || ""}
               placeholder="Specialization in Artificial Intelligence. GPA: 3.8/4.0"
-              className="text-[15px] text-gray-700 mt-0.5 font-normal"
+              className={experienceDescriptionClass}
               onSave={val => onUpdateData?.("education", [
                 ...data.education.slice(0, index),
                 { ...edu, description: val },
@@ -296,11 +286,10 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         ))}
       </div>
 
-      {/* SKILLS - DISPLAY ONLY, NO EDIT */}
       <div className="mb-2 pb-2 border-b border-[#e4e4e4] section-gap">
-        <h2 className={sectionHeader}>Skills</h2>
+        <h2 className={sectionHeaderClass}>Skills</h2>
         <div className="mb-2">
-          <div className="font-semibold text-gray-800 text-[15px]">Technical Skills</div>
+          <div className="font-semibold text-gray-800 text-sm">Technical Skills</div>
           <div className="flex flex-wrap gap-2 mt-2">
             {data.skills.technical.map((skill: string, i: number) => (
               <span
@@ -314,7 +303,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           </div>
         </div>
         <div>
-          <div className="font-semibold text-gray-800 text-[15px]">Soft Skills</div>
+          <div className="font-semibold text-gray-800 text-sm">Soft Skills</div>
           <div className="flex flex-wrap gap-2 mt-2">
             {data.skills.soft.map((skill: string, i: number) => (
               <span
