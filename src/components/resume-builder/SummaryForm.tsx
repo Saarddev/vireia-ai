@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Form,
   FormControl,
@@ -28,6 +28,7 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
   onGenerateWithAI,
   isGenerating = false
 }) => {
+  const [showToolkit, setShowToolkit] = useState(false);
   const { toast } = useToast();
   const form = useForm({
     defaultValues: {
@@ -64,16 +65,7 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
   };
 
   return (
-    <div className="relative">
-      <div className="absolute right-0 top-0 z-10">
-        <AIHoverToolkit
-          onExplain={handleExplain}
-          onAskAI={handleAskAI}
-          onComment={handleComment}
-          onIntroduction={handleIntroduction}
-        />
-      </div>
-
+    <div>
       <h2 className="text-xl font-semibold mb-4 flex items-center">
         <FileText className="mr-2 h-5 w-5 text-resume-purple" />
         Professional Summary
@@ -119,15 +111,30 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
             control={form.control}
             name="summary"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="relative">
                 <FormLabel>Professional Summary*</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    placeholder="Summarize your professional background, key skills, and career achievements in 3-5 sentences"
-                    className="min-h-[150px] resize-none"
-                    {...field} 
-                  />
-                </FormControl>
+                <div 
+                  className="relative group"
+                  onMouseEnter={() => setShowToolkit(true)}
+                  onMouseLeave={() => setShowToolkit(false)}
+                >
+                  <div className={`absolute -top-12 right-0 z-10 transform transition-all duration-300 ease-out ${showToolkit ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0 pointer-events-none'}`}>
+                    <AIHoverToolkit 
+                      onComplete={onGenerateWithAI}
+                      onAddChanges={() => {
+                        const currentText = form.getValues("summary");
+                        form.setValue("summary", currentText + "\n");
+                      }}
+                    />
+                  </div>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Summarize your professional background, key skills, and career achievements in 3-5 sentences"
+                      className="min-h-[150px] resize-none"
+                      {...field} 
+                    />
+                  </FormControl>
+                </div>
                 <FormDescription>
                   Keep your summary concise (50-200 words) and focused on your most relevant qualifications.
                 </FormDescription>
