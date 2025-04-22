@@ -92,7 +92,7 @@ export function useResumeData(resumeId?: string) {
           if (typeof resume.content === "string") {
             content = JSON.parse(resume.content) as ResumeData;
           } else if (typeof resume.content === "object" && resume.content !== null) {
-            content = resume.content as ResumeData;
+            content = resume.content as unknown as ResumeData;
           }
         } catch (e) {
           console.error('Error parsing resume content:', e);
@@ -103,7 +103,7 @@ export function useResumeData(resumeId?: string) {
           if (typeof resume.settings === "string") {
             settings = JSON.parse(resume.settings) as ResumeSettings;
           } else if (typeof resume.settings === "object" && resume.settings !== null) {
-            settings = resume.settings as ResumeSettings;
+            settings = resume.settings as unknown as ResumeSettings;
           }
         } catch (e) {
           console.error('Error parsing resume settings:', e);

@@ -26,7 +26,9 @@ const AIHoverMenu: React.FC<AIHoverMenuProps> = ({
   return (
     <HoverCard openDelay={200}>
       <HoverCardTrigger asChild>
-        {trigger}
+        <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity">
+          {trigger}
+        </div>
       </HoverCardTrigger>
       <HoverCardContent className="w-72 p-3">
         <div className="space-y-3">

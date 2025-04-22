@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Form,
@@ -11,7 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { FileText, Wand2 } from 'lucide-react';
 import { useForm } from "react-hook-form";
-import { Card } from "@/components/ui/card";
 import AIHoverMenu from './AIHoverMenu';
 
 interface SummaryFormProps {
@@ -54,8 +54,15 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
             name="summary"
             render={({ field }) => (
               <FormItem>
-                <div className="flex justify-between items-center">
-                  <FormLabel>Professional Summary*</FormLabel>
+                <FormLabel>Professional Summary*</FormLabel>
+                <div className="relative group">
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Summarize your professional background, key skills, and career achievements in 3-5 sentences"
+                      className="min-h-[150px] resize-none pr-10"
+                      {...field} 
+                    />
+                  </FormControl>
                   <AIHoverMenu
                     isGenerating={isGenerating}
                     onGenerate={onGenerateWithAI}
@@ -67,13 +74,6 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
                     }
                   />
                 </div>
-                <FormControl>
-                  <Textarea 
-                    placeholder="Summarize your professional background, key skills, and career achievements in 3-5 sentences"
-                    className="min-h-[150px] resize-none"
-                    {...field} 
-                  />
-                </FormControl>
                 <FormDescription>
                   Keep your summary concise (50-200 words) and focused on your most relevant qualifications.
                 </FormDescription>
