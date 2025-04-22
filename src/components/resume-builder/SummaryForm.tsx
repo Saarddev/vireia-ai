@@ -10,16 +10,23 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { FileText, Wand2 } from 'lucide-react';
+import { FileText, Wand2, Loader } from 'lucide-react';
 import { useForm } from "react-hook-form";
 import { Card } from "@/components/ui/card";
 
 interface SummaryFormProps {
   data: string;
   onChange: (data: string) => void;
+  onGenerateWithAI: () => Promise<void>;
+  isGenerating?: boolean;
 }
 
-const SummaryForm: React.FC<SummaryFormProps> = ({ data, onChange }) => {
+const SummaryForm: React.FC<SummaryFormProps> = ({ 
+  data, 
+  onChange,
+  onGenerateWithAI,
+  isGenerating = false
+}) => {
   const form = useForm({
     defaultValues: {
       summary: data
@@ -48,8 +55,24 @@ const SummaryForm: React.FC<SummaryFormProps> = ({ data, onChange }) => {
             <p className="text-xs text-resume-gray mt-1">
               Let our AI help you craft a compelling professional summary based on your experience and skills.
             </p>
-            <Button size="sm" variant="outline" className="mt-2 border-resume-purple text-resume-purple hover:bg-resume-purple hover:text-white">
-              <Wand2 className="mr-2 h-3 w-3" /> Generate Summary
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="mt-2 border-resume-purple text-resume-purple hover:bg-resume-purple hover:text-white transition-all duration-300"
+              onClick={onGenerateWithAI}
+              disabled={isGenerating}
+            >
+              {isGenerating ? (
+                <>
+                  <Loader className="mr-2 h-3 w-3 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="mr-2 h-3 w-3" />
+                  Generate Summary
+                </>
+              )}
             </Button>
           </div>
         </div>

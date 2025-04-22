@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -96,6 +95,7 @@ const ResumeBuilder = () => {
         return (
           <SummaryForm 
             {...formProps}
+            isGenerating={aiGenerating}
             onGenerateWithAI={async () => {
               const summary = await generateSummary(
                 resumeData.experience.map(exp => exp.description),
@@ -115,6 +115,7 @@ const ResumeBuilder = () => {
         return (
           <SkillsForm 
             {...formProps}
+            isGenerating={aiGenerating}
             onExtractSkills={async () => {
               const skills = await extractSkills(
                 resumeData.experience.map(exp => exp.description)
@@ -145,6 +146,8 @@ const ResumeBuilder = () => {
           aiEnabled={aiEnabled}
           onSave={handleSave}
           onAIToggle={handleAIToggle}
+          onDownload={() => {}}
+          onShare={() => {}}
         />
 
         <div className="flex-1 flex">
@@ -155,6 +158,7 @@ const ResumeBuilder = () => {
               aiEnabled={aiEnabled}
               aiGenerating={aiGenerating}
               onSectionChange={setActiveSection}
+              onGenerateWithAI={() => {}}
             />
           </Sidebar>
 

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,8 @@ import {
   LayoutPanelLeft, 
   Settings, 
   Wand2,
-  CloudLightning
+  CloudLightning,
+  Loader
 } from 'lucide-react';
 
 interface BuilderSidebarProps {
@@ -34,7 +34,7 @@ interface BuilderSidebarProps {
   aiEnabled: boolean;
   aiGenerating: boolean;
   onSectionChange: (section: string) => void;
-  onGenerateWithAI: () => void;
+  onGenerateWithAI?: () => void;
 }
 
 const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
@@ -176,16 +176,26 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
         <Button 
           variant="outline" 
           size="sm"
-          className="w-full justify-center gap-2 border-resume-purple/20 text-resume-purple hover:bg-resume-purple/10 hover:border-resume-purple dark:border-resume-purple-light/20 dark:text-resume-purple-light dark:hover:bg-resume-purple-light/10"
+          className={cn(
+            "w-full justify-center gap-2 border-resume-purple/20 text-resume-purple",
+            "hover:bg-resume-purple/10 hover:border-resume-purple transition-all duration-300",
+            "dark:border-resume-purple-light/20 dark:text-resume-purple-light dark:hover:bg-resume-purple-light/10",
+            aiGenerating && "animate-pulse"
+          )}
           onClick={onGenerateWithAI}
           disabled={aiGenerating || !aiEnabled}
         >
           {aiGenerating ? (
-            <CloudLightning className="h-4 w-4 animate-pulse" />
+            <>
+              <Loader className="h-4 w-4 animate-spin" />
+              <span>Generating...</span>
+            </>
           ) : (
-            <Wand2 className="h-4 w-4" />
+            <>
+              <Wand2 className="h-4 w-4" />
+              <span>Generate with AI</span>
+            </>
           )}
-          {aiGenerating ? "Generating..." : "Generate with AI"}
         </Button>
       </SidebarFooter>
     </>
