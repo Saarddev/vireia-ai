@@ -14,6 +14,8 @@ interface EditableFieldProps {
   autoFocus?: boolean;
   maxRows?: number;
   minRows?: number;
+  inputStyle?: React.CSSProperties;
+  outputStyle?: React.CSSProperties;
 }
 
 const EditableField: React.FC<EditableFieldProps> = ({
@@ -25,6 +27,8 @@ const EditableField: React.FC<EditableFieldProps> = ({
   autoFocus = false,
   maxRows = 5,
   minRows = 1,
+  inputStyle = {},
+  outputStyle = {}
 }) => {
   const [editing, setEditing] = useState(false);
   const [localValue, setLocalValue] = useState(value);
@@ -42,7 +46,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
     if (editing && textareaRef.current) {
       textareaRef.current.style.height = "auto";
       const scrollHeight = textareaRef.current.scrollHeight;
-      const rowHeight = 20; // Approximate line height
+      const rowHeight = 20;
       const maxHeight = rowHeight * maxRows;
       const minHeight = rowHeight * minRows;
       const newHeight = Math.max(Math.min(scrollHeight, maxHeight), minHeight);
@@ -58,7 +62,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
       setStreamingText(current + generated.slice(0, i));
       if (i < generated.length) {
         i++;
-        setTimeout(next, 18); // ~55 wpm
+        setTimeout(next, 18);
       } else {
         setStreamingText(null);
         setLocalValue(current + generated);
@@ -113,7 +117,6 @@ const EditableField: React.FC<EditableFieldProps> = ({
     if (localValue !== value) onSave(localValue.trim());
   };
 
-  // Keyboard shortcuts
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -153,7 +156,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             readOnly={streamingText !== null}
-            style={{ fontFamily: "inherit" }}
+            style={{ fontFamily: "inherit", ...inputStyle }}
             autoFocus={autoFocus}
             rows={minRows}
           />
@@ -175,8 +178,6 @@ const EditableField: React.FC<EditableFieldProps> = ({
               <span className="text-gray-500">Cancel</span>
             </Button>
           </div>
-          
-          {/* AI generation controls */}
           {onGenerateWithAI && (
             <div className="absolute -right-2 -bottom-7 z-10 animate-fade-in">
               <AIHoverToolkit
@@ -186,7 +187,6 @@ const EditableField: React.FC<EditableFieldProps> = ({
               />
             </div>
           )}
-          
           {isGenerating && (
             <span className="absolute -left-5 top-1 animate-spin text-resume-purple">
               <Loader2 size={14} />
@@ -200,6 +200,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
             "block transition-colors px-1 -mx-1 rounded cursor-text hover:bg-gray-50/70",
             value ? "text-gray-800" : "text-gray-400 italic"
           )}
+          style={outputStyle}
         >
           {value || placeholder}
         </span>

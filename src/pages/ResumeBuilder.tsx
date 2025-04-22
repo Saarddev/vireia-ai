@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -85,40 +84,45 @@ const ResumeBuilder = () => {
     }
   };
 
-  const handleGenerateWithAI = async (section: string) => {
+  const handleGenerateWithAI = async (section: string): Promise<string> => {
     if (!aiEnabled) {
       toast({
         title: "AI is disabled",
         description: "Please enable AI to use this feature",
         variant: "destructive"
       });
-      return;
+      return "";
     }
 
     try {
       switch (section) {
-        case "summary":
+        case "summary": {
           const summary = await generateSummary(
             resumeData.experience.map(exp => exp.description),
             [...resumeData.skills.technical, ...resumeData.skills.soft]
           );
           if (summary) {
             handleDataChange("summary", summary);
+            return summary;
           }
           break;
-        case "skills":
+        }
+        case "skills": {
           const skills = await extractSkills(
             resumeData.experience.map(exp => exp.description)
           );
           if (skills) {
             handleDataChange("skills", skills);
+            return "";
           }
           break;
+        }
         default:
           toast({
             title: "AI Generation",
             description: `AI generation not available for ${section} section`,
           });
+          return "";
       }
     } catch (error) {
       console.error('Error generating with AI:', error);
@@ -127,7 +131,9 @@ const ResumeBuilder = () => {
         description: "Failed to generate with AI. Please try again.",
         variant: "destructive"
       });
+      return "";
     }
+    return "";
   };
 
   const renderActiveForm = () => {
@@ -145,9 +151,7 @@ const ResumeBuilder = () => {
             data={resumeData.summary}
             onChange={(data) => handleDataChange("summary", data)}
             isGenerating={isGenerating}
-            onGenerateWithAI={async () => {
-              await handleGenerateWithAI("summary");
-            }}
+            onGenerateWithAI={async () => { return await handleGenerateWithAI("summary"); }}
           />
         );
       case "experience":
@@ -174,9 +178,7 @@ const ResumeBuilder = () => {
             data={resumeData.skills}
             onChange={(data) => handleDataChange("skills", data)}
             isGenerating={isGenerating}
-            onExtractSkills={async () => {
-              await handleGenerateWithAI("skills");
-            }}
+            onExtractSkills={async () => { return await handleGenerateWithAI("skills"); }}
           />
         );
       case "templates":

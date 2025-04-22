@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
@@ -22,45 +23,65 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
     }
   };
 
-  const handleNestedFieldUpdate = (section: string, index: number, field: string, value: string) => {
-    if (onUpdateData) {
-      const updated = [...data[section]];
-      updated[index] = { ...updated[index], [field]: value };
-      onUpdateData(section, updated);
-    }
-  };
-
-  const wrapAIPromise = (sectionKey: string): (() => Promise<string>) => {
-    return async () => {
-      if (onGenerateWithAI) {
-        const result = await onGenerateWithAI(sectionKey);
-        return result ?? "";
-      }
-      return "";
-    };
-  };
-
   // STYLE CONSTANTS
-  const nameClass = "text-4xl font-bold text-[#232323] leading-tight tracking-tight";
+  const nameClass = "text-[2.7rem] sm:text-5xl font-extrabold text-[#232323] leading-tight tracking-tight pb-0 mb-2";
   const subtitleClass =
     "text-xl font-semibold text-[#7061e7] mt-1 transition-all";
+  const subtitleInputStyle = { color: '#7061e7', fontWeight: 600 };
   const contactFieldClass =
-    "inline px-1 py-0 rounded bg-transparent border-none text-[15px] focus:bg-gray-50 text-[#232323] min-w-[90px] max-w-[190px]";
+    "inline px-2 py-0.5 rounded bg-transparent border-none text-[15px] focus:bg-gray-100 text-[#232323] min-w-[90px] max-w-[190px]";
   const contactDivider = <span className="mx-2 text-[#aaa] font-semibold select-none">|</span>;
   const sectionHeader =
     "text-lg font-bold text-[#232323] mb-2 border-b border-[#e4e4e4] pb-1 tracking-normal";
 
+  // Horizontal contact row layout for mobile/desktop
+  const contactItems = [
+    {
+      key: 'email',
+      value: data.personal.email,
+      placeholder: "john.smith@example.com",
+      ai: "personal-email"
+    },
+    {
+      key: 'phone',
+      value: data.personal.phone,
+      placeholder: "(555) 123-4567",
+      ai: "personal-phone"
+    },
+    {
+      key: 'location',
+      value: data.personal.location,
+      placeholder: "San Francisco, CA",
+      ai: "personal-location"
+    },
+    ...(data.personal.linkedin ? [{
+      key: 'linkedin',
+      value: data.personal.linkedin,
+      placeholder: "linkedin.com/in/johnsmith",
+      ai: "personal-linkedin"
+    }] : []),
+    ...(data.personal.website ? [{
+      key: 'website',
+      value: data.personal.website,
+      placeholder: "johnsmith.dev",
+      ai: "personal-website"
+    }] : []),
+  ];
+
   return (
     <div
       className={cn(
-        "bg-white rounded-none shadow-none border border-[#e3e3e3] max-w-[720px] mx-auto",
+        "bg-white rounded-2xl shadow-lg border border-[#ede9f7] max-w-[720px] mx-auto",
         settings.fontFamily && `font-[${settings.fontFamily}]`,
         settings.fontSize && `text-[${settings.fontSize}pt]`
       )}
-      style={{ padding: "40px 48px 32px 48px" }}
+      style={{
+        padding: "48px 56px 38px 56px",
+        background: "#fff"
+      }}
     >
       {/* HEADER */}
-      <div className="pb-5 border-b border-[#7B61FF] mb-7">
+      <div className="pb-6 border-b-4 border-resume-purple mb-10">
         <EditableField
           value={data.personal.name}
           placeholder="John Smith"
@@ -70,6 +91,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           minRows={1}
           maxRows={1}
         />
+        {/* Subtitle - styled output & input both purple */}
         <EditableField
           value={data.personal.title}
           placeholder="Software Engineer"
@@ -78,82 +100,34 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-title") : undefined}
           minRows={1}
           maxRows={1}
-          style={{ color: "#7061e7" }}
+          inputStyle={subtitleInputStyle}
+          outputStyle={subtitleInputStyle}
         />
-        {/* Compact horizontal contact row */}
-        <div className="flex flex-wrap text-[15px] text-[#232323] mt-3 items-center gap-x-1">
-          <div className="flex items-center">
-            <EditableField
-              value={data.personal.email}
-              placeholder="john.smith@example.com"
-              className={contactFieldClass}
-              onSave={val => onUpdateData?.("personal", { ...data.personal, email: val })}
-              onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-email") : undefined}
-              minRows={1}
-              maxRows={1}
-            />
-          </div>
-          {contactDivider}
-          <div className="flex items-center">
-            <EditableField
-              value={data.personal.phone}
-              placeholder="(555) 123-4567"
-              className={contactFieldClass}
-              onSave={val => onUpdateData?.("personal", { ...data.personal, phone: val })}
-              onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-phone") : undefined}
-              minRows={1}
-              maxRows={1}
-            />
-          </div>
-          {contactDivider}
-          <div className="flex items-center">
-            <EditableField
-              value={data.personal.location}
-              placeholder="San Francisco, CA"
-              className={contactFieldClass}
-              onSave={val => onUpdateData?.("personal", { ...data.personal, location: val })}
-              onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-location") : undefined}
-              minRows={1}
-              maxRows={1}
-            />
-          </div>
-          {data.personal.linkedin && (
-            <>
-              {contactDivider}
-              <div className="flex items-center">
+        {/* Contact Row: horizontal, responsive, no vertical stacking except on mobile */}
+        <div className="flex flex-wrap text-[15px] text-[#232323] mt-4 gap-y-2 items-center">
+          <div className="flex flex-wrap items-center gap-x-1">
+            {contactItems.map((item, idx) => (
+              <React.Fragment key={item.key}>
+                {idx > 0 && contactDivider}
                 <EditableField
-                  value={data.personal.linkedin}
-                  placeholder="linkedin.com/in/johnsmith"
+                  value={item.value}
+                  placeholder={item.placeholder}
                   className={contactFieldClass}
-                  onSave={val => onUpdateData?.("personal", { ...data.personal, linkedin: val })}
-                  onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-linkedin") : undefined}
+                  onSave={val =>
+                    onUpdateData?.("personal", { ...data.personal, [item.key]: val })
+                  }
+                  onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(item.ai) : undefined}
                   minRows={1}
                   maxRows={1}
                 />
-              </div>
-            </>
-          )}
-          {data.personal.website && (
-            <>
-              {contactDivider}
-              <div className="flex items-center">
-                <EditableField
-                  value={data.personal.website}
-                  placeholder="johnsmith.dev"
-                  className={contactFieldClass}
-                  onSave={val => onUpdateData?.("personal", { ...data.personal, website: val })}
-                  onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-website") : undefined}
-                  minRows={1}
-                  maxRows={1}
-                />
-              </div>
-            </>
-          )}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* SUMMARY */}
-      <div className="mb-7">
+      <div className="mb-12 section-gap">
         <h2 className={sectionHeader}>Summary</h2>
         <EditableField
           value={data.summary}
@@ -167,15 +141,15 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
       </div>
 
       {/* EXPERIENCE */}
-      <div className="mb-7">
+      <div className="mb-12 section-gap">
         <h2 className={sectionHeader}>Experience</h2>
         {data.experience.map((exp: any, index: number) => (
-          <div key={exp.id} className="mb-5 last:mb-0">
-            <div className="flex items-baseline justify-between">
+          <div key={exp.id} className="mb-8 last:mb-0">
+            <div className="flex items-baseline justify-between flex-wrap gap-x-4">
               <EditableField
                 value={exp.title}
                 placeholder="Senior Software Engineer"
-                className="font-semibold text-gray-900 text-[16px]"
+                className="font-semibold text-gray-900 text-[1.07rem]"
                 onSave={val => onUpdateData?.("experience", [
                   ...data.experience.slice(0, index),
                   { ...exp, title: val },
@@ -245,15 +219,15 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
       </div>
 
       {/* EDUCATION */}
-      <div className="mb-7">
+      <div className="mb-12 section-gap">
         <h2 className={sectionHeader}>Education</h2>
         {data.education.map((edu: any, index: number) => (
-          <div key={edu.id} className="mb-5 last:mb-0">
-            <div className="flex items-baseline justify-between">
+          <div key={edu.id} className="mb-8 last:mb-0">
+            <div className="flex items-baseline justify-between flex-wrap gap-x-4">
               <EditableField
                 value={edu.degree}
                 placeholder="Master of Science in Computer Science"
-                className="font-semibold text-gray-900 text-[16px]"
+                className="font-semibold text-gray-900 text-[1.07rem]"
                 onSave={val => onUpdateData?.("education", [
                   ...data.education.slice(0, index),
                   { ...edu, degree: val },
@@ -322,8 +296,8 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         ))}
       </div>
 
-      {/* SKILLS - NO EDIT, JUST SHOW CHIPS */}
-      <div className="mb-2 pb-2 border-b border-[#e4e4e4]">
+      {/* SKILLS - DISPLAY ONLY, NO EDIT */}
+      <div className="mb-2 pb-2 border-b border-[#e4e4e4] section-gap">
         <h2 className={sectionHeader}>Skills</h2>
         <div className="mb-2">
           <div className="font-semibold text-gray-800 text-[15px]">Technical Skills</div>
