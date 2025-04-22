@@ -29,9 +29,8 @@ export const EditableContent: React.FC<EditableContentProps> = ({
     setIsEditing(false);
   };
 
-  const handleGenerate = async (e?: React.MouseEvent) => {
-    if (e) e.preventDefault();
-    if (!onGenerateWithAI) return;
+  const handleGenerate = async () => {
+    if (!onGenerateWithAI) return "";
     
     setIsGenerating(true);
     try {
@@ -39,12 +38,13 @@ export const EditableContent: React.FC<EditableContentProps> = ({
     } finally {
       setIsGenerating(false);
     }
+    return "";
   };
 
-  const handleContinue = (e?: React.MouseEvent) => {
-    if (e) e.preventDefault();
+  const handleContinue = () => {
     const newText = editedContent + "\n";
     setEditedContent(newText);
+    return "";
   };
 
   if (isEditing) {
@@ -55,7 +55,7 @@ export const EditableContent: React.FC<EditableContentProps> = ({
           onMouseEnter={() => setShowToolkit(true)}
           onMouseLeave={() => setShowToolkit(false)}
         >
-          <div className={`absolute -top-12 left-0 z-10 transform transition-all duration-300 ease-out ${
+          <div className={`absolute -top-10 left-0 z-10 transform transition-all duration-300 ease-out ${
             showToolkit ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
           }`}>
             {onGenerateWithAI && (
@@ -106,10 +106,10 @@ export const EditableContent: React.FC<EditableContentProps> = ({
         {content ? (
           <p className="whitespace-pre-line">{content}</p>
         ) : (
-          <p className="text-gray-400 italic">No content. Click to add.</p>
+          <p className="text-gray-400 italic">Click to edit</p>
         )}
         {onGenerateWithAI && (
-          <div className={`absolute -top-12 left-0 z-10 transform transition-all duration-300 ease-out ${
+          <div className={`absolute -top-10 left-0 z-10 transform transition-all duration-300 ease-out ${
             showToolkit ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
           }`}>
             <AIHoverToolkit 

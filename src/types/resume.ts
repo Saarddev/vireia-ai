@@ -1,4 +1,3 @@
-
 export interface PersonalInfo {
   name: string;
   title: string;
@@ -24,6 +23,7 @@ export interface Education {
   institution: string;
   degree: string;
   field: string;
+  location: string;
   startDate: string;
   endDate: string;
   description: string;

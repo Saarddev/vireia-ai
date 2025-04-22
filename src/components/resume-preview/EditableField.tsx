@@ -67,9 +67,9 @@ const EditableField: React.FC<EditableFieldProps> = ({
   };
 
   const handleAIComplete = async () => {
-    if (!onGenerateWithAI) return;
+    if (!onGenerateWithAI) return "";
     setIsGenerating(true);
-    let result: string | undefined;
+    let result: string | undefined = "";
     try {
       result = await onGenerateWithAI();
       // If streaming, show streaming effect instead of instant insert
@@ -79,12 +79,13 @@ const EditableField: React.FC<EditableFieldProps> = ({
     } finally {
       setIsGenerating(false);
     }
+    return result || "";
   };
 
   const handleAIContinue = async () => {
-    if (!onGenerateWithAI) return;
+    if (!onGenerateWithAI) return "";
     setIsGenerating(true);
-    let result: string | undefined;
+    let result: string | undefined = "";
     try {
       result = await onGenerateWithAI();
       // Simulate "continue": append only new content, smoothly
@@ -95,6 +96,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
     } finally {
       setIsGenerating(false);
     }
+    return result || "";
   };
 
   const startEdit = () => {
@@ -122,7 +124,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
   return (
     <div
       className={cn(
-        "relative w-full group px-1 rounded hover:bg-resume-purple/10 transition-colors min-h-[32px]",
+        "relative w-full group transition-colors min-h-[24px]",
         className
       )}
       tabIndex={0}
@@ -142,24 +144,23 @@ const EditableField: React.FC<EditableFieldProps> = ({
           <textarea
             ref={textareaRef}
             className={cn(
-              "block w-full min-h-[32px] max-h-[160px] rounded-xl px-4 py-2 text-base border border-gray-200 focus:border-resume-purple focus:ring-1 focus:ring-resume-purple bg-white/90 shadow transition-all outline-0 resize-none",
+              "block w-full min-h-[24px] px-2 py-1 text-sm rounded border border-gray-200 focus:border-resume-purple focus:ring-1 focus:ring-resume-purple bg-white/95 shadow-sm transition-all outline-0 resize-none",
               isGenerating && "opacity-70",
-              "placeholder:text-gray-400",
-              "font-medium",
+              "placeholder:text-gray-400"
             )}
             value={streamingText !== null ? streamingText : localValue}
             onChange={e => setLocalValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             readOnly={streamingText !== null}
-            style={{ fontFamily: "inherit", lineHeight: "1.3" }}
+            style={{ fontFamily: "inherit", lineHeight: "1.5" }}
             autoFocus={autoFocus}
             rows={minRows}
             aria-label={placeholder}
           />
           {/* Save/Cancel reveal on focus */}
-          <div className="absolute -right-2 -top-10 z-20 flex gap-2 opacity-80 bg-white/90 rounded shadow px-2 py-1 transition-all animate-fade-in pointer-events-auto">
-            <Button variant="ghost" size="sm" onClick={handleSave} disabled={isGenerating} tabIndex={-1}>
+          <div className="absolute -right-1 -top-8 z-20 flex gap-1 opacity-90 bg-white/95 rounded shadow-sm px-1 py-0.5 transition-all animate-fade-in pointer-events-auto">
+            <Button variant="ghost" size="sm" onClick={handleSave} disabled={isGenerating} tabIndex={-1} className="h-6 text-xs px-2">
               <span className="font-semibold text-resume-purple">Save</span>
             </Button>
             <Button
@@ -171,23 +172,24 @@ const EditableField: React.FC<EditableFieldProps> = ({
               }}
               disabled={isGenerating}
               tabIndex={-1}
+              className="h-6 text-xs px-2"
             >
               <span className="text-gray-500">Cancel</span>
             </Button>
           </div>
           {/* AI toolkit always visible in edit mode */}
           {onGenerateWithAI && (
-            <div className="absolute -right-2 -bottom-10 z-10 animate-fade-in">
+            <div className="absolute -right-1 -bottom-8 z-10 animate-fade-in">
               <AIHoverToolkit
                 onComplete={handleAIComplete}
                 onAddChanges={handleAIContinue}
-                className="shadow-lg"
+                className="shadow-sm scale-90"
               />
             </div>
           )}
           {isGenerating && (
-            <span className="absolute -left-8 top-2 animate-spin text-resume-purple">
-              <Loader2 size={20} />
+            <span className="absolute -left-6 top-1.5 animate-spin text-resume-purple">
+              <Loader2 size={16} />
             </span>
           )}
         </div>
@@ -195,28 +197,20 @@ const EditableField: React.FC<EditableFieldProps> = ({
         <span
           className={cn(
             "block transition-all",
-            value
-              ? "cursor-pointer hover:bg-resume-purple/10 rounded text-gray-900 before:content-[''] before:block before:absolute before:-inset-1 before:rounded before:bg-resume-purple/10 before:opacity-0 group-hover:before:opacity-100"
-              : "text-gray-400 italic",
-            "px-2 py-1",
-            "font-medium",
+            value ? "text-gray-900" : "text-gray-400 italic",
             "relative"
           )}
-          style={{
-            minHeight: 32,
-            transition: "background .18s cubic-bezier(.4,0,.2,1), box-shadow .18s cubic-bezier(.4,0,.2,1)"
-          }}
         >
           {value ? (
-            <span>{value}</span>
+            <span className="py-0.5">{value}</span>
           ) : (
-            <span>{placeholder}</span>
+            <span className="py-0.5">{placeholder}</span>
           )}
           {/* Pen icon appears on hover/focus */}
           <span className={cn(
-            "absolute right-0 top-1 text-resume-purple/60 opacity-0 group-hover:opacity-70 transition-opacity pointer-events-none"
+            "absolute right-0 top-0.5 text-resume-purple/60 opacity-0 group-hover:opacity-70 transition-opacity pointer-events-none"
           )}>
-            <SquarePen className="w-4 h-4" />
+            <SquarePen className="w-3 h-3" />
           </span>
         </span>
       )}
