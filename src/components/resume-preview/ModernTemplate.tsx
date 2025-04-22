@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from "@/lib/utils";
 import EditableContent from './EditableResumePreview';
@@ -6,7 +5,6 @@ import EditableContent from './EditableResumePreview';
 interface ModernTemplateProps {
   data: any;
   settings?: any;
-  isEditable?: boolean;
   onUpdateData?: (section: string, value: any) => void;
   onGenerateWithAI?: (section: string) => Promise<void>;
 }
@@ -14,7 +12,6 @@ interface ModernTemplateProps {
 const ModernTemplate: React.FC<ModernTemplateProps> = ({ 
   data, 
   settings = {},
-  isEditable = false,
   onUpdateData,
   onGenerateWithAI
 }) => {
@@ -78,31 +75,17 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         </div>
 
         <div className="mb-4">
-          <h2 className="text-lg font-bold text-gray-800 mb-2 border-b pb-1 flex justify-between items-center">
-            <span>Summary</span>
-            {isEditable && (
-              <span className="text-xs text-gray-500">(Click to edit)</span>
-            )}
-          </h2>
-          {isEditable && onUpdateData ? (
-            <EditableContent 
-              content={data.summary} 
-              onSave={handleSummaryUpdate} 
-              className="text-sm text-gray-700"
-              onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("summary") : undefined}
-            />
-          ) : (
-            <p className="text-sm text-gray-700">{data.summary}</p>
-          )}
+          <h2 className="text-lg font-bold text-gray-800 mb-2 border-b pb-1">Summary</h2>
+          <EditableContent 
+            content={data.summary} 
+            onSave={handleSummaryUpdate} 
+            className="text-sm text-gray-700"
+            onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("summary") : undefined}
+          />
         </div>
 
         <div className="mb-4">
-          <h2 className="text-lg font-bold text-gray-800 mb-2 border-b pb-1 flex justify-between items-center">
-            <span>Experience</span>
-            {isEditable && (
-              <span className="text-xs text-gray-500">(Click to edit)</span>
-            )}
-          </h2>
+          <h2 className="text-lg font-bold text-gray-800 mb-2 border-b pb-1">Experience</h2>
           {data.experience.map((exp: any, index: number) => (
             <div key={exp.id} className="mb-3">
               <div className="flex justify-between">
@@ -110,42 +93,31 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                 <span className="text-sm text-gray-600">{exp.startDate} - {exp.endDate}</span>
               </div>
               <div className="text-sm font-medium text-resume-purple">{exp.company}, {exp.location}</div>
-              {isEditable && onUpdateData ? (
-                <EditableContent 
-                  content={exp.description} 
-                  onSave={(content) => handleExperienceUpdate(index, content)} 
-                  className="text-sm text-gray-700 mt-1"
-                />
-              ) : (
-                <p className="text-sm text-gray-700 mt-1">{exp.description}</p>
-              )}
+              <EditableContent 
+                content={exp.description} 
+                onSave={(content) => handleExperienceUpdate(index, content)} 
+                className="text-sm text-gray-700 mt-1"
+                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("experience") : undefined}
+              />
             </div>
           ))}
         </div>
 
         <div className="mb-4">
-          <h2 className="text-lg font-bold text-gray-800 mb-2 border-b pb-1 flex justify-between items-center">
-            <span>Education</span>
-            {isEditable && (
-              <span className="text-xs text-gray-500">(Click to edit)</span>
-            )}
-          </h2>
+          <h2 className="text-lg font-bold text-gray-800 mb-2 border-b pb-1">Education</h2>
           {data.education.map((edu: any, index: number) => (
             <div key={edu.id} className="mb-3">
               <div className="flex justify-between">
                 <h3 className="font-semibold text-gray-800">{edu.degree}</h3>
                 <span className="text-sm text-gray-600">{edu.startDate} - {edu.endDate}</span>
               </div>
-              <div className="text-sm font-medium text-resume-purple">{edu.institution}, {edu.location}</div>
-              {isEditable && onUpdateData ? (
-                <EditableContent 
-                  content={edu.description || ""} 
-                  onSave={(content) => handleEducationUpdate(index, content)} 
-                  className="text-sm text-gray-700 mt-1"
-                />
-              ) : (
-                <p className="text-sm text-gray-700 mt-1">{edu.description}</p>
-              )}
+              <div className="text-sm font-medium text-resume-purple">{edu.institution}, {edu.location || ""}</div>
+              <EditableContent 
+                content={edu.description || ""} 
+                onSave={(content) => handleEducationUpdate(index, content)} 
+                className="text-sm text-gray-700 mt-1"
+                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("education") : undefined}
+              />
             </div>
           ))}
         </div>

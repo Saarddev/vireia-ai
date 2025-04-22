@@ -23,12 +23,14 @@ export const EditableContent: React.FC<EditableContentProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [showToolkit, setShowToolkit] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     onSave(editedContent);
     setIsEditing(false);
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (!onGenerateWithAI) return;
     
     setIsGenerating(true);
@@ -39,6 +41,12 @@ export const EditableContent: React.FC<EditableContentProps> = ({
     }
   };
 
+  const handleContinue = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    const newText = editedContent + "\n";
+    setEditedContent(newText);
+  };
+
   if (isEditing) {
     return (
       <div className="relative">
@@ -47,20 +55,20 @@ export const EditableContent: React.FC<EditableContentProps> = ({
           onMouseEnter={() => setShowToolkit(true)}
           onMouseLeave={() => setShowToolkit(false)}
         >
-          <div className={`absolute -top-12 right-0 z-10 transform transition-opacity transition-transform duration-300 ease-out ${showToolkit ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+          <div className={`absolute -top-12 left-0 z-10 transform transition-all duration-300 ease-out ${
+            showToolkit ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+          }`}>
             {onGenerateWithAI && (
               <AIHoverToolkit 
                 onComplete={handleGenerate}
-                onAddChanges={() => {
-                  setEditedContent(prev => prev + "\n");
-                }}
+                onAddChanges={handleContinue}
               />
             )}
           </div>
           <Textarea
             value={editedContent}
             onChange={(e) => setEditedContent(e.target.value)}
-            className={`w-full min-h-[100px] p-2 border border-resume-purple focus:ring-resume-purple ${className}`}
+            className={`w-full min-h-[100px] p-2 border border-resume-purple focus:ring-resume-purple transition-all duration-200 ${className}`}
             autoFocus
           />
         </div>
@@ -88,7 +96,10 @@ export const EditableContent: React.FC<EditableContentProps> = ({
   }
 
   return (
-    <div className="group relative">
+    <div 
+      className="group relative p-2 rounded-md transition-all duration-200 hover:bg-gray-50 cursor-text"
+      onClick={() => setIsEditing(true)}
+    >
       <div className={`${className} relative`}>
         {content ? (
           <p className="whitespace-pre-line">{content}</p>
@@ -99,7 +110,10 @@ export const EditableContent: React.FC<EditableContentProps> = ({
           size="sm"
           variant="ghost"
           className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={() => setIsEditing(true)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsEditing(true);
+          }}
         >
           <Edit3 className="h-4 w-4 text-resume-purple" />
         </Button>
