@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { FileText, Wand2 } from 'lucide-react';
+import { FileText, Wand2, Loader } from 'lucide-react';
 import { useForm } from "react-hook-form";
-import AIHoverMenu from './AIHoverMenu';
+import { Card } from "@/components/ui/card";
 
 interface SummaryFormProps {
   data: string;
@@ -47,6 +47,37 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
         Write a compelling summary that highlights your experience and skills
       </p>
 
+      <Card className="p-4 bg-purple-50 border-resume-purple mb-6">
+        <div className="flex items-start">
+          <Wand2 className="h-5 w-5 text-resume-purple mr-2 mt-0.5 flex-shrink-0" />
+          <div>
+            <h3 className="text-sm font-medium text-resume-purple">AI Summary Assistant</h3>
+            <p className="text-xs text-resume-gray mt-1">
+              Let our AI help you craft a compelling professional summary based on your experience and skills.
+            </p>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="mt-2 border-resume-purple text-resume-purple hover:bg-resume-purple hover:text-white transition-all duration-300"
+              onClick={onGenerateWithAI}
+              disabled={isGenerating}
+            >
+              {isGenerating ? (
+                <>
+                  <Loader className="mr-2 h-3 w-3 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="mr-2 h-3 w-3" />
+                  Generate Summary
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </Card>
+
       <Form {...form}>
         <form onChange={form.handleSubmit(handleSubmit)} className="space-y-4">
           <FormField
@@ -55,25 +86,13 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Professional Summary*</FormLabel>
-                <div className="relative group">
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Summarize your professional background, key skills, and career achievements in 3-5 sentences"
-                      className="min-h-[150px] resize-none pr-10"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <AIHoverMenu
-                    isGenerating={isGenerating}
-                    onGenerate={onGenerateWithAI}
-                    description="Generate a compelling professional summary based on your experience and skills."
-                    trigger={
-                      <Button variant="ghost" size="sm" className="h-8 text-resume-purple">
-                        <Wand2 className="h-4 w-4" />
-                      </Button>
-                    }
+                <FormControl>
+                  <Textarea 
+                    placeholder="Summarize your professional background, key skills, and career achievements in 3-5 sentences"
+                    className="min-h-[150px] resize-none"
+                    {...field} 
                   />
-                </div>
+                </FormControl>
                 <FormDescription>
                   Keep your summary concise (50-200 words) and focused on your most relevant qualifications.
                 </FormDescription>

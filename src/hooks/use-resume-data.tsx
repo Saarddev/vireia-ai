@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
@@ -26,7 +27,7 @@ const defaultResumeData: ResumeData = {
   projects: []
 };
 
-export function useResumeData(resumeId?: string) {
+export function useResumeData(resumeId: string | undefined) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
@@ -92,7 +93,7 @@ export function useResumeData(resumeId?: string) {
           if (typeof resume.content === "string") {
             content = JSON.parse(resume.content) as ResumeData;
           } else if (typeof resume.content === "object" && resume.content !== null) {
-            content = resume.content as unknown as ResumeData;
+            content = resume.content as ResumeData;
           }
         } catch (e) {
           console.error('Error parsing resume content:', e);
@@ -103,7 +104,7 @@ export function useResumeData(resumeId?: string) {
           if (typeof resume.settings === "string") {
             settings = JSON.parse(resume.settings) as ResumeSettings;
           } else if (typeof resume.settings === "object" && resume.settings !== null) {
-            settings = resume.settings as unknown as ResumeSettings;
+            settings = resume.settings as ResumeSettings;
           }
         } catch (e) {
           console.error('Error parsing resume settings:', e);
@@ -203,29 +204,28 @@ export function useResumeData(resumeId?: string) {
   };
 
   const handleSave = async () => {
-    if (!resumeId) return;
-
     try {
       const { error } = await supabase
         .from('resumes')
         .update({
           content: resumeData as any,
+          template: selectedTemplate,
           settings: resumeSettings as any,
           updated_at: new Date().toISOString()
         })
         .eq('id', resumeId);
-
+        
       if (error) throw error;
-
+      
       toast({
-        title: "Changes saved",
-        description: "Your resume has been updated successfully."
+        title: "Resume saved",
+        description: "Your resume has been successfully saved."
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving resume:', error);
       toast({
         title: "Error",
-        description: "Failed to save changes. Please try again.",
+        description: "Failed to save resume. Please try again.",
         variant: "destructive"
       });
     }
