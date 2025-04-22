@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Form,
@@ -13,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { FileText, Wand2, Loader } from 'lucide-react';
 import { useForm } from "react-hook-form";
 import { Card } from "@/components/ui/card";
+import AIHoverToolkit from "@/components/AIHoverToolkit";
+import { useToast } from "@/hooks/use-toast";
 
 interface SummaryFormProps {
   data: string;
@@ -27,6 +28,7 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
   onGenerateWithAI,
   isGenerating = false
 }) => {
+  const { toast } = useToast();
   const form = useForm({
     defaultValues: {
       summary: data
@@ -37,8 +39,41 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
     onChange(formData.summary);
   };
 
+  const handleExplain = () => {
+    toast({
+      title: "Professional Summary",
+      description: "This section gives recruiters a quick overview of your skills and experience. Keep it concise and impactful.",
+    });
+  };
+
+  const handleAskAI = () => {
+    onGenerateWithAI();
+  };
+
+  const handleComment = () => {
+    toast({
+      description: "Comments feature coming soon!",
+    });
+  };
+
+  const handleIntroduction = () => {
+    toast({
+      title: "Writing Tips",
+      description: "Start with your professional identity, highlight key achievements, and end with your career goals.",
+    });
+  };
+
   return (
-    <div>
+    <div className="relative">
+      <div className="absolute right-0 top-0 z-10">
+        <AIHoverToolkit
+          onExplain={handleExplain}
+          onAskAI={handleAskAI}
+          onComment={handleComment}
+          onIntroduction={handleIntroduction}
+        />
+      </div>
+
       <h2 className="text-xl font-semibold mb-4 flex items-center">
         <FileText className="mr-2 h-5 w-5 text-resume-purple" />
         Professional Summary
