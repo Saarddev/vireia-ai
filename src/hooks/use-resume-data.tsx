@@ -91,7 +91,7 @@ export function useResumeData(resumeId: string | undefined) {
         let content: ResumeData = defaultResumeData;
         try {
           if (typeof resume.content === "string") {
-            content = JSON.parse(resume.content);
+            content = JSON.parse(resume.content) as ResumeData;
           } else if (typeof resume.content === "object" && resume.content !== null) {
             content = resume.content as ResumeData;
           }
@@ -102,7 +102,7 @@ export function useResumeData(resumeId: string | undefined) {
         let settings: ResumeSettings = { ...resumeSettings };
         try {
           if (typeof resume.settings === "string") {
-            settings = JSON.parse(resume.settings);
+            settings = JSON.parse(resume.settings) as ResumeSettings;
           } else if (typeof resume.settings === "object" && resume.settings !== null) {
             settings = resume.settings as ResumeSettings;
           }
@@ -126,12 +126,12 @@ export function useResumeData(resumeId: string | undefined) {
             
             if (typeof profile.linkedin_data === "string") {
               try {
-                linkedinData = JSON.parse(profile.linkedin_data);
+                linkedinData = JSON.parse(profile.linkedin_data) as LinkedInData;
               } catch {
                 linkedinData = null;
               }
             } else if (typeof profile.linkedin_data === "object" && profile.linkedin_data !== null) {
-              linkedinData = profile.linkedin_data;
+              linkedinData = profile.linkedin_data as LinkedInData;
             }
 
             if (linkedinData?.full_name) {
@@ -208,9 +208,9 @@ export function useResumeData(resumeId: string | undefined) {
       const { error } = await supabase
         .from('resumes')
         .update({
-          content: resumeData,
+          content: resumeData as any,
           template: selectedTemplate,
-          settings: resumeSettings,
+          settings: resumeSettings as any,
           updated_at: new Date().toISOString()
         })
         .eq('id', resumeId);

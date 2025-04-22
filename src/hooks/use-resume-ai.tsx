@@ -22,6 +22,12 @@ export function useResumeAI() {
       });
 
       if (error) throw error;
+      
+      toast({
+        title: "Summary Generated",
+        description: "Your professional summary has been generated."
+      });
+      
       return data.summary;
 
     } catch (error) {
@@ -51,6 +57,12 @@ export function useResumeAI() {
       });
 
       if (error) throw error;
+      
+      toast({
+        title: "Skills Extracted",
+        description: `Found ${(data.technical?.length || 0) + (data.soft?.length || 0)} skills from your experience.`
+      });
+      
       return {
         technical: data.technical || [],
         soft: data.soft || []
@@ -83,6 +95,12 @@ export function useResumeAI() {
       });
 
       if (error) throw error;
+      
+      toast({
+        title: "Description Improved",
+        description: "Your job description has been enhanced."
+      });
+      
       return data.improved;
 
     } catch (error) {

@@ -63,12 +63,12 @@ serve(async (req) => {
 
 function generateSummaryPrompt(experience: string[], skills: string[]) {
   return `
-Generate a concise, professional summary that highlights key achievements and skills. Focus on:
-1. Keep it under 3-4 sentences
-2. Highlight quantifiable achievements
-3. Emphasize relevant skills
-4. Use clear, direct language
-5. Focus on impact and results
+Generate a concise, professional summary for a resume. Be brief and direct:
+1. Use 2-3 sentences maximum
+2. Include quantifiable achievements
+3. Use clear, factual language without fluff
+4. Focus on impact and concrete skills
+5. No flowery language or vague claims
 
 Experience context:
 ${experience.join('\n')}
@@ -85,7 +85,7 @@ Extract technical and soft skills from the following experience:
 
 ${experience.join('\n')}
 
-Return as JSON in this format:
+Return as JSON in this format - be concise and specific:
 {
   "technical": ["skill1", "skill2"],
   "soft": ["skill1", "skill2"]
@@ -94,12 +94,12 @@ Return as JSON in this format:
 
 function generateImprovementPrompt(description: string) {
   return `
-Improve this job description to be more impactful and achievement-oriented. Focus on:
+Improve this job description to be more concise and achievement-focused:
 1. Use strong action verbs
-2. Add metrics where possible
-3. Highlight key achievements
-4. Keep it concise
-5. Focus on results and impact
+2. Add specific metrics and numbers
+3. Be brief and to the point
+4. Remove any fluffy language
+5. Focus only on accomplishments and skills
 
 Original description:
 ${description}
@@ -109,15 +109,15 @@ Return only the improved description.`;
 
 function generateFullResumePrompt(linkedinData: any, template: string = 'modern') {
   return `
-You are an expert resume writer.
+You are creating a precise, professional resume.
 
-Key Guidelines:
-1. Summarize strengths precisely
-2. Integrate skills into experience
-3. Quantify achievements
-4. Use clear, direct language
-5. Keep formatting ATS-friendly
-6. Focus on impact and results
+Requirements:
+1. Be concise and direct
+2. Use numbers and metrics
+3. Focus on achievements, not responsibilities
+4. Use simple, clear language
+5. No fluffy or generic statements
+6. Focus on relevant skills only
 
 LinkedIn Data:
 ${JSON.stringify(linkedinData, null, 2)}

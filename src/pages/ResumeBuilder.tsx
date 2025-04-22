@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider, Sidebar, SidebarInset } from "@/components/ui/sidebar";
 import { Card } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 import BuilderHeader from '@/components/resume-builder/BuilderHeader';
 import BuilderSidebar from '@/components/resume-builder/BuilderSidebar';
 import AISuggestion from '@/components/resume-builder/AISuggestion';
@@ -18,12 +20,19 @@ import ResumeSettings from '@/components/resume-builder/ResumeSettings';
 import { useResumeData } from '@/hooks/use-resume-data';
 import { useResumeAI } from '@/hooks/use-resume-ai';
 
+interface AISuggestionData {
+  type: string;
+  section: string;
+  content: string;
+}
+
 const ResumeBuilder = () => {
   const { resumeId } = useParams();
   const { isMobile } = useIsMobile();
+  const { toast } = useToast();
   const [activeSection, setActiveSection] = useState("personal");
   const [aiEnabled, setAiEnabled] = useState(true);
-  const [aiSuggestion, setAiSuggestion] = useState(null);
+  const [aiSuggestion, setAiSuggestion] = useState<AISuggestionData | null>(null);
 
   const {
     isLoading,
@@ -39,7 +48,7 @@ const ResumeBuilder = () => {
   } = useResumeData(resumeId);
 
   const {
-    isGenerating: aiGenerating,
+    isGenerating,
     generateSummary,
     extractSkills,
     improveDescription
@@ -76,26 +85,66 @@ const ResumeBuilder = () => {
     }
   };
 
-  const renderActiveForm = () => {
-    const formProps = {
-      data: resumeData[activeSection],
-      onChange: (data: any) => handleDataChange(activeSection, data),
-      onGenerateWithAI: async (text: string) => {
-        const improved = await improveDescription(text);
-        if (improved) {
-          return improved;
-        }
-      }
-    };
+  const handleGenerateWithAI = async () => {
+    if (!aiEnabled) {
+      toast({
+        title: "AI is disabled",
+        description: "Please enable AI to use this feature",
+        variant: "destructive"
+      });
+      return;
+    }
 
+    try {
+      switch (activeSection) {
+        case "summary":
+          const summary = await generateSummary(
+            resumeData.experience.map(exp => exp.description),
+            [...resumeData.skills.technical, ...resumeData.skills.soft]
+          );
+          if (summary) {
+            handleDataChange("summary", summary);
+          }
+          break;
+        case "skills":
+          const skills = await extractSkills(
+            resumeData.experience.map(exp => exp.description)
+          );
+          if (skills) {
+            handleDataChange("skills", skills);
+          }
+          break;
+        default:
+          toast({
+            title: "AI Generation",
+            description: `AI generation not available for ${activeSection} section`,
+          });
+      }
+    } catch (error) {
+      console.error('Error generating with AI:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate with AI. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const renderActiveForm = () => {
     switch (activeSection) {
       case "personal":
-        return <PersonalInfoForm {...formProps} />;
+        return (
+          <PersonalInfoForm 
+            data={resumeData.personal}
+            onChange={(data) => handleDataChange("personal", data)}
+          />
+        );
       case "summary":
         return (
           <SummaryForm 
-            {...formProps}
-            isGenerating={aiGenerating}
+            data={resumeData.summary}
+            onChange={(data) => handleDataChange("summary", data)}
+            isGenerating={isGenerating}
             onGenerateWithAI={async () => {
               const summary = await generateSummary(
                 resumeData.experience.map(exp => exp.description),
@@ -108,14 +157,29 @@ const ResumeBuilder = () => {
           />
         );
       case "experience":
-        return <ExperienceForm {...formProps} />;
+        return (
+          <ExperienceForm 
+            data={resumeData.experience}
+            onChange={(data) => handleDataChange("experience", data)}
+            onGenerateWithAI={async (text) => {
+              const improved = await improveDescription(text);
+              return improved;
+            }}
+          />
+        );
       case "education":
-        return <EducationForm {...formProps} />;
+        return (
+          <EducationForm 
+            data={resumeData.education}
+            onChange={(data) => handleDataChange("education", data)}
+          />
+        );
       case "skills":
         return (
           <SkillsForm 
-            {...formProps}
-            isGenerating={aiGenerating}
+            data={resumeData.skills}
+            onChange={(data) => handleDataChange("skills", data)}
+            isGenerating={isGenerating}
             onExtractSkills={async () => {
               const skills = await extractSkills(
                 resumeData.experience.map(exp => exp.description)
@@ -127,13 +191,32 @@ const ResumeBuilder = () => {
           />
         );
       case "templates":
-        return <TemplateSelector selectedTemplate={selectedTemplate} onSelect={setSelectedTemplate} />;
+        return (
+          <TemplateSelector 
+            selectedTemplate={selectedTemplate} 
+            onSelect={setSelectedTemplate} 
+          />
+        );
       case "settings":
-        return <ResumeSettings settings={resumeSettings} onChange={handleSettingsChange} />;
+        return (
+          <ResumeSettings 
+            settings={resumeSettings} 
+            onChange={handleSettingsChange} 
+          />
+        );
       case "ai":
-        return <AIAssistant resumeData={resumeData} enabled={aiEnabled} />;
+        return (
+          <AIAssistant 
+            resumeData={resumeData} 
+            enabled={aiEnabled} 
+          />
+        );
       default:
-        return <PersonalInfoForm {...formProps} />;
+        return (
+          <div className="p-4 text-center">
+            <p>Select a section to edit</p>
+          </div>
+        );
     }
   };
 
@@ -156,9 +239,9 @@ const ResumeBuilder = () => {
               progress={calculateProgress(resumeData)}
               activeSection={activeSection}
               aiEnabled={aiEnabled}
-              aiGenerating={aiGenerating}
+              aiGenerating={isGenerating}
               onSectionChange={setActiveSection}
-              onGenerateWithAI={() => {}}
+              onGenerateWithAI={handleGenerateWithAI}
             />
           </Sidebar>
 

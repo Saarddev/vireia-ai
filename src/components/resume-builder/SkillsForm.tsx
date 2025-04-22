@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Code, X, Plus, Wand2 } from 'lucide-react';
+import { Code, X, Plus, Wand2, Loader } from 'lucide-react';
 import { useForm } from "react-hook-form";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -25,9 +25,18 @@ interface Skills {
 interface SkillsFormProps {
   data: Skills;
   onChange: (data: Skills) => void;
+  onExtractSkills?: () => Promise<void>;
+  isGenerating?: boolean;
+  onGenerateWithAI?: (text: string) => Promise<any>;
 }
 
-const SkillsForm: React.FC<SkillsFormProps> = ({ data, onChange }) => {
+const SkillsForm: React.FC<SkillsFormProps> = ({ 
+  data, 
+  onChange, 
+  onExtractSkills,
+  isGenerating = false,
+  onGenerateWithAI
+}) => {
   const [skills, setSkills] = useState<Skills>(data);
   const [activeTab, setActiveTab] = useState<string>("technical");
   const [newSkill, setNewSkill] = useState<string>("");
@@ -106,8 +115,22 @@ const SkillsForm: React.FC<SkillsFormProps> = ({ data, onChange }) => {
             <p className="text-sm text-gray-500 mt-1">
               Let our AI analyze your experience and automatically extract relevant skills for your profile.
             </p>
-            <Button className="mt-2 bg-white text-resume-purple border border-resume-purple hover:bg-resume-purple hover:text-white">
-              <Wand2 className="mr-2 h-4 w-4" /> Extract Skills
+            <Button 
+              className="mt-2 bg-white text-resume-purple border border-resume-purple hover:bg-resume-purple hover:text-white transition-colors duration-300"
+              onClick={onExtractSkills}
+              disabled={isGenerating}
+            >
+              {isGenerating ? (
+                <>
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Extracting Skills...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="mr-2 h-4 w-4" />
+                  Extract Skills
+                </>
+              )}
             </Button>
           </div>
         </div>
