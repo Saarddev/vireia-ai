@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
@@ -22,16 +21,15 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
     }
   };
 
-  // More professional typography and colors
-  const nameClass = "text-lg font-semibold text-gray-900 leading-tight tracking-tight pb-0 mb-1";
+  // Professional typography classes with consistent sizes
+  const nameClass = "text-base font-semibold text-gray-900 leading-tight tracking-tight pb-0 mb-1";
   const subtitleClass = "text-sm font-medium text-[#5d4dcd] mt-1 transition-all";
   const subtitleInputStyle = { color: '#5d4dcd', fontWeight: 500 };
-  const sectionHeaderClass = "text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide";
-  const experienceTitleClass = "font-medium text-gray-800 text-sm";
+  const sectionHeaderClass = "text-xs font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide";
+  const experienceTitleClass = "font-medium text-gray-800 text-xs";
   const experienceDateClass = "text-xs text-gray-600 ml-3 whitespace-nowrap min-w-[100px] max-w-[160px]";
   const experienceDescriptionClass = "text-xs text-gray-700 mt-1 font-normal leading-relaxed";
   const contactFieldClass = "inline px-1.5 py-0.5 rounded bg-transparent border-none text-xs focus:bg-gray-100 text-gray-700 min-w-[90px] max-w-[180px]";
-  const contactDivider = <span className="mx-1.5 text-gray-400 font-normal select-none">|</span>;
 
   const contactItems = [
     {

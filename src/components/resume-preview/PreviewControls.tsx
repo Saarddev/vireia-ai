@@ -27,7 +27,7 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
           <Button
             variant="outline"
             size="sm"
-            className="hover:border-resume-purple hover:text-resume-purple transition-all duration-300"
+            className="hover:border-[#5d4dcd] hover:text-[#5d4dcd] transition-all duration-300"
           >
             <Eye className="h-4 w-4 mr-2" /> Preview
           </Button>
@@ -38,7 +38,7 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
               variant="outline" 
               size="sm" 
               onClick={onDownload}
-              className="hover:border-resume-purple hover:text-resume-purple transition-all duration-300"
+              className="hover:border-[#5d4dcd] hover:text-[#5d4dcd] transition-all duration-300"
             >
               <Download className="mr-2 h-4 w-4" /> Download PDF
             </Button>
@@ -55,7 +55,7 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
           size="sm" 
           onClick={onZoomOut}
           disabled={zoomLevel <= 0.5}
-          className="hover:border-resume-purple hover:text-resume-purple transition-all duration-300"
+          className="hover:border-[#5d4dcd] hover:text-[#5d4dcd] transition-all duration-300"
         >
           <ZoomOut className="h-4 w-4" />
         </Button>
@@ -65,7 +65,7 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
           size="sm" 
           onClick={onZoomIn}
           disabled={zoomLevel >= 2}
-          className="hover:border-resume-purple hover:text-resume-purple transition-all duration-300"
+          className="hover:border-[#5d4dcd] hover:text-[#5d4dcd] transition-all duration-300"
         >
           <ZoomIn className="h-4 w-4" />
         </Button>
@@ -73,7 +73,7 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
           variant="outline" 
           size="sm" 
           onClick={onDownload}
-          className="ml-2 hover:border-resume-purple hover:text-resume-purple transition-all duration-300"
+          className="ml-2 hover:border-[#5d4dcd] hover:text-[#5d4dcd] transition-all duration-300"
         >
           <Download className="mr-2 h-4 w-4" /> Download
         </Button>
