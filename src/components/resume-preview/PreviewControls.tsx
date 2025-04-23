@@ -3,7 +3,8 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
-import { Eye, Download, ZoomIn, ZoomOut } from 'lucide-react';
+import { Eye, Download, ZoomIn, ZoomOut, Printer } from 'lucide-react';
+import { Separator } from "@/components/ui/separator";
 
 interface PreviewControlsProps {
   zoomLevel: number;
@@ -42,6 +43,14 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
             >
               <Download className="mr-2 h-4 w-4" /> Download PDF
             </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="hover:border-[#5d4dcd] hover:text-[#5d4dcd] transition-all duration-300"
+              onClick={() => window.print()}
+            >
+              <Printer className="mr-2 h-4 w-4" /> Print
+            </Button>
           </div>
           <Card className="h-full bg-white p-8 shadow-md overflow-y-auto">
             {children}
@@ -69,11 +78,12 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
         >
           <ZoomIn className="h-4 w-4" />
         </Button>
+        <Separator orientation="vertical" className="mx-2 h-6" />
         <Button 
           variant="outline" 
           size="sm" 
           onClick={onDownload}
-          className="ml-2 hover:border-[#5d4dcd] hover:text-[#5d4dcd] transition-all duration-300"
+          className="hover:border-[#5d4dcd] hover:text-[#5d4dcd] transition-all duration-300"
         >
           <Download className="mr-2 h-4 w-4" /> Download
         </Button>

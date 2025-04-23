@@ -151,7 +151,10 @@ const ResumeBuilder = () => {
             data={resumeData.summary}
             onChange={(data) => handleDataChange("summary", data)}
             isGenerating={isGenerating}
-            onGenerateWithAI={async () => handleGenerateWithAI("summary")}
+            onGenerateWithAI={async () => {
+              const result = await handleGenerateWithAI("summary");
+              return result;
+            }}
           />
         );
       case "experience":
@@ -161,7 +164,7 @@ const ResumeBuilder = () => {
             onChange={(data) => handleDataChange("experience", data)}
             onGenerateWithAI={async (text: string) => {
               const improved = await improveDescription(text);
-              return improved;
+              return improved || "";
             }}
           />
         );
@@ -178,7 +181,10 @@ const ResumeBuilder = () => {
             data={resumeData.skills}
             onChange={(data) => handleDataChange("skills", data)}
             isGenerating={isGenerating}
-            onExtractSkills={async () => handleGenerateWithAI("skills")}
+            onExtractSkills={async () => {
+              const result = await handleGenerateWithAI("skills");
+              return result;
+            }}
           />
         );
       case "templates":

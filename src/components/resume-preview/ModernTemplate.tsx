@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
+import { Separator } from "@/components/ui/separator";
 
 interface ModernTemplateProps {
   data: any;
@@ -22,14 +24,19 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
   };
 
   // Professional typography classes with consistent sizes
-  const nameClass = "text-base font-semibold text-gray-900 leading-tight tracking-tight pb-0 mb-1";
-  const subtitleClass = "text-sm font-medium text-[#5d4dcd] mt-1 transition-all";
+  const nameClass = "text-2xl font-bold text-gray-900 leading-tight tracking-tight pb-0 mb-1";
+  const subtitleClass = "text-lg font-medium text-[#5d4dcd] mt-1 transition-all";
   const subtitleInputStyle = { color: '#5d4dcd', fontWeight: 500 };
-  const sectionHeaderClass = "text-xs font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide";
-  const experienceTitleClass = "font-medium text-gray-800 text-xs";
-  const experienceDateClass = "text-xs text-gray-600 ml-3 whitespace-nowrap min-w-[100px] max-w-[160px]";
-  const experienceDescriptionClass = "text-xs text-gray-700 mt-1 font-normal leading-relaxed";
-  const contactFieldClass = "inline px-1.5 py-0.5 rounded bg-transparent border-none text-xs focus:bg-gray-100 text-gray-700 min-w-[90px] max-w-[180px]";
+  const sectionHeaderClass = "text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide";
+  const experienceTitleClass = "font-medium text-gray-800 text-sm";
+  const experienceDateClass = "text-sm text-gray-600 ml-3 whitespace-nowrap min-w-[100px] max-w-[160px]";
+  const experienceDescriptionClass = "text-sm text-gray-700 mt-1 font-normal leading-relaxed";
+  const contactFieldClass = "inline px-1.5 py-0.5 rounded bg-transparent border-none text-sm focus:bg-gray-100 text-gray-700 min-w-[90px] max-w-[180px]";
+  
+  // Define contact divider element
+  const contactDivider = (
+    <span className="mx-2 text-gray-400">•</span>
+  );
 
   const contactItems = [
     {
@@ -98,7 +105,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           inputStyle={subtitleInputStyle}
           outputStyle={subtitleInputStyle}
         />
-        <div className="flex flex-wrap text-xs text-gray-700 mt-3 gap-y-1 items-center">
+        <div className="flex flex-wrap text-sm text-gray-700 mt-3 gap-y-1 items-center">
           <div className="flex flex-wrap items-center">
             {contactItems.map((item, idx) => (
               <React.Fragment key={item.key}>
@@ -126,7 +133,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           value={data.summary}
           placeholder="Experienced software engineer with 5+ years of experience in full-stack development. ..."
           onSave={val => onUpdateData?.("summary", val)}
-          className="text-xs text-gray-700 font-normal leading-relaxed"
+          className="text-sm text-gray-700 font-normal leading-relaxed"
           onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("summary") : undefined}
           minRows={2}
           maxRows={4}
@@ -179,7 +186,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                   : exp.company || exp.location || ""
               }
               placeholder="Tech Solutions Inc., San Francisco, CA"
-              className="text-xs text-[#5d4dcd] font-medium my-0.5"
+              className="text-sm text-[#5d4dcd] font-medium my-0.5"
               onSave={val => {
                 let [company, ...locParts] = val.split(",");
                 const location = locParts.join(",").trim();
@@ -256,7 +263,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                   : edu.institution || edu.location || ""
               }
               placeholder="Stanford University, Stanford, CA"
-              className="text-xs text-[#5d4dcd] font-medium my-0.5"
+              className="text-sm text-[#5d4dcd] font-medium my-0.5"
               onSave={val => {
                 let [inst, ...locParts] = val.split(",");
                 const location = locParts.join(",").trim();
@@ -290,12 +297,12 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
       <div className="mb-2 pb-2 border-b border-gray-200 resume-section">
         <h2 className={sectionHeaderClass}>Skills</h2>
         <div className="mb-3">
-          <div className="font-medium text-gray-700 text-xs mb-1.5">Technical Skills</div>
+          <div className="font-medium text-gray-700 text-sm mb-1.5">Technical Skills</div>
           <div className="flex flex-wrap gap-1.5 mt-1">
             {data.skills.technical.map((skill: string, i: number) => (
               <span
                 key={i}
-                className="px-2 py-0.5 bg-[#efeafc] text-[#5d4dcd] font-medium rounded-sm text-xs border-[0.5px] border-[#dad3f8] shadow-xs transition whitespace-nowrap"
+                className="px-2 py-0.5 bg-[#efeafc] text-[#5d4dcd] font-medium rounded-sm text-sm border-[0.5px] border-[#dad3f8] shadow-xs transition whitespace-nowrap"
               >
                 {skill}
               </span>
@@ -303,12 +310,12 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           </div>
         </div>
         <div>
-          <div className="font-medium text-gray-700 text-xs mb-1.5">Soft Skills</div>
+          <div className="font-medium text-gray-700 text-sm mb-1.5">Soft Skills</div>
           <div className="flex flex-wrap gap-1.5 mt-1">
             {data.skills.soft.map((skill: string, i: number) => (
               <span
                 key={i}
-                className="px-2 py-0.5 bg-[#f3f3f3] text-gray-600 font-medium rounded-sm text-xs border-[0.5px] border-[#e5e5e5] transition whitespace-nowrap"
+                className="px-2 py-0.5 bg-[#f3f3f3] text-gray-600 font-medium rounded-sm text-sm border-[0.5px] border-[#e5e5e5] transition whitespace-nowrap"
               >
                 {skill}
               </span>
