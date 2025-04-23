@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -109,30 +108,10 @@ const EditableField: React.FC<EditableFieldProps> = ({
     setTimeout(() => textareaRef.current?.focus(), 5);
   };
 
-  const handleSave = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+  const handleSave = () => {
+    if (streamingText !== null) return;
     setEditing(false);
-    if (localValue !== value) {
-      onSave(localValue.trim());
-    }
-  };
-
-  const handleGenerate = async () => {
-    if (!onGenerateWithAI) return "";
-    setIsGenerating(true);
-    try {
-      const result = await onGenerateWithAI();
-      if (result) {
-        setLocalValue(result);
-        handleSave();
-      }
-      return "";
-    } catch (error) {
-      console.error('AI generation failed:', error);
-      return "";
-    } finally {
-      setIsGenerating(false);
-    }
+    if (localValue !== value) onSave(localValue.trim());
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -145,9 +124,23 @@ const EditableField: React.FC<EditableFieldProps> = ({
     }
   };
 
-  if (editing || streamingText !== null) {
-    return (
-      <div className="relative">
+  return (
+    <div 
+      className={cn(
+        "relative w-full group transition-colors min-h-[20px]",
+        className
+      )}
+      onClick={startEdit}
+      onMouseEnter={() => setShowToolkit(true)}
+      onMouseLeave={() => setShowToolkit(false)}
+      onFocus={() => setShowToolkit(true)}
+      onBlur={e => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+          handleSave();
+        }
+      }}
+    >
+      {editing || streamingText !== null ? (
         <div className="relative w-full">
           <textarea
             ref={textareaRef}
@@ -210,46 +203,24 @@ const EditableField: React.FC<EditableFieldProps> = ({
             </span>
           )}
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div 
-      className="group relative cursor-text rounded-md transition-all duration-200"
-      onClick={() => setEditing(true)}
-      onMouseEnter={() => setShowToolkit(true)}
-      onMouseLeave={() => setShowToolkit(false)}
-    >
-      <div 
-        className={cn(
-          className,
-          "relative hover:bg-gray-50/30 rounded transition-colors duration-200 cursor-text",
-          !value && "text-gray-400 italic"
-        )}
-      >
+      ) : (
         <span
+          tabIndex={0}
           style={{
             ...outputStyle,
             fontSize: "inherit",
             fontWeight: "inherit",
             lineHeight: "inherit",
           }}
-          className="block w-full px-1 py-0.5"
+          className={cn(
+            "block w-full transition-colors duration-200",
+            "hover:bg-gray-50/50 focus:bg-gray-50/50 rounded px-1 py-0.5",
+            !value && "text-gray-400"
+          )}
         >
           {value || placeholder}
         </span>
-        {onGenerateWithAI && (
-          <div className={`absolute -top-10 left-0 z-10 transform transition-all duration-300 ease-out ${
-            showToolkit ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-          }`}>
-            <AIHoverToolkit 
-              onComplete={handleGenerate}
-              onAddChanges={handleAIContinue}
-            />
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 };
