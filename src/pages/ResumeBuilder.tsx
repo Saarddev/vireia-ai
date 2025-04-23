@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -19,6 +18,7 @@ import TemplateSelector from '@/components/resume-builder/TemplateSelector';
 import ResumeSettings from '@/components/resume-builder/ResumeSettings';
 import { useResumeData } from '@/hooks/use-resume-data';
 import { useResumeAI } from '@/hooks/use-resume-ai';
+import { supabase } from '@/lib/supabase';
 
 interface AISuggestionData {
   type: string;
@@ -97,15 +97,44 @@ const ResumeBuilder = () => {
 
     try {
       switch (section) {
+        case "personal-name":
+        case "personal-title":
+        case "personal-email":
+        case "personal-phone":
+        case "personal-location":
+        case "personal-linkedin":
+        case "personal-website": {
+          const field = section.replace("personal-", "");
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('linkedin_data')
+            .single();
+
+          if (profile?.linkedin_data) {
+            const linkedinData = typeof profile.linkedin_data === 'string' 
+              ? JSON.parse(profile.linkedin_data) 
+              : profile.linkedin_data;
+
+            const fieldMapping: { [key: string]: string } = {
+              name: linkedinData.full_name || "",
+              title: linkedinData.headline || "",
+              email: linkedinData.email || "",
+              phone: linkedinData.phone || "",
+              location: linkedinData.location || "",
+              linkedin: linkedinData.profile_url || "",
+              website: linkedinData.website || ""
+            };
+
+            return fieldMapping[field] || "";
+          }
+          break;
+        }
         case "summary": {
           const summary = await generateSummary(
             resumeData.experience.map(exp => exp.description),
             [...resumeData.skills.technical, ...resumeData.skills.soft]
           );
-          if (summary) {
-            handleDataChange("summary", summary);
-            return summary;
-          }
+          if (summary) return summary;
           break;
         }
         case "skills": {

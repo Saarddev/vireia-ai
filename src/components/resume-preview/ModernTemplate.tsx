@@ -25,19 +25,19 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
     }
   };
 
-  const nameClass = "text-2xl font-bold text-gray-900 leading-tight tracking-tight pb-0 mb-1";
-  const subtitleClass = "text-lg font-medium text-[#5d4dcd] mt-1 transition-all";
+  const nameClass = "text-2xl font-bold text-gray-900 leading-tight tracking-tight pb-0 mb-1 hover:bg-gray-50/30 rounded transition-colors duration-200";
+  const subtitleClass = "text-lg font-medium text-[#5d4dcd] mt-1 transition-all hover:bg-gray-50/30 rounded";
   const subtitleInputStyle = {
     color: '#5d4dcd',
     fontWeight: 500
   };
   const sectionHeaderClass = "text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide";
-  const experienceTitleClass = "font-medium text-gray-800 text-sm";
-  const experienceDateClass = "text-sm text-gray-600 ml-3 whitespace-nowrap min-w-[100px] max-w-[160px]";
-  const experienceDescriptionClass = "text-sm text-gray-700 mt-1 font-normal leading-relaxed";
-  const contactFieldClass = "inline px-1.5 py-0.5 rounded bg-transparent border-none text-sm focus:bg-gray-100 text-gray-700 min-w-[90px] max-w-[180px]";
+  const experienceTitleClass = "font-medium text-gray-800 text-sm hover:bg-gray-50/30 rounded transition-colors duration-200";
+  const experienceDateClass = "text-sm text-gray-600 ml-3 whitespace-nowrap min-w-[100px] max-w-[160px] hover:bg-gray-50/30 rounded transition-colors duration-200";
+  const experienceDescriptionClass = "text-sm text-gray-700 mt-1 font-normal leading-relaxed hover:bg-gray-50/30 rounded transition-colors duration-200";
+  const contactFieldClass = "inline px-1.5 py-0.5 rounded hover:bg-gray-50/30 transition-colors duration-200 text-sm text-gray-700 min-w-[90px] max-w-[180px]";
 
-  const contactDivider = <span className="mx-2 text-gray-400">•</span>;
+  const contactDivider = <span className="mx-2 text-gray-400 print:mx-2">•</span>;
 
   const contactItems = [{
     key: 'email',
@@ -203,23 +203,6 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                   minRows={1} 
                   maxRows={1} 
                 />
-                <EditableField 
-                  value={edu.institution && edu.location ? `${edu.institution}, ${edu.location}` : edu.institution || edu.location || ""} 
-                  placeholder="Stanford University, Stanford, CA" 
-                  className="text-sm text-[#5d4dcd] font-medium my-0.5" 
-                  onSave={val => {
-                    let [inst, ...locParts] = val.split(",");
-                    const location = locParts.join(",").trim();
-                    onUpdateData?.("education", [...data.education.slice(0, index), {
-                      ...edu,
-                      institution: inst?.trim() || "",
-                      location: location
-                    }, ...data.education.slice(index + 1)]);
-                  }} 
-                  onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-institution-${index}`) : undefined} 
-                  minRows={1} 
-                  maxRows={1} 
-                />
               </div>
               <EditableField 
                 value={`${edu.startDate} - ${edu.endDate}`} 
@@ -238,6 +221,23 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                 maxRows={1} 
               />
             </div>
+            <EditableField 
+              value={edu.institution && edu.location ? `${edu.institution}, ${edu.location}` : edu.institution || edu.location || ""} 
+              placeholder="Stanford University, Stanford, CA" 
+              className="text-sm text-[#5d4dcd] font-medium my-0.5 hover:bg-gray-50/30 rounded transition-colors duration-200" 
+              onSave={val => {
+                let [inst, ...locParts] = val.split(",");
+                const location = locParts.join(",").trim();
+                onUpdateData?.("education", [...data.education.slice(0, index), {
+                  ...edu,
+                  institution: inst?.trim() || "",
+                  location: location
+                }, ...data.education.slice(index + 1)]);
+              }} 
+              onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-institution-${index}`) : undefined} 
+              minRows={1} 
+              maxRows={1} 
+            />
             <EditableField 
               value={edu.description || ""} 
               placeholder="Specialization in Artificial Intelligence. GPA: 3.8/4.0" 
