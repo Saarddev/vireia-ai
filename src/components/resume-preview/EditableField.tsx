@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -244,7 +245,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
           }`}>
             <AIHoverToolkit 
               onComplete={handleGenerate}
-              onAddChanges={handleContinue}
+              onAddChanges={handleAIContinue}
             />
           </div>
         )}
