@@ -19,6 +19,7 @@ import TemplateSelector from '@/components/resume-builder/TemplateSelector';
 import ResumeSettings from '@/components/resume-builder/ResumeSettings';
 import { useResumeData } from '@/hooks/use-resume-data';
 import { useResumeAI } from '@/hooks/use-resume-ai';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AISuggestionData {
   type: string;
@@ -129,7 +130,7 @@ const ResumeBuilder = () => {
                     institution: currentEdu.institution,
                     location: currentEdu.location,
                     field: currentEdu.field || '',
-                    level: currentEdu.level || 'Bachelor's',
+                    level: currentEdu.level || "Bachelor's",
                     status: currentEdu.endDate === 'Present' ? 'Current' : 'Graduated'
                   }
                 }
