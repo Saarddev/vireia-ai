@@ -102,28 +102,62 @@ const ResumeBuilder = () => {
             resumeData.experience.map(exp => exp.description),
             [...resumeData.skills.technical, ...resumeData.skills.soft]
           );
-          if (summary) {
-            handleDataChange("summary", summary);
-            return summary;
-          }
+          if (summary) return summary;
           break;
         }
         case "skills": {
-          const skills = await extractSkills(
-            resumeData.experience.map(exp => exp.description)
-          );
+          const skills = await extractSkills(resumeData.experience.map(exp => exp.description));
           if (skills) {
             handleDataChange("skills", skills);
             return "";
           }
           break;
         }
-        default:
+        default: {
+          // Handle education-related AI generation
+          if (section.startsWith('education-')) {
+            const [, eduIndex, field] = section.split('-');
+            const index = parseInt(eduIndex);
+            const currentEdu = resumeData.education[index];
+            
+            if (currentEdu) {
+              const { data, error } = await supabase.functions.invoke('enhance-resume', {
+                body: { 
+                  type: `education-${field}`,
+                  educationContext: {
+                    degree: currentEdu.degree,
+                    institution: currentEdu.institution,
+                    location: currentEdu.location,
+                    field: currentEdu.field || '',
+                    level: currentEdu.level || 'Bachelor's',
+                    status: currentEdu.endDate === 'Present' ? 'Current' : 'Graduated'
+                  }
+                }
+              });
+
+              if (error) throw error;
+              
+              if (field === 'dates' && data.startDate && data.endDate) {
+                handleDataChange("education", [
+                  ...resumeData.education.slice(0, index),
+                  { ...currentEdu, startDate: data.startDate, endDate: data.endDate },
+                  ...resumeData.education.slice(index + 1)
+                ]);
+                return `${data.startDate} - ${data.endDate}`;
+              }
+              
+              if (data[field]) {
+                return data[field];
+              }
+            }
+          }
+
           toast({
             title: "AI Generation",
             description: `AI generation not available for ${section} section`,
           });
           return "";
+        }
       }
     } catch (error) {
       console.error('Error generating with AI:', error);

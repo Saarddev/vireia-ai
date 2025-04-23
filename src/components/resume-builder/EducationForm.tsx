@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Form,
@@ -24,14 +23,17 @@ interface Education {
   startDate: string;
   endDate: string;
   description: string;
+  field?: string;
+  level?: string;
 }
 
 interface EducationFormProps {
   data: Education[];
   onChange: (data: Education[]) => void;
+  onGenerateWithAI?: (section: string) => Promise<string>;
 }
 
-const EducationForm: React.FC<EducationFormProps> = ({ data, onChange }) => {
+const EducationForm: React.FC<EducationFormProps> = ({ data, onChange, onGenerateWithAI }) => {
   const [educations, setEducations] = useState<Education[]>(data);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -133,7 +135,7 @@ const EducationForm: React.FC<EducationFormProps> = ({ data, onChange }) => {
         Add your educational background, starting with your most recent degree
       </p>
 
-      {educations.length === 0 && (
+      {data.length === 0 && (
         <div className="text-center p-8 border border-dashed rounded-md mb-4">
           <GraduationCap className="h-10 w-10 text-resume-gray mx-auto mb-2" />
           <p className="text-resume-gray mb-4">No education history added yet</p>
@@ -143,9 +145,9 @@ const EducationForm: React.FC<EducationFormProps> = ({ data, onChange }) => {
         </div>
       )}
 
-      {educations.length > 0 && (
+      {data.length > 0 && (
         <div className="space-y-4 mb-6">
-          {educations.map((edu) => (
+          {data.map((edu, index) => (
             <Card key={edu.id} className="overflow-hidden">
               <div className="p-4 flex items-center justify-between bg-gray-50 dark:bg-gray-800 border-b cursor-pointer"
                 onClick={() => setExpandedId(expandedId === edu.id ? null : edu.id)}>
@@ -186,7 +188,15 @@ const EducationForm: React.FC<EducationFormProps> = ({ data, onChange }) => {
                             <FormItem>
                               <FormLabel>Degree*</FormLabel>
                               <FormControl>
-                                <Input placeholder="e.g., Bachelor of Science in Computer Science" {...field} />
+                                <div className="relative">
+                                  <EditableField
+                                    value={field.value}
+                                    placeholder="e.g., Bachelor of Science in Computer Science"
+                                    className="w-full px-3 py-2 border rounded-md"
+                                    onSave={field.onChange}
+                                    onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-${index}-degree`) : undefined}
+                                  />
+                                </div>
                               </FormControl>
                             </FormItem>
                           )}
@@ -261,10 +271,14 @@ const EducationForm: React.FC<EducationFormProps> = ({ data, onChange }) => {
                             <FormItem>
                               <FormLabel>Description</FormLabel>
                               <FormControl>
-                                <Textarea 
-                                  placeholder="Describe your major, GPA, honors, key courses, thesis, etc." 
-                                  className="min-h-[120px]"
-                                  {...field} 
+                                <EditableField
+                                  value={field.value}
+                                  placeholder="Describe your major, GPA, honors, key courses, thesis, etc."
+                                  className="w-full min-h-[120px] px-3 py-2 border rounded-md"
+                                  onSave={field.onChange}
+                                  onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-${index}-description`) : undefined}
+                                  minRows={2}
+                                  maxRows={4}
                                 />
                               </FormControl>
                             </FormItem>

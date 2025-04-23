@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
@@ -15,11 +14,13 @@ serve(async (req) => {
   }
 
   try {
-    const { type, linkedinData, resumeTemplate, experience, skills, description } = await req.json();
+    const { type, linkedinData, resumeTemplate, experience, skills, description, educationContext } = await req.json();
     
     let prompt = "";
     
-    if (type === "summary") {
+    if (type.startsWith('education-')) {
+      prompt = generateEducationPrompt(type, educationContext);
+    } else if (type === "summary") {
       prompt = generateSummaryPrompt(experience, skills);
     } else if (type === "skills") {
       prompt = generateSkillsPrompt(experience);
@@ -166,10 +167,86 @@ Return only a valid JSON resume:
 }`;
 }
 
+function generateEducationPrompt(type: string, context: any = {}) {
+  const field = type.replace('education-', '');
+  
+  switch (field) {
+    case 'degree':
+      return `Generate an academic degree name based on this context:
+- Institution: ${context.institution || 'Not specified'}
+- Field: ${context.field || 'Not specified'}
+- Level: ${context.level || 'Bachelor's'}
+
+Requirements:
+1. Be specific and formal
+2. Use standard degree nomenclature
+3. Include concentration if relevant
+4. Be concise but complete
+
+Return only the degree name.`;
+
+    case 'institution':
+      return `Suggest a prestigious educational institution name based on this context:
+- Degree: ${context.degree || 'Not specified'}
+- Location: ${context.location || 'Not specified'}
+- Field: ${context.field || 'Not specified'}
+
+Requirements:
+1. Use the official institution name
+2. Be accurate and specific
+3. Include location if part of the name
+4. Focus on well-known institutions
+
+Return only the institution name.`;
+
+    case 'description':
+      return `Write an academic description based on this context:
+- Degree: ${context.degree || 'Not specified'}
+- Institution: ${context.institution || 'Not specified'}
+- Field: ${context.field || 'Not specified'}
+
+Requirements:
+1. Highlight key achievements
+2. Mention relevant coursework
+3. Include GPA if noteworthy
+4. List honors or awards
+5. Be specific and quantifiable
+6. Keep it to 2-3 lines
+7. Focus on relevant skills and knowledge gained
+
+Return only the description.`;
+
+    case 'dates':
+      return `Generate education dates based on:
+- Degree Level: ${context.degree || 'Bachelor's'}
+- Current Status: ${context.status || 'Graduated'}
+
+Requirements:
+1. Use MM YYYY format
+2. Be realistic for the degree type
+3. Consider typical duration
+4. If recent, use current year
+
+Return in format: "MM YYYY - MM YYYY"`;
+
+    default:
+      return "";
+  }
+}
+
 function parseGeminiResponse(response: any, type: string) {
   const text = response.candidates[0].content.parts[0].text;
   
   try {
+    if (type.startsWith('education-')) {
+      const field = type.replace('education-', '');
+      if (field === 'dates') {
+        const [startDate, endDate] = text.trim().split(' - ');
+        return { startDate, endDate };
+      }
+      return { [field]: text.trim() };
+    }
+    
     if (type === "summary" || type === "improve") {
       return { [type === "summary" ? "summary" : "improved"]: text.trim() };
     }
@@ -182,7 +259,6 @@ function parseGeminiResponse(response: any, type: string) {
       throw new Error('No valid JSON found in skills response');
     }
     
-    // For full resume
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       return { enhancedResume: JSON.parse(jsonMatch[0]) };
