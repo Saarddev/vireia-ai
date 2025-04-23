@@ -120,10 +120,10 @@ const ResumeBuilder = () => {
             const [, eduIndex, field] = section.split('-');
             const index = parseInt(eduIndex);
             const currentEdu = resumeData.education[index];
-            
+
             if (currentEdu) {
               const { data, error } = await supabase.functions.invoke('enhance-resume', {
-                body: { 
+                body: {
                   type: `education-${field}`,
                   educationContext: {
                     degree: currentEdu.degree,
@@ -137,7 +137,7 @@ const ResumeBuilder = () => {
               });
 
               if (error) throw error;
-              
+
               if (field === 'dates' && data.startDate && data.endDate) {
                 handleDataChange("education", [
                   ...resumeData.education.slice(0, index),
@@ -146,7 +146,7 @@ const ResumeBuilder = () => {
                 ]);
                 return `${data.startDate} - ${data.endDate}`;
               }
-              
+
               if (data[field]) {
                 return data[field];
               }
@@ -175,14 +175,14 @@ const ResumeBuilder = () => {
     switch (activeSection) {
       case "personal":
         return (
-          <PersonalInfoForm 
+          <PersonalInfoForm
             data={resumeData.personal}
             onChange={(data) => handleDataChange("personal", data)}
           />
         );
       case "summary":
         return (
-          <SummaryForm 
+          <SummaryForm
             data={resumeData.summary}
             onChange={(data) => handleDataChange("summary", data)}
             isGenerating={isGenerating}
@@ -194,7 +194,7 @@ const ResumeBuilder = () => {
         );
       case "experience":
         return (
-          <ExperienceForm 
+          <ExperienceForm
             data={resumeData.experience}
             onChange={(data) => handleDataChange("experience", data)}
             onGenerateWithAI={async (text: string) => {
@@ -205,14 +205,14 @@ const ResumeBuilder = () => {
         );
       case "education":
         return (
-          <EducationForm 
+          <EducationForm
             data={resumeData.education}
             onChange={(data) => handleDataChange("education", data)}
           />
         );
       case "skills":
         return (
-          <SkillsForm 
+          <SkillsForm
             data={resumeData.skills}
             onChange={(data) => handleDataChange("skills", data)}
             isGenerating={isGenerating}
@@ -224,23 +224,23 @@ const ResumeBuilder = () => {
         );
       case "templates":
         return (
-          <TemplateSelector 
-            selectedTemplate={selectedTemplate} 
-            onSelect={setSelectedTemplate} 
+          <TemplateSelector
+            selectedTemplate={selectedTemplate}
+            onSelect={setSelectedTemplate}
           />
         );
       case "settings":
         return (
-          <ResumeSettings 
-            settings={resumeSettings} 
-            onChange={handleSettingsChange} 
+          <ResumeSettings
+            settings={resumeSettings}
+            onChange={handleSettingsChange}
           />
         );
       case "ai":
         return (
-          <AIAssistant 
-            resumeData={resumeData} 
-            enabled={aiEnabled} 
+          <AIAssistant
+            resumeData={resumeData}
+            enabled={aiEnabled}
           />
         );
       default:
@@ -255,19 +255,19 @@ const ResumeBuilder = () => {
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50/80 via-background to-purple-50/60 dark:from-gray-900/90 dark:via-gray-900/50 dark:to-gray-900/90">
-        <BuilderHeader 
+        <BuilderHeader
           name={resumeTitle || resumeData.personal.name || "New Resume"}
           isSaving={false}
           aiEnabled={aiEnabled}
           onSave={handleSave}
           onAIToggle={handleAIToggle}
-          onDownload={() => {}}
-          onShare={() => {}}
+          onDownload={() => { }}
+          onShare={() => { }}
         />
 
         <div className="flex-1 flex">
           <Sidebar side="left" variant="floating" collapsible="icon">
-            <BuilderSidebar 
+            <BuilderSidebar
               progress={calculateProgress(resumeData)}
               activeSection={activeSection}
               aiEnabled={aiEnabled}
@@ -278,12 +278,12 @@ const ResumeBuilder = () => {
           </Sidebar>
 
           <SidebarInset className="flex flex-col p-4 lg:p-6">
-            <AISuggestion 
+            <AISuggestion
               suggestion={aiSuggestion}
               onDismiss={dismissAiSuggestion}
               onApply={applyAiSuggestion}
             />
-            
+
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 h-[calc(100vh-8rem)]">
               <div className="xl:col-span-5 h-full overflow-auto">
                 <Card className="h-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 overflow-hidden shadow-xl">
@@ -303,15 +303,15 @@ const ResumeBuilder = () => {
               </div>
 
               <div className="xl:col-span-7 h-full overflow-auto">
-                <Card className="h-full flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 shadow-xl">
-                  <ResumePreview 
-                    data={resumeData} 
-                    template={selectedTemplate}
-                    settings={resumeSettings}
-                    onDataChange={(section, data) => handleDataChange(section, data)}
-                    onGenerateWithAI={handleGenerateWithAI}
-                  />
-                </Card>
+                {/* <Card className="h-full flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 shadow-xl"> */}
+                <ResumePreview
+                  data={resumeData}
+                  template={selectedTemplate}
+                  settings={resumeSettings}
+                  onDataChange={(section, data) => handleDataChange(section, data)}
+                  onGenerateWithAI={handleGenerateWithAI}
+                />
+                {/* </Card> */}
               </div>
             </div>
           </SidebarInset>

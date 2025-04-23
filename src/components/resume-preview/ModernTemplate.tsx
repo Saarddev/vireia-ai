@@ -25,7 +25,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
     }
   };
 
-  const nameClass = "text-2xl font-bold text-gray-900 leading-tight tracking-tight pb-0 mb-1";
+  const nameClass = "text-xl font-bold text-gray-900 leading-tight tracking-tight pb-0 mb-1";
   const subtitleClass = "text-lg font-medium text-[#5d4dcd] mt-1 transition-all";
   const subtitleInputStyle = {
     color: '#5d4dcd',
@@ -37,7 +37,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
   const experienceDescriptionClass = "text-sm text-gray-700 mt-1 font-normal leading-relaxed";
   const contactFieldClass = "inline px-1.5 py-0.5 rounded bg-transparent border-none text-sm focus:bg-gray-100 text-gray-700 min-w-[90px] max-w-[180px]";
 
-  const contactDivider = <span className="mx-2 text-gray-400">•</span>;
+  const contactDivider = <span className="mx-2 text-gray-400">| </span>;
 
   const contactItems = [{
     key: 'email',
@@ -67,46 +67,46 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
   }] : [])];
 
   return (
-    <div className={cn("bg-white rounded-lg border border-gray-200 max-w-[720px] mx-auto", settings.fontFamily && `font-[${settings.fontFamily}]`)} 
+    <div className={cn("bg-white rounded-lg border border-gray-200 max-w-full", settings.fontFamily && `font-[${settings.fontFamily}]`)}
       style={{
-        padding: "30px 40px 26px 40px",
+        padding: "20px",
         background: "#fff",
         fontSize: `${settings.fontSize || 11}pt`,
         lineHeight: "1.5"
       }}>
       <div className="pb-4 border-b-2 border-[#5d4dcd] mb-6">
-        <EditableField 
-          value={data.personal.name} 
-          placeholder="John Smith" 
-          className={nameClass} 
-          onSave={val => onUpdateData?.("personal", { ...data.personal, name: val })} 
-          onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-name") : undefined} 
-          minRows={1} 
-          maxRows={1} 
+        <EditableField
+          value={data.personal.name}
+          placeholder="John Smith"
+          className={nameClass}
+          onSave={val => onUpdateData?.("personal", { ...data.personal, name: val })}
+          onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-name") : undefined}
+          minRows={1}
+          maxRows={1}
         />
-        <EditableField 
-          value={data.personal.title} 
-          placeholder="Software Engineer" 
-          className={subtitleClass} 
-          onSave={val => onUpdateData?.("personal", { ...data.personal, title: val })} 
-          onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-title") : undefined} 
-          minRows={1} 
-          maxRows={1} 
-          inputStyle={subtitleInputStyle} 
-          outputStyle={subtitleInputStyle} 
+        <EditableField
+          value={data.personal.title}
+          placeholder="Software Engineer"
+          className={subtitleClass}
+          onSave={val => onUpdateData?.("personal", { ...data.personal, title: val })}
+          onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-title") : undefined}
+          minRows={1}
+          maxRows={1}
+          inputStyle={subtitleInputStyle}
+          outputStyle={subtitleInputStyle}
         />
         <div className="flex flex-wrap text-sm text-gray-700 mt-3 gap-y-1 items-center print:flex-row print:gap-x-2 print:gap-y-0">
           {contactItems.map((item, idx) => (
             <React.Fragment key={item.key}>
               {idx > 0 && contactDivider}
-              <EditableField 
-                value={item.value} 
-                placeholder={item.placeholder} 
-                className={contactFieldClass} 
-                onSave={val => onUpdateData?.("personal", { ...data.personal, [item.key]: val })} 
-                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(item.ai) : undefined} 
-                minRows={1} 
-                maxRows={1} 
+              <EditableField
+                value={item.value}
+                placeholder={item.placeholder}
+                className={contactFieldClass}
+                onSave={val => onUpdateData?.("personal", { ...data.personal, [item.key]: val })}
+                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(item.ai) : undefined}
+                minRows={1}
+                maxRows={1}
               />
             </React.Fragment>
           ))}
@@ -124,23 +124,23 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           <div key={exp.id} className="mb-5 last:mb-0 resume-item">
             <div className="flex items-baseline justify-between flex-wrap gap-x-2">
               <div className="flex-1 min-w-0">
-                <EditableField 
-                  value={exp.title} 
-                  placeholder="Senior Software Engineer" 
-                  className={experienceTitleClass} 
+                <EditableField
+                  value={exp.title}
+                  placeholder="Senior Software Engineer"
+                  className={experienceTitleClass}
                   onSave={val => onUpdateData?.("experience", [...data.experience.slice(0, index), {
                     ...exp,
                     title: val
-                  }, ...data.experience.slice(index + 1)])} 
-                  onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-title-${index}`) : undefined} 
-                  minRows={1} 
-                  maxRows={1} 
+                  }, ...data.experience.slice(index + 1)])}
+                  onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-title-${index}`) : undefined}
+                  minRows={1}
+                  maxRows={1}
                 />
               </div>
-              <EditableField 
-                value={`${exp.startDate} - ${exp.endDate}`} 
-                placeholder="Jan 2022 - Present" 
-                className={experienceDateClass} 
+              <EditableField
+                value={`${exp.startDate} - ${exp.endDate}`}
+                placeholder="Jan 2022 - Present"
+                className={experienceDateClass}
                 onSave={val => {
                   const [startDate, endDate] = val.split(" - ");
                   onUpdateData?.("experience", [...data.experience.slice(0, index), {
@@ -148,16 +148,16 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                     startDate: startDate || "",
                     endDate: endDate || ""
                   }, ...data.experience.slice(index + 1)]);
-                }} 
-                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-dates-${index}`) : undefined} 
-                minRows={1} 
-                maxRows={1} 
+                }}
+                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-dates-${index}`) : undefined}
+                minRows={1}
+                maxRows={1}
               />
             </div>
-            <EditableField 
-              value={exp.company && exp.location ? `${exp.company}, ${exp.location}` : exp.company || exp.location || ""} 
-              placeholder="Tech Solutions Inc., San Francisco, CA" 
-              className="text-sm text-[#5d4dcd] font-medium my-0.5" 
+            <EditableField
+              value={exp.company && exp.location ? `${exp.company}, ${exp.location}` : exp.company || exp.location || ""}
+              placeholder="Tech Solutions Inc., San Francisco, CA"
+              className="text-sm text-[#5d4dcd] font-medium my-0.5"
               onSave={val => {
                 let [company, ...locParts] = val.split(",");
                 const location = locParts.join(",").trim();
@@ -166,22 +166,22 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                   company: company?.trim() || "",
                   location: location
                 }, ...data.experience.slice(index + 1)]);
-              }} 
-              onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-company-${index}`) : undefined} 
-              minRows={1} 
-              maxRows={1} 
+              }}
+              onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-company-${index}`) : undefined}
+              minRows={1}
+              maxRows={1}
             />
-            <EditableField 
-              value={exp.description} 
-              placeholder="Lead developer for the company's flagship product..." 
-              className={experienceDescriptionClass} 
+            <EditableField
+              value={exp.description}
+              placeholder="Lead developer for the company's flagship product..."
+              className={experienceDescriptionClass}
               onSave={val => onUpdateData?.("experience", [...data.experience.slice(0, index), {
                 ...exp,
                 description: val
-              }, ...data.experience.slice(index + 1)])} 
-              onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-desc-${index}`) : undefined} 
-              minRows={1} 
-              maxRows={3} 
+              }, ...data.experience.slice(index + 1)])}
+              onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-desc-${index}`) : undefined}
+              minRows={1}
+              maxRows={3}
             />
           </div>
         ))}
@@ -193,22 +193,22 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           <div key={edu.id} className="mb-5 last:mb-0 resume-item">
             <div className="flex items-baseline justify-between flex-wrap gap-x-2">
               <div className="flex-1 min-w-0">
-                <EditableField 
-                  value={edu.degree} 
-                  placeholder="Master of Science in Computer Science" 
-                  className={experienceTitleClass} 
+                <EditableField
+                  value={edu.degree}
+                  placeholder="Master of Science in Computer Science"
+                  className={experienceTitleClass}
                   onSave={val => onUpdateData?.("education", [...data.education.slice(0, index), {
                     ...edu,
                     degree: val
-                  }, ...data.education.slice(index + 1)])} 
-                  onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-degree-${index}`) : undefined} 
-                  minRows={1} 
-                  maxRows={1} 
+                  }, ...data.education.slice(index + 1)])}
+                  onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-degree-${index}`) : undefined}
+                  minRows={1}
+                  maxRows={1}
                 />
-                <EditableField 
-                  value={edu.institution && edu.location ? `${edu.institution}, ${edu.location}` : edu.institution || edu.location || ""} 
-                  placeholder="Stanford University, Stanford, CA" 
-                  className="text-sm text-[#5d4dcd] font-medium my-0.5" 
+                <EditableField
+                  value={edu.institution && edu.location ? `${edu.institution}, ${edu.location}` : edu.institution || edu.location || ""}
+                  placeholder="Stanford University, Stanford, CA"
+                  className="text-sm text-[#5d4dcd] font-medium my-0.5"
                   onSave={val => {
                     let [inst, ...locParts] = val.split(",");
                     const location = locParts.join(",").trim();
@@ -217,16 +217,16 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                       institution: inst?.trim() || "",
                       location: location
                     }, ...data.education.slice(index + 1)]);
-                  }} 
-                  onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-institution-${index}`) : undefined} 
-                  minRows={1} 
-                  maxRows={1} 
+                  }}
+                  onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-institution-${index}`) : undefined}
+                  minRows={1}
+                  maxRows={1}
                 />
               </div>
-              <EditableField 
-                value={`${edu.startDate} - ${edu.endDate}`} 
-                placeholder="Sep 2017 - May 2019" 
-                className={experienceDateClass} 
+              <EditableField
+                value={`${edu.startDate} - ${edu.endDate}`}
+                placeholder="Sep 2017 - May 2019"
+                className={experienceDateClass}
                 onSave={val => {
                   const [startDate, endDate] = val.split(" - ");
                   onUpdateData?.("education", [...data.education.slice(0, index), {
@@ -234,23 +234,23 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                     startDate: startDate || "",
                     endDate: endDate || ""
                   }, ...data.education.slice(index + 1)]);
-                }} 
-                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-dates-${index}`) : undefined} 
-                minRows={1} 
-                maxRows={1} 
+                }}
+                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-dates-${index}`) : undefined}
+                minRows={1}
+                maxRows={1}
               />
             </div>
-            <EditableField 
-              value={edu.description || ""} 
-              placeholder="Specialization in Artificial Intelligence. GPA: 3.8/4.0" 
-              className={experienceDescriptionClass} 
+            <EditableField
+              value={edu.description || ""}
+              placeholder="Specialization in Artificial Intelligence. GPA: 3.8/4.0"
+              className={experienceDescriptionClass}
               onSave={val => onUpdateData?.("education", [...data.education.slice(0, index), {
                 ...edu,
                 description: val
-              }, ...data.education.slice(index + 1)])} 
-              onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-desc-${index}`) : undefined} 
-              minRows={1} 
-              maxRows={2} 
+              }, ...data.education.slice(index + 1)])}
+              onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-desc-${index}`) : undefined}
+              minRows={1}
+              maxRows={2}
             />
           </div>
         ))}

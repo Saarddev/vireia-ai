@@ -64,12 +64,12 @@ serve(async (req) => {
 
 function generateSummaryPrompt(experience: string[], skills: string[]) {
   return `
-Generate a concise, professional summary for a resume. Be brief and direct:
+Generate a concise, professional summary for a resume. Be brief, ATS friendly:
 1. Use 2-3 sentences maximum
 2. Include quantifiable achievements
 3. Use clear, factual language without fluff
 4. Focus on impact and concrete skills
-5. No flowery language or vague claims
+5. Humanize the summary, avoid generic phrases
 
 Experience context:
 ${experience.join('\n')}
@@ -175,7 +175,7 @@ function generateEducationPrompt(type: string, context: any = {}) {
       return `Generate an academic degree name based on this context:
 - Institution: ${context.institution || 'Not specified'}
 - Field: ${context.field || 'Not specified'}
-- Level: ${context.level || 'Bachelor's'}
+- Level: ${context.level || "Bachelor's"}
 
 Requirements:
 1. Be specific and formal
@@ -218,7 +218,7 @@ Return only the description.`;
 
     case 'dates':
       return `Generate education dates based on:
-- Degree Level: ${context.degree || 'Bachelor's'}
+- Degree Level: ${context.degree || "Bachelor's"}
 - Current Status: ${context.status || 'Graduated'}
 
 Requirements:

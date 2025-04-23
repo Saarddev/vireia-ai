@@ -15,8 +15,8 @@ interface ResumePreviewProps {
 }
 
 const ResumePreview: React.FC<ResumePreviewProps> = ({
-  data, 
-  template, 
+  data,
+  template,
   settings = {},
   onDataChange,
   onGenerateWithAI
@@ -40,7 +40,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
     }
 
     const fontFamily = settings.fontFamily || 'Inter';
-    
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
@@ -49,40 +49,37 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-          <link href="https://fonts.googleapis.com/css2?family=${fontFamily}:wght@400;500;600;700&display=swap" rel="stylesheet">
+          ${settings.fontFamily ?
+        `<link href="https://fonts.googleapis.com/css2?family=${settings.fontFamily}:wght@400;500;600;700&display=swap" rel="stylesheet">`
+        : ''
+      }
           <style>
             @page {
               size: ${settings.paperSize || 'a4'};
-              margin: ${
-                settings.margins === 'narrow' ? '0.5in' :
-                settings.margins === 'wide' ? '1.5in' :
-                '1in'
-              };
+              margin: ${settings.margins === 'narrow' ? '0.5in' :
+        settings.margins === 'wide' ? '1.5in' :
+          '1in'
+      };
             }
             body {
-              margin: 0;
-              padding: 0;
-              background: white !important;
-              display: flex;
-              justify-content: center;
+              font-family: ${settings.fontFamily || 'Inter'}, sans-serif;
+              font-size: ${settings.fontSize || 10}pt;
+              line-height: 1.5;
+              color: #000;
+              background: #fff;
             }
-            .resume-content {
-              font-family: '${fontFamily}', sans-serif !important;
-              font-size: ${settings.fontSize || 11}pt !important;
-              line-height: 1.5 !important;
-              color: #232323 !important;
-              max-width: 720px;
-              width: 100%;
-              padding: 30px 40px 26px 40px;
-              box-sizing: border-box;
-              box-shadow: none !important;
-              border: none !important;
+            @media print {
+              body { margin: 0; }
+              .resume-content { padding: 0; }
             }
+            .text-resume-purple { color: ${settings.primaryColor}; }
+            .border-resume-purple { border-color: ${settings.primaryColor}; }
+            .bg-purple-100 { background-color: ${settings.primaryColor}20; }
           </style>
         </head>
-        <body>
+        <body class="p-0 m-0">
           <div class="resume-content">
-            ${resumeContentRef.current.innerHTML}
+            ${document.querySelector('.resume-content')?.innerHTML || ''}
           </div>
           <script>
             window.onload = () => {
@@ -97,6 +94,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
     printWindow.document.close();
   };
 
+  console.log("color", document.querySelector('.resume-content')?.innerHTML || '');
   const handleZoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 0.25, 2));
   };
@@ -106,7 +104,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
   };
 
   return (
-    <div className="relative h-full flex flex-col">
+    <div className="relative h-full  flex flex-col">
       <PreviewControls
         zoomLevel={zoomLevel}
         onZoomIn={handleZoomIn}
@@ -130,11 +128,11 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
       </PreviewControls>
 
       <div className="flex-1 overflow-auto relative p-4">
-        <Card 
+        <Card
           className={cn(
             "resume-content bg-white rounded-lg shadow-md p-0 transition-all duration-200 mx-auto",
             "border border-gray-200"
-          )} 
+          )}
           style={{
             width: '100%',
             maxWidth: '720px',

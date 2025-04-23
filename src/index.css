@@ -159,7 +159,7 @@
   /* Resume styles for PDF consistency */
   @media print {
     .resume-content {
-      padding: 30px 40px 26px 40px !important;
+      padding: 20px 0px 0px 0px !important;
       max-width: 100% !important;
       border: none !important;
       box-shadow: none !important;
@@ -178,15 +178,15 @@
       margin-bottom: 8px !important;
     }
     
-    .text-[#5d4dcd] { 
+    .text-primary-color { 
       color: #5d4dcd !important;
     }
     
-    .bg-[#efeafc] {
+    .bg-print-light {
       background-color: #efeafc !important;
     }
     
-    .border-[#5d4dcd] {
+    .border-primary {
       border-color: #5d4dcd !important;
     }
   }
