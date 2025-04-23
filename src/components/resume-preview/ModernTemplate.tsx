@@ -123,18 +123,20 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         {data.experience.map((exp: any, index: number) => (
           <div key={exp.id} className="mb-5 last:mb-0 resume-item">
             <div className="flex items-baseline justify-between flex-wrap gap-x-2">
-              <EditableField 
-                value={exp.title} 
-                placeholder="Senior Software Engineer" 
-                className={experienceTitleClass} 
-                onSave={val => onUpdateData?.("experience", [...data.experience.slice(0, index), {
-                  ...exp,
-                  title: val
-                }, ...data.experience.slice(index + 1)])} 
-                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-title-${index}`) : undefined} 
-                minRows={1} 
-                maxRows={1} 
-              />
+              <div className="flex-1 min-w-0">
+                <EditableField 
+                  value={exp.title} 
+                  placeholder="Senior Software Engineer" 
+                  className={experienceTitleClass} 
+                  onSave={val => onUpdateData?.("experience", [...data.experience.slice(0, index), {
+                    ...exp,
+                    title: val
+                  }, ...data.experience.slice(index + 1)])} 
+                  onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-title-${index}`) : undefined} 
+                  minRows={1} 
+                  maxRows={1} 
+                />
+              </div>
               <EditableField 
                 value={`${exp.startDate} - ${exp.endDate}`} 
                 placeholder="Jan 2022 - Present" 
