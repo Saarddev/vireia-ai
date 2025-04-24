@@ -48,39 +48,9 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
 
   const handleDownloadPDF = () => {
     const printWindow = window.open('', '_blank');
-    if (!printWindow || !resumeContentRef.current) {
-      console.error('Failed to open print window or find resume content');
-      return;
-    }
+    if (!printWindow || !resumeContentRef.current) return;
 
-    const fontFamily = settings.fontFamily || 'Inter';
-    const primaryColor = settings.primaryColor || '#5d4dcd';
-
-    // Clone the resume content node to avoid modifying the original
-    const clonedResumeContent = resumeContentRef.current.cloneNode(true) as HTMLDivElement;
-
-    // Extract all computed styles
-    let allStyles = '';
-    const styleElements = document.querySelectorAll('style');
-    styleElements.forEach(style => {
-      allStyles += style.textContent;
-    });
-
-    // Add inline styles to the cloned content (this might be very verbose)
-    // You might need to selectively apply styles if this becomes too large
-    // const applyAllStylesInline = (element: Element) => {
-    //   const computedStyle = window.getComputedStyle(element);
-    //   let inlineStyle = '';
-    //   for (let i = 0; i < computedStyle.length; i++) {
-    //     const propertyName = computedStyle[i];
-    //     inlineStyle += `${propertyName}: ${computedStyle.getPropertyValue(propertyName)}; `;
-    //   }
-    //   element.setAttribute('style', inlineStyle);
-    //   Array.from(element.children).forEach(applyAllStylesInline);
-    // };
-    // applyAllStylesInline(clonedResumeContent);
-
-    const resumeHTMLContent = clonedResumeContent.outerHTML;
+    const resumeHTMLContent = resumeContentRef.current.outerHTML;
 
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -90,16 +60,14 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <style>
-            ${allStyles}
             @page {
-              size: ${settings.paperSize || 'a4'};
-              margin: ${settings.margins === 'narrow' ? '0.5in' :
-        settings.margins === 'wide' ? '1.5in' :
-          '1in'
-      };
+              size: ${settings.paperSize || 'a4'} portrait;
+              margin: 0;
             }
-            body {
-              font-family: ${settings.fontFamily || 'Inter'}, sans-serif;
+            html, body {
+              margin: 0;
+              padding: 0;
+              font-family: ${settings.fontFamily || 'Inter'}, system-ui, sans-serif;
               font-size: ${settings.fontSize || 10}pt;
               line-height: 1.5;
               color: #000;
@@ -107,9 +75,28 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
             }
+            * {
+              box-sizing: border-box;
+            }
+            .resume-content {
+              width: 210mm;
+              min-height: 297mm;
+              padding: 25mm;
+              margin: 0 auto;
+              background: white;
+            }
+            a {
+              color: inherit;
+              text-decoration: none;
+            }
             @media print {
-              body { margin: 0; }
-              .resume-content { padding: 0 !important; }
+              html, body {
+                width: 210mm;
+                height: 297mm;
+              }
+              .resume-content {
+                padding: 25mm;
+              }
             }
           </style>
           ${settings.fontFamily ?
@@ -117,8 +104,10 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
         : ''
       }
         </head>
-        <body class="p-0 m-0">
-          ${resumeHTMLContent}
+        <body>
+          <div class="resume-content">
+            ${resumeHTMLContent}
+          </div>
           <script>
             window.onload = () => {
               window.print();
@@ -141,33 +130,18 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
   };
 
   return (
-    <div className="relative h-full  flex flex-col">
+    <div className="relative h-full flex flex-col">
       <PreviewControls
         zoomLevel={zoomLevel}
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onDownload={handleDownloadPDF}
-      >
-        <div className="resume-content">
-          {template === 'modern' ? (
-            <ModernTemplate
-              data={data}
-              settings={settings}
-              onUpdateData={onDataChange}
-              onGenerateWithAI={handleGenerateWithAI}
-            />
-          ) : (
-            <div className="h-full flex items-center justify-center">
-              <p className="text-gray-500">{template.charAt(0).toUpperCase() + template.slice(1)} template preview</p>
-            </div>
-          )}
-        </div>
-      </PreviewControls>
+      />
 
       <div className="flex-1 overflow-auto relative p-4">
         <Card
           className={cn(
-            "resume-content bg-white rounded-lg shadow-md p-0 transition-all duration-200 mx-auto",
+            "resume-content mx-auto transition-all duration-200",
             "border border-gray-200"
           )}
           style={{
@@ -175,10 +149,9 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
             maxWidth: '720px',
             transform: `scale(${zoomLevel})`,
             transformOrigin: 'center top',
-            background: '#fff',
           }}
         >
-          <div ref={resumeContentRef} className="resume-content">
+          <div ref={resumeContentRef}>
             {template === 'modern' ? (
               <ModernTemplate
                 data={data}

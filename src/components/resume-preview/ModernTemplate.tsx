@@ -2,6 +2,7 @@ import React from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
 import { Separator } from "@/components/ui/separator";
+import { Mail, Phone, MapPin, Linkedin, Globe } from 'lucide-react';
 
 interface ModernTemplateProps {
   data: any;
@@ -39,41 +40,65 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
 
   const contactDivider = <span className="mx-2 text-gray-400">| </span>;
 
+  const getWebsiteDisplayText = (url: string) => {
+    try {
+      const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`);
+      return urlObj.hostname.replace('www.', '');
+    } catch {
+      return url;
+    }
+  };
+
   const contactItems = [{
     key: 'email',
     value: data.personal.email,
     placeholder: "john.smith@example.com",
-    ai: "personal-email"
+    ai: "personal-email",
+    icon: <Mail className="w-4 h-4 text-[#5d4dcd] mr-1" />,
+    link: (val: string) => `mailto:${val}`
   }, {
     key: 'phone',
     value: data.personal.phone,
     placeholder: "(555) 123-4567",
-    ai: "personal-phone"
+    ai: "personal-phone",
+    icon: <Phone className="w-4 h-4 text-[#5d4dcd] mr-1" />,
+    link: (val: string) => `tel:${val.replace(/[^\d+]/g, '')}`
   }, {
     key: 'location',
     value: data.personal.location,
     placeholder: "San Francisco, CA",
-    ai: "personal-location"
+    ai: "personal-location",
+    icon: <MapPin className="w-4 h-4 text-[#5d4dcd] mr-1" />
   }, ...(data.personal.linkedin ? [{
     key: 'linkedin',
     value: data.personal.linkedin,
     placeholder: "linkedin.com/in/johnsmith",
-    ai: "personal-linkedin"
+    ai: "personal-linkedin",
+    icon: <Linkedin className="w-4 h-4 text-[#5d4dcd] mr-1" />,
+    link: (val: string) => val.startsWith('http') ? val : `https://${val}`,
+    display: () => 'LinkedIn'
   }] : []), ...(data.personal.website ? [{
     key: 'website',
     value: data.personal.website,
     placeholder: "johnsmith.dev",
-    ai: "personal-website"
+    ai: "personal-website",
+    icon: <Globe className="w-4 h-4 text-[#5d4dcd] mr-1" />,
+    link: (val: string) => val.startsWith('http') ? val : `https://${val}`,
+    display: (val: string) => getWebsiteDisplayText(val)
   }] : [])];
 
   return (
-    <div className={cn("bg-white rounded-lg border border-gray-200 max-w-full", settings.fontFamily && `font-[${settings.fontFamily}]`)}
-      style={{
-        padding: "20px",
-        background: "#fff",
-        fontSize: `${settings.fontSize || 11}pt`,
-        lineHeight: "1.5"
-      }}>
+    <div className={cn(
+      "bg-white rounded-lg max-w-full mx-auto w-[21cm]",
+      settings.fontFamily && `font-[${settings.fontFamily}]`
+    )}
+    style={{
+      padding: "25mm",
+      background: "#fff",
+      fontSize: `${settings.fontSize || 11}pt`,
+      lineHeight: "1.5",
+      minHeight: "29.7cm"
+    }}>
       <div className="pb-4 border-b-2 border-[#5d4dcd] mb-6">
         <EditableField
           value={data.personal.name}
@@ -95,19 +120,41 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           inputStyle={subtitleInputStyle}
           outputStyle={subtitleInputStyle}
         />
-        <div className="flex flex-wrap text-sm text-gray-700 mt-3 gap-y-1 items-center print:flex-row print:gap-x-2 print:gap-y-0">
+        <div className="flex flex-wrap text-sm text-gray-700 mt-3 gap-y-2 items-center">
           {contactItems.map((item, idx) => (
             <React.Fragment key={item.key}>
-              {idx > 0 && contactDivider}
-              <EditableField
-                value={item.value}
-                placeholder={item.placeholder}
-                className={contactFieldClass}
-                onSave={val => onUpdateData?.("personal", { ...data.personal, [item.key]: val })}
-                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(item.ai) : undefined}
-                minRows={1}
-                maxRows={1}
-              />
+              {idx > 0 && <span className="mx-2 text-gray-400 select-none">|</span>}
+              <div className="flex items-center">
+                {item.icon}
+                {item.link ? (
+                  <a
+                    href={item.link(item.value)}
+                    target={item.key !== 'email' && item.key !== 'phone' ? '_blank' : undefined}
+                    rel="noopener noreferrer"
+                    className="hover:text-[#5d4dcd] transition-colors"
+                  >
+                    <EditableField
+                      value={item.display ? item.display(item.value) : item.value}
+                      placeholder={item.placeholder}
+                      className={contactFieldClass}
+                      onSave={val => onUpdateData?.("personal", { ...data.personal, [item.key]: val })}
+                      onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(item.ai) : undefined}
+                      minRows={1}
+                      maxRows={1}
+                    />
+                  </a>
+                ) : (
+                  <EditableField
+                    value={item.value}
+                    placeholder={item.placeholder}
+                    className={contactFieldClass}
+                    onSave={val => onUpdateData?.("personal", { ...data.personal, [item.key]: val })}
+                    onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(item.ai) : undefined}
+                    minRows={1}
+                    maxRows={1}
+                  />
+                )}
+              </div>
             </React.Fragment>
           ))}
         </div>
