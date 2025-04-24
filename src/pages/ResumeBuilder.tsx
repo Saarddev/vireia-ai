@@ -155,7 +155,7 @@ const ResumeBuilder = () => {
 
           toast({
             title: "AI Generation",
-            description: `AI generation not available for ${section} section`,
+            description: `Could not find available data for ${section} section`,
           });
           return "";
         }

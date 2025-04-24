@@ -1,10 +1,24 @@
-
 import React, { useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ModernTemplate from './resume-preview/ModernTemplate';
 import PreviewControls from './resume-preview/PreviewControls';
+
+// Function to extract all styles applied to an element and its descendants
+const getAllStyles = (element: Element): string => {
+  let styles = '';
+  const computedStyle = window.getComputedStyle(element);
+  for (let i = 0; i < computedStyle.length; i++) {
+    const propertyName = computedStyle[i];
+    styles += `${propertyName}: ${computedStyle.getPropertyValue(propertyName)}; `;
+  }
+
+  for (let i = 0; i < element.children.length; i++) {
+    styles += getAllStyles(element.children[i]);
+  }
+  return styles;
+};
 
 interface ResumePreviewProps {
   data: any;
@@ -40,6 +54,33 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
     }
 
     const fontFamily = settings.fontFamily || 'Inter';
+    const primaryColor = settings.primaryColor || '#5d4dcd';
+
+    // Clone the resume content node to avoid modifying the original
+    const clonedResumeContent = resumeContentRef.current.cloneNode(true) as HTMLDivElement;
+
+    // Extract all computed styles
+    let allStyles = '';
+    const styleElements = document.querySelectorAll('style');
+    styleElements.forEach(style => {
+      allStyles += style.textContent;
+    });
+
+    // Add inline styles to the cloned content (this might be very verbose)
+    // You might need to selectively apply styles if this becomes too large
+    // const applyAllStylesInline = (element: Element) => {
+    //   const computedStyle = window.getComputedStyle(element);
+    //   let inlineStyle = '';
+    //   for (let i = 0; i < computedStyle.length; i++) {
+    //     const propertyName = computedStyle[i];
+    //     inlineStyle += `${propertyName}: ${computedStyle.getPropertyValue(propertyName)}; `;
+    //   }
+    //   element.setAttribute('style', inlineStyle);
+    //   Array.from(element.children).forEach(applyAllStylesInline);
+    // };
+    // applyAllStylesInline(clonedResumeContent);
+
+    const resumeHTMLContent = clonedResumeContent.outerHTML;
 
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -48,12 +89,8 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
           <title>${data.personal.name} - Resume</title>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
-          <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-          ${settings.fontFamily ?
-        `<link href="https://fonts.googleapis.com/css2?family=${settings.fontFamily}:wght@400;500;600;700&display=swap" rel="stylesheet">`
-        : ''
-      }
           <style>
+            ${allStyles}
             @page {
               size: ${settings.paperSize || 'a4'};
               margin: ${settings.margins === 'narrow' ? '0.5in' :
@@ -67,20 +104,21 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
               line-height: 1.5;
               color: #000;
               background: #fff;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
             }
             @media print {
               body { margin: 0; }
-              .resume-content { padding: 0; }
+              .resume-content { padding: 0 !important; }
             }
-            .text-resume-purple { color: ${settings.primaryColor}; }
-            .border-resume-purple { border-color: ${settings.primaryColor}; }
-            .bg-purple-100 { background-color: ${settings.primaryColor}20; }
           </style>
+          ${settings.fontFamily ?
+        `<link href="https://fonts.googleapis.com/css2?family=${settings.fontFamily}:wght@400;500;600;700&display=swap" rel="stylesheet">`
+        : ''
+      }
         </head>
         <body class="p-0 m-0">
-          <div class="resume-content">
-            ${document.querySelector('.resume-content')?.innerHTML || ''}
-          </div>
+          ${resumeHTMLContent}
           <script>
             window.onload = () => {
               window.print();
@@ -94,7 +132,6 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
     printWindow.document.close();
   };
 
-  console.log("color", document.querySelector('.resume-content')?.innerHTML || '');
   const handleZoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 0.25, 2));
   };
