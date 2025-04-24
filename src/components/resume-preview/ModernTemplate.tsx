@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
 import AddSectionItem from './AddSectionItem';
-import { Linkedin, Mail, Phone, MapPin } from 'lucide-react';
+import { Linkedin, Mail, Phone, MapPin, Link as LinkIcon } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 interface ModernTemplateProps {
@@ -37,9 +37,6 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
   const experienceTitleClass = "font-medium text-gray-800 text-sm";
   const experienceDateClass = "text-sm text-gray-600 ml-3 whitespace-nowrap min-w-[100px] max-w-[160px]";
   const experienceDescriptionClass = "text-sm text-gray-700 mt-1 font-normal leading-relaxed";
-  const contactFieldClass = "inline px-1.5 py-0.5 rounded bg-transparent border-none text-sm focus:bg-gray-100 text-gray-700 min-w-[90px] max-w-[180px]";
-
-  const contactDivider = <span className="mx-2 text-gray-400">| </span>;
 
   const handleAddExperience = () => {
     if (onUpdateData) {
@@ -75,39 +72,43 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
     }
   };
 
+  const contactFieldClass = "inline px-1 py-0 rounded bg-transparent border-none text-sm focus:bg-gray-100 text-gray-700 min-w-[60px] max-w-[180px]";
+  const contactDivider = <span className="mx-1 text-gray-400">|</span>;
+
   const contactItems = [{
     key: 'email',
     value: data.personal.email,
     placeholder: "john.smith@example.com",
     ai: "personal-email",
-    icon: <Mail className="h-4 w-4 mr-1" />,
+    icon: <Mail className="h-3.5 w-3.5 mr-1" />,
     link: `mailto:${data.personal.email}`
   }, {
     key: 'phone',
     value: data.personal.phone,
     placeholder: "(555) 123-4567",
     ai: "personal-phone",
-    icon: <Phone className="h-4 w-4 mr-1" />,
+    icon: <Phone className="h-3.5 w-3.5 mr-1" />,
     link: `tel:${data.personal.phone}`
   }, {
     key: 'location',
     value: data.personal.location,
     placeholder: "San Francisco, CA",
     ai: "personal-location",
-    icon: <MapPin className="h-4 w-4 mr-1" />
+    icon: <MapPin className="h-3.5 w-3.5 mr-1" />
   }, ...(data.personal.linkedin ? [{
     key: 'linkedin',
     value: "LinkedIn",
     placeholder: "linkedin.com/in/johnsmith",
     ai: "personal-linkedin",
-    icon: <Linkedin className="h-4 w-4 mr-1" />,
-    link: data.personal.linkedin
+    icon: <Linkedin className="h-3.5 w-3.5 mr-1" />,
+    link: data.personal.linkedin.startsWith('http') ? data.personal.linkedin : `https://www.linkedin.com/in/${data.personal.linkedin}`
   }] : []), ...(data.personal.website ? [{
     key: 'website',
     value: new URL(data.personal.website).hostname,
     placeholder: "johnsmith.dev",
     ai: "personal-website",
-    link: data.personal.website
+    icon: <LinkIcon className="h-3.5 w-3.5 mr-1" />,
+    link: data.personal.website.startsWith('http') ? data.personal.website : `https://${data.personal.website}`
   }] : [])];
 
   return (
@@ -118,11 +119,11 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         fontSize: `${settings.fontSize || 11}pt`,
         lineHeight: "1.5"
       }}>
-      <div className="pb-4 border-b-2 border-[#5d4dcd] mb-6">
+      <div className="pb-4 border-b-2 border-[#5d4dcd] mb-4">
         <EditableField
           value={data.personal.name}
           placeholder="John Smith"
-          className={nameClass}
+          className="text-xl font-bold text-gray-900 leading-tight tracking-tight"
           onSave={val => onUpdateData?.("personal", { ...data.personal, name: val })}
           onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-name") : undefined}
           minRows={1}
@@ -131,15 +132,15 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         <EditableField
           value={data.personal.title}
           placeholder="Software Engineer"
-          className={subtitleClass}
+          className="text-lg font-medium text-[#5d4dcd] mt-1 transition-all"
           onSave={val => onUpdateData?.("personal", { ...data.personal, title: val })}
           onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-title") : undefined}
           minRows={1}
           maxRows={1}
-          inputStyle={subtitleInputStyle}
-          outputStyle={subtitleInputStyle}
+          inputStyle={{ color: '#5d4dcd', fontWeight: 500 }}
+          outputStyle={{ color: '#5d4dcd', fontWeight: 500 }}
         />
-        <div className="flex flex-wrap text-sm text-gray-700 mt-3 gap-y-1 items-center print:flex-row print:gap-x-2 print:gap-y-0">
+        <div className="flex flex-wrap text-sm text-gray-700 mt-2 gap-x-2 gap-y-1 items-center print:flex-row print:gap-x-2 print:gap-y-0">
           {contactItems.map((item, idx) => (
             <React.Fragment key={item.key}>
               {idx > 0 && contactDivider}
@@ -156,7 +157,12 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                       value={item.value}
                       placeholder={item.placeholder}
                       className={contactFieldClass}
-                      onSave={val => onUpdateData?.("personal", { ...data.personal, [item.key]: item.key === 'linkedin' ? val : item.link })}
+                      onSave={val => onUpdateData?.("personal", { 
+                        ...data.personal, 
+                        [item.key]: item.key === 'linkedin' || item.key === 'website' 
+                          ? val 
+                          : item.link 
+                      })}
                       onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(item.ai) : undefined}
                       minRows={1}
                       maxRows={1}
