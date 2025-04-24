@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
@@ -75,20 +76,50 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
   const contactFieldClass = "inline px-1 py-0 rounded bg-transparent border-none text-sm focus:bg-gray-100 text-gray-700 min-w-[60px] max-w-[180px]";
   const contactDivider = <span className="mx-1 text-gray-400">|</span>;
 
+  // Helper function to validate URL strings
+  const isValidUrl = (urlString: string): boolean => {
+    try {
+      if (!urlString || urlString.trim() === '') return false;
+      // Add protocol if missing
+      const urlToTest = urlString.match(/^https?:\/\//) ? urlString : `https://${urlString}`;
+      new URL(urlToTest);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // Helper to get URL hostname or original value
+  const getDisplayUrl = (url: string): string => {
+    try {
+      if (!isValidUrl(url)) return url;
+      const urlWithProtocol = url.match(/^https?:\/\//) ? url : `https://${url}`;
+      return new URL(urlWithProtocol).hostname;
+    } catch (e) {
+      return url;
+    }
+  };
+
+  // Helper to format links properly
+  const formatLink = (url: string): string => {
+    if (!url) return '';
+    return url.match(/^https?:\/\//) ? url : `https://${url}`;
+  };
+
   const contactItems = [{
     key: 'email',
     value: data.personal.email,
     placeholder: "john.smith@example.com",
     ai: "personal-email",
     icon: <Mail className="h-3.5 w-3.5 mr-1" />,
-    link: `mailto:${data.personal.email}`
+    link: data.personal.email ? `mailto:${data.personal.email}` : ''
   }, {
     key: 'phone',
     value: data.personal.phone,
     placeholder: "(555) 123-4567",
     ai: "personal-phone",
     icon: <Phone className="h-3.5 w-3.5 mr-1" />,
-    link: `tel:${data.personal.phone}`
+    link: data.personal.phone ? `tel:${data.personal.phone}` : ''
   }, {
     key: 'location',
     value: data.personal.location,
@@ -101,14 +132,18 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
     placeholder: "linkedin.com/in/johnsmith",
     ai: "personal-linkedin",
     icon: <Linkedin className="h-3.5 w-3.5 mr-1" />,
-    link: data.personal.linkedin.startsWith('http') ? data.personal.linkedin : `https://www.linkedin.com/in/${data.personal.linkedin}`
-  }] : []), ...(data.personal.website ? [{
+    link: data.personal.linkedin ? formatLink(
+      data.personal.linkedin.includes('linkedin.com') ? 
+      data.personal.linkedin : 
+      `https://www.linkedin.com/in/${data.personal.linkedin}`
+    ) : ''
+  }] : []), ...(data.personal.website && isValidUrl(data.personal.website) ? [{
     key: 'website',
-    value: new URL(data.personal.website).hostname,
+    value: getDisplayUrl(data.personal.website),
     placeholder: "johnsmith.dev",
     ai: "personal-website",
     icon: <LinkIcon className="h-3.5 w-3.5 mr-1" />,
-    link: data.personal.website.startsWith('http') ? data.personal.website : `https://${data.personal.website}`
+    link: formatLink(data.personal.website)
   }] : [])];
 
   return (
@@ -161,7 +196,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                         ...data.personal, 
                         [item.key]: item.key === 'linkedin' || item.key === 'website' 
                           ? val 
-                          : item.link 
+                          : item.key === 'email' || item.key === 'phone' ? val : data.personal[item.key]
                       })}
                       onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(item.ai) : undefined}
                       minRows={1}
