@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
@@ -257,6 +256,79 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           </div>
         </div>
       </div>
+
+      {data.projects && data.projects.length > 0 && (
+        <div className="mb-6 resume-section">
+          <h2 className={sectionHeaderClass}>Projects</h2>
+          {data.projects.map((project: any) => (
+            <div key={project.id} className="mb-5 last:mb-0 resume-item">
+              <div className="flex items-baseline justify-between flex-wrap gap-x-2">
+                <div className="flex-1 min-w-0">
+                  <EditableField
+                    value={project.title}
+                    placeholder="Project Name"
+                    className={experienceTitleClass}
+                    onSave={val => handleFieldUpdate("projects", "title", val)}
+                    minRows={1}
+                    maxRows={1}
+                  />
+                </div>
+                <EditableField
+                  value={`${project.startDate} - ${project.endDate}`}
+                  placeholder="Jan 2023 - Present"
+                  className={experienceDateClass}
+                  onSave={val => {
+                    const [startDate, endDate] = val.split(" - ");
+                    handleFieldUpdate("projects", "startDate", startDate || "");
+                    handleFieldUpdate("projects", "endDate", endDate || "");
+                  }}
+                  minRows={1}
+                  maxRows={1}
+                />
+              </div>
+              <EditableField
+                value={project.description}
+                placeholder="Describe the project and your role..."
+                className={experienceDescriptionClass}
+                onSave={val => handleFieldUpdate("projects", "description", val)}
+                minRows={1}
+                maxRows={3}
+              />
+              {project.technologies && project.technologies.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {project.technologies.map((tech: string, i: number) => (
+                    <span key={i} className="px-2 py-0.5 bg-[#efeafc] rounded-sm text-sm border-[0.5px] border-[#dad3f8] shadow-xs transition whitespace-nowrap text-violet-400 font-normal">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {project.link && (
+                <a
+                  href={project.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-resume-purple hover:text-resume-purple-dark mt-1 inline-block"
+                >
+                  View Project →
+                </a>
+              )}
+            </div>
+          ))}
+          <AddSectionItem onAdd={() => {
+            const newProject = {
+              id: uuidv4(),
+              title: "",
+              description: "",
+              technologies: [],
+              startDate: "",
+              endDate: "",
+              link: ""
+            };
+            onUpdateData?.("projects", [...(data.projects || []), newProject]);
+          }} />
+        </div>
+      )}
     </div>
   );
 };

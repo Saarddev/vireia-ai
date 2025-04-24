@@ -119,6 +119,16 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
                   <span>Skills</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  isActive={activeSection === "projects"}
+                  onClick={() => onSectionChange("projects")}
+                >
+                  <Code className="h-4 w-4" />
+                  <span>Projects</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

@@ -1,4 +1,3 @@
-
 export interface Education {
   id: string;
   degree: string;
@@ -34,10 +33,23 @@ export interface Personal {
   website?: string;
 }
 
+export interface Project {
+  id: string;
+  title: string;
+  description: string;
+  technologies: string[];
+  link?: string;
+  startDate: string;
+  endDate: string;
+}
+
 export interface ResumeData {
   personal: Personal;
   summary: string;
   experience: Experience[];
   education: Education[];
   skills: Skills;
+  languages: string[];
+  certifications: string[];
+  projects: Project[];
 }

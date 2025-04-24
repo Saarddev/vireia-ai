@@ -156,7 +156,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          content: Json
+          content?: Json
           created_at?: string
           id?: string
           settings?: Json | null

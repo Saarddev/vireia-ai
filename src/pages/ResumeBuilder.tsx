@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -20,6 +19,7 @@ import ResumeSettings from '@/components/resume-builder/ResumeSettings';
 import { useResumeData } from '@/hooks/use-resume-data';
 import { useResumeAI } from '@/hooks/use-resume-ai';
 import { supabase } from '@/integrations/supabase/client';
+import ProjectForm from '@/components/resume-builder/ProjectForm';
 
 interface AISuggestionData {
   type: string;
@@ -115,7 +115,6 @@ const ResumeBuilder = () => {
           break;
         }
         default: {
-          // Handle education-related AI generation
           if (section.startsWith('education-')) {
             const [, eduIndex, field] = section.split('-');
             const index = parseInt(eduIndex);
@@ -222,6 +221,13 @@ const ResumeBuilder = () => {
             }}
           />
         );
+      case "projects":
+        return (
+          <ProjectForm
+            data={resumeData.projects || []}
+            onChange={(data) => handleDataChange("projects", data)}
+          />
+        );
       case "templates":
         return (
           <TemplateSelector
@@ -303,7 +309,6 @@ const ResumeBuilder = () => {
               </div>
 
               <div className="xl:col-span-7 h-full overflow-auto">
-                {/* <Card className="h-full flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 shadow-xl"> */}
                 <ResumePreview
                   data={resumeData}
                   template={selectedTemplate}
@@ -311,7 +316,6 @@ const ResumeBuilder = () => {
                   onDataChange={(section, data) => handleDataChange(section, data)}
                   onGenerateWithAI={handleGenerateWithAI}
                 />
-                {/* </Card> */}
               </div>
             </div>
           </SidebarInset>
