@@ -35,12 +35,28 @@ export const enhanceResumeWithAI = async (linkedinData: any, template: string = 
       throw new Error('LinkedIn data is required');
     }
 
+    console.log('Enhancing resume with AI...');
     const response = await supabase.functions.invoke('enhance-resume', {
-      body: { linkedinData, resumeTemplate: template }
+      body: { 
+        linkedinData, 
+        resumeTemplate: template,
+        type: 'full-resume'
+      }
     });
 
     if (response.error) {
-      throw new Error(`Function error: ${response.error.message}`);
+      console.error('Edge function error:', response.error);
+      throw new Error(`Function error: ${response.error}`);
+    }
+
+    if (!response.data?.enhancedResume) {
+      console.error('Missing enhancedResume in response:', response.data);
+      throw new Error('Invalid response from AI enhancement');
+    }
+
+    // Ensure projects array exists
+    if (!response.data.enhancedResume.projects) {
+      response.data.enhancedResume.projects = [];
     }
 
     return response.data.enhancedResume;

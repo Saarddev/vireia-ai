@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
@@ -17,18 +18,22 @@ serve(async (req) => {
     const { type, linkedinData, resumeTemplate, experience, skills, description, educationContext } = await req.json();
     
     let prompt = "";
+    let requestType = type || 'full-resume'; // Default to full resume if type isn't specified
     
-    if (type.startsWith('education-')) {
-      prompt = generateEducationPrompt(type, educationContext);
-    } else if (type === "summary") {
+    if (requestType.startsWith('education-')) {
+      prompt = generateEducationPrompt(requestType, educationContext);
+    } else if (requestType === "summary") {
       prompt = generateSummaryPrompt(experience, skills);
-    } else if (type === "skills") {
+    } else if (requestType === "skills") {
       prompt = generateSkillsPrompt(experience);
-    } else if (type === "improve") {
+    } else if (requestType === "improve") {
       prompt = generateImprovementPrompt(description);
     } else {
-      prompt = generateFullResumePrompt(linkedinData, resumeTemplate);
+      // Full resume enhancement
+      prompt = generateFullResumePrompt(linkedinData, resumeTemplate || "modern");
     }
+
+    console.log(`Generating ${requestType} with Gemini API`);
 
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
@@ -44,18 +49,21 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorData = await response.text();
+      console.error(`Gemini API error: ${response.status} ${errorData}`);
       throw new Error(`Gemini API error: ${response.status} ${errorData}`);
     }
 
     const data = await response.json();
-    const result = parseGeminiResponse(data, type);
+    const result = parseGeminiResponse(data, requestType);
+    
+    console.log(`Successfully generated ${requestType}`);
     
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('Error in enhance-resume function:', error);
+    return new Response(JSON.stringify({ error: error.message || "Unknown error occurred" }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -72,10 +80,10 @@ Generate a concise, professional summary for a resume. Be brief, ATS friendly:
 5. Humanize the summary, avoid generic phrases
 
 Experience context:
-${experience.join('\n')}
+${experience ? experience.join('\n') : 'Not provided'}
 
 Skills context:
-${skills.join(', ')}
+${skills ? skills.join(', ') : 'Not provided'}
 
 Return only the summary text.`;
 }
@@ -84,7 +92,7 @@ function generateSkillsPrompt(experience: string[]) {
   return `
 Extract technical and soft skills from the following experience:
 
-${experience.join('\n')}
+${experience ? experience.join('\n') : 'Not provided'}
 
 Return as JSON in this format - be concise and specific:
 {
@@ -103,12 +111,17 @@ Improve this job description to be more concise and achievement-focused:
 5. Focus only on accomplishments and skills
 
 Original description:
-${description}
+${description || 'Not provided'}
 
 Return only the improved description.`;
 }
 
 function generateFullResumePrompt(linkedinData: any, template: string = 'modern') {
+  // Ensure linkedinData is valid
+  if (!linkedinData) {
+    linkedinData = {};
+  }
+  
   return `
 You are creating a precise, professional resume.
 
@@ -123,7 +136,7 @@ Requirements:
 LinkedIn Data:
 ${JSON.stringify(linkedinData, null, 2)}
 
-Return only a valid JSON resume:
+Return only a valid JSON resume with the following structure:
 {
   "personal": {
     "name": "",
@@ -151,7 +164,7 @@ Return only a valid JSON resume:
       "id": "edu1",
       "institution": "",
       "degree": "",
-      "field": "",
+      "location": "",
       "startDate": "",
       "endDate": "",
       "description": ""
@@ -173,9 +186,9 @@ function generateEducationPrompt(type: string, context: any = {}) {
   switch (field) {
     case 'degree':
       return `Generate an academic degree name based on this context:
-- Institution: ${context.institution || 'Not specified'}
-- Field: ${context.field || 'Not specified'}
-- Level: ${context.level || "Bachelor's"}
+- Institution: ${context?.institution || 'Not specified'}
+- Field: ${context?.field || 'Not specified'}
+- Level: ${context?.level || "Bachelor's"}
 
 Requirements:
 1. Be specific and formal
@@ -187,9 +200,9 @@ Return only the degree name.`;
 
     case 'institution':
       return `Suggest a prestigious educational institution name based on this context:
-- Degree: ${context.degree || 'Not specified'}
-- Location: ${context.location || 'Not specified'}
-- Field: ${context.field || 'Not specified'}
+- Degree: ${context?.degree || 'Not specified'}
+- Location: ${context?.location || 'Not specified'}
+- Field: ${context?.field || 'Not specified'}
 
 Requirements:
 1. Use the official institution name
@@ -201,9 +214,9 @@ Return only the institution name.`;
 
     case 'description':
       return `Write an academic description based on this context:
-- Degree: ${context.degree || 'Not specified'}
-- Institution: ${context.institution || 'Not specified'}
-- Field: ${context.field || 'Not specified'}
+- Degree: ${context?.degree || 'Not specified'}
+- Institution: ${context?.institution || 'Not specified'}
+- Field: ${context?.field || 'Not specified'}
 
 Requirements:
 1. Highlight key achievements
@@ -218,8 +231,8 @@ Return only the description.`;
 
     case 'dates':
       return `Generate education dates based on:
-- Degree Level: ${context.degree || "Bachelor's"}
-- Current Status: ${context.status || 'Graduated'}
+- Degree Level: ${context?.degree || "Bachelor's"}
+- Current Status: ${context?.status || 'Graduated'}
 
 Requirements:
 1. Use MM YYYY format
@@ -235,6 +248,10 @@ Return in format: "MM YYYY - MM YYYY"`;
 }
 
 function parseGeminiResponse(response: any, type: string) {
+  if (!response?.candidates?.[0]?.content?.parts?.[0]?.text) {
+    throw new Error('Invalid response format from Gemini API');
+  }
+  
   const text = response.candidates[0].content.parts[0].text;
   
   try {
@@ -259,9 +276,17 @@ function parseGeminiResponse(response: any, type: string) {
       throw new Error('No valid JSON found in skills response');
     }
     
+    // For full resume enhancement
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      return { enhancedResume: JSON.parse(jsonMatch[0]) };
+      const parsedResume = JSON.parse(jsonMatch[0]);
+      
+      // Ensure projects array exists
+      if (!parsedResume.projects) {
+        parsedResume.projects = [];
+      }
+      
+      return { enhancedResume: parsedResume };
     }
     
     throw new Error('No valid JSON found in response');
