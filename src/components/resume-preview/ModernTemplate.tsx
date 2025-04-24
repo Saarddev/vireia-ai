@@ -1,7 +1,9 @@
 import React from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
-import { Separator } from "@/components/ui/separator";
+import AddSectionItem from './AddSectionItem';
+import { Linkedin, Mail, Phone, MapPin } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
 
 interface ModernTemplateProps {
   data: any;
@@ -39,31 +41,73 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
 
   const contactDivider = <span className="mx-2 text-gray-400">| </span>;
 
+  const handleAddExperience = () => {
+    if (onUpdateData) {
+      onUpdateData("experience", [
+        ...data.experience,
+        {
+          id: uuidv4(),
+          title: "",
+          company: "",
+          location: "",
+          startDate: "",
+          endDate: "",
+          description: ""
+        }
+      ]);
+    }
+  };
+
+  const handleAddEducation = () => {
+    if (onUpdateData) {
+      onUpdateData("education", [
+        ...data.education,
+        {
+          id: uuidv4(),
+          degree: "",
+          institution: "",
+          location: "",
+          startDate: "",
+          endDate: "",
+          description: ""
+        }
+      ]);
+    }
+  };
+
   const contactItems = [{
     key: 'email',
     value: data.personal.email,
     placeholder: "john.smith@example.com",
-    ai: "personal-email"
+    ai: "personal-email",
+    icon: <Mail className="h-4 w-4 mr-1" />,
+    link: `mailto:${data.personal.email}`
   }, {
     key: 'phone',
     value: data.personal.phone,
     placeholder: "(555) 123-4567",
-    ai: "personal-phone"
+    ai: "personal-phone",
+    icon: <Phone className="h-4 w-4 mr-1" />,
+    link: `tel:${data.personal.phone}`
   }, {
     key: 'location',
     value: data.personal.location,
     placeholder: "San Francisco, CA",
-    ai: "personal-location"
+    ai: "personal-location",
+    icon: <MapPin className="h-4 w-4 mr-1" />
   }, ...(data.personal.linkedin ? [{
     key: 'linkedin',
-    value: data.personal.linkedin,
+    value: "LinkedIn",
     placeholder: "linkedin.com/in/johnsmith",
-    ai: "personal-linkedin"
+    ai: "personal-linkedin",
+    icon: <Linkedin className="h-4 w-4 mr-1" />,
+    link: data.personal.linkedin
   }] : []), ...(data.personal.website ? [{
     key: 'website',
-    value: data.personal.website,
+    value: new URL(data.personal.website).hostname,
     placeholder: "johnsmith.dev",
-    ai: "personal-website"
+    ai: "personal-website",
+    link: data.personal.website
   }] : [])];
 
   return (
@@ -99,15 +143,37 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           {contactItems.map((item, idx) => (
             <React.Fragment key={item.key}>
               {idx > 0 && contactDivider}
-              <EditableField
-                value={item.value}
-                placeholder={item.placeholder}
-                className={contactFieldClass}
-                onSave={val => onUpdateData?.("personal", { ...data.personal, [item.key]: val })}
-                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(item.ai) : undefined}
-                minRows={1}
-                maxRows={1}
-              />
+              <div className="inline-flex items-center">
+                {item.icon}
+                {item.link ? (
+                  <a
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#5d4dcd] transition-colors"
+                  >
+                    <EditableField
+                      value={item.value}
+                      placeholder={item.placeholder}
+                      className={contactFieldClass}
+                      onSave={val => onUpdateData?.("personal", { ...data.personal, [item.key]: item.key === 'linkedin' ? val : item.link })}
+                      onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(item.ai) : undefined}
+                      minRows={1}
+                      maxRows={1}
+                    />
+                  </a>
+                ) : (
+                  <EditableField
+                    value={item.value}
+                    placeholder={item.placeholder}
+                    className={contactFieldClass}
+                    onSave={val => onUpdateData?.("personal", { ...data.personal, [item.key]: val })}
+                    onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(item.ai) : undefined}
+                    minRows={1}
+                    maxRows={1}
+                  />
+                )}
+              </div>
             </React.Fragment>
           ))}
         </div>
@@ -185,6 +251,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
             />
           </div>
         ))}
+        <AddSectionItem onAdd={handleAddExperience} />
       </div>
 
       <div className="mb-6 resume-section">
@@ -254,6 +321,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
             />
           </div>
         ))}
+        <AddSectionItem onAdd={handleAddEducation} />
       </div>
 
       <div className="mb-2 pb-2 border-b border-gray-200 resume-section">
