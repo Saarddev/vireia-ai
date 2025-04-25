@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { ResumeData } from "@/types/resume.d";
 
@@ -41,7 +40,8 @@ export const enhanceResumeWithAI = async (linkedinData: any, template: string = 
       body: { 
         linkedinData, 
         resumeTemplate: template,
-        type: 'full-resume'
+        type: 'full-resume',
+        promptStyle: 'concise'
       }
     });
 
@@ -79,12 +79,17 @@ export const enhanceResumeWithAI = async (linkedinData: any, template: string = 
     };
     
     // Merge the response with defaults to ensure all properties exist
-    let enhancedResume = {
+    const enhancedResume = {
       ...defaultResume,
       ...response.data.enhancedResume
     };
     
-    // Extra safety checks for nested objects and arrays
+    // Type safety checks for nested objects and arrays
+    enhancedResume.personal = {
+      ...defaultResume.personal,
+      ...enhancedResume.personal
+    };
+    
     enhancedResume.experience = Array.isArray(enhancedResume.experience) 
       ? enhancedResume.experience 
       : [];
@@ -97,13 +102,14 @@ export const enhanceResumeWithAI = async (linkedinData: any, template: string = 
       ? enhancedResume.projects 
       : [];
     
-    enhancedResume.skills = enhancedResume.skills || { technical: [], soft: [] };
-    enhancedResume.skills.technical = Array.isArray(enhancedResume.skills.technical) 
-      ? enhancedResume.skills.technical 
-      : [];
-    enhancedResume.skills.soft = Array.isArray(enhancedResume.skills.soft) 
-      ? enhancedResume.skills.soft 
-      : [];
+    enhancedResume.skills = {
+      technical: Array.isArray(enhancedResume.skills?.technical) 
+        ? enhancedResume.skills.technical 
+        : [],
+      soft: Array.isArray(enhancedResume.skills?.soft) 
+        ? enhancedResume.skills.soft 
+        : []
+    };
     
     enhancedResume.languages = Array.isArray(enhancedResume.languages) 
       ? enhancedResume.languages 
@@ -116,28 +122,7 @@ export const enhanceResumeWithAI = async (linkedinData: any, template: string = 
     return enhancedResume;
   } catch (error) {
     console.error('Error enhancing resume with AI:', error);
-    // Return a safe default structure in case of error
-    return {
-      personal: {
-        name: "",
-        title: "",
-        email: "",
-        phone: "",
-        location: "",
-        linkedin: "",
-        website: ""
-      },
-      summary: "",
-      experience: [],
-      education: [],
-      skills: {
-        technical: [],
-        soft: []
-      },
-      languages: [],
-      certifications: [],
-      projects: []
-    };
+    throw error;
   }
 };
 
@@ -172,7 +157,7 @@ export const createEnhancedResume = async (linkedinUrl: string, resumeTitle?: st
       .from('resumes')
       .insert({
         title: resumeTitle || 'My Professional Resume',
-        content: enhancedResume,
+        content: JSON.stringify(enhancedResume),
         template: 'modern',
         user_id: userId,
         settings: {
