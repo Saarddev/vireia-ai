@@ -1,33 +1,28 @@
-
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
 import { 
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
-  FormDescription
+  FormLabel
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
-import { Code, Plus, Trash2, MoveUp, MoveDown } from 'lucide-react';
+import { CalendarIcon, Rocket, Trash2, Plus, ArrowUpDown, GripVertical, Wand2 } from "lucide-react";
 import { useForm } from "react-hook-form";
-import type { Project } from '@/types/resume';
+import { Badge } from "@/components/ui/badge";
+import { Project } from '@/types/resume';
+import { cn } from '@/lib/utils';
 
 interface ProjectFormProps {
   data: Project[];
   onChange: (data: Project[]) => void;
-  onGenerateWithAI?: (section: string) => Promise<void>;
 }
 
-const ProjectForm: React.FC<ProjectFormProps> = ({ 
-  data, 
-  onChange,
-  onGenerateWithAI 
-}) => {
+const ProjectForm: React.FC<ProjectFormProps> = ({ data = [], onChange }) => {
   const [activeProjectIndex, setActiveProjectIndex] = useState(data.length > 0 ? 0 : -1);
   
   const form = useForm({

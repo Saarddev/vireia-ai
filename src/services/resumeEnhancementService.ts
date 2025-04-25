@@ -54,12 +54,34 @@ export const enhanceResumeWithAI = async (linkedinData: any, template: string = 
       throw new Error('Invalid response from AI enhancement');
     }
 
-    // Ensure projects array exists
-    if (!response.data.enhancedResume.projects) {
-      response.data.enhancedResume.projects = [];
+    let enhancedResume = response.data.enhancedResume;
+    
+    // Ensure all array properties exist and are arrays
+    if (!Array.isArray(enhancedResume.experience)) {
+      enhancedResume.experience = [];
+    }
+    
+    if (!Array.isArray(enhancedResume.education)) {
+      enhancedResume.education = [];
+    }
+    
+    if (!Array.isArray(enhancedResume.projects)) {
+      enhancedResume.projects = [];
+    }
+    
+    // Ensure skills object exists
+    if (!enhancedResume.skills) {
+      enhancedResume.skills = { technical: [], soft: [] };
+    } else {
+      if (!Array.isArray(enhancedResume.skills.technical)) {
+        enhancedResume.skills.technical = [];
+      }
+      if (!Array.isArray(enhancedResume.skills.soft)) {
+        enhancedResume.skills.soft = [];
+      }
     }
 
-    return response.data.enhancedResume;
+    return enhancedResume;
   } catch (error) {
     console.error('Error enhancing resume with AI:', error);
     throw error;

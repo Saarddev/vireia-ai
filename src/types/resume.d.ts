@@ -7,6 +7,8 @@ export interface Education {
   startDate: string;
   endDate: string;
   description?: string;
+  field?: string;
+  level?: string;
 }
 
 export interface Experience {

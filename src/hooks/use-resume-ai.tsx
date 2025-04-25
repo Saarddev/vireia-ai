@@ -7,7 +7,7 @@ export function useResumeAI() {
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
 
-  const generateSummary = async (experience: string[], skills: string[]) => {
+  const generateSummary = async (experience: string[], skills: string[]): Promise<string> => {
     setIsGenerating(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -44,7 +44,7 @@ export function useResumeAI() {
         description: `Failed to generate summary: ${error.message || "Please try again"}`,
         variant: "destructive"
       });
-      return null;
+      return "";
     } finally {
       setIsGenerating(false);
     }
@@ -95,7 +95,7 @@ export function useResumeAI() {
     }
   };
 
-  const improveDescription = async (description: string) => {
+  const improveDescription = async (description: string): Promise<string> => {
     setIsGenerating(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -131,7 +131,7 @@ export function useResumeAI() {
         description: `Failed to improve description: ${error.message || "Please try again"}`,
         variant: "destructive"
       });
-      return null;
+      return "";
     } finally {
       setIsGenerating(false);
     }

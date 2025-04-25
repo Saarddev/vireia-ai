@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -99,15 +100,25 @@ const ResumeBuilder = () => {
     try {
       switch (section) {
         case "summary": {
-          const summary = await generateSummary(
-            resumeData.experience.map(exp => exp.description),
-            [...resumeData.skills.technical, ...resumeData.skills.soft]
-          );
+          const experienceDescriptions = Array.isArray(resumeData.experience) 
+            ? resumeData.experience.map(exp => exp.description)
+            : [];
+
+          const allSkills = [
+            ...(Array.isArray(resumeData.skills?.technical) ? resumeData.skills.technical : []),
+            ...(Array.isArray(resumeData.skills?.soft) ? resumeData.skills.soft : [])
+          ];
+          
+          const summary = await generateSummary(experienceDescriptions, allSkills);
           if (summary) return summary;
           break;
         }
         case "skills": {
-          const skills = await extractSkills(resumeData.experience.map(exp => exp.description));
+          const experienceDescriptions = Array.isArray(resumeData.experience) 
+            ? resumeData.experience.map(exp => exp.description)
+            : [];
+            
+          const skills = await extractSkills(experienceDescriptions);
           if (skills) {
             handleDataChange("skills", skills);
             return "";
@@ -118,9 +129,10 @@ const ResumeBuilder = () => {
           if (section.startsWith('education-')) {
             const [, eduIndex, field] = section.split('-');
             const index = parseInt(eduIndex);
-            const currentEdu = resumeData.education[index];
+            
+            if (Array.isArray(resumeData.education) && resumeData.education[index]) {
+              const currentEdu = resumeData.education[index];
 
-            if (currentEdu) {
               const { data, error } = await supabase.functions.invoke('enhance-resume', {
                 body: {
                   type: `education-${field}`,

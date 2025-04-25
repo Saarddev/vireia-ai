@@ -1,50 +1,72 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Wand2, PlusCircle } from 'lucide-react';
+import { Wand2, Edit, Sparkles, Loader } from 'lucide-react';
 
-interface AIHoverToolkitProps {
-  onComplete?: () => Promise<string> | void;
-  onAddChanges?: () => Promise<string> | void;
-  className?: string;
+export interface AIHoverToolkitProps {
+  onComplete: () => Promise<string>;
+  onAddChanges?: () => Promise<string>;
+  icon?: React.ReactNode;
+  label?: string;
 }
 
-const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
-  onComplete,
+const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({ 
+  onComplete, 
   onAddChanges,
-  className
+  icon = <Wand2 className="h-3 w-3 mr-1" />,
+  label = "Enhance with AI"
 }) => {
+  const [isGenerating, setIsGenerating] = React.useState(false);
+
+  const handleComplete = async () => {
+    if (isGenerating) return;
+    
+    setIsGenerating(true);
+    try {
+      await onComplete();
+    } catch (error) {
+      console.error('Error completing AI action:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleAddChanges = async () => {
+    if (!onAddChanges || isGenerating) return;
+    
+    try {
+      await onAddChanges();
+    } catch (error) {
+      console.error('Error adding changes:', error);
+    }
+  };
+
   return (
-    <div className={`flex items-center gap-1 p-1 rounded-md bg-white/95 border border-gray-100 shadow-sm backdrop-blur-sm transition-all duration-200 ${className}`}>
-      {onComplete && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-5 px-2 text-xs text-muted-foreground hover:text-resume-purple hover:bg-resume-purple/10 flex items-center gap-1"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (onComplete) onComplete();
-          }}
-        >
-          <Wand2 className="h-3 w-3" />
-          <span className="font-medium">Generate</span>
-        </Button>
-      )}
+    <div className="flex gap-1">
+      <Button 
+        size="sm" 
+        variant="ghost" 
+        className="h-7 text-xs px-2 hover:bg-purple-50 hover:text-resume-purple" 
+        onClick={handleComplete}
+        disabled={isGenerating}
+      >
+        {isGenerating ? (
+          <Loader className="h-3 w-3 mr-1 animate-spin" />
+        ) : (
+          icon
+        )}
+        {label}
+      </Button>
       
       {onAddChanges && (
         <Button
-          variant="ghost"
           size="sm"
-          className="h-5 px-2 text-xs text-muted-foreground hover:text-resume-purple hover:bg-resume-purple/10 flex items-center gap-1"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (onAddChanges) onAddChanges();
-          }}
+          variant="ghost"
+          className="h-7 text-xs px-2 hover:bg-purple-50 hover:text-resume-purple"
+          onClick={handleAddChanges}
         >
-          <PlusCircle className="h-3 w-3" />
-          <span className="font-medium">Continue</span>
+          <Edit className="h-3 w-3 mr-1" />
+          Add bullet
         </Button>
       )}
     </div>
