@@ -1,3 +1,4 @@
+
 export interface Education {
   id: string;
   degree: string;

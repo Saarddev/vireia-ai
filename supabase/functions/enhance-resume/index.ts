@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
@@ -14,7 +15,7 @@ serve(async (req) => {
   }
 
   try {
-    const { type, linkedinData, resumeTemplate, experience, skills, description, educationContext } = await req.json();
+    const { type, linkedinData, resumeTemplate, experience, skills, description, educationContext, experienceContext } = await req.json();
     
     let prompt = "";
     let requestType = type || 'full-resume'; // Default to full resume if type isn't specified
@@ -27,6 +28,8 @@ serve(async (req) => {
       prompt = generateSkillsPrompt(experience);
     } else if (requestType === "improve") {
       prompt = generateImprovementPrompt(description);
+    } else if (requestType === "experience-description") {
+      prompt = generateExperiencePrompt(experienceContext);
     } else {
       // Full resume enhancement
       prompt = generateFullResumePrompt(linkedinData, resumeTemplate || "modern");
@@ -71,12 +74,12 @@ serve(async (req) => {
 
 function generateSummaryPrompt(experience: string[], skills: string[]) {
   return `
-As a professional resume writer, help create a warm and engaging professional summary. Consider:
-1. The person's real experiences and achievements
-2. Their unique combination of skills
-3. Their career progression and aspirations
-4. Write in a natural, conversational tone while maintaining professionalism
-5. Focus on impact and value while showing personality
+As a thoughtful resume writer with empathy for job seekers, help create a warm, engaging professional summary that feels genuinely human. Consider:
+
+1. The real person behind these experiences and their unique journey
+2. Their personal blend of skills and how they've applied them
+3. The story of their career progression and aspirations
+4. Use natural language that resonates with both the person and potential employers
 
 Current experience context:
 ${experience ? experience.join('\n') : 'Not provided'}
@@ -84,17 +87,18 @@ ${experience ? experience.join('\n') : 'Not provided'}
 Skills highlight:
 ${skills ? skills.join(', ') : 'Not provided'}
 
-Write a brief, engaging summary that sounds natural and human while highlighting professional achievements.
+Write a brief, authentic summary that feels conversational and human while still highlighting professional achievements. Avoid corporate jargon when possible. Show the person behind the professional.
+
 Return only the summary text.`;
 }
 
 function generateSkillsPrompt(experience: string[]) {
   return `
-Extract technical and soft skills from the following experience:
+Extract technical and soft skills from the following experience, focusing on what makes this person unique:
 
 ${experience ? experience.join('\n') : 'Not provided'}
 
-Return as JSON in this format - be concise and specific:
+Return as JSON in this format - be specific and include skills that reveal both professional expertise and personal strengths:
 {
   "technical": ["skill1", "skill2"],
   "soft": ["skill1", "skill2"]
@@ -103,17 +107,43 @@ Return as JSON in this format - be concise and specific:
 
 function generateImprovementPrompt(description: string) {
   return `
-As an experienced resume writer, enhance this description to be more engaging and impactful while maintaining authenticity:
-1. Use natural language that reflects real human experiences
-2. Incorporate specific achievements and metrics
-3. Show both professional growth and personal investment
-4. Maintain a balance of confidence and humility
-5. Keep the voice active and engaging
+As an experienced resume writer who cares about helping people tell their authentic story, enhance this description to be more engaging and impactful:
+
+1. Use warm, natural language that reflects real human experiences and personality
+2. Incorporate specific achievements that showcase the person's unique contributions
+3. Balance professional accomplishments with hints of personal investment and passion
+4. Maintain a confident but humble tone that feels authentic
+5. Keep the voice active and engaging while preserving their unique voice
 
 Original description:
 ${description || 'Not provided'}
 
-Enhance this while keeping it genuine and human. Return only the improved description.`;
+Enhance this while keeping it genuine and distinctly human. The result should sound like something the person would actually say about themselves, not generic corporate speak.
+
+Return only the improved description.`;
+}
+
+function generateExperiencePrompt(context: any = {}) {
+  return `
+As an empathetic resume writer, help craft a compelling description for this work experience that feels authentic and human:
+
+Job Title: ${context?.title || 'Not specified'}
+Company: ${context?.company || 'Not specified'}
+Location: ${context?.location || 'Not specified'}
+Duration: ${context?.startDate || 'Not specified'} to ${context?.endDate || 'Present'}
+
+Current description (if any):
+${context?.description || ''}
+
+Please create or enhance this description to:
+1. Use natural language that feels like how a real person would talk about their work
+2. Include specific achievements and metrics when possible
+3. Show both professional impact and personal growth
+4. Highlight transferable skills and problem-solving abilities
+5. Keep it concise but meaningful - around 2-3 sentences
+6. Maintain the person's authentic voice and avoid corporate jargon when possible
+
+Return only the description text.`;
 }
 
 function generateFullResumePrompt(linkedinData: any, template: string = 'modern') {
@@ -123,15 +153,15 @@ function generateFullResumePrompt(linkedinData: any, template: string = 'modern'
   }
   
   return `
-You are creating a precise, professional resume.
+You are creating a natural-sounding, professional resume that feels genuinely human.
 
 Requirements:
-1. Be concise and direct
-2. Use numbers and metrics
-3. Focus on achievements, not responsibilities
-4. Use simple, clear language
-5. No fluffy or generic statements
-6. Focus on relevant skills only
+1. Use warm, conversational language
+2. Include specific achievements and metrics
+3. Focus on impact and value rather than just responsibilities
+4. Balance professionalism with personality
+5. Avoid generic corporate language
+6. Highlight relevant skills that tell a story
 
 LinkedIn Data:
 ${JSON.stringify(linkedinData, null, 2)}
@@ -213,19 +243,19 @@ Requirements:
 Return only the institution name.`;
 
     case 'description':
-      return `Write an academic description based on this context:
+      return `Write a warm, personal academic description based on this educational experience:
 - Degree: ${context?.degree || 'Not specified'}
 - Institution: ${context?.institution || 'Not specified'}
 - Field: ${context?.field || 'Not specified'}
 
-Requirements:
-1. Highlight key achievements
-2. Mention relevant coursework
-3. Include GPA if noteworthy
-4. List honors or awards
-5. Be specific and quantifiable
-6. Keep it to 2-3 lines
-7. Focus on relevant skills and knowledge gained
+Create a description that:
+1. Highlights key achievements in a natural way
+2. Mentions relevant coursework that shows passion or interest
+3. Includes honors or awards with personal context
+4. Adds a touch of personality to the academic experience
+5. Is specific but conversational
+6. Keeps to 2-3 lines while remaining engaging
+7. Shows the human behind the degree
 
 Return only the description.`;
 
@@ -255,6 +285,10 @@ function parseGeminiResponse(response: any, type: string) {
   const text = response.candidates[0].content.parts[0].text;
   
   try {
+    if (type === "experience-description") {
+      return { description: text.trim() };
+    }
+    
     if (type.startsWith('education-')) {
       const field = type.replace('education-', '');
       if (field === 'dates') {

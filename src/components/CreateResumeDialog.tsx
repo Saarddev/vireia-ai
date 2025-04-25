@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FileText, Sparkles, LinkedinIcon, PenLine, Loader2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import { createEnhancedResume } from "@/services/resumeEnhancementService";
+import { fetchLinkedInProfile, transformLinkedInData } from "@/services/linkedinService";
+import { supabase } from "@/integrations/supabase/client";
+import { enhanceResumeWithAI } from "@/services/resumeEnhancementService";
 
 interface CreateResumeDialogProps {
   open: boolean;
@@ -45,18 +47,61 @@ const CreateResumeDialog: React.FC<CreateResumeDialogProps> = ({
 
     setIsProcessingLinkedIn(true);
     try {
-      const resumeData = await createEnhancedResume(linkedinUrl);
-      if (resumeData) {
-        onCreateResume(resumeTitle || 'My Professional Resume');
-        toast({
-          title: "Success!",
-          description: "Your resume has been created from LinkedIn data",
-        });
+      // 1. Fetch LinkedIn profile data
+      const linkedinData = await fetchLinkedInProfile(linkedinUrl);
+      
+      if (!linkedinData) {
+        throw new Error('Failed to fetch LinkedIn data');
       }
-    } catch (error) {
+      
+      // 2. Transform LinkedIn data to our resume format
+      const transformedData = transformLinkedInData(linkedinData);
+      
+      // 3. Use AI to enhance the resume
+      const enhancedResume = await enhanceResumeWithAI(linkedinData);
+      
+      // 4. Store the data in Supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+      
+      // 5. Create the resume in the database
+      const { data: resume, error } = await supabase
+        .from('resumes')
+        .insert({
+          title: resumeTitle || 'My Professional Resume',
+          content: enhancedResume,
+          template: 'modern',
+          user_id: user.id,
+          settings: {
+            fontFamily: "Inter",
+            fontSize: 10,
+            primaryColor: "#9b87f5",
+            secondaryColor: "#6E59A5",
+            accentColor: "#D6BCFA",
+            paperSize: "a4",
+            margins: "normal"
+          }
+        })
+        .select()
+        .single();
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Success!",
+        description: "Your resume has been created from LinkedIn data",
+      });
+      
+      onCreateResume(resumeTitle || 'My Professional Resume');
+      
+    } catch (error: any) {
+      console.error('Error importing LinkedIn data:', error);
       toast({
         title: "Error",
-        description: "Failed to import LinkedIn data. Please try again.",
+        description: error.message || "Failed to import LinkedIn data. Please try again.",
         variant: "destructive"
       });
     } finally {

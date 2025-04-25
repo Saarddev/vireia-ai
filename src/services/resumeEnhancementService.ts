@@ -143,28 +143,36 @@ export const enhanceResumeWithAI = async (linkedinData: any, template: string = 
 
 /**
  * Creates an enhanced resume in the database
- * @param userId The user ID
+ * @param linkedinUrl The LinkedIn URL to fetch data from
  * @param resumeTitle The title of the resume
  * @returns The created resume
  */
-export const createEnhancedResume = async (userId: string, resumeTitle: string) => {
+export const createEnhancedResume = async (linkedinUrl: string, resumeTitle?: string) => {
   try {
-    // 1. Fetch LinkedIn data from the user's profile
-    const linkedinData = await fetchLinkedInDataFromProfile(userId);
+    // Get the current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Authentication required to create a resume');
+    
+    const userId = user.id;
+    
+    // Import data from LinkedIn profile
+    const { fetchLinkedInProfile, transformLinkedInData } = await import('@/services/linkedinService');
+    const linkedinData = await fetchLinkedInProfile(linkedinUrl);
     
     if (!linkedinData) {
-      throw new Error('No LinkedIn data found for this user');
+      throw new Error('Failed to fetch LinkedIn data');
     }
     
-    // 2. Use AI to enhance the resume
+    // Transform and enhance the data
+    const transformedData = transformLinkedInData(linkedinData);
     const enhancedResume = await enhanceResumeWithAI(linkedinData);
     
-    // 3. Create the resume in the database
+    // Create the resume in the database with the enhanced content
     const { data: resume, error } = await supabase
       .from('resumes')
       .insert({
-        title: resumeTitle,
-        content: enhancedResume as any,
+        title: resumeTitle || 'My Professional Resume',
+        content: enhancedResume,
         template: 'modern',
         user_id: userId,
         settings: {

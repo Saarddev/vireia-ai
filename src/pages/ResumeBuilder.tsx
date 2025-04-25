@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -20,7 +21,7 @@ import { useResumeData } from '@/hooks/use-resume-data';
 import { useResumeAI } from '@/hooks/use-resume-ai';
 import { supabase } from '@/integrations/supabase/client';
 import ProjectForm from '@/components/resume-builder/ProjectForm';
-import { Project } from '@/types/resume';
+import { Project } from '@/types/resume.d';
 
 interface AISuggestionData {
   type: string;
