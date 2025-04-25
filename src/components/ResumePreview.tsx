@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ModernTemplate from './resume-preview/ModernTemplate';
 import PreviewControls from './resume-preview/PreviewControls';
+import { ResumeData } from '@/types/resume';
 
 // Function to extract all styles applied to an element and its descendants
 const getAllStyles = (element: Element): string => {
@@ -21,7 +22,7 @@ const getAllStyles = (element: Element): string => {
 };
 
 interface ResumePreviewProps {
-  data: any;
+  data: ResumeData;
   template: string;
   settings?: any;
   onDataChange?: (section: string, data: any) => void;
@@ -35,6 +36,28 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
   onDataChange,
   onGenerateWithAI
 }) => {
+  // Ensure data is valid and complete with defaults
+  const safeData: ResumeData = React.useMemo(() => {
+    return {
+      personal: data.personal || {
+        name: "",
+        title: "",
+        email: "",
+        phone: "",
+        location: "",
+        linkedin: "",
+        website: ""
+      },
+      summary: data.summary || "",
+      experience: Array.isArray(data.experience) ? data.experience : [],
+      education: Array.isArray(data.education) ? data.education : [],
+      skills: data.skills || { technical: [], soft: [] },
+      languages: Array.isArray(data.languages) ? data.languages : [],
+      certifications: Array.isArray(data.certifications) ? data.certifications : [],
+      projects: Array.isArray(data.projects) ? data.projects : []
+    };
+  }, [data]);
+
   const { isMobile } = useIsMobile();
   const [zoomLevel, setZoomLevel] = React.useState(1);
   const resumeContentRef = useRef<HTMLDivElement>(null);
@@ -144,14 +167,98 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
     <div className="relative h-full  flex flex-col">
       <PreviewControls
         zoomLevel={zoomLevel}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onDownload={handleDownloadPDF}
+        onZoomIn={() => setZoomLevel(prev => Math.min(prev + 0.25, 2))}
+        onZoomOut={() => setZoomLevel(prev => Math.max(prev - 0.25, 0.5))}
+        onDownload={() => {
+          const printWindow = window.open('', '_blank');
+          if (!printWindow || !resumeContentRef.current) {
+            console.error('Failed to open print window or find resume content');
+            return;
+          }
+          
+          const fontFamily = settings.fontFamily || 'Inter';
+          const primaryColor = settings.primaryColor || '#5d4dcd';
+
+          // Clone the resume content node to avoid modifying the original
+          const clonedResumeContent = resumeContentRef.current.cloneNode(true) as HTMLDivElement;
+
+          // Extract all computed styles
+          let allStyles = '';
+          const styleElements = document.querySelectorAll('style');
+          styleElements.forEach(style => {
+            allStyles += style.textContent;
+          });
+
+          // Add inline styles to the cloned content (this might be very verbose)
+          // You might need to selectively apply styles if this becomes too large
+          // const applyAllStylesInline = (element: Element) => {
+          //   const computedStyle = window.getComputedStyle(element);
+          //   let inlineStyle = '';
+          //   for (let i = 0; i < computedStyle.length; i++) {
+          //     const propertyName = computedStyle[i];
+          //     inlineStyle += `${propertyName}: ${computedStyle.getPropertyValue(propertyName)}; `;
+          //   }
+          //   element.setAttribute('style', inlineStyle);
+          //   Array.from(element.children).forEach(applyAllStylesInline);
+          // };
+          // applyAllStylesInline(clonedResumeContent);
+
+          const resumeHTMLContent = clonedResumeContent.outerHTML;
+
+          printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>${data.personal.name} - Resume</title>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <style>
+                  ${allStyles}
+                  @page {
+                    size: ${settings.paperSize || 'a4'};
+                    margin: ${settings.margins === 'narrow' ? '0.5in' :
+              settings.margins === 'wide' ? '1.5in' :
+                '1in'
+            };
+                  }
+                  body {
+                    font-family: ${settings.fontFamily || 'Inter'}, sans-serif;
+                    font-size: ${settings.fontSize || 10}pt;
+                    line-height: 1.5;
+                    color: #000;
+                    background: #fff;
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                  }
+                  @media print {
+                    body { margin: 0; }
+                    .resume-content { padding: 0 !important; }
+                  }
+                </style>
+                ${settings.fontFamily ?
+              `<link href="https://fonts.googleapis.com/css2?family=${settings.fontFamily}:wght@400;500;600;700&display=swap" rel="stylesheet">`
+            : ''
+          }
+              </head>
+              <body class="p-0 m-0">
+                ${resumeHTMLContent}
+                <script>
+                  window.onload = () => {
+                    window.print();
+                    window.close();
+                  };
+                </script>
+              </body>
+            </html>
+          `);
+
+          printWindow.document.close();
+        }}
       >
         <div className="resume-content">
           {template === 'modern' ? (
             <ModernTemplate
-              data={data}
+              data={safeData}
               settings={settings}
               onUpdateData={onDataChange}
               onGenerateWithAI={handleGenerateWithAI}
@@ -181,7 +288,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
           <div ref={resumeContentRef} className="resume-content">
             {template === 'modern' ? (
               <ModernTemplate
-                data={data}
+                data={safeData}
                 settings={settings}
                 onUpdateData={onDataChange}
                 onGenerateWithAI={handleGenerateWithAI}

@@ -8,13 +8,15 @@ export interface AIHoverToolkitProps {
   onAddChanges?: () => Promise<string>;
   icon?: React.ReactNode;
   label?: string;
+  className?: string; // Added className prop
 }
 
 const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({ 
   onComplete, 
   onAddChanges,
   icon = <Wand2 className="h-3 w-3 mr-1" />,
-  label = "Enhance with AI"
+  label = "Enhance with AI",
+  className = "" // Default empty className
 }) => {
   const [isGenerating, setIsGenerating] = React.useState(false);
 
@@ -42,7 +44,7 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
   };
 
   return (
-    <div className="flex gap-1">
+    <div className={`flex gap-1 ${className}`}>
       <Button 
         size="sm" 
         variant="ghost" 

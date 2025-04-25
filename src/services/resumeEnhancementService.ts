@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { ResumeData } from "@/types/resume.d";
 
 /**
  * Fetches LinkedIn data from the user profile
@@ -29,7 +30,7 @@ export const fetchLinkedInDataFromProfile = async (userId: string) => {
  * @param template The resume template name
  * @returns An enhanced resume object
  */
-export const enhanceResumeWithAI = async (linkedinData: any, template: string = 'modern') => {
+export const enhanceResumeWithAI = async (linkedinData: any, template: string = 'modern'): Promise<ResumeData> => {
   try {
     if (!linkedinData) {
       throw new Error('LinkedIn data is required');
@@ -54,37 +55,89 @@ export const enhanceResumeWithAI = async (linkedinData: any, template: string = 
       throw new Error('Invalid response from AI enhancement');
     }
 
-    let enhancedResume = response.data.enhancedResume;
+    // Create a default structure to ensure all properties exist
+    const defaultResume: ResumeData = {
+      personal: {
+        name: "",
+        title: "",
+        email: "",
+        phone: "",
+        location: "",
+        linkedin: "",
+        website: ""
+      },
+      summary: "",
+      experience: [],
+      education: [],
+      skills: {
+        technical: [],
+        soft: []
+      },
+      languages: [],
+      certifications: [],
+      projects: []
+    };
     
-    // Ensure all array properties exist and are arrays
-    if (!Array.isArray(enhancedResume.experience)) {
-      enhancedResume.experience = [];
-    }
+    // Merge the response with defaults to ensure all properties exist
+    let enhancedResume = {
+      ...defaultResume,
+      ...response.data.enhancedResume
+    };
     
-    if (!Array.isArray(enhancedResume.education)) {
-      enhancedResume.education = [];
-    }
+    // Extra safety checks for nested objects and arrays
+    enhancedResume.experience = Array.isArray(enhancedResume.experience) 
+      ? enhancedResume.experience 
+      : [];
     
-    if (!Array.isArray(enhancedResume.projects)) {
-      enhancedResume.projects = [];
-    }
+    enhancedResume.education = Array.isArray(enhancedResume.education) 
+      ? enhancedResume.education 
+      : [];
     
-    // Ensure skills object exists
-    if (!enhancedResume.skills) {
-      enhancedResume.skills = { technical: [], soft: [] };
-    } else {
-      if (!Array.isArray(enhancedResume.skills.technical)) {
-        enhancedResume.skills.technical = [];
-      }
-      if (!Array.isArray(enhancedResume.skills.soft)) {
-        enhancedResume.skills.soft = [];
-      }
-    }
+    enhancedResume.projects = Array.isArray(enhancedResume.projects) 
+      ? enhancedResume.projects 
+      : [];
+    
+    enhancedResume.skills = enhancedResume.skills || { technical: [], soft: [] };
+    enhancedResume.skills.technical = Array.isArray(enhancedResume.skills.technical) 
+      ? enhancedResume.skills.technical 
+      : [];
+    enhancedResume.skills.soft = Array.isArray(enhancedResume.skills.soft) 
+      ? enhancedResume.skills.soft 
+      : [];
+    
+    enhancedResume.languages = Array.isArray(enhancedResume.languages) 
+      ? enhancedResume.languages 
+      : [];
+    
+    enhancedResume.certifications = Array.isArray(enhancedResume.certifications) 
+      ? enhancedResume.certifications 
+      : [];
 
     return enhancedResume;
   } catch (error) {
     console.error('Error enhancing resume with AI:', error);
-    throw error;
+    // Return a safe default structure in case of error
+    return {
+      personal: {
+        name: "",
+        title: "",
+        email: "",
+        phone: "",
+        location: "",
+        linkedin: "",
+        website: ""
+      },
+      summary: "",
+      experience: [],
+      education: [],
+      skills: {
+        technical: [],
+        soft: []
+      },
+      languages: [],
+      certifications: [],
+      projects: []
+    };
   }
 };
 
@@ -111,7 +164,7 @@ export const createEnhancedResume = async (userId: string, resumeTitle: string) 
       .from('resumes')
       .insert({
         title: resumeTitle,
-        content: enhancedResume,
+        content: enhancedResume as any,
         template: 'modern',
         user_id: userId,
         settings: {

@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
 import AddSectionItem from './AddSectionItem';
 import ContactInfo from './ContactInfo';
 import { v4 as uuidv4 } from 'uuid';
+import { Experience, Education, Project } from '@/types/resume.d';
 
 interface ModernTemplateProps {
   data: any;
@@ -18,10 +20,31 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
   onUpdateData,
   onGenerateWithAI
 }) => {
+  // Ensure data has all required properties with defaults
+  const safeData = React.useMemo(() => {
+    return {
+      ...data,
+      experience: Array.isArray(data.experience) ? data.experience : [],
+      education: Array.isArray(data.education) ? data.education : [],
+      projects: Array.isArray(data.projects) ? data.projects : [],
+      skills: data.skills || { technical: [], soft: [] },
+      personal: data.personal || {
+        name: "",
+        title: "",
+        email: "",
+        phone: "",
+        location: "",
+        linkedin: "",
+        website: ""
+      },
+      summary: data.summary || ""
+    };
+  }, [data]);
+
   const handleFieldUpdate = (section: string, field: string, value: string) => {
     if (onUpdateData) {
       onUpdateData(section, {
-        ...data[section],
+        ...safeData[section],
         [field]: value
       });
     }
@@ -30,7 +53,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
   const handleAddExperience = () => {
     if (onUpdateData) {
       onUpdateData("experience", [
-        ...data.experience,
+        ...safeData.experience,
         {
           id: uuidv4(),
           title: "",
@@ -47,7 +70,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
   const handleAddEducation = () => {
     if (onUpdateData) {
       onUpdateData("education", [
-        ...data.education,
+        ...safeData.education,
         {
           id: uuidv4(),
           degree: "",
@@ -78,19 +101,19 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
       }}>
       <div className="pb-4 border-b-2 border-[#5d4dcd] mb-4">
         <EditableField
-          value={data.personal.name}
+          value={safeData.personal.name}
           placeholder="John Smith"
           className={nameClass}
-          onSave={val => onUpdateData?.("personal", { ...data.personal, name: val })}
+          onSave={val => onUpdateData?.("personal", { ...safeData.personal, name: val })}
           onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-name") : undefined}
           minRows={1}
           maxRows={1}
         />
         <EditableField
-          value={data.personal.title}
+          value={safeData.personal.title}
           placeholder="Software Engineer"
           className={subtitleClass}
-          onSave={val => onUpdateData?.("personal", { ...data.personal, title: val })}
+          onSave={val => onUpdateData?.("personal", { ...safeData.personal, title: val })}
           onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-title") : undefined}
           minRows={1}
           maxRows={1}
@@ -98,7 +121,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           outputStyle={{ color: '#5d4dcd', fontWeight: 500 }}
         />
         <ContactInfo
-          personal={data.personal}
+          personal={safeData.personal}
           onUpdateData={onUpdateData}
           onGenerateWithAI={onGenerateWithAI}
         />
@@ -107,7 +130,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
       <div className="mb-6 resume-section">
         <h2 className={sectionHeaderClass}>Summary</h2>
         <EditableField 
-          value={data.summary} 
+          value={safeData.summary} 
           placeholder="Experienced software engineer with 5+ years of experience in full-stack development. ..." 
           onSave={val => onUpdateData?.("summary", val)} 
           className="text-sm text-gray-700 font-normal leading-relaxed" 
@@ -119,7 +142,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
 
       <div className="mb-6 resume-section">
         <h2 className={sectionHeaderClass}>Experience</h2>
-        {data.experience.map((exp: any) => (
+        {safeData.experience.map((exp: Experience) => (
           <div key={exp.id} className="mb-5 last:mb-0 resume-item">
             <div className="flex items-baseline justify-between flex-wrap gap-x-2">
               <div className="flex-1 min-w-0">
@@ -177,7 +200,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
 
       <div className="mb-6 resume-section">
         <h2 className={sectionHeaderClass}>Education</h2>
-        {data.education.map((edu: any) => (
+        {safeData.education.map((edu: Education) => (
           <div key={edu.id} className="mb-5 last:mb-0 resume-item">
             <div className="flex items-baseline justify-between flex-wrap gap-x-2">
               <div className="flex-1 min-w-0">
@@ -238,7 +261,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         <div className="mb-3">
           <div className="font-medium text-gray-700 text-sm mb-1.5">Technical Skills</div>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            {data.skills.technical.map((skill: string, i: number) => (
+            {safeData.skills.technical.map((skill: string, i: number) => (
               <span key={i} className="px-2 py-0.5 bg-[#efeafc] rounded-sm text-sm border-[0.5px] border-[#dad3f8] shadow-xs transition whitespace-nowrap text-violet-400 font-normal">
                 {skill}
               </span>
@@ -248,7 +271,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         <div>
           <div className="font-medium text-gray-700 text-sm mb-1.5">Soft Skills</div>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            {data.skills.soft.map((skill: string, i: number) => (
+            {safeData.skills.soft.map((skill: string, i: number) => (
               <span key={i} className="px-2 py-0.5 bg-[#f3f3f3] text-gray-600 font-medium rounded-sm text-sm border-[0.5px] border-[#e5e5e5] transition whitespace-nowrap">
                 {skill}
               </span>
@@ -257,10 +280,10 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         </div>
       </div>
 
-      {data.projects && data.projects.length > 0 && (
+      {safeData.projects && safeData.projects.length > 0 && (
         <div className="mb-6 resume-section">
           <h2 className={sectionHeaderClass}>Projects</h2>
-          {data.projects.map((project: any) => (
+          {safeData.projects.map((project: Project) => (
             <div key={project.id} className="mb-5 last:mb-0 resume-item">
               <div className="flex items-baseline justify-between flex-wrap gap-x-2">
                 <div className="flex-1 min-w-0">
@@ -325,7 +348,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
               endDate: "",
               link: ""
             };
-            onUpdateData?.("projects", [...(data.projects || []), newProject]);
+            onUpdateData?.("projects", [...(safeData.projects || []), newProject]);
           }} />
         </div>
       )}
