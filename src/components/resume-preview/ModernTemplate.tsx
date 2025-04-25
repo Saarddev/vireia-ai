@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
@@ -41,12 +40,25 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
     };
   }, [data]);
 
-  const handleFieldUpdate = (section: string, field: string, value: string) => {
+  const handleFieldUpdate = (section: string, field: string, value: string, itemId?: string) => {
     if (onUpdateData) {
-      onUpdateData(section, {
-        ...safeData[section],
-        [field]: value
-      });
+      if (itemId && ['experience', 'education', 'projects'].includes(section)) {
+        // Handling array items (experience, education, projects)
+        const items = [...safeData[section]];
+        const itemIndex = items.findIndex((item: any) => item.id === itemId);
+        
+        if (itemIndex >= 0) {
+          const updatedItem = { ...items[itemIndex], [field]: value };
+          items[itemIndex] = updatedItem;
+          onUpdateData(section, items);
+        }
+      } else {
+        // Handling other sections (personal, summary, skills)
+        onUpdateData(section, {
+          ...safeData[section],
+          [field]: value
+        });
+      }
     }
   };
 
@@ -150,7 +162,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                   value={exp.title}
                   placeholder="Senior Software Engineer"
                   className={experienceTitleClass}
-                  onSave={val => handleFieldUpdate("experience", "title", val)}
+                  onSave={val => handleFieldUpdate("experience", "title", val, exp.id)}
                   onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-title`) : undefined}
                   minRows={1}
                   maxRows={1}
@@ -162,8 +174,12 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                 className={experienceDateClass}
                 onSave={val => {
                   const [startDate, endDate] = val.split(" - ");
-                  handleFieldUpdate("experience", "startDate", startDate || "");
-                  handleFieldUpdate("experience", "endDate", endDate || "");
+                  
+                  // Update start date
+                  handleFieldUpdate("experience", "startDate", startDate || "", exp.id);
+                  
+                  // Update end date
+                  handleFieldUpdate("experience", "endDate", endDate || "", exp.id);
                 }}
                 onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-dates`) : undefined}
                 minRows={1}
@@ -177,8 +193,12 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
               onSave={val => {
                 let [company, ...locParts] = val.split(",");
                 const location = locParts.join(",").trim();
-                handleFieldUpdate("experience", "company", company?.trim() || "");
-                handleFieldUpdate("experience", "location", location);
+                
+                // Update company
+                handleFieldUpdate("experience", "company", company?.trim() || "", exp.id);
+                
+                // Update location
+                handleFieldUpdate("experience", "location", location, exp.id);
               }}
               onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-company`) : undefined}
               minRows={1}
@@ -188,7 +208,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
               value={exp.description}
               placeholder="Lead developer for the company's flagship product..."
               className={experienceDescriptionClass}
-              onSave={val => handleFieldUpdate("experience", "description", val)}
+              onSave={val => handleFieldUpdate("experience", "description", val, exp.id)}
               onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-desc`) : undefined}
               minRows={1}
               maxRows={3}
@@ -208,7 +228,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                   value={edu.degree}
                   placeholder="Master of Science in Computer Science"
                   className={experienceTitleClass}
-                  onSave={val => handleFieldUpdate("education", "degree", val)}
+                  onSave={val => handleFieldUpdate("education", "degree", val, edu.id)}
                   onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-degree`) : undefined}
                   minRows={1}
                   maxRows={1}
@@ -220,8 +240,12 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                   onSave={val => {
                     let [inst, ...locParts] = val.split(",");
                     const location = locParts.join(",").trim();
-                    handleFieldUpdate("education", "institution", inst?.trim() || "");
-                    handleFieldUpdate("education", "location", location);
+                    
+                    // Update institution
+                    handleFieldUpdate("education", "institution", inst?.trim() || "", edu.id);
+                    
+                    // Update location
+                    handleFieldUpdate("education", "location", location, edu.id);
                   }}
                   onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-institution`) : undefined}
                   minRows={1}
@@ -234,8 +258,12 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                 className={experienceDateClass}
                 onSave={val => {
                   const [startDate, endDate] = val.split(" - ");
-                  handleFieldUpdate("education", "startDate", startDate || "");
-                  handleFieldUpdate("education", "endDate", endDate || "");
+                  
+                  // Update start date
+                  handleFieldUpdate("education", "startDate", startDate || "", edu.id);
+                  
+                  // Update end date
+                  handleFieldUpdate("education", "endDate", endDate || "", edu.id);
                 }}
                 onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-dates`) : undefined}
                 minRows={1}
@@ -246,7 +274,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
               value={edu.description || ""}
               placeholder="Specialization in Artificial Intelligence. GPA: 3.8/4.0"
               className={experienceDescriptionClass}
-              onSave={val => handleFieldUpdate("education", "description", val)}
+              onSave={val => handleFieldUpdate("education", "description", val, edu.id)}
               onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-desc`) : undefined}
               minRows={1}
               maxRows={2}
@@ -291,7 +319,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                     value={project.title}
                     placeholder="Project Name"
                     className={experienceTitleClass}
-                    onSave={val => handleFieldUpdate("projects", "title", val)}
+                    onSave={val => handleFieldUpdate("projects", "title", val, project.id)}
                     minRows={1}
                     maxRows={1}
                   />
@@ -302,8 +330,8 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                   className={experienceDateClass}
                   onSave={val => {
                     const [startDate, endDate] = val.split(" - ");
-                    handleFieldUpdate("projects", "startDate", startDate || "");
-                    handleFieldUpdate("projects", "endDate", endDate || "");
+                    handleFieldUpdate("projects", "startDate", startDate || "", project.id);
+                    handleFieldUpdate("projects", "endDate", endDate || "", project.id);
                   }}
                   minRows={1}
                   maxRows={1}
@@ -313,7 +341,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                 value={project.description}
                 placeholder="Describe the project and your role..."
                 className={experienceDescriptionClass}
-                onSave={val => handleFieldUpdate("projects", "description", val)}
+                onSave={val => handleFieldUpdate("projects", "description", val, project.id)}
                 minRows={1}
                 maxRows={3}
               />

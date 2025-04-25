@@ -8,7 +8,7 @@ export interface AIHoverToolkitProps {
   onAddChanges?: () => Promise<string>;
   icon?: React.ReactNode;
   label?: string;
-  className?: string; // Added className prop
+  className?: string;
 }
 
 const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({ 

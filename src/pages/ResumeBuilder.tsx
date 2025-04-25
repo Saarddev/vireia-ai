@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -20,6 +21,7 @@ import { useResumeData } from '@/hooks/use-resume-data';
 import { useResumeAI } from '@/hooks/use-resume-ai';
 import { supabase } from '@/integrations/supabase/client';
 import ProjectForm from '@/components/resume-builder/ProjectForm';
+import { Project } from '@/types/resume';
 
 interface AISuggestionData {
   type: string;
@@ -124,51 +126,55 @@ const ResumeBuilder = () => {
           }
           break;
         }
-        case "education": {
-          if (Array.isArray(resumeData.education) && resumeData.education[index]) {
-            const currentEdu = resumeData.education[index];
+        case "education-desc": {
+          if (Array.isArray(resumeData.education)) {
+            const currentEdu = resumeData.education.find(edu => edu);
 
-            const { data, error } = await supabase.functions.invoke('enhance-resume', {
-              body: {
-                type: `education-description`,
-                educationContext: {
-                  degree: currentEdu.degree,
-                  institution: currentEdu.institution,
-                  location: currentEdu.location,
-                  field: currentEdu.field || '',
-                  startDate: currentEdu.startDate,
-                  endDate: currentEdu.endDate,
-                  status: currentEdu.endDate === 'Present' ? 'Current' : 'Graduated'
+            if (currentEdu) {
+              const { data, error } = await supabase.functions.invoke('enhance-resume', {
+                body: {
+                  type: `education-description`,
+                  educationContext: {
+                    degree: currentEdu.degree,
+                    institution: currentEdu.institution,
+                    location: currentEdu.location,
+                    field: currentEdu.field || '',
+                    startDate: currentEdu.startDate,
+                    endDate: currentEdu.endDate,
+                    status: currentEdu.endDate === 'Present' ? 'Current' : 'Graduated'
+                  }
                 }
-              }
-            });
+              });
 
-            if (error) throw error;
-            return data?.description || "";
+              if (error) throw error;
+              return data?.description || "";
+            }
           }
           return "";
         }
         
-        case "experience": {
-          if (Array.isArray(resumeData.experience) && resumeData.experience[index]) {
-            const currentExp = resumeData.experience[index];
+        case "experience-desc": {
+          if (Array.isArray(resumeData.experience)) {
+            const currentExp = resumeData.experience.find(exp => exp);
 
-            const { data, error } = await supabase.functions.invoke('enhance-resume', {
-              body: {
-                type: 'experience-description',
-                experienceContext: {
-                  title: currentExp.title,
-                  company: currentExp.company,
-                  location: currentExp.location,
-                  startDate: currentExp.startDate,
-                  endDate: currentExp.endDate,
-                  description: currentExp.description
+            if (currentExp) {
+              const { data, error } = await supabase.functions.invoke('enhance-resume', {
+                body: {
+                  type: 'experience-description',
+                  experienceContext: {
+                    title: currentExp.title,
+                    company: currentExp.company,
+                    location: currentExp.location,
+                    startDate: currentExp.startDate,
+                    endDate: currentExp.endDate,
+                    description: currentExp.description
+                  }
                 }
-              }
-            });
+              });
 
-            if (error) throw error;
-            return data?.description || "";
+              if (error) throw error;
+              return data?.description || "";
+            }
           }
           return "";
         }
@@ -185,6 +191,8 @@ const ResumeBuilder = () => {
       });
       return "";
     }
+    
+    return "";
   };
 
   const renderActiveForm = () => {

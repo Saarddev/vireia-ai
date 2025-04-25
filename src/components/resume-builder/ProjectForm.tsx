@@ -1,9 +1,4 @@
 import React, { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
 import { 
   Form,
   FormControl,
@@ -12,11 +7,22 @@ import {
   FormLabel,
   FormDescription
 } from "@/components/ui/form";
-import { Code, ArrowUpDown, GripVertical } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import { 
+  FilePlus2,
+  Plus,
+  Trash2,
+  MoveUp,
+  MoveDown,
+  Link as LinkIcon,
+  Code
+} from 'lucide-react';
 import { useForm } from "react-hook-form";
-import { Badge } from "@/components/ui/badge";
-import { Project } from '@/types/resume.d';
-import { cn } from '@/lib/utils';
+import { v4 as uuidv4 } from 'uuid';
+import { Project } from '@/types/resume';
 
 interface ProjectFormProps {
   data: Project[];
