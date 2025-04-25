@@ -3,18 +3,19 @@ import { v4 as uuidv4 } from 'uuid';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { 
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel
+  FormLabel,
+  FormDescription
 } from "@/components/ui/form";
-import { CalendarIcon, Rocket, Trash2, Plus, ArrowUpDown, GripVertical, Wand2 } from "lucide-react";
+import { Code, ArrowUpDown, GripVertical } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
-import { Project } from '@/types/resume';
+import { Project } from '@/types/resume.d';
 import { cn } from '@/lib/utils';
 
 interface ProjectFormProps {

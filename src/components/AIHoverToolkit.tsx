@@ -16,7 +16,7 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
   onAddChanges,
   icon = <Wand2 className="h-3 w-3 mr-1" />,
   label = "Enhance with AI",
-  className = "" // Default empty className
+  className = ""
 }) => {
   const [isGenerating, setIsGenerating] = React.useState(false);
 
@@ -68,7 +68,7 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
           onClick={handleAddChanges}
         >
           <Edit className="h-3 w-3 mr-1" />
-          Add bullet
+          Continue writing
         </Button>
       )}
     </div>

@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider, Sidebar, SidebarInset } from "@/components/ui/sidebar";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import BuilderHeader from '@/components/resume-builder/BuilderHeader';
 import BuilderSidebar from '@/components/resume-builder/BuilderSidebar';
@@ -125,51 +124,57 @@ const ResumeBuilder = () => {
           }
           break;
         }
-        default: {
-          if (section.startsWith('education-')) {
-            const [, eduIndex, field] = section.split('-');
-            const index = parseInt(eduIndex);
-            
-            if (Array.isArray(resumeData.education) && resumeData.education[index]) {
-              const currentEdu = resumeData.education[index];
+        case "education": {
+          if (Array.isArray(resumeData.education) && resumeData.education[index]) {
+            const currentEdu = resumeData.education[index];
 
-              const { data, error } = await supabase.functions.invoke('enhance-resume', {
-                body: {
-                  type: `education-${field}`,
-                  educationContext: {
-                    degree: currentEdu.degree,
-                    institution: currentEdu.institution,
-                    location: currentEdu.location,
-                    field: currentEdu.field || '',
-                    level: currentEdu.level || "Bachelor's",
-                    status: currentEdu.endDate === 'Present' ? 'Current' : 'Graduated'
-                  }
+            const { data, error } = await supabase.functions.invoke('enhance-resume', {
+              body: {
+                type: `education-description`,
+                educationContext: {
+                  degree: currentEdu.degree,
+                  institution: currentEdu.institution,
+                  location: currentEdu.location,
+                  field: currentEdu.field || '',
+                  startDate: currentEdu.startDate,
+                  endDate: currentEdu.endDate,
+                  status: currentEdu.endDate === 'Present' ? 'Current' : 'Graduated'
                 }
-              });
-
-              if (error) throw error;
-
-              if (field === 'dates' && data.startDate && data.endDate) {
-                handleDataChange("education", [
-                  ...resumeData.education.slice(0, index),
-                  { ...currentEdu, startDate: data.startDate, endDate: data.endDate },
-                  ...resumeData.education.slice(index + 1)
-                ]);
-                return `${data.startDate} - ${data.endDate}`;
               }
+            });
 
-              if (data[field]) {
-                return data[field];
-              }
-            }
+            if (error) throw error;
+            return data?.description || "";
           }
-
-          toast({
-            title: "AI Generation",
-            description: `Could not find available data for ${section} section`,
-          });
           return "";
         }
+        
+        case "experience": {
+          if (Array.isArray(resumeData.experience) && resumeData.experience[index]) {
+            const currentExp = resumeData.experience[index];
+
+            const { data, error } = await supabase.functions.invoke('enhance-resume', {
+              body: {
+                type: 'experience-description',
+                experienceContext: {
+                  title: currentExp.title,
+                  company: currentExp.company,
+                  location: currentExp.location,
+                  startDate: currentExp.startDate,
+                  endDate: currentExp.endDate,
+                  description: currentExp.description
+                }
+              }
+            });
+
+            if (error) throw error;
+            return data?.description || "";
+          }
+          return "";
+        }
+
+        default:
+          return "";
       }
     } catch (error) {
       console.error('Error generating with AI:', error);
@@ -178,8 +183,8 @@ const ResumeBuilder = () => {
         description: "Failed to generate with AI. Please try again.",
         variant: "destructive"
       });
+      return "";
     }
-    return "";
   };
 
   const renderActiveForm = () => {
@@ -305,7 +310,7 @@ const ResumeBuilder = () => {
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 h-[calc(100vh-8rem)]">
               <div className="xl:col-span-5 h-full overflow-auto">
                 <Card className="h-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 overflow-hidden shadow-xl">
-                  <div className="p-4 lg:p-6 h-full overflow-auto">
+                  <CardContent className="p-4 lg:p-6 h-full overflow-auto">
                     <div className="max-w-2xl space-y-6">
                       {isLoading ? (
                         <div className="flex flex-col items-center justify-center h-full space-y-4 py-20">
@@ -316,7 +321,7 @@ const ResumeBuilder = () => {
                         renderActiveForm()
                       )}
                     </div>
-                  </div>
+                  </CardContent>
                 </Card>
               </div>
 
