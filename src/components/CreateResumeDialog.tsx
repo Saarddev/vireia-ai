@@ -4,7 +4,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FileText, Sparkles, LinkedinIcon, PenLine } from 'lucide-react';
+import { FileText, Sparkles, LinkedinIcon, PenLine, Loader2 } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { createEnhancedResume } from "@/services/resumeEnhancementService";
 
 interface CreateResumeDialogProps {
   open: boolean;
@@ -20,11 +22,45 @@ const CreateResumeDialog: React.FC<CreateResumeDialogProps> = ({
   isCreating = false
 }) => {
   const [resumeTitle, setResumeTitle] = useState('');
+  const [linkedinUrl, setLinkedinUrl] = useState('');
+  const [isProcessingLinkedIn, setIsProcessingLinkedIn] = useState(false);
+  const { toast } = useToast();
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (resumeTitle.trim()) {
       onCreateResume(resumeTitle.trim());
+    }
+  };
+
+  const handleLinkedInImport = async () => {
+    if (!linkedinUrl) {
+      toast({
+        title: "LinkedIn URL Required",
+        description: "Please enter your LinkedIn profile URL to import data",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsProcessingLinkedIn(true);
+    try {
+      const resumeData = await createEnhancedResume(linkedinUrl);
+      if (resumeData) {
+        onCreateResume(resumeTitle || 'My Professional Resume');
+        toast({
+          title: "Success!",
+          description: "Your resume has been created from LinkedIn data",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to import LinkedIn data. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessingLinkedIn(false);
     }
   };
 
@@ -41,12 +77,12 @@ const CreateResumeDialog: React.FC<CreateResumeDialogProps> = ({
             Create Your Resume
           </DialogTitle>
           <DialogDescription className="text-center text-gray-600 dark:text-gray-400 px-4">
-            Start crafting your professional story with our AI-powered resume builder
+            Start crafting your professional story or import from LinkedIn
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6 py-4 relative z-10">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-4">
             <div className="space-y-3 px-1">
               <Label htmlFor="title" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Resume Title
@@ -60,49 +96,72 @@ const CreateResumeDialog: React.FC<CreateResumeDialogProps> = ({
                 className="w-full px-3 py-2 border-gray-300 focus:border-resume-purple focus:ring-resume-purple dark:bg-gray-800 dark:border-gray-700"
                 autoFocus
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Give your resume a descriptive name to find it easily
-              </p>
             </div>
-            
-            <div className="grid gap-4 pt-2">
-              <Button
-                type="submit"
-                disabled={!resumeTitle.trim() || isCreating}
-                className="w-full bg-resume-purple hover:bg-resume-purple/90 text-white font-medium py-2 transition-all duration-200 shadow-sm hover:shadow-md"
-              >
-                {isCreating ? (
-                  <>
-                    <Sparkles className="mr-2 h-4 w-4 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    <FileText className="mr-2 h-4 w-4" />
-                    Create Resume
-                  </>
-                )}
-              </Button>
-              
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-gray-200 dark:border-gray-700" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white dark:bg-gray-900 px-2 text-gray-500 dark:text-gray-400">or</span>
-                </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-gray-200 dark:border-gray-700" />
               </div>
-              
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full border-resume-purple/30 text-resume-purple hover:bg-resume-purple/10 dark:border-resume-purple/50 dark:text-purple-300 dark:hover:bg-resume-purple/20 font-medium"
-              >
-                <LinkedinIcon className="mr-2 h-4 w-4" />
-                Import from LinkedIn
-              </Button>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white dark:bg-gray-900 px-2 text-gray-500 dark:text-gray-400">or import from LinkedIn</span>
+              </div>
             </div>
-          </form>
+
+            <div className="space-y-3 px-1">
+              <Label htmlFor="linkedin" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                LinkedIn Profile URL
+              </Label>
+              <Input
+                id="linkedin"
+                type="text"
+                value={linkedinUrl}
+                onChange={(e) => setLinkedinUrl(e.target.value)}
+                placeholder="https://linkedin.com/in/yourprofile"
+                className="w-full px-3 py-2 border-gray-300 focus:border-resume-purple focus:ring-resume-purple dark:bg-gray-800 dark:border-gray-700"
+              />
+            </div>
+          </div>
+            
+          <div className="grid gap-4 pt-2">
+            <Button
+              type="submit"
+              onClick={handleSubmit}
+              disabled={!resumeTitle.trim() || isCreating || isProcessingLinkedIn}
+              className="w-full bg-resume-purple hover:bg-resume-purple/90 text-white font-medium py-2 transition-all duration-200 shadow-sm hover:shadow-md"
+            >
+              {isCreating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Create Resume
+                </>
+              )}
+            </Button>
+            
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full border-resume-purple/30 text-resume-purple hover:bg-resume-purple/10 dark:border-resume-purple/50 dark:text-purple-300 dark:hover:bg-resume-purple/20 font-medium"
+              onClick={handleLinkedInImport}
+              disabled={isProcessingLinkedIn || isCreating}
+            >
+              {isProcessingLinkedIn ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Importing...
+                </>
+              ) : (
+                <>
+                  <LinkedinIcon className="mr-2 h-4 w-4" />
+                  Import from LinkedIn
+                </>
+              )}
+            </Button>
+          </div>
           
           <div className="text-center">
             <p className="text-xs text-gray-500 dark:text-gray-400">

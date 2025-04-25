@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
@@ -72,19 +71,20 @@ serve(async (req) => {
 
 function generateSummaryPrompt(experience: string[], skills: string[]) {
   return `
-Generate a concise, professional summary for a resume. Be brief, ATS friendly:
-1. Use 2-3 sentences maximum
-2. Include quantifiable achievements
-3. Use clear, factual language without fluff
-4. Focus on impact and concrete skills
-5. Humanize the summary, avoid generic phrases
+As a professional resume writer, help create a warm and engaging professional summary. Consider:
+1. The person's real experiences and achievements
+2. Their unique combination of skills
+3. Their career progression and aspirations
+4. Write in a natural, conversational tone while maintaining professionalism
+5. Focus on impact and value while showing personality
 
-Experience context:
+Current experience context:
 ${experience ? experience.join('\n') : 'Not provided'}
 
-Skills context:
+Skills highlight:
 ${skills ? skills.join(', ') : 'Not provided'}
 
+Write a brief, engaging summary that sounds natural and human while highlighting professional achievements.
 Return only the summary text.`;
 }
 
@@ -103,17 +103,17 @@ Return as JSON in this format - be concise and specific:
 
 function generateImprovementPrompt(description: string) {
   return `
-Improve this job description to be more concise and achievement-focused:
-1. Use strong action verbs
-2. Add specific metrics and numbers
-3. Be brief and to the point
-4. Remove any fluffy language
-5. Focus only on accomplishments and skills
+As an experienced resume writer, enhance this description to be more engaging and impactful while maintaining authenticity:
+1. Use natural language that reflects real human experiences
+2. Incorporate specific achievements and metrics
+3. Show both professional growth and personal investment
+4. Maintain a balance of confidence and humility
+5. Keep the voice active and engaging
 
 Original description:
 ${description || 'Not provided'}
 
-Return only the improved description.`;
+Enhance this while keeping it genuine and human. Return only the improved description.`;
 }
 
 function generateFullResumePrompt(linkedinData: any, template: string = 'modern') {

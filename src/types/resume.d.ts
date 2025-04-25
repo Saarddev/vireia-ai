@@ -1,4 +1,3 @@
-
 export interface Education {
   id: string;
   degree: string;
@@ -41,9 +40,9 @@ export interface Project {
   title: string;
   description: string;
   technologies: string[];
-  link?: string;
   startDate: string;
   endDate: string;
+  link?: string;
 }
 
 export interface ResumeData {
