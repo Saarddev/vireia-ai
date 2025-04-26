@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { ResumeData } from "@/types/resume.d";
+import { fetchLinkedInProfile } from "@/services/linkedinService";
 
 /**
  * Fetches LinkedIn data from the user profile
@@ -140,16 +141,13 @@ export const createEnhancedResume = async (linkedinUrl: string, resumeTitle?: st
     
     const userId = user.id;
     
-    // Import data from LinkedIn profile
-    const { fetchLinkedInProfile, transformLinkedInData } = await import('@/services/linkedinService');
+    // First fetch LinkedIn data
     const linkedinData = await fetchLinkedInProfile(linkedinUrl);
-    
     if (!linkedinData) {
       throw new Error('Failed to fetch LinkedIn data');
     }
-    
+
     // Transform and enhance the data
-    const transformedData = transformLinkedInData(linkedinData);
     const enhancedResume = await enhanceResumeWithAI(linkedinData);
     
     // Create the resume in the database with the enhanced content
