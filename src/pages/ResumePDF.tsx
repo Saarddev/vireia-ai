@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useResumeData } from '@/hooks/use-resume-data';
@@ -14,7 +13,22 @@ const ResumePDF = () => {
 
   const formatBulletPoints = (text: string) => {
     if (!text) return [];
-    return text.split('\n').filter(point => point.trim() !== '').map(point => point.trim());
+    return text
+      .split('\n')
+      .filter(point => point.trim() !== '')
+      .map(point => {
+        let cleanPoint = point.trim().replace(/^[-•*]\s*/, '');
+        
+        if (!/^[A-Z][a-z]+ed|^[A-Z][a-z]+ing|^[A-Z][a-z]+s\b/.test(cleanPoint)) {
+          cleanPoint = cleanPoint.charAt(0).toUpperCase() + cleanPoint.slice(1);
+        }
+        
+        if (!/\d/.test(cleanPoint)) {
+          return cleanPoint;
+        }
+        
+        return cleanPoint;
+      });
   };
 
   return (
@@ -84,7 +98,7 @@ const ResumePDF = () => {
           </h2>
           <ul className="list-disc pl-4 text-sm text-gray-700 font-normal leading-relaxed">
             {formatBulletPoints(resumeData.summary).map((point, index) => (
-              <li key={index} className="mb-1">{point}</li>
+              <li key={index} className="mb-1.5">{point}</li>
             ))}
           </ul>
         </div>
@@ -97,23 +111,68 @@ const ResumePDF = () => {
             Experience
           </h2>
           {resumeData.experience.map((exp, index) => (
-            <div key={index} className="mb-5 last:mb-0">
+            <div key={index} className="mb-4 last:mb-0">
               <div className="flex items-baseline justify-between flex-wrap gap-x-2">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-gray-800 text-sm">{exp.title}</h3>
                 </div>
-                <span className="text-sm text-gray-600 ml-3 whitespace-nowrap">
+                <span className="text-sm text-gray-600 whitespace-nowrap">
                   {exp.startDate} - {exp.endDate}
                 </span>
               </div>
               <p className="text-sm text-[#5d4dcd] font-medium my-0.5">
                 {exp.company}, {exp.location}
               </p>
-              <ul className="list-disc pl-4 text-sm text-gray-700 mt-1 font-normal leading-relaxed">
+              <ul className="list-disc pl-4 text-sm text-gray-700 mt-2 font-normal leading-relaxed">
                 {formatBulletPoints(exp.description).map((point, i) => (
-                  <li key={i} className="mb-1">{point}</li>
+                  <li key={i} className="mb-1.5">{point}</li>
                 ))}
               </ul>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Projects */}
+      {resumeData.projects && resumeData.projects.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">
+            Projects
+          </h2>
+          {resumeData.projects.map((project: Project, index) => (
+            <div key={index} className="mb-4 last:mb-0">
+              <div className="flex items-baseline justify-between flex-wrap gap-x-2">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-gray-800 text-sm">{project.title}</h3>
+                </div>
+                <span className="text-sm text-gray-600 whitespace-nowrap">
+                  {project.startDate} - {project.endDate}
+                </span>
+              </div>
+              <ul className="list-disc pl-4 text-sm text-gray-700 mt-2 font-normal leading-relaxed">
+                {formatBulletPoints(project.description).map((point, i) => (
+                  <li key={i} className="mb-1.5">{point}</li>
+                ))}
+              </ul>
+              {project.technologies && project.technologies.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {project.technologies.map((tech, i) => (
+                    <span key={i} className="px-2 py-0.5 bg-[#efeafc] rounded-sm text-sm border-[0.5px] border-[#dad3f8] shadow-xs text-violet-400 font-normal">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {project.link && (
+                <a
+                  href={project.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-[#5d4dcd] hover:text-[#4a3da3] mt-1 inline-block"
+                >
+                  View Project →
+                </a>
+              )}
             </div>
           ))}
         </div>
@@ -126,12 +185,12 @@ const ResumePDF = () => {
             Education
           </h2>
           {resumeData.education.map((edu, index) => (
-            <div key={index} className="mb-5 last:mb-0">
+            <div key={index} className="mb-4 last:mb-0">
               <div className="flex items-baseline justify-between flex-wrap gap-x-2">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-gray-800 text-sm">{edu.degree}</h3>
                 </div>
-                <span className="text-sm text-gray-600 ml-3 whitespace-nowrap">
+                <span className="text-sm text-gray-600 whitespace-nowrap">
                   {edu.startDate} - {edu.endDate}
                 </span>
               </div>
@@ -139,9 +198,9 @@ const ResumePDF = () => {
                 {edu.institution}, {edu.location}
               </p>
               {edu.description && (
-                <ul className="list-disc pl-4 text-sm text-gray-700 mt-1 font-normal leading-relaxed">
+                <ul className="list-disc pl-4 text-sm text-gray-700 mt-2 font-normal leading-relaxed">
                   {formatBulletPoints(edu.description).map((point, i) => (
-                    <li key={i} className="mb-1">{point}</li>
+                    <li key={i} className="mb-1.5">{point}</li>
                   ))}
                 </ul>
               )}
@@ -180,51 +239,6 @@ const ResumePDF = () => {
               </div>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Projects */}
-      {resumeData.projects && resumeData.projects.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">
-            Projects
-          </h2>
-          {resumeData.projects.map((project: Project, index) => (
-            <div key={index} className="mb-5 last:mb-0">
-              <div className="flex items-baseline justify-between flex-wrap gap-x-2">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-gray-800 text-sm">{project.title}</h3>
-                </div>
-                <span className="text-sm text-gray-600 ml-3 whitespace-nowrap">
-                  {project.startDate} - {project.endDate}
-                </span>
-              </div>
-              <ul className="list-disc pl-4 text-sm text-gray-700 mt-1 font-normal leading-relaxed">
-                {formatBulletPoints(project.description).map((point, i) => (
-                  <li key={i} className="mb-1">{point}</li>
-                ))}
-              </ul>
-              {project.technologies && project.technologies.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  {project.technologies.map((tech, i) => (
-                    <span key={i} className="px-2 py-0.5 bg-[#efeafc] rounded-sm text-sm border-[0.5px] border-[#dad3f8] shadow-xs text-violet-400 font-normal">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              )}
-              {project.link && (
-                <a
-                  href={project.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-[#5d4dcd] hover:text-[#4a3da3] mt-1 inline-block"
-                >
-                  View Project →
-                </a>
-              )}
-            </div>
-          ))}
         </div>
       )}
     </div>
