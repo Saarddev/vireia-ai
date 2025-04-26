@@ -12,6 +12,11 @@ const ResumePDF = () => {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
+  const formatBulletPoints = (text: string) => {
+    if (!text) return [];
+    return text.split('\n').filter(point => point.trim() !== '').map(point => point.trim());
+  };
+
   return (
     <div className="max-w-[800px] mx-auto p-8 bg-white print:p-0" style={{
       fontFamily: resumeSettings.fontFamily || 'Inter',
@@ -77,7 +82,11 @@ const ResumePDF = () => {
           <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">
             Summary
           </h2>
-          <p className="text-sm text-gray-700 font-normal leading-relaxed">{resumeData.summary}</p>
+          <ul className="list-disc pl-4 text-sm text-gray-700 font-normal leading-relaxed">
+            {formatBulletPoints(resumeData.summary).map((point, index) => (
+              <li key={index} className="mb-1">{point}</li>
+            ))}
+          </ul>
         </div>
       )}
 
@@ -100,9 +109,11 @@ const ResumePDF = () => {
               <p className="text-sm text-[#5d4dcd] font-medium my-0.5">
                 {exp.company}, {exp.location}
               </p>
-              <p className="text-sm text-gray-700 mt-1 font-normal leading-relaxed">
-                {exp.description}
-              </p>
+              <ul className="list-disc pl-4 text-sm text-gray-700 mt-1 font-normal leading-relaxed">
+                {formatBulletPoints(exp.description).map((point, i) => (
+                  <li key={i} className="mb-1">{point}</li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
@@ -128,9 +139,11 @@ const ResumePDF = () => {
                 {edu.institution}, {edu.location}
               </p>
               {edu.description && (
-                <p className="text-sm text-gray-700 mt-1 font-normal leading-relaxed">
-                  {edu.description}
-                </p>
+                <ul className="list-disc pl-4 text-sm text-gray-700 mt-1 font-normal leading-relaxed">
+                  {formatBulletPoints(edu.description).map((point, i) => (
+                    <li key={i} className="mb-1">{point}</li>
+                  ))}
+                </ul>
               )}
             </div>
           ))}
@@ -186,9 +199,11 @@ const ResumePDF = () => {
                   {project.startDate} - {project.endDate}
                 </span>
               </div>
-              <p className="text-sm text-gray-700 mt-1 font-normal leading-relaxed">
-                {project.description}
-              </p>
+              <ul className="list-disc pl-4 text-sm text-gray-700 mt-1 font-normal leading-relaxed">
+                {formatBulletPoints(project.description).map((point, i) => (
+                  <li key={i} className="mb-1">{point}</li>
+                ))}
+              </ul>
               {project.technologies && project.technologies.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {project.technologies.map((tech, i) => (
