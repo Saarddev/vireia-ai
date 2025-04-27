@@ -8,12 +8,14 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Resume from "./pages/Resume";
 import ResumeBuilder from "./pages/ResumeBuilder";
+import ResumeCanvas from "./pages/ResumeCanvas";
 import Applications from "./pages/Applications";
 import Analytics from "./pages/Analytics";
 import Templates from "./pages/Templates";
 import NotFound from "./pages/NotFound";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
+import ResumePDF from "./pages/ResumePDF";
 
 const App = () => (
   <div className="flex min-h-screen flex-col">
@@ -32,6 +34,8 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/resume" element={<Resume />} />
             <Route path="/resume/builder/:resumeId" element={<ResumeBuilder />} />
+            <Route path="/resume/canvas/:resumeId" element={<ResumeCanvas />} />
+            <Route path="/resume/pdf/:resumeId" element={<ResumePDF />} />
             <Route path="/applications" element={<Applications />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/templates" element={<Templates />} />

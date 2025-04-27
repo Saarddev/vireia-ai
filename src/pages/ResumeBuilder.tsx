@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider, Sidebar, SidebarInset } from "@/components/ui/sidebar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 import BuilderHeader from '@/components/resume-builder/BuilderHeader';
 import BuilderSidebar from '@/components/resume-builder/BuilderSidebar';
 import AISuggestion from '@/components/resume-builder/AISuggestion';
@@ -21,7 +22,7 @@ import { useResumeData } from '@/hooks/use-resume-data';
 import { useResumeAI } from '@/hooks/use-resume-ai';
 import { supabase } from '@/integrations/supabase/client';
 import ProjectForm from '@/components/resume-builder/ProjectForm';
-import { Project } from '@/types/resume.d';
+import { Paintbrush } from 'lucide-react';
 
 interface AISuggestionData {
   type: string;
@@ -210,10 +211,7 @@ const ResumeBuilder = () => {
             data={resumeData.summary}
             onChange={(data) => handleDataChange("summary", data)}
             isGenerating={isGenerating}
-            onGenerateWithAI={async () => {
-              const result = await handleGenerateWithAI("summary");
-              return result;
-            }}
+            onGenerateWithAI={handleGenerateWithAI}
           />
         );
       case "experience":
@@ -241,8 +239,8 @@ const ResumeBuilder = () => {
             onChange={(data) => handleDataChange("skills", data)}
             isGenerating={isGenerating}
             onExtractSkills={async () => {
-              const result = await handleGenerateWithAI("skills");
-              return result;
+              await handleGenerateWithAI("skills");
+              return "";
             }}
           />
         );
@@ -304,7 +302,10 @@ const ResumeBuilder = () => {
               aiEnabled={aiEnabled}
               aiGenerating={isGenerating}
               onSectionChange={setActiveSection}
-              onGenerateWithAI={() => handleGenerateWithAI(activeSection)}
+              onGenerateWithAI={() => {
+                handleGenerateWithAI(activeSection);
+                return Promise.resolve();
+              }}
             />
           </Sidebar>
 
@@ -341,6 +342,16 @@ const ResumeBuilder = () => {
                   onDataChange={(section, data) => handleDataChange(section, data)}
                   onGenerateWithAI={handleGenerateWithAI}
                 />
+                {resumeId && (
+                  <div className="mt-4 flex justify-center">
+                    <Link to={`/resume/canvas/${resumeId}`}>
+                      <Button variant="outline" className="flex items-center gap-2">
+                        <Paintbrush className="h-4 w-4" />
+                        Open in Canvas Editor
+                      </Button>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </SidebarInset>

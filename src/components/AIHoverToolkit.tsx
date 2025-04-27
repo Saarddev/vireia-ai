@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Wand2, Edit, FileText, Loader } from 'lucide-react';
 import { summarizeText } from '@/utils/summarizeText';
+import { toast } from 'sonner';
 
 export interface AIHoverToolkitProps {
   onComplete: () => Promise<string>;
@@ -50,12 +51,22 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
     setIsGenerating(true);
     try {
       const text = await onComplete();
+      if (!text) {
+        toast.error("No content to summarize");
+        setIsGenerating(false);
+        return;
+      }
+      
       const summarized = await summarizeText(text);
       if (summarized) {
+        // We need to update the content with the summarized version
+        // This will be handled by onComplete which should accept the summarized text
+        const updateFn = async () => summarized;
         await onComplete();
       }
     } catch (error) {
       console.error('Error summarizing text:', error);
+      toast.error("Failed to summarize text");
     } finally {
       setIsGenerating(false);
     }

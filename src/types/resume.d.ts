@@ -1,29 +1,3 @@
-export interface Education {
-  id: string;
-  degree: string;
-  institution: string;
-  location: string;
-  startDate: string;
-  endDate: string;
-  description?: string;
-  field?: string;
-  level?: string;
-}
-
-export interface Experience {
-  id: string;
-  title: string;
-  company: string;
-  location: string;
-  startDate: string;
-  endDate: string;
-  description: string;
-}
-
-export interface Skills {
-  technical: string[];
-  soft: string[];
-}
 
 export interface Personal {
   name: string;
@@ -35,14 +9,59 @@ export interface Personal {
   website?: string;
 }
 
+export interface Experience {
+  id?: string;
+  company: string;
+  title: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+}
+
+export interface Education {
+  id?: string;
+  institution: string;
+  degree: string;
+  field?: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  description?: string;
+}
+
+export interface Skills {
+  technical: string[];
+  soft: string[];
+}
+
 export interface Project {
-  id: string;
+  id?: string;
   title: string;
   description: string;
   technologies?: string[];
+  link?: string;
   startDate: string;
   endDate: string;
-  link?: string;
+}
+
+export interface LinkedInData {
+  full_name?: string;
+  headline?: string;
+  location?: string;
+  linkedin_url?: string;
+  experience?: any[];
+  education?: any[];
+}
+
+export interface ResumeSettings {
+  fontFamily: string;
+  fontSize: number;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  paperSize: "a4" | "letter" | "legal";
+  margins: "narrow" | "normal" | "wide";
 }
 
 export interface ResumeData {
