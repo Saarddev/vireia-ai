@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Wand2, Edit, Sparkles, Loader } from 'lucide-react';
+import { Wand2, Edit, FileText, Loader } from 'lucide-react';
+import { summarizeText } from '@/utils/summarizeText';
 
 export interface AIHoverToolkitProps {
   onComplete: () => Promise<string>;
@@ -43,6 +44,23 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
     }
   };
 
+  const handleSummarize = async () => {
+    if (isGenerating) return;
+    
+    setIsGenerating(true);
+    try {
+      const text = await onComplete();
+      const summarized = await summarizeText(text);
+      if (summarized) {
+        await onComplete();
+      }
+    } catch (error) {
+      console.error('Error summarizing text:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <div className={`flex gap-1 ${className}`}>
       <Button 
@@ -58,6 +76,17 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
           icon
         )}
         {label}
+      </Button>
+      
+      <Button 
+        size="sm"
+        variant="ghost"
+        className="h-7 text-xs px-2 hover:bg-purple-50 hover:text-resume-purple"
+        onClick={handleSummarize}
+        disabled={isGenerating}
+      >
+        <FileText className="h-3 w-3 mr-1" />
+        Summarize
       </Button>
       
       {onAddChanges && (

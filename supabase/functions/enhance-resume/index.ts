@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
@@ -9,68 +8,20 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+function generateSummarizationPrompt(text: string) {
+  return `
+Convert the following text into clear, concise bullet points that are ATS-friendly. Each point should:
+- Start with an action verb
+- Be concise and impactful
+- Highlight key achievements and skills
+- Be easy to scan
+- Focus on relevant information
 
-  try {
-    const { type, linkedinData, resumeTemplate, experience, skills, description, educationContext, experienceContext } = await req.json();
-    
-    let prompt = "";
-    let requestType = type || 'full-resume'; // Default to full resume if type isn't specified
-    
-    if (requestType.startsWith('education-')) {
-      prompt = generateEducationPrompt(requestType, educationContext);
-    } else if (requestType === "summary") {
-      prompt = generateSummaryPrompt(experience, skills);
-    } else if (requestType === "skills") {
-      prompt = generateSkillsPrompt(experience);
-    } else if (requestType === "improve") {
-      prompt = generateImprovementPrompt(description);
-    } else if (requestType === "experience-description") {
-      prompt = generateExperiencePrompt(experienceContext);
-    } else {
-      // Full resume enhancement
-      prompt = generateFullResumePrompt(linkedinData, resumeTemplate || "modern");
-    }
+Text to summarize:
+${text}
 
-    console.log(`Generating ${requestType} with Gemini API`);
-
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: prompt }]
-        }]
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error(`Gemini API error: ${response.status} ${errorData}`);
-      throw new Error(`Gemini API error: ${response.status} ${errorData}`);
-    }
-
-    const data = await response.json();
-    const result = parseGeminiResponse(data, requestType);
-    
-    console.log(`Successfully generated ${requestType}`);
-    
-    return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  } catch (error) {
-    console.error('Error in enhance-resume function:', error);
-    return new Response(JSON.stringify({ error: error.message || "Unknown error occurred" }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
-});
+Return only the bullet points, one per line, without any other text or formatting.`;
+}
 
 function generateSummaryPrompt(experience: string[], skills: string[]) {
   return `
@@ -329,3 +280,74 @@ function parseGeminiResponse(response: any, type: string) {
     throw new Error('Failed to parse the AI-generated data');
   }
 }
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { type, text, linkedinData, resumeTemplate, experience, skills, description, educationContext, experienceContext } = await req.json();
+    
+    let prompt = "";
+    let requestType = type || 'full-resume';
+    
+    if (type === "summarize") {
+      prompt = generateSummarizationPrompt(text);
+    } else if (requestType.startsWith('education-')) {
+      prompt = generateEducationPrompt(requestType, educationContext);
+    } else if (requestType === "summary") {
+      prompt = generateSummaryPrompt(experience, skills);
+    } else if (requestType === "skills") {
+      prompt = generateSkillsPrompt(experience);
+    } else if (requestType === "improve") {
+      prompt = generateImprovementPrompt(description);
+    } else if (requestType === "experience-description") {
+      prompt = generateExperiencePrompt(experienceContext);
+    } else {
+      // Full resume enhancement
+      prompt = generateFullResumePrompt(linkedinData, resumeTemplate || "modern");
+    }
+
+    console.log(`Generating ${requestType} with Gemini API`);
+
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: prompt }]
+        }]
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error(`Gemini API error: ${response.status} ${errorData}`);
+      throw new Error(`Gemini API error: ${response.status} ${errorData}`);
+    }
+
+    const data = await response.json();
+    const result = parseGeminiResponse(data, requestType);
+    
+    console.log(`Successfully generated ${requestType}`);
+    
+    if (type === "summarize") {
+      return new Response(JSON.stringify({ summary: text.trim() }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response(JSON.stringify(result), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('Error in enhance-resume function:', error);
+    return new Response(JSON.stringify({ error: error.message || "Unknown error occurred" }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+});
