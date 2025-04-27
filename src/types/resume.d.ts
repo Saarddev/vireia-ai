@@ -74,3 +74,5 @@ export interface ResumeData {
   certifications: string[];
   projects: Project[];
 }
+
+export type { Project };

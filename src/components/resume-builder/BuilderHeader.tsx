@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -11,7 +11,8 @@ import {
   Save, 
   Download, 
   Share2, 
-  Sparkles
+  Sparkles,
+  Paintbrush
 } from 'lucide-react';
 
 interface BuilderHeaderProps {
@@ -34,6 +35,7 @@ const BuilderHeader: React.FC<BuilderHeaderProps> = ({
   onAIToggle
 }) => {
   const navigate = useNavigate();
+  const { resumeId } = useParams();
 
   return (
     <header className="sticky top-0 z-50 px-4 py-3 border-b bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-sm">
@@ -78,6 +80,16 @@ const BuilderHeader: React.FC<BuilderHeaderProps> = ({
           </div>
           
           <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate(`/resume/canvas/${resumeId}`)}
+              className="gap-1.5 border-resume-purple/20 text-resume-purple hover:bg-resume-purple/5 hover:border-resume-purple transition-all duration-300"
+            >
+              <Paintbrush className="h-4 w-4" />
+              Canvas Editor
+            </Button>
+
             <Button 
               variant="outline" 
               size="sm" 
