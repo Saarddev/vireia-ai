@@ -41,6 +41,27 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
     onChange(formData.summary);
   };
 
+  // Format summary to display bullet points properly in the preview
+  const formatSummaryPreview = (text: string) => {
+    if (!text) return <p className="text-gray-400 italic">No summary yet</p>;
+
+    if (text.includes('•') || text.includes('\n')) {
+      // This is a bulleted list, render with proper HTML
+      return (
+        <ul className="list-disc pl-5 space-y-1 mt-2">
+          {text.split('\n').map((line, idx) => (
+            <li key={idx} className="text-gray-700">
+              {line.replace(/^•\s*/, '')}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+    
+    // Regular text
+    return <p className="text-gray-700 whitespace-pre-line mt-2">{text}</p>;
+  };
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4 flex items-center">
@@ -58,6 +79,7 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
             <h3 className="text-sm font-medium text-resume-purple">AI Summary Assistant</h3>
             <p className="text-xs text-resume-gray mt-1">
               Let our AI help you craft a compelling professional summary based on your experience and skills.
+              The AI will create bullet points highlighting your key strengths.
             </p>
             <Button 
               size="sm" 
@@ -111,18 +133,25 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
                   </div>
                   <FormControl>
                     <Textarea 
-                      placeholder="Summarize your professional background, key skills, and career achievements in 3-5 sentences"
+                      placeholder="Summarize your professional background, key skills, and career achievements in bullet points"
                       className="min-h-[150px] resize-none"
                       {...field} 
                     />
                   </FormControl>
                 </div>
                 <FormDescription>
-                  Keep your summary concise (50-200 words) and focused on your most relevant qualifications.
+                  Use bullet points (• ) to highlight your key achievements and skills. The AI can help format this for you.
                 </FormDescription>
               </FormItem>
             )}
           />
+          
+          {data && (
+            <div className="mt-4 bg-gray-50 p-4 rounded-md border border-gray-200">
+              <h4 className="text-sm font-medium mb-2">Summary Preview:</h4>
+              {formatSummaryPreview(data)}
+            </div>
+          )}
           
           <div className="flex justify-between items-center mt-4">
             <div className="text-sm text-resume-gray">

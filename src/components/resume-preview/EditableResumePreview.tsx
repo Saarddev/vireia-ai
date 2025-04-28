@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -45,6 +44,24 @@ export const EditableContent: React.FC<EditableContentProps> = ({
     const newText = editedContent + "\n";
     setEditedContent(newText);
     return Promise.resolve("");
+  };
+
+  const formatContent = (text: string) => {
+    if (!text) return null;
+
+    if (text.includes('•') || text.includes('\n')) {
+      return (
+        <ul className="list-disc pl-5 space-y-1">
+          {text.split('\n').map((line, idx) => (
+            <li key={idx} className="text-gray-800">
+              {line.replace(/^•\s*/, '')}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+    
+    return <p className="whitespace-pre-line">{text}</p>;
   };
 
   if (isEditing) {
@@ -104,7 +121,7 @@ export const EditableContent: React.FC<EditableContentProps> = ({
     >
       <div className={`${className} relative hover:bg-gray-50/50 p-1 rounded`}>
         {content ? (
-          <p className="whitespace-pre-line">{content}</p>
+          formatContent(content)
         ) : (
           <p className="text-gray-400 italic">Click to edit</p>
         )}

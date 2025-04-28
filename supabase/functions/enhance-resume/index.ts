@@ -10,17 +10,18 @@ const corsHeaders = {
 
 function generateSummarizationPrompt(text: string) {
   return `
-Convert the following text into clear, concise bullet points that are ATS-friendly. Each point should:
+Convert the following text into clear, concise bullet points that highlight key achievements and skills. Make each point:
 - Start with an action verb
-- Be concise and impactful
-- Highlight key achievements and skills
-- Be easy to scan
-- Focus on relevant information
+- Be concise and impactful (1-2 lines each)
+- Include specific achievements with measurable results when possible
+- Focus on the most relevant information
+- Be ATS-friendly for resume scanning
 
-Text to summarize:
+Original text:
 ${text}
 
-Return only the bullet points, one per line, without any other text or formatting.`;
+Return ONLY a clean list of 3-6 bullet points, each starting with "• " (bullet symbol followed by a space), with one bullet point per line. 
+Do not include any other text, explanations, or formatting in your response. Just the bullet points.`;
 }
 
 function generateSummaryPrompt(experience: string[], skills: string[]) {
@@ -253,6 +254,28 @@ function parseGeminiResponse(response: any, type: string) {
       return { [type === "summary" ? "summary" : "improved"]: text.trim() };
     }
     
+    if (type === "summarize") {
+      // Ensure bullet points are formatted properly
+      let summary = text.trim();
+      
+      // If there are no bullet points in the response, format as bullet points
+      if (!summary.includes('•') && !summary.includes('-')) {
+        const lines = summary.split('\n').filter(line => line.trim().length > 0);
+        summary = lines.map(line => `• ${line.trim()}`).join('\n');
+      }
+      
+      // Clean up formatting to ensure consistent bullets
+      summary = summary
+        .replace(/[-*]\s+/g, '• ') // Replace markdown bullets with •
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0) // Remove empty lines
+        .map(line => line.startsWith('•') ? line : `• ${line}`) // Ensure each line starts with a bullet
+        .join('\n');
+      
+      return { summary };
+    }
+    
     if (type === "skills") {
       const skillsMatch = text.match(/\{[\s\S]*\}/);
       if (skillsMatch) {
@@ -335,7 +358,7 @@ serve(async (req) => {
     console.log(`Successfully generated ${requestType}`);
     
     if (type === "summarize") {
-      return new Response(JSON.stringify({ summary: text.trim() }), {
+      return new Response(JSON.stringify({ summary: result.summary }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
