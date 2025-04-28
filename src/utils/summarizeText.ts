@@ -4,6 +4,11 @@ import { toast } from 'sonner';
 
 export const summarizeText = async (text: string): Promise<string> => {
   try {
+    if (!text || text.trim() === '') {
+      toast.error('No content to summarize. Please add some text first.');
+      return '';
+    }
+
     const { data, error } = await supabase.functions.invoke('enhance-resume', {
       body: {
         type: 'summarize',
@@ -15,6 +20,11 @@ export const summarizeText = async (text: string): Promise<string> => {
     
     // Process the summary to ensure proper bullet point formatting
     let summary = data?.summary || '';
+    
+    if (!summary || summary.trim() === '') {
+      toast.error('AI could not generate a summary. Try with more detailed content.');
+      return text;
+    }
     
     // If the summary doesn't contain line breaks but has bullet points, format them
     if (summary) {
@@ -46,4 +56,3 @@ export const summarizeText = async (text: string): Promise<string> => {
     return '';
   }
 };
-
