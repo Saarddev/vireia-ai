@@ -75,4 +75,9 @@ export interface ResumeData {
   projects: Project[];
 }
 
-export type { Project };
+export interface CreateResumeDialogProps {
+  open: boolean;
+  onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
+  onResumeCreated?: () => Promise<void>;
+}
+
