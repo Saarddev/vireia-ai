@@ -209,6 +209,7 @@ export function useResumeData(resumeId: string | undefined) {
         .from('resumes')
         .update({
           content: resumeData as any,
+          title: resumeTitle, // Ensure title is saved
           template: selectedTemplate,
           settings: resumeSettings as any,
           updated_at: new Date().toISOString()
@@ -236,6 +237,7 @@ export function useResumeData(resumeId: string | undefined) {
     resumeData,
     setResumeData,
     resumeTitle,
+    setResumeTitle, // Export the setResumeTitle function
     selectedTemplate,
     setSelectedTemplate,
     resumeSettings,

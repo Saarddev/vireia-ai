@@ -23,7 +23,8 @@ import {
   FileText,
   List,
   Edit,
-  Check
+  Check,
+  Eye // Added missing Eye component import
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -41,6 +42,7 @@ import ModernTemplate from '@/components/resume-preview/ModernTemplate';
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea"; // Added missing Textarea component import
 import { 
   Select, 
   SelectContent, 
@@ -194,6 +196,7 @@ const ResumeCanvas = () => {
             id: uuidv4(),
             degree: "",
             institution: "",
+            field: "", // Added missing field property
             location: "",
             startDate: "",
             endDate: "",

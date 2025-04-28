@@ -80,4 +80,3 @@ export interface CreateResumeDialogProps {
   onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
   onResumeCreated?: () => Promise<void>;
 }
-
