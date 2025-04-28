@@ -164,142 +164,45 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
   };
 
   return (
-    <div className="relative h-full  flex flex-col">
+    <div className="relative h-full flex flex-col overflow-hidden">
       <PreviewControls
         zoomLevel={zoomLevel}
-        onZoomIn={() => setZoomLevel(prev => Math.min(prev + 0.25, 2))}
-        onZoomOut={() => setZoomLevel(prev => Math.max(prev - 0.25, 0.5))}
-        onDownload={() => {
-          const printWindow = window.open('', '_blank');
-          if (!printWindow || !resumeContentRef.current) {
-            console.error('Failed to open print window or find resume content');
-            return;
-          }
-          
-          const fontFamily = settings.fontFamily || 'Inter';
-          const primaryColor = settings.primaryColor || '#5d4dcd';
-
-          // Clone the resume content node to avoid modifying the original
-          const clonedResumeContent = resumeContentRef.current.cloneNode(true) as HTMLDivElement;
-
-          // Extract all computed styles
-          let allStyles = '';
-          const styleElements = document.querySelectorAll('style');
-          styleElements.forEach(style => {
-            allStyles += style.textContent;
-          });
-
-          // Add inline styles to the cloned content (this might be very verbose)
-          // You might need to selectively apply styles if this becomes too large
-          // const applyAllStylesInline = (element: Element) => {
-          //   const computedStyle = window.getComputedStyle(element);
-          //   let inlineStyle = '';
-          //   for (let i = 0; i < computedStyle.length; i++) {
-          //     const propertyName = computedStyle[i];
-          //     inlineStyle += `${propertyName}: ${computedStyle.getPropertyValue(propertyName)}; `;
-          //   }
-          //   element.setAttribute('style', inlineStyle);
-          //   Array.from(element.children).forEach(applyAllStylesInline);
-          // };
-          // applyAllStylesInline(clonedResumeContent);
-
-          const resumeHTMLContent = clonedResumeContent.outerHTML;
-
-          printWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <title>${data.personal.name} - Resume</title>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <style>
-                  ${allStyles}
-                  @page {
-                    size: ${settings.paperSize || 'a4'};
-                    margin: ${settings.margins === 'narrow' ? '0.5in' :
-              settings.margins === 'wide' ? '1.5in' :
-                '1in'
-            };
-                  }
-                  body {
-                    font-family: ${settings.fontFamily || 'Inter'}, sans-serif;
-                    font-size: ${settings.fontSize || 10}pt;
-                    line-height: 1.5;
-                    color: #000;
-                    background: #fff;
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                  }
-                  @media print {
-                    body { margin: 0; }
-                    .resume-content { padding: 0 !important; }
-                  }
-                </style>
-                ${settings.fontFamily ?
-              `<link href="https://fonts.googleapis.com/css2?family=${settings.fontFamily}:wght@400;500;600;700&display=swap" rel="stylesheet">`
-            : ''
-          }
-              </head>
-              <body class="p-0 m-0">
-                ${resumeHTMLContent}
-                <script>
-                  window.onload = () => {
-                    window.print();
-                    window.close();
-                  };
-                </script>
-              </body>
-            </html>
-          `);
-
-          printWindow.document.close();
-        }}
-      >
-        <div className="resume-content">
-          {template === 'modern' ? (
-            <ModernTemplate
-              data={safeData}
-              settings={settings}
-              onUpdateData={onDataChange}
-              onGenerateWithAI={handleGenerateWithAI}
-            />
-          ) : (
-            <div className="h-full flex items-center justify-center">
-              <p className="text-gray-500">{template.charAt(0).toUpperCase() + template.slice(1)} template preview</p>
-            </div>
-          )}
-        </div>
-      </PreviewControls>
-
-      <div className="flex-1 overflow-auto relative p-4">
-        <Card
-          className={cn(
-            "resume-content bg-white rounded-lg shadow-md p-0 transition-all duration-200 mx-auto",
-            "border border-gray-200"
-          )}
-          style={{
-            width: '100%',
-            maxWidth: '720px',
-            transform: `scale(${zoomLevel})`,
-            transformOrigin: 'center top',
-            background: '#fff',
-          }}
-        >
-          <div ref={resumeContentRef} className="resume-content">
-            {template === 'modern' ? (
-              <ModernTemplate
-                data={safeData}
-                settings={settings}
-                onUpdateData={onDataChange}
-                onGenerateWithAI={handleGenerateWithAI}
-              />
-            ) : (
-              <div className="h-full flex items-center justify-center">
-                <p className="text-gray-500">{template.charAt(0).toUpperCase() + template.slice(1)} template preview</p>
-              </div>
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onDownload={handleDownloadPDF}
+      />
+      
+      <div className="flex-1 overflow-auto p-4 relative">
+        <div className="min-h-full flex items-start justify-center">
+          <Card
+            className={cn(
+              "resume-content bg-white rounded-lg shadow-md p-8 transition-all duration-200 mx-auto",
+              "border border-gray-200 w-full max-w-[21cm]"
             )}
-          </div>
-        </Card>
+            style={{
+              transform: `scale(${zoomLevel})`,
+              transformOrigin: 'top center',
+              marginBottom: `${(zoomLevel - 1) * 100}%`
+            }}
+          >
+            <div ref={resumeContentRef} className="resume-content">
+              {template === 'modern' ? (
+                <ModernTemplate
+                  data={safeData}
+                  settings={settings}
+                  onUpdateData={onDataChange}
+                  onGenerateWithAI={handleGenerateWithAI}
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center">
+                  <p className="text-gray-500">
+                    {template.charAt(0).toUpperCase() + template.slice(1)} template preview
+                  </p>
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );

@@ -51,17 +51,23 @@ export const EditableContent: React.FC<EditableContentProps> = ({
 
     if (text.includes('•') || text.includes('\n')) {
       return (
-        <ul className="list-disc pl-5 space-y-1">
-          {text.split('\n').map((line, idx) => (
-            <li key={idx} className="text-gray-800">
-              {line.replace(/^•\s*/, '')}
-            </li>
-          ))}
+        <ul className="pl-6 space-y-2 list-none">
+          {text.split('\n').map((line, idx) => {
+            const bulletPoint = line.replace(/^•\s*/, '').trim();
+            if (!bulletPoint) return null;
+            
+            return (
+              <li key={idx} className="relative flex items-start group">
+                <span className="absolute left-[-1.5rem] top-[0.5rem] w-1.5 h-1.5 rounded-full bg-resume-purple"></span>
+                <span className="text-gray-800 leading-relaxed">{bulletPoint}</span>
+              </li>
+            );
+          })}
         </ul>
       );
     }
     
-    return <p className="whitespace-pre-line">{text}</p>;
+    return <p className="whitespace-pre-line text-gray-800">{text}</p>;
   };
 
   if (isEditing) {

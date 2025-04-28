@@ -18,7 +18,6 @@ export const summarizeText = async (text: string): Promise<string> => {
 
     if (error) throw error;
     
-    // Process the summary to ensure proper bullet point formatting
     let summary = data?.summary || '';
     
     if (!summary || summary.trim() === '') {
@@ -26,30 +25,40 @@ export const summarizeText = async (text: string): Promise<string> => {
       return text;
     }
     
-    // Make sure we have a response from AI before proceeding
+    // Format the text into proper ATS-friendly bullet points
     if (!summary.includes('•') && !summary.includes('-')) {
-      // If the response doesn't have any bullet points, let's format it into bullet points
-      const sentences = summary.split(/[.!?]\s+/).filter(s => s.trim().length > 0);
+      const sentences = summary
+        .split(/[.!?]\s+/)
+        .filter(s => s.trim().length > 0)
+        .map(s => {
+          // Ensure each bullet point starts with an action verb
+          let point = s.trim();
+          if (!/^[A-Z][a-z]+ed|^[A-Z][a-z]+ing|^[A-Z][a-z]+s\b/.test(point)) {
+            // If it doesn't start with an action verb, try to rephrase it
+            point = point.charAt(0).toUpperCase() + point.slice(1);
+          }
+          return point;
+        });
+      
       if (sentences.length > 0) {
-        summary = sentences.map(s => `• ${s.trim()}`).join('\n');
+        summary = sentences.map(s => `• ${s}`).join('\n');
       }
     }
     
-    // Clean up the format to ensure each bullet point is properly displayed
+    // Clean up and standardize bullet points
     summary = summary
       .replace(/•\s*/g, '• ') // Standardize bullet points
       .replace(/[-*]\s+/g, '• ') // Replace markdown bullets with •
       .split('\n')
       .map(line => line.trim())
-      .filter(line => line.length > 0) // Remove empty lines
-      .map(line => line.startsWith('•') ? line : `• ${line}`) // Ensure each line starts with a bullet
+      .filter(line => line.length > 0)
+      .map(line => line.startsWith('•') ? line : `• ${line}`)
       .join('\n');
-      
-    // Clean up extra spaces and ensure no double bullets
-    summary = summary.replace(/•\s+•/g, '•');
     
-    // Remove any extra newlines at beginning and end
-    summary = summary.replace(/^\n+|\n+$/g, '');
+    // Clean up extra spaces and ensure no double bullets
+    summary = summary
+      .replace(/•\s+•/g, '•')
+      .replace(/^\n+|\n+$/g, '');
     
     return summary;
   } catch (error) {
