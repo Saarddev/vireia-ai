@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { cn } from "@/lib/utils";
@@ -89,20 +90,6 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
       allStyles += style.textContent;
     });
 
-    // Add inline styles to the cloned content (this might be very verbose)
-    // You might need to selectively apply styles if this becomes too large
-    // const applyAllStylesInline = (element: Element) => {
-    //   const computedStyle = window.getComputedStyle(element);
-    //   let inlineStyle = '';
-    //   for (let i = 0; i < computedStyle.length; i++) {
-    //     const propertyName = computedStyle[i];
-    //     inlineStyle += `${propertyName}: ${computedStyle.getPropertyValue(propertyName)}; `;
-    //   }
-    //   element.setAttribute('style', inlineStyle);
-    //   Array.from(element.children).forEach(applyAllStylesInline);
-    // };
-    // applyAllStylesInline(clonedResumeContent);
-
     const resumeHTMLContent = clonedResumeContent.outerHTML;
 
     printWindow.document.write(`
@@ -117,9 +104,9 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
             @page {
               size: ${settings.paperSize || 'a4'};
               margin: ${settings.margins === 'narrow' ? '0.5in' :
-        settings.margins === 'wide' ? '1.5in' :
-          '1in'
-      };
+                settings.margins === 'wide' ? '1.5in' :
+                '1in'
+              };
             }
             body {
               font-family: ${settings.fontFamily || 'Inter'}, sans-serif;
@@ -136,9 +123,9 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
             }
           </style>
           ${settings.fontFamily ?
-        `<link href="https://fonts.googleapis.com/css2?family=${settings.fontFamily}:wght@400;500;600;700&display=swap" rel="stylesheet">`
-        : ''
-      }
+            `<link href="https://fonts.googleapis.com/css2?family=${settings.fontFamily}:wght@400;500;600;700&display=swap" rel="stylesheet">`
+            : ''
+          }
         </head>
         <body class="p-0 m-0">
           ${resumeHTMLContent}
@@ -170,13 +157,17 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onDownload={handleDownloadPDF}
-      />
+      >
+        <span className="text-sm text-gray-600 ml-2">
+          {Math.round(zoomLevel * 100)}%
+        </span>
+      </PreviewControls>
       
       <div className="flex-1 overflow-auto p-4 relative">
-        <div className="min-h-full flex items-start justify-center">
+        <div className="min-h-full flex items-start justify-center pb-20">
           <Card
             className={cn(
-              "resume-content bg-white rounded-lg shadow-md p-8 transition-all duration-200 mx-auto",
+              "resume-content bg-white rounded-lg shadow-md p-6 md:p-8 transition-all duration-200 mx-auto",
               "border border-gray-200 w-full max-w-[21cm]"
             )}
             style={{

@@ -48,12 +48,18 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
     if (text.includes('•') || text.includes('\n')) {
       // This is a bulleted list, render with proper HTML
       return (
-        <ul className="list-disc pl-5 space-y-1 mt-2">
-          {text.split('\n').map((line, idx) => (
-            <li key={idx} className="text-gray-700">
-              {line.replace(/^•\s*/, '')}
-            </li>
-          ))}
+        <ul className="list-none pl-5 space-y-1 mt-2">
+          {text.split('\n').map((line, idx) => {
+            const bulletText = line.replace(/^•\s*/, '').trim();
+            if (!bulletText) return null;
+            
+            return (
+              <li key={idx} className="relative flex items-start">
+                <span className="absolute left-[-1.5rem] top-[0.5rem] w-1.5 h-1.5 rounded-full bg-resume-purple"></span>
+                <span className="text-gray-700">{bulletText}</span>
+              </li>
+            );
+          })}
         </ul>
       );
     }
@@ -85,7 +91,10 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
               size="sm" 
               variant="outline" 
               className="mt-2 border-resume-purple text-resume-purple hover:bg-resume-purple hover:text-white transition-all duration-300"
-              onClick={() => onGenerateWithAI()}
+              onClick={async () => {
+                const result = await onGenerateWithAI();
+                return result;
+              }}
               disabled={isGenerating}
             >
               {isGenerating ? (

@@ -1,222 +1,124 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FileText, Sparkles, LinkedinIcon, PenLine, Loader2, Upload } from 'lucide-react';
-import { useToast } from "@/hooks/use-toast";
-import { createEnhancedResume } from "@/services/resumeEnhancementService";
-import { supabase } from "@/integrations/supabase/client";
+import { createEnhancedResume } from '@/services/resumeEnhancementService';
+import { toast } from 'sonner';
+import { Loader } from 'lucide-react';
 
-interface CreateResumeDialogProps {
+export interface CreateResumeDialogProps {
   open: boolean;
-  onClose: () => void;
-  onResumeCreated?: (resumeId: string) => void;
-  isCreating?: boolean;
+  onOpenChange: (open: boolean) => void;
+  onResumeCreated?: () => Promise<void>;
 }
 
-const CreateResumeDialog: React.FC<CreateResumeDialogProps> = ({
+export default function CreateResumeDialog({
   open,
-  onClose,
-  onResumeCreated,
-  isCreating = false
-}) => {
-  const [resumeTitle, setResumeTitle] = useState('');
+  onOpenChange,
+  onResumeCreated
+}: CreateResumeDialogProps) {
   const [linkedinUrl, setLinkedinUrl] = useState('');
-  const [isProcessingLinkedIn, setIsProcessingLinkedIn] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const { toast } = useToast();
+  const [resumeName, setResumeName] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLinkedInImport = async () => {
-    if (!linkedinUrl) {
-      toast({
-        title: "LinkedIn URL Required",
-        description: "Please enter your LinkedIn profile URL to import data",
-        variant: "destructive"
-      });
+  const resetForm = () => {
+    setLinkedinUrl('');
+    setResumeName('');
+    setError(null);
+  };
+
+  const handleOpenChange = (newOpenState: boolean) => {
+    if (!newOpenState) {
+      resetForm();
+    }
+    onOpenChange(newOpenState);
+  };
+
+  const handleCreate = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!linkedinUrl.trim()) {
+      setError('Please enter your LinkedIn profile URL');
       return;
     }
 
-    setIsProcessingLinkedIn(true);
+    setError(null);
+    setIsCreating(true);
+
     try {
-      const newResume = await createEnhancedResume(linkedinUrl, resumeTitle);
+      await createEnhancedResume(linkedinUrl, resumeName || 'My Professional Resume');
+      toast.success('Resume created successfully!');
       
-      if (newResume && onResumeCreated) {
-        onResumeCreated(newResume.id);
+      if (onResumeCreated) {
+        await onResumeCreated();
       }
-      onClose();
       
-      toast({
-        title: "Success!",
-        description: "Your resume has been created from LinkedIn data",
-      });
+      handleOpenChange(false);
     } catch (error: any) {
-      console.error('Error importing LinkedIn data:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to import LinkedIn data. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsProcessingLinkedIn(false);
-    }
-  };
-
-  const handleCreateBlank = async () => {
-    if (!resumeTitle.trim()) {
-      toast({
-        title: "Title Required",
-        description: "Please enter a title for your resume",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Authentication required');
-
-      const { data: resume, error } = await supabase
-        .from('resumes')
-        .insert({
-          title: resumeTitle,
-          template: 'modern',
-          user_id: user.id,
-          content: {
-            personal: {
-              name: "",
-              title: "",
-              email: "",
-              phone: "",
-              location: "",
-              linkedin: "",
-              website: ""
-            },
-            summary: "",
-            experience: [],
-            education: [],
-            skills: {
-              technical: [],
-              soft: []
-            },
-            languages: [],
-            certifications: [],
-            projects: []
-          },
-          settings: {
-            fontFamily: "Inter",
-            fontSize: 10,
-            primaryColor: "#9b87f5",
-            secondaryColor: "#6E59A5",
-            accentColor: "#D6BCFA",
-            paperSize: "a4",
-            margins: "normal"
-          }
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      
-      if (onResumeCreated && resume) {
-        onResumeCreated(resume.id);
-      }
-      onClose();
-    } catch (error) {
       console.error('Error creating resume:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create resume. Please try again.",
-        variant: "destructive"
-      });
+      setError(error.message || 'Failed to create resume. Please try again.');
+      toast.error('Failed to create resume');
+    } finally {
+      setIsCreating(false);
     }
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadedFile(file);
-    setResumeTitle(file.name.replace(/\.[^/.]+$/, ""));
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Create Resume</DialogTitle>
-          <DialogDescription>
-            Create a new resume or import from LinkedIn
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="title">Resume Title</Label>
-            <Input
-              id="title"
-              value={resumeTitle}
-              onChange={(e) => setResumeTitle(e.target.value)}
-              placeholder="E.g., Software Engineer 2024"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="linkedin">LinkedIn Profile URL (Optional)</Label>
-            <Input
-              id="linkedin"
-              value={linkedinUrl}
-              onChange={(e) => setLinkedinUrl(e.target.value)}
-              placeholder="https://linkedin.com/in/yourprofile"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="resume-upload">Upload Existing Resume (Optional)</Label>
-            <Input
-              id="resume-upload"
-              type="file"
-              accept=".pdf,.doc,.docx"
-              onChange={handleFileUpload}
-            />
-            {uploadedFile && (
-              <p className="text-sm text-muted-foreground mt-1">
-                Selected: {uploadedFile.name}
-              </p>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <form onSubmit={handleCreate}>
+          <DialogHeader>
+            <DialogTitle>Create a New Resume</DialogTitle>
+            <DialogDescription>
+              Enter your LinkedIn URL to automatically generate a professional resume with AI.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right col-span-1">
+                Name
+              </Label>
+              <Input
+                id="name"
+                placeholder="My Professional Resume"
+                value={resumeName}
+                onChange={(e) => setResumeName(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="linkedin" className="text-right col-span-1">
+                LinkedIn
+              </Label>
+              <Input
+                id="linkedin"
+                placeholder="https://linkedin.com/in/yourname"
+                value={linkedinUrl}
+                onChange={(e) => setLinkedinUrl(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            {error && (
+              <p className="text-red-500 text-sm mt-1">{error}</p>
             )}
           </div>
-
-          <div className="flex flex-col gap-2">
-            <Button
-              onClick={handleCreateBlank}
-              disabled={!resumeTitle.trim() || isCreating || isProcessingLinkedIn}
-            >
-              <FileText className="mr-2 h-4 w-4" />
-              Create Blank Resume
+          <DialogFooter>
+            <Button type="submit" disabled={isCreating} className="gap-2">
+              {isCreating && <Loader className="h-4 w-4 animate-spin" />}
+              {isCreating ? 'Creating...' : 'Create Resume'}
             </Button>
-
-            <Button
-              variant="outline"
-              onClick={handleLinkedInImport}
-              disabled={!linkedinUrl || isProcessingLinkedIn || isCreating}
-            >
-              {isProcessingLinkedIn ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Importing...
-                </>
-              ) : (
-                <>
-                  <LinkedinIcon className="mr-2 h-4 w-4" />
-                  Import from LinkedIn
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
-};
-
-export default CreateResumeDialog;
+}
