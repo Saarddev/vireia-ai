@@ -16,7 +16,10 @@ export const summarizeText = async (text: string): Promise<string> => {
       }
     });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase function error:', error);
+      throw error;
+    }
     
     let summary = data?.summary || '';
     
@@ -60,10 +63,11 @@ export const summarizeText = async (text: string): Promise<string> => {
       .replace(/•\s+•/g, '•')
       .replace(/^\n+|\n+$/g, '');
     
+    console.log('Summarized text:', summary);
     return summary;
   } catch (error) {
     console.error('Error summarizing text:', error);
     toast.error('Failed to summarize text. Please try again.');
-    return '';
+    return text;
   }
 };

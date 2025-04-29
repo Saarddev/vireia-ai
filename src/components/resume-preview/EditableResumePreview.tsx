@@ -50,17 +50,25 @@ export const EditableContent: React.FC<EditableContentProps> = ({
   const formatContent = (text: string) => {
     if (!text) return null;
 
-    if (text.includes('•') || text.includes('\n')) {
+    if (text.includes('•') || text.includes('-') || text.includes('\n')) {
+      // Transform the text to properly handle bullet points from both • and - characters
+      const lines = text.split('\n');
+      
       return (
-        <ul className="pl-6 space-y-2 list-none">
-          {text.split('\n').map((line, idx) => {
-            const bulletPoint = line.replace(/^•\s*/, '').trim();
-            if (!bulletPoint) return null;
+        <ul className="pl-6 space-y-1 list-disc">
+          {lines.map((line, idx) => {
+            // Clean the line from bullet point characters
+            let cleanedLine = line.trim();
+            if (cleanedLine.startsWith('•') || cleanedLine.startsWith('-')) {
+              cleanedLine = cleanedLine.substring(1).trim();
+            }
+            
+            // Skip empty lines
+            if (!cleanedLine) return null;
             
             return (
-              <li key={idx} className="relative flex items-start group">
-                <span className="absolute left-[-1.5rem] top-[0.5rem] w-1.5 h-1.5 rounded-full bg-resume-purple"></span>
-                <span className="text-gray-800 leading-relaxed">{bulletPoint}</span>
+              <li key={idx} className="text-gray-800 leading-relaxed">
+                {cleanedLine}
               </li>
             );
           })}

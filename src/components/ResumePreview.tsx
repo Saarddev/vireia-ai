@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ModernTemplate from './resume-preview/ModernTemplate';
 import PreviewControls from './resume-preview/PreviewControls';
-import { ResumeData } from '@/types/resume';
+import { ResumeData } from '@/types/resume.d';
 
 // Function to extract all styles applied to an element and its descendants
 const getAllStyles = (element: Element): string => {
@@ -70,6 +70,10 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
     return '';
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   const handleDownloadPDF = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow || !resumeContentRef.current) {
@@ -121,6 +125,15 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
               body { margin: 0; }
               .resume-content { padding: 0 !important; }
             }
+            /* Ensure bullet points are rendered correctly */
+            ul.list-disc {
+              padding-left: 1.5rem;
+              list-style-type: disc;
+            }
+            ul.list-disc li {
+              display: list-item;
+              margin-bottom: 0.25rem;
+            }
           </style>
           ${settings.fontFamily ?
             `<link href="https://fonts.googleapis.com/css2?family=${settings.fontFamily}:wght@400;500;600;700&display=swap" rel="stylesheet">`
@@ -157,6 +170,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onDownload={handleDownloadPDF}
+        onPrint={handlePrint}
       >
         <span className="text-sm text-gray-600 ml-2">
           {Math.round(zoomLevel * 100)}%

@@ -35,6 +35,16 @@ export interface Skills {
   soft: string[];
 }
 
+export interface Project {
+  id: string;
+  title: string;
+  description: string;
+  technologies?: string[];
+  link?: string;
+  startDate: string;
+  endDate: string;
+}
+
 export interface ResumeData {
   personal: PersonalInfo;
   summary: string;
@@ -43,7 +53,7 @@ export interface ResumeData {
   skills: Skills;
   languages: string[];
   certifications: string[];
-  projects: string[];
+  projects: Project[];
 }
 
 export interface ResumeSettings {

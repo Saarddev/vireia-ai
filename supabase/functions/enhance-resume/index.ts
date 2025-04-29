@@ -255,24 +255,30 @@ function parseGeminiResponse(response: any, type: string) {
     }
     
     if (type === "summarize") {
-      // Ensure bullet points are formatted properly
+      // Convert text to bullet points if it's not already
       let summary = text.trim();
       
       // If there are no bullet points in the response, format as bullet points
       if (!summary.includes('•') && !summary.includes('-')) {
-        const lines = summary.split('\n').filter(line => line.trim().length > 0);
-        summary = lines.map(line => `• ${line.trim()}`).join('\n');
+        const sentences = summary
+          .split(/[.!?]\s+/)
+          .filter(line => line.trim().length > 0)
+          .map(line => line.trim())
+          .filter(line => line.length > 0);
+        
+        summary = sentences.map(line => `• ${line}`).join('\n');
+      } else {
+        // If bullet points exist but need formatting
+        summary = summary
+          .replace(/[-*]\s+/g, '• ') // Replace markdown bullets with •
+          .split('\n')
+          .map(line => line.trim())
+          .filter(line => line.length > 0) // Remove empty lines
+          .map(line => line.startsWith('•') ? line : `• ${line}`) // Ensure each line starts with a bullet
+          .join('\n');
       }
       
-      // Clean up formatting to ensure consistent bullets
-      summary = summary
-        .replace(/[-*]\s+/g, '• ') // Replace markdown bullets with •
-        .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0) // Remove empty lines
-        .map(line => line.startsWith('•') ? line : `• ${line}`) // Ensure each line starts with a bullet
-        .join('\n');
-      
+      console.log('Formatted summary:', summary);
       return { summary };
     }
     
