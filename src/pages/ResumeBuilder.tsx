@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -211,7 +210,7 @@ const ResumeBuilder = () => {
             data={resumeData.summary}
             onChange={(data) => handleDataChange("summary", data)}
             isGenerating={isGenerating}
-            onGenerateWithAI={handleGenerateWithAI}
+            onGenerateWithAI={() => handleGenerateWithAI("summary")}
           />
         );
       case "experience":
@@ -302,9 +301,8 @@ const ResumeBuilder = () => {
               aiEnabled={aiEnabled}
               aiGenerating={isGenerating}
               onSectionChange={setActiveSection}
-              onGenerateWithAI={() => {
-                handleGenerateWithAI(activeSection);
-                return Promise.resolve();
+              onGenerateWithAI={async () => {
+                await handleGenerateWithAI(activeSection);
               }}
             />
           </Sidebar>

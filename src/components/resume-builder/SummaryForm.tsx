@@ -45,12 +45,20 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
   const formatSummaryPreview = (text: string) => {
     if (!text) return <p className="text-gray-400 italic">No summary yet</p>;
 
-    if (text.includes('•') || text.includes('\n')) {
+    if (text.includes('•') || text.includes('-') || text.includes('\n')) {
       // This is a bulleted list, render with proper HTML
+      const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+      
       return (
-        <ul className="list-none pl-5 space-y-1 mt-2">
-          {text.split('\n').map((line, idx) => {
-            const bulletText = line.replace(/^•\s*/, '').trim();
+        <ul className="list-disc pl-5 space-y-1 mt-2">
+          {lines.map((line, idx) => {
+            let bulletText = line;
+            
+            // Remove bullet characters if they exist
+            if (bulletText.startsWith('•') || bulletText.startsWith('-')) {
+              bulletText = bulletText.substring(1).trim();
+            }
+            
             if (!bulletText) return null;
             
             return (
@@ -92,8 +100,21 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
               variant="outline" 
               className="mt-2 border-resume-purple text-resume-purple hover:bg-resume-purple hover:text-white transition-all duration-300"
               onClick={async () => {
-                const result = await onGenerateWithAI();
-                return result;
+                try {
+                  const result = await onGenerateWithAI();
+                  if (result) {
+                    form.setValue("summary", result);
+                    onChange(result);
+                  }
+                } catch (error) {
+                  console.error("Error generating summary:", error);
+                  toast({
+                    title: "Error",
+                    description: "Failed to generate summary. Please try again.",
+                    variant: "destructive"
+                  });
+                }
+                return "";
               }}
               disabled={isGenerating}
             >
@@ -129,13 +150,21 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
                   <div className={`absolute -top-12 right-0 z-10 transform transition-opacity transition-transform duration-300 ease-out ${showToolkit ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
                     <AIHoverToolkit 
                       onComplete={async () => {
-                        const result = await onGenerateWithAI();
-                        return result;
+                        try {
+                          const result = await onGenerateWithAI();
+                          if (result) {
+                            form.setValue("summary", result);
+                            onChange(result);
+                          }
+                        } catch (error) {
+                          console.error("Error generating summary:", error);
+                        }
+                        return "";
                       }}
                       onAddChanges={() => {
                         const currentText = form.getValues("summary");
-                        form.setValue("summary", currentText + "\n");
-                        onChange(currentText + "\n");
+                        form.setValue("summary", currentText + "\n• ");
+                        onChange(currentText + "\n• ");
                         return Promise.resolve("");
                       }}
                     />

@@ -9,7 +9,7 @@ interface EditableContentProps {
   content: string;
   onSave: (content: string) => void;
   className?: string;
-  onGenerateWithAI?: () => Promise<void>;
+  onGenerateWithAI?: () => Promise<string>;
 }
 
 export const EditableContent: React.FC<EditableContentProps> = ({ 
@@ -50,12 +50,13 @@ export const EditableContent: React.FC<EditableContentProps> = ({
   const formatContent = (text: string) => {
     if (!text) return null;
 
+    // Check if the text contains bullet points or multiple lines
     if (text.includes('•') || text.includes('-') || text.includes('\n')) {
       // Transform the text to properly handle bullet points from both • and - characters
       const lines = text.split('\n');
       
       return (
-        <ul className="pl-6 space-y-1 list-disc">
+        <ul className="list-disc pl-6 space-y-1">
           {lines.map((line, idx) => {
             // Clean the line from bullet point characters
             let cleanedLine = line.trim();

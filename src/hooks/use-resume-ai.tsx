@@ -10,8 +10,23 @@ export function useResumeAI() {
   const generateSummary = async (experience: string[], skills: string[]): Promise<string> => {
     setIsGenerating(true);
     try {
+      // Validate input data
+      if (!Array.isArray(experience) || experience.length === 0) {
+        toast({
+          title: "Missing Experience",
+          description: "Please add some work experience before generating a summary.",
+        });
+        return "";
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Authentication required');
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to use AI features",
+        });
+        throw new Error('Authentication required');
+      }
 
       const { data, error } = await supabase.functions.invoke('enhance-resume', {
         body: { 
@@ -27,6 +42,11 @@ export function useResumeAI() {
       }
       
       if (!data || !data.summary) {
+        toast({
+          title: "Error",
+          description: "No summary generated. Please try again.",
+          variant: "destructive"
+        });
         throw new Error('Invalid response from AI service');
       }
       
@@ -53,8 +73,23 @@ export function useResumeAI() {
   const extractSkills = async (experience: string[]) => {
     setIsGenerating(true);
     try {
+      // Validate input data
+      if (!Array.isArray(experience) || experience.length === 0) {
+        toast({
+          title: "Missing Experience",
+          description: "Please add some work experience before extracting skills.",
+        });
+        return null;
+      }
+      
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Authentication required');
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to use AI features",
+        });
+        throw new Error('Authentication required');
+      }
 
       const { data, error } = await supabase.functions.invoke('enhance-resume', {
         body: { 
@@ -98,8 +133,22 @@ export function useResumeAI() {
   const improveDescription = async (description: string): Promise<string> => {
     setIsGenerating(true);
     try {
+      if (!description || description.trim() === '') {
+        toast({
+          title: "Missing Content",
+          description: "Please add some content before improving.",
+        });
+        return "";
+      }
+      
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Authentication required');
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to use AI features",
+        });
+        throw new Error('Authentication required');
+      }
 
       const { data, error } = await supabase.functions.invoke('enhance-resume', {
         body: { 

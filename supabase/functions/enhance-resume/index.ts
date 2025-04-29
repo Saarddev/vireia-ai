@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
@@ -316,25 +317,52 @@ serve(async (req) => {
   }
 
   try {
-    const { type, text, linkedinData, resumeTemplate, experience, skills, description, educationContext, experienceContext } = await req.json();
+    if (!GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY is not set. Please configure your environment variables.");
+    }
+
+    const requestData = await req.json().catch(err => {
+      throw new Error(`Invalid JSON in request body: ${err.message}`);
+    });
+    
+    const { type, text, linkedinData, resumeTemplate, experience, skills, description, educationContext, experienceContext } = requestData;
+    
+    if (!type) {
+      throw new Error("Missing 'type' parameter in request");
+    }
     
     let prompt = "";
     let requestType = type || 'full-resume';
     
     if (type === "summarize") {
+      if (!text) {
+        throw new Error("Missing 'text' parameter for summarization");
+      }
       prompt = generateSummarizationPrompt(text);
     } else if (requestType.startsWith('education-')) {
       prompt = generateEducationPrompt(requestType, educationContext);
     } else if (requestType === "summary") {
+      if (!Array.isArray(experience) || experience.length === 0) {
+        throw new Error("Insufficient experience data for summary generation");
+      }
       prompt = generateSummaryPrompt(experience, skills);
     } else if (requestType === "skills") {
+      if (!Array.isArray(experience) || experience.length === 0) {
+        throw new Error("Insufficient experience data for skills extraction");
+      }
       prompt = generateSkillsPrompt(experience);
     } else if (requestType === "improve") {
+      if (!description) {
+        throw new Error("Missing 'description' parameter for improvement");
+      }
       prompt = generateImprovementPrompt(description);
     } else if (requestType === "experience-description") {
       prompt = generateExperiencePrompt(experienceContext);
     } else {
       // Full resume enhancement
+      if (!linkedinData) {
+        throw new Error("Missing 'linkedinData' parameter for resume enhancement");
+      }
       prompt = generateFullResumePrompt(linkedinData, resumeTemplate || "modern");
     }
 
