@@ -32,7 +32,7 @@ export function DatePicker({
   return (
     <div className={cn("grid gap-2", className)}>
       <Calendar
-        mode={mode}
+        mode={mode as any}
         selected={date}
         onSelect={onSelect}
         initialFocus={initialFocus}

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Form,
@@ -31,7 +30,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
   onGenerateWithAI
 }) => {
   const [experiences, setExperiences] = useState(data);
-  const [openFields, setOpenFields] = useState<Record<number, boolean>>({});
+  const [openFields, setOpenFields] = useState<Record<number | string, boolean>>({});
   const [unsavedChanges, setUnsavedChanges] = useState(false);
 
   useEffect(() => {
