@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader, FileText, Sparkles } from "lucide-react";
+import { toast } from 'sonner';
 
 interface TailorResumeModalProps {
   isOpen: boolean;
@@ -26,18 +27,33 @@ const TailorResumeModal: React.FC<TailorResumeModalProps> = ({
   isSubmitting
 }) => {
   const [jobDescription, setJobDescription] = useState('');
+  const [error, setError] = useState('');
   
   const handleSubmit = async () => {
     if (jobDescription.trim().length < 50) {
-      return; // Job description is too short to be useful
+      setError('Please enter a more detailed job description (at least 50 characters).');
+      return;
     }
     
-    await onSubmit(jobDescription);
+    setError('');
+    try {
+      await onSubmit(jobDescription);
+      // Don't clear the job description here in case it fails
+      // We'll clear it on successful completion in the parent component
+    } catch (err: any) {
+      console.error('Error in tailoring resume:', err);
+      toast.error(`Failed to tailor resume: ${err.message || 'Unknown error'}`);
+    }
+  };
+
+  const handleClose = () => {
     setJobDescription('');
+    setError('');
+    onClose();
   };
   
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -60,12 +76,17 @@ const TailorResumeModal: React.FC<TailorResumeModalProps> = ({
               placeholder="Paste the full job description here (minimum 50 characters)..."
               className="min-h-[200px] resize-none"
               value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
+              onChange={(e) => {
+                setJobDescription(e.target.value);
+                if (error && e.target.value.trim().length >= 50) {
+                  setError('');
+                }
+              }}
               disabled={isSubmitting}
             />
-            {jobDescription.trim().length > 0 && jobDescription.trim().length < 50 && (
+            {error && (
               <p className="text-xs text-red-500">
-                Please enter a more detailed job description (at least 50 characters).
+                {error}
               </p>
             )}
           </div>
@@ -88,7 +109,7 @@ const TailorResumeModal: React.FC<TailorResumeModalProps> = ({
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+          <Button variant="outline" onClick={handleClose} disabled={isSubmitting}>
             Cancel
           </Button>
           <Button 

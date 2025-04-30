@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
+import { toast as sonnerToast } from 'sonner';
 
 export function useResumeAI() {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -28,6 +29,7 @@ export function useResumeAI() {
         throw new Error('Authentication required');
       }
 
+      console.log("Calling enhance-resume with summary type", { experience, skills });
       const { data, error } = await supabase.functions.invoke('enhance-resume', {
         body: { 
           type: 'summary',
@@ -42,6 +44,7 @@ export function useResumeAI() {
       }
       
       if (!data || !data.summary) {
+        console.error("Invalid response from AI service:", data);
         toast({
           title: "Error",
           description: "No summary generated. Please try again.",
@@ -50,8 +53,7 @@ export function useResumeAI() {
         throw new Error('Invalid response from AI service');
       }
       
-      toast({
-        title: "Summary Generated",
+      sonnerToast.success("Summary Generated", {
         description: "Your professional summary has been generated."
       });
       
@@ -91,6 +93,7 @@ export function useResumeAI() {
         throw new Error('Authentication required');
       }
 
+      console.log("Calling enhance-resume with skills type", { experience });
       const { data, error } = await supabase.functions.invoke('enhance-resume', {
         body: { 
           type: 'skills',
@@ -104,11 +107,11 @@ export function useResumeAI() {
       }
       
       if (!data || (!data.technical && !data.soft)) {
+        console.error("Invalid skill data from AI service:", data);
         throw new Error('Invalid skill data from AI service');
       }
       
-      toast({
-        title: "Skills Extracted",
+      sonnerToast.success("Skills Extracted", {
         description: `Found ${(data.technical?.length || 0) + (data.soft?.length || 0)} skills from your experience.`
       });
       
@@ -150,6 +153,7 @@ export function useResumeAI() {
         throw new Error('Authentication required');
       }
 
+      console.log("Calling enhance-resume with improve type", { description: description.slice(0, 50) + '...' });
       const { data, error } = await supabase.functions.invoke('enhance-resume', {
         body: { 
           type: 'improve',
@@ -163,11 +167,11 @@ export function useResumeAI() {
       }
       
       if (!data || !data.improved) {
+        console.error("Invalid response from AI service:", data);
         throw new Error('Invalid response from AI service');
       }
       
-      toast({
-        title: "Description Improved",
+      sonnerToast.success("Description Improved", {
         description: "Your job description has been enhanced."
       });
       

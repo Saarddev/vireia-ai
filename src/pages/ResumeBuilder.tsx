@@ -220,9 +220,13 @@ const ResumeBuilder = () => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error from edge function:', error);
+        throw new Error(`Edge function error: ${error.message || error}`);
+      }
       
       if (!data || !data.tailoredResume) {
+        console.error('Invalid response from tailor function:', data);
         throw new Error('Failed to get tailored resume data');
       }
 
@@ -237,6 +241,9 @@ const ResumeBuilder = () => {
       // Save the tailored resume
       await handleSave();
       
+      // Close the modal on success
+      setTailorModalOpen(false);
+      
     } catch (error: any) {
       console.error('Error tailoring resume:', error);
       toast({
@@ -246,7 +253,6 @@ const ResumeBuilder = () => {
       });
     } finally {
       setIsTailoring(false);
-      setTailorModalOpen(false);
     }
   };
 

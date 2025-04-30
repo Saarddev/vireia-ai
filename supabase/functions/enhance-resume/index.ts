@@ -249,7 +249,8 @@ Your task:
 6. Keep the tailored resume authentic to the person's experience (no fabrication)
 7. Prioritize skills and experience most relevant to this position
 
-Return a complete JSON with the same structure as the input resume, but with optimized content:
+Return a complete JSON with the same structure as the input resume, but with optimized content.
+The JSON should follow this exact structure:
 {
   "personal": { same structure as input },
   "summary": "tailored summary",
@@ -259,15 +260,22 @@ Return a complete JSON with the same structure as the input resume, but with opt
   "languages": [ same as input ],
   "certifications": [ same as input ],
   "projects": [ tailored if relevant or same as input ]
-}`;
+}
+
+IMPORTANT: Return ONLY valid JSON with no markdown formatting or explanatory text.`;
 }
 
 function parseGeminiResponse(response: any, type: string) {
+  console.log("Parsing Gemini response for type:", type);
+  console.log("Response status:", response.status);
+  
   if (!response?.candidates?.[0]?.content?.parts?.[0]?.text) {
+    console.error("Invalid response format:", JSON.stringify(response));
     throw new Error('Invalid response format from Gemini API');
   }
   
   const text = response.candidates[0].content.parts[0].text;
+  console.log("Got text response of length:", text.length);
   
   try {
     if (type === "experience-description") {
@@ -316,18 +324,31 @@ function parseGeminiResponse(response: any, type: string) {
     }
     
     if (type === "skills") {
-      const skillsMatch = text.match(/\{[\s\S]*\}/);
-      if (skillsMatch) {
-        return JSON.parse(skillsMatch[0]);
+      // Look for JSON pattern in the response
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          return JSON.parse(jsonMatch[0]);
+        } catch (e) {
+          console.error("Failed to parse skills JSON:", jsonMatch[0]);
+          throw new Error('Invalid JSON format in skills response');
+        }
       }
       throw new Error('No valid JSON found in skills response');
     }
     
     if (type === "tailor-resume") {
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      // Extract JSON from the response - the AI might wrap it in code blocks or add explanatory text
+      const jsonMatch = text.match(/(\{[\s\S]*\})/);
       if (jsonMatch) {
-        const tailoredResume = JSON.parse(jsonMatch[0]);
-        return { tailoredResume };
+        try {
+          const tailoredResume = JSON.parse(jsonMatch[1]);
+          console.log("Successfully parsed tailored resume");
+          return { tailoredResume };
+        } catch (e) {
+          console.error("Failed to parse tailor-resume JSON:", jsonMatch[1]);
+          throw new Error('Invalid JSON format in tailor-resume response');
+        }
       }
       throw new Error('No valid JSON found in tailor-resume response');
     }
@@ -335,14 +356,19 @@ function parseGeminiResponse(response: any, type: string) {
     // For full resume enhancement
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      const parsedResume = JSON.parse(jsonMatch[0]);
-      
-      // Ensure projects array exists
-      if (!parsedResume.projects) {
-        parsedResume.projects = [];
+      try {
+        const parsedResume = JSON.parse(jsonMatch[0]);
+        
+        // Ensure projects array exists
+        if (!parsedResume.projects) {
+          parsedResume.projects = [];
+        }
+        
+        return { enhancedResume: parsedResume };
+      } catch (e) {
+        console.error("Failed to parse resume JSON:", jsonMatch[0]);
+        throw new Error('Invalid JSON format in resume enhancement response');
       }
-      
-      return { enhancedResume: parsedResume };
     }
     
     throw new Error('No valid JSON found in response');
@@ -359,13 +385,19 @@ serve(async (req) => {
   }
 
   try {
+    // Enable more detailed request logging
+    console.log(`Received request: ${req.method} with URL: ${req.url}`);
+    
     if (!GEMINI_API_KEY) {
       throw new Error("GEMINI_API_KEY is not set. Please configure your environment variables.");
     }
 
     const requestData = await req.json().catch(err => {
+      console.error("Invalid JSON in request body:", err);
       throw new Error(`Invalid JSON in request body: ${err.message}`);
     });
+    
+    console.log("Request data type:", requestData.type);
     
     const { type, text, linkedinData, resumeTemplate, experience, skills, description, educationContext, experienceContext, resumeData, jobDescription } = requestData;
     
@@ -380,6 +412,7 @@ serve(async (req) => {
       if (!text) {
         throw new Error("Missing 'text' parameter for summarization");
       }
+      console.log("Generating summary for text of length:", text.length);
       prompt = generateSummarizationPrompt(text);
     } else if (requestType.startsWith('education-')) {
       prompt = generateEducationPrompt(requestType, educationContext);
@@ -404,6 +437,7 @@ serve(async (req) => {
       if (!resumeData || !jobDescription) {
         throw new Error("Missing 'resumeData' or 'jobDescription' parameter for resume tailoring");
       }
+      console.log("Tailoring resume with job description length:", jobDescription.length);
       prompt = generateTailorResumePrompt(resumeData, jobDescription);
     } else {
       // Full resume enhancement
@@ -423,7 +457,13 @@ serve(async (req) => {
       body: JSON.stringify({
         contents: [{
           parts: [{ text: prompt }]
-        }]
+        }],
+        generationConfig: {
+          temperature: 0.2,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 8192,
+        }
       }),
     });
 
@@ -434,16 +474,12 @@ serve(async (req) => {
     }
 
     const data = await response.json();
+    console.log("Gemini API response received successfully");
+    
     const result = parseGeminiResponse(data, requestType);
     
     console.log(`Successfully generated ${requestType}`);
     
-    if (type === "summarize") {
-      return new Response(JSON.stringify({ summary: result.summary }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
