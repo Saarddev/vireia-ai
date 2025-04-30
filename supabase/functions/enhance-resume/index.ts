@@ -35,27 +35,21 @@ As a thoughtful resume writer with empathy for job seekers, help create a warm, 
 4. Use natural language that resonates with both the person and potential employers
 
 Current experience context:
-${experience && experience.length > 0 ? experience.join('\n') : 'Not provided'}
+${experience ? experience.join('\n') : 'Not provided'}
 
 Skills highlight:
-${skills && skills.length > 0 ? skills.join(', ') : 'Not provided'}
+${skills ? skills.join(', ') : 'Not provided'}
 
-Write a brief, authentic summary that feels conversational and human while still highlighting professional achievements. Format your response as 4-6 bullet points, each starting with "• " (bullet point symbol).
+Write a brief, authentic summary that feels conversational and human while still highlighting professional achievements. Avoid corporate jargon when possible. Show the person behind the professional.
 
-Each bullet point should:
-- Start with an action verb
-- Highlight a specific achievement or skill area
-- Be concise (1-2 lines each)
-- Be formatted for ATS scanning
-
-Return only the bullet points, one per line.`;
+Return only the summary text.`;
 }
 
 function generateSkillsPrompt(experience: string[]) {
   return `
 Extract technical and soft skills from the following experience, focusing on what makes this person unique:
 
-${experience && experience.length > 0 ? experience.join('\n') : 'Not provided'}
+${experience ? experience.join('\n') : 'Not provided'}
 
 Return as JSON in this format - be specific and include skills that reveal both professional expertise and personal strengths:
 {
@@ -238,12 +232,10 @@ Return in format: "MM YYYY - MM YYYY"`;
 
 function parseGeminiResponse(response: any, type: string) {
   if (!response?.candidates?.[0]?.content?.parts?.[0]?.text) {
-    console.error('Invalid response format from Gemini API:', JSON.stringify(response));
     throw new Error('Invalid response format from Gemini API');
   }
   
   const text = response.candidates[0].content.parts[0].text;
-  console.log(`Raw response for ${type}:`, text.substring(0, 100) + '...');
   
   try {
     if (type === "experience-description") {
@@ -292,42 +284,11 @@ function parseGeminiResponse(response: any, type: string) {
     }
     
     if (type === "skills") {
-      // Handle both JSON format and text format
-      try {
-        // First, try to parse as complete JSON
-        const jsonData = JSON.parse(text);
-        if (jsonData.technical && jsonData.soft) {
-          return jsonData;
-        }
-      } catch (e) {
-        // If that fails, look for a JSON object within the text
-        const skillsMatch = text.match(/\{[\s\S]*\}/);
-        if (skillsMatch) {
-          try {
-            const jsonData = JSON.parse(skillsMatch[0]);
-            if (jsonData.technical || jsonData.soft) {
-              return {
-                technical: jsonData.technical || [],
-                soft: jsonData.soft || []
-              };
-            }
-          } catch (innerError) {
-            console.error('Error parsing JSON in skills match:', innerError);
-          }
-        }
+      const skillsMatch = text.match(/\{[\s\S]*\}/);
+      if (skillsMatch) {
+        return JSON.parse(skillsMatch[0]);
       }
-      
-      // If all else fails, attempt to extract skill lists from text
-      console.error('Failed to parse skills as JSON, attempting text extraction');
-      const technicalMatch = text.match(/technical["']?: \[(.*?)\]/s);
-      const softMatch = text.match(/soft["']?: \[(.*?)\]/s);
-      
-      const technical = technicalMatch ? 
-        technicalMatch[1].split(',').map(s => s.trim().replace(/"/g, '').replace(/'/g, '')) : [];
-      const soft = softMatch ? 
-        softMatch[1].split(',').map(s => s.trim().replace(/"/g, '').replace(/'/g, '')) : [];
-      
-      return { technical, soft };
+      throw new Error('No valid JSON found in skills response');
     }
     
     // For full resume enhancement
@@ -343,32 +304,27 @@ function parseGeminiResponse(response: any, type: string) {
       return { enhancedResume: parsedResume };
     }
     
-    throw new Error('No valid JSON or expected data format found in response');
+    throw new Error('No valid JSON found in response');
   } catch (error) {
     console.error('Error parsing Gemini response:', error);
-    console.error('Raw text that failed to parse:', text);
     throw new Error('Failed to parse the AI-generated data');
   }
 }
 
 serve(async (req) => {
-  // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Check if API key is set
     if (!GEMINI_API_KEY) {
       throw new Error("GEMINI_API_KEY is not set. Please configure your environment variables.");
     }
 
-    // Parse request body
     const requestData = await req.json().catch(err => {
       throw new Error(`Invalid JSON in request body: ${err.message}`);
     });
     
-    // Extract parameters from request
     const { type, text, linkedinData, resumeTemplate, experience, skills, description, educationContext, experienceContext } = requestData;
     
     if (!type) {
@@ -378,7 +334,6 @@ serve(async (req) => {
     let prompt = "";
     let requestType = type || 'full-resume';
     
-    // Generate appropriate prompt based on request type
     if (type === "summarize") {
       if (!text) {
         throw new Error("Missing 'text' parameter for summarization");
@@ -390,7 +345,7 @@ serve(async (req) => {
       if (!Array.isArray(experience) || experience.length === 0) {
         throw new Error("Insufficient experience data for summary generation");
       }
-      prompt = generateSummaryPrompt(experience, skills || []);
+      prompt = generateSummaryPrompt(experience, skills);
     } else if (requestType === "skills") {
       if (!Array.isArray(experience) || experience.length === 0) {
         throw new Error("Insufficient experience data for skills extraction");
@@ -412,9 +367,7 @@ serve(async (req) => {
     }
 
     console.log(`Generating ${requestType} with Gemini API`);
-    console.log('Prompt preview:', prompt.substring(0, 200) + '...');
 
-    // Call Gemini API
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
@@ -423,39 +376,21 @@ serve(async (req) => {
       body: JSON.stringify({
         contents: [{
           parts: [{ text: prompt }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 1024,
-        }
+        }]
       }),
     });
 
-    // Handle API response
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Gemini API error (${response.status}):`, errorText);
-      
-      try {
-        // Try to parse as JSON for more detailed error
-        const errorJson = JSON.parse(errorText);
-        const errorMessage = errorJson.error?.message || `Status ${response.status}`;
-        throw new Error(`Gemini API error: ${errorMessage}`);
-      } catch (e) {
-        // If not JSON, use text
-        throw new Error(`Gemini API error: ${response.status} ${errorText.substring(0, 100)}`);
-      }
+      const errorData = await response.text();
+      console.error(`Gemini API error: ${response.status} ${errorData}`);
+      throw new Error(`Gemini API error: ${response.status} ${errorData}`);
     }
 
-    // Parse successful response
     const data = await response.json();
     const result = parseGeminiResponse(data, requestType);
     
     console.log(`Successfully generated ${requestType}`);
     
-    // Return appropriate response based on request type
     if (type === "summarize") {
       return new Response(JSON.stringify({ summary: result.summary }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -465,14 +400,9 @@ serve(async (req) => {
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-  } catch (error: any) {
-    // Handle errors
+  } catch (error) {
     console.error('Error in enhance-resume function:', error);
-    
-    return new Response(JSON.stringify({ 
-      error: error.message || "Unknown error occurred",
-      details: error.stack || "" 
-    }), {
+    return new Response(JSON.stringify({ error: error.message || "Unknown error occurred" }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

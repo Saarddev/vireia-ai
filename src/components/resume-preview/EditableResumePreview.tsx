@@ -52,7 +52,7 @@ export const EditableContent: React.FC<EditableContentProps> = ({
 
     // Check if the text contains bullet points or multiple lines
     if (text.includes('•') || text.includes('-') || text.includes('\n')) {
-      // Transform the text to properly handle bullet points
+      // Transform the text to properly handle bullet points from both • and - characters
       const lines = text.split('\n');
       
       return (

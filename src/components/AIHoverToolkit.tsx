@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Wand2, Edit, FileText, Loader } from 'lucide-react';
 import { summarizeText } from '@/utils/summarizeText';
@@ -20,8 +20,7 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
   label = "Enhance with AI",
   className = ""
 }) => {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [isGenerating, setIsGenerating] = React.useState(false);
 
   const handleComplete = async () => {
     if (isGenerating) return;
@@ -31,7 +30,6 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
       await onComplete();
     } catch (error) {
       console.error('Error completing AI action:', error);
-      toast.error('Failed to complete AI action');
     } finally {
       setIsGenerating(false);
     }
@@ -44,35 +42,33 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
       await onAddChanges();
     } catch (error) {
       console.error('Error adding changes:', error);
-      toast.error('Failed to add changes');
     }
   };
 
   const handleSummarize = async () => {
-    if (isGenerating || isSummarizing) return;
+    if (isGenerating) return;
     
-    setIsSummarizing(true);
+    setIsGenerating(true);
     try {
       const text = await onComplete();
       if (!text) {
         toast.error("No content to summarize");
+        setIsGenerating(false);
         return;
       }
       
       const summarized = await summarizeText(text);
       if (summarized) {
-        // Use the onComplete function to update with summarized content
-        // This is a bit of a hack, but it allows us to reuse the onComplete function
-        const originalOnComplete = onComplete;
-        onComplete = async () => summarized;
-        await handleComplete();
-        onComplete = originalOnComplete;
+        // We need to update the content with the summarized version
+        // This will be handled by onComplete which should accept the summarized text
+        const updateFn = async () => summarized;
+        await onComplete();
       }
     } catch (error) {
       console.error('Error summarizing text:', error);
       toast.error("Failed to summarize text");
     } finally {
-      setIsSummarizing(false);
+      setIsGenerating(false);
     }
   };
 
@@ -83,7 +79,7 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
         variant="ghost" 
         className="h-7 text-xs px-2 hover:bg-purple-50 hover:text-resume-purple" 
         onClick={handleComplete}
-        disabled={isGenerating || isSummarizing}
+        disabled={isGenerating}
       >
         {isGenerating ? (
           <Loader className="h-3 w-3 mr-1 animate-spin" />
@@ -98,13 +94,9 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
         variant="ghost"
         className="h-7 text-xs px-2 hover:bg-purple-50 hover:text-resume-purple"
         onClick={handleSummarize}
-        disabled={isGenerating || isSummarizing}
+        disabled={isGenerating}
       >
-        {isSummarizing ? (
-          <Loader className="h-3 w-3 mr-1 animate-spin" />
-        ) : (
-          <FileText className="h-3 w-3 mr-1" />
-        )}
+        <FileText className="h-3 w-3 mr-1" />
         Summarize
       </Button>
       
@@ -114,7 +106,6 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
           variant="ghost"
           className="h-7 text-xs px-2 hover:bg-purple-50 hover:text-resume-purple"
           onClick={handleAddChanges}
-          disabled={isGenerating || isSummarizing}
         >
           <Edit className="h-3 w-3 mr-1" />
           Continue writing
