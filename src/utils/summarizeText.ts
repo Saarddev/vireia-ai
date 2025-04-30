@@ -1,45 +1,73 @@
 
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-/**
- * Summarizes a text using AI through the Supabase Edge Function
- * @param text The text to summarize
- * @returns The summarized text or null if the operation failed
- */
-export const summarizeText = async (text: string): Promise<string | null> => {
+export const summarizeText = async (text: string): Promise<string> => {
   try {
-    if (!text || text.trim().length < 30) {
-      toast.error("Text is too short to summarize");
-      return null;
+    if (!text || text.trim() === '') {
+      toast.error('No content to summarize. Please add some text first.');
+      return '';
     }
-    
-    // Log the request to help debug
-    console.log('Summarizing text with length:', text.length);
-    
+
     const { data, error } = await supabase.functions.invoke('enhance-resume', {
-      body: { 
+      body: {
         type: 'summarize',
-        text: text.trim()
+        text
       }
     });
 
     if (error) {
-      console.error('Error from edge function:', error);
-      toast.error(`Summarization failed: ${error.message || "Unknown error"}`);
-      return null;
+      console.error('Supabase function error:', error);
+      throw error;
     }
     
-    if (!data || !data.summary) {
-      console.error('Invalid response format from edge function:', data);
-      toast.error("Received invalid response format");
-      return null;
+    let summary = data?.summary || '';
+    
+    if (!summary || summary.trim() === '') {
+      toast.error('AI could not generate a summary. Try with more detailed content.');
+      return text;
     }
     
-    return data.summary;
-  } catch (error: any) {
+    // Format the text into proper ATS-friendly bullet points
+    if (!summary.includes('•') && !summary.includes('-')) {
+      const sentences = summary
+        .split(/[.!?]\s+/)
+        .filter(s => s.trim().length > 0)
+        .map(s => {
+          // Ensure each bullet point starts with an action verb
+          let point = s.trim();
+          if (!/^[A-Z][a-z]+ed|^[A-Z][a-z]+ing|^[A-Z][a-z]+s\b/.test(point)) {
+            // If it doesn't start with an action verb, try to rephrase it
+            point = point.charAt(0).toUpperCase() + point.slice(1);
+          }
+          return point;
+        });
+      
+      if (sentences.length > 0) {
+        summary = sentences.map(s => `• ${s}`).join('\n');
+      }
+    }
+    
+    // Clean up and standardize bullet points
+    summary = summary
+      .replace(/•\s*/g, '• ') // Standardize bullet points
+      .replace(/[-*]\s+/g, '• ') // Replace markdown bullets with •
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
+      .map(line => line.startsWith('•') ? line : `• ${line}`)
+      .join('\n');
+    
+    // Clean up extra spaces and ensure no double bullets
+    summary = summary
+      .replace(/•\s+•/g, '•')
+      .replace(/^\n+|\n+$/g, '');
+    
+    console.log('Summarized text:', summary);
+    return summary;
+  } catch (error) {
     console.error('Error summarizing text:', error);
-    toast.error(`Failed to summarize: ${error.message || "Unknown error"}`);
-    return null;
+    toast.error('Failed to summarize text. Please try again.');
+    return text;
   }
 };

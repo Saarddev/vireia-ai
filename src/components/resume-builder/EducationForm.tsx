@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Form,
@@ -216,6 +217,8 @@ const EducationForm: React.FC<EducationFormProps> = ({
                       <div className={`absolute -top-12 right-0 z-10 transform transition-opacity transition-transform duration-300 ease-out ${hoverToolkitField === "institution" ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
                         <AIHoverToolkit 
                           onComplete={async () => generateWithAI("institution")}
+                          icon={<Building2 className="h-3.5 w-3.5" />}
+                          label="Generate Institution"
                         />
                       </div>
                       <FormControl>
@@ -238,6 +241,8 @@ const EducationForm: React.FC<EducationFormProps> = ({
                       <div className={`absolute -top-12 right-0 z-10 transform transition-opacity transition-transform duration-300 ease-out ${hoverToolkitField === "degree" ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
                         <AIHoverToolkit 
                           onComplete={async () => generateWithAI("degree")}
+                          icon={<BookOpen className="h-3.5 w-3.5" />}
+                          label="Generate Degree"
                         />
                       </div>
                       <FormControl>
@@ -346,6 +351,8 @@ const EducationForm: React.FC<EducationFormProps> = ({
                     <div className={`absolute -top-12 right-0 z-10 transform transition-opacity transition-transform duration-300 ease-out ${hoverToolkitField === "description" ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
                       <AIHoverToolkit 
                         onComplete={async () => generateWithAI("description")}
+                        icon={<Wand2 className="h-3.5 w-3.5" />}
+                        label="Generate Description"
                       />
                     </div>
                     <FormControl>

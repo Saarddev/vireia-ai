@@ -21,7 +21,6 @@ import { useResumeData } from '@/hooks/use-resume-data';
 import { useResumeAI } from '@/hooks/use-resume-ai';
 import { supabase } from '@/integrations/supabase/client';
 import ProjectForm from '@/components/resume-builder/ProjectForm';
-import TailorResumeModal from '@/components/resume-builder/TailorResumeModal';
 import { Paintbrush } from 'lucide-react';
 
 interface AISuggestionData {
@@ -37,8 +36,6 @@ const ResumeBuilder = () => {
   const [activeSection, setActiveSection] = useState("personal");
   const [aiEnabled, setAiEnabled] = useState(true);
   const [aiSuggestion, setAiSuggestion] = useState<AISuggestionData | null>(null);
-  const [tailorModalOpen, setTailorModalOpen] = useState(false);
-  const [isTailoring, setIsTailoring] = useState(false);
 
   const {
     isLoading,
@@ -198,69 +195,6 @@ const ResumeBuilder = () => {
     return "";
   };
 
-  // Handle tailoring the resume based on job description
-  const handleTailorResume = async (jobDescription: string): Promise<void> => {
-    if (!jobDescription.trim() || !aiEnabled || !resumeId) {
-      toast({
-        title: "Cannot Tailor Resume",
-        description: "Please provide a job description and ensure AI is enabled.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsTailoring(true);
-    try {
-      // Call the edge function to tailor the resume
-      const { data, error } = await supabase.functions.invoke('enhance-resume', {
-        body: {
-          type: 'tailor-resume',
-          resumeData,
-          jobDescription,
-        }
-      });
-
-      if (error) {
-        console.error('Error from edge function:', error);
-        throw new Error(`Edge function error: ${error.message || error}`);
-      }
-      
-      if (!data || !data.tailoredResume) {
-        console.error('Invalid response from tailor function:', data);
-        throw new Error('Failed to get tailored resume data');
-      }
-
-      // Update the resume with the tailored data
-      setResumeData(data.tailoredResume);
-      
-      toast({
-        title: "Resume Tailored Successfully",
-        description: "Your resume has been optimized for this job description."
-      });
-      
-      // Save the tailored resume
-      await handleSave();
-      
-      // Close the modal on success
-      setTailorModalOpen(false);
-      
-    } catch (error: any) {
-      console.error('Error tailoring resume:', error);
-      toast({
-        title: "Tailoring Failed",
-        description: error.message || "Failed to tailor your resume. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsTailoring(false);
-    }
-  };
-
-  // Fix the type error for onExtractSkills - ensure it returns Promise<void> instead of Promise<string>
-  const handleExtractSkills = async (): Promise<void> => {
-    await handleGenerateWithAI("skills");
-  };
-
   const renderActiveForm = () => {
     switch (activeSection) {
       case "personal":
@@ -303,7 +237,10 @@ const ResumeBuilder = () => {
             data={resumeData.skills}
             onChange={(data) => handleDataChange("skills", data)}
             isGenerating={isGenerating}
-            onExtractSkills={handleExtractSkills}
+            onExtractSkills={async () => {
+              await handleGenerateWithAI("skills");
+              return "";
+            }}
           />
         );
       case "projects":
@@ -367,7 +304,6 @@ const ResumeBuilder = () => {
               onGenerateWithAI={async () => {
                 await handleGenerateWithAI(activeSection);
               }}
-              onOpenTailorModal={() => setTailorModalOpen(true)}
             />
           </Sidebar>
 
@@ -418,13 +354,6 @@ const ResumeBuilder = () => {
             </div>
           </SidebarInset>
         </div>
-
-        <TailorResumeModal
-          isOpen={tailorModalOpen}
-          onClose={() => setTailorModalOpen(false)}
-          onSubmit={handleTailorResume}
-          isSubmitting={isTailoring}
-        />
       </div>
     </SidebarProvider>
   );

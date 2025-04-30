@@ -1,179 +1,225 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Check, X, Wand2, Loader, FileText } from "lucide-react";
-import AITabContinuation from '@/components/AITabContinuation';
-import { summarizeText } from '@/utils/summarizeText';
+import { cn } from "@/lib/utils";
+import AIHoverToolkit from "@/components/AIHoverToolkit";
+import { Loader2 } from "lucide-react";
 
 interface EditableFieldProps {
   value: string;
   placeholder: string;
   className?: string;
-  onSave: (value: string) => void;
+  onSave: (val: string) => void;
   onGenerateWithAI?: () => Promise<string>;
-  minRows?: number;
+  autoFocus?: boolean;
   maxRows?: number;
+  minRows?: number;
   inputStyle?: React.CSSProperties;
   outputStyle?: React.CSSProperties;
-  renderHTML?: (text: string) => string;
 }
 
 const EditableField: React.FC<EditableFieldProps> = ({
   value,
   placeholder,
-  className = '',
+  className,
   onSave,
   onGenerateWithAI,
+  autoFocus = false,
+  maxRows = 5,
   minRows = 1,
-  maxRows = 4,
   inputStyle = {},
-  outputStyle = {},
-  renderHTML
+  outputStyle = {}
 }) => {
   const [editing, setEditing] = useState(false);
-  const [editValue, setEditValue] = useState(value);
+  const [localValue, setLocalValue] = useState(value);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showToolkit, setShowToolkit] = useState(false);
+  const [streamingText, setStreamingText] = useState<string | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const handleEdit = () => {
-    setEditValue(value);
-    setEditing(true);
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  useEffect(() => {
+    if (editing && textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      const scrollHeight = textareaRef.current.scrollHeight;
+      const rowHeight = 20;
+      const maxHeight = rowHeight * maxRows;
+      const minHeight = rowHeight * minRows;
+      const newHeight = Math.max(Math.min(scrollHeight, maxHeight), minHeight);
+      textareaRef.current.style.height = newHeight + "px";
+    }
+  }, [editing, localValue, maxRows, minRows]);
+
+  const streamGeneratedText = (current: string, generated: string) => {
+    setStreamingText(current);
+    let i = 0;
+    function next() {
+      setStreamingText(current + generated.slice(0, i));
+      if (i < generated.length) {
+        i++;
+        setTimeout(next, 18);
+      } else {
+        setStreamingText(null);
+        setLocalValue(current + generated);
+      }
+    }
+    next();
   };
 
-  const handleCancel = () => {
-    setEditValue(value);
-    setEditing(false);
+  const handleAIComplete = async () => {
+    if (!onGenerateWithAI) return "";
+    setIsGenerating(true);
+    try {
+      const result = await onGenerateWithAI();
+      if (result) {
+        streamGeneratedText(localValue, result.replace(localValue, ""));
+      }
+      return "";
+    } catch (error) {
+      console.error("AI generation failed:", error);
+      return "";
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleAIContinue = async () => {
+    if (!onGenerateWithAI) return "";
+    setIsGenerating(true);
+    try {
+      const result = await onGenerateWithAI();
+      if (result && result.length > localValue.length) {
+        const added = result.slice(localValue.length);
+        streamGeneratedText(localValue, added);
+      }
+      return "";
+    } catch (error) {
+      console.error("AI continuation failed:", error);
+      return "";
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const startEdit = () => {
+    setEditing(true);
+    setTimeout(() => textareaRef.current?.focus(), 5);
   };
 
   const handleSave = () => {
-    onSave(editValue);
+    if (streamingText !== null) return;
     setEditing(false);
+    if (localValue !== value) onSave(localValue.trim());
   };
 
-  const handleGenerateWithAI = async () => {
-    if (!onGenerateWithAI) return "";
-
-    setIsGenerating(true);
-    try {
-      const generatedText = await onGenerateWithAI();
-      if (generatedText) {
-        setEditValue(generatedText);
-        return generatedText;
-      }
-    } catch (error) {
-      console.error('Error generating content:', error);
-    } finally {
-      setIsGenerating(false);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSave();
+    } else if (e.key === "Escape") {
+      setEditing(false);
+      setLocalValue(value);
     }
-    
-    return "";
-  };
-
-  const handleSummarize = async () => {
-    if (!editValue.trim()) return "";
-
-    setIsGenerating(true);
-    try {
-      const summarized = await summarizeText(editValue);
-      if (summarized) {
-        setEditValue(summarized);
-        return summarized;
-      }
-    } catch (error) {
-      console.error('Error summarizing content:', error);
-    } finally {
-      setIsGenerating(false);
-    }
-    
-    return "";
   };
 
   return (
-    <div className={`editable-field relative transition-all duration-200 ${editing ? 'editing' : ''}`}>
-      {editing ? (
-        <div className="edit-mode w-full">
-          <AITabContinuation
-            value={editValue}
-            onChange={setEditValue}
-            onGenerateWithAI={onGenerateWithAI} 
-            placeholder={placeholder}
-            className={`w-full py-1 px-2 border border-gray-300 rounded text-sm focus:border-resume-purple focus:ring-1 focus:ring-resume-purple outline-none transition-all duration-200 ${className}`}
-            minRows={minRows}
-            maxRows={maxRows}
-          />
-          <div className="flex items-center justify-end mt-1 gap-1">
-            {onGenerateWithAI && (
-              <>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleGenerateWithAI}
-                  className="text-xs h-7 px-2 text-resume-purple hover:bg-resume-purple/10"
-                  disabled={isGenerating}
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader className="h-3 w-3 mr-1 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Wand2 className="h-3 w-3 mr-1" />
-                      Enhance
-                    </>
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleSummarize}
-                  className="text-xs h-7 px-2 text-resume-purple hover:bg-resume-purple/10"
-                  disabled={isGenerating}
-                >
-                  <FileText className="h-3 w-3 mr-1" />
-                  Summarize
-                </Button>
-              </>
+    <div 
+      className={cn(
+        "relative w-full group transition-colors min-h-[20px]",
+        className
+      )}
+      onClick={startEdit}
+      onMouseEnter={() => setShowToolkit(true)}
+      onMouseLeave={() => setShowToolkit(false)}
+      onFocus={() => setShowToolkit(true)}
+      onBlur={e => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+          handleSave();
+        }
+      }}
+    >
+      {editing || streamingText !== null ? (
+        <div className="relative w-full">
+          <textarea
+            ref={textareaRef}
+            className={cn(
+              "block w-full px-1 py-0.5 text-inherit font-inherit rounded",
+              "border border-gray-200 focus:border-[#5d4dcd] focus:ring-1 focus:ring-[#5d4dcd]",
+              "bg-white/95 shadow-sm transition-all outline-0 resize-none",
+              isGenerating && "opacity-70"
             )}
+            value={streamingText !== null ? streamingText : localValue}
+            onChange={e => setLocalValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            readOnly={streamingText !== null}
+            style={{
+              fontFamily: "inherit",
+              fontSize: "inherit",
+              fontWeight: "inherit",
+              lineHeight: "inherit",
+              ...inputStyle
+            }}
+            autoFocus={autoFocus}
+            rows={minRows}
+          />
+          <div className="absolute -right-2 -top-7 z-20 flex gap-1 opacity-90 bg-white shadow-sm rounded-md px-1 py-0.5 animate-fade-in">
             <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={handleCancel}
-              className="text-xs h-7 px-2"
-            >
-              <X className="h-3 w-3 mr-1" />
-              Cancel
-            </Button>
-            <Button
-              type="button"
               variant="ghost"
               size="sm"
               onClick={handleSave}
-              className="text-xs h-7 px-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+              disabled={isGenerating}
+              className="h-5 text-xs px-2"
             >
-              <Check className="h-3 w-3 mr-1" />
-              Save
+              <span className="font-medium text-[#5d4dcd]">Save</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setEditing(false);
+                setLocalValue(value);
+              }}
+              disabled={isGenerating}
+              className="h-5 text-xs px-2"
+            >
+              <span className="text-gray-500">Cancel</span>
             </Button>
           </div>
-        </div>
-      ) : (
-        <div
-          className={`view-mode cursor-pointer py-0.5 rounded hover:bg-gray-50 transition-all ${className}`}
-          onClick={handleEdit}
-          style={outputStyle}
-        >
-          {value ? (
-            renderHTML ? (
-              <div dangerouslySetInnerHTML={{ __html: renderHTML(value) }} />
-            ) : (
-              value
-            )
-          ) : (
-            <span className="text-gray-400 italic">{placeholder}</span>
+          {onGenerateWithAI && (
+            <div className="absolute -right-2 -bottom-7 z-10 animate-fade-in">
+              <AIHoverToolkit
+                onComplete={handleAIComplete}
+                onAddChanges={handleAIContinue}
+                className="shadow-sm scale-90"
+              />
+            </div>
+          )}
+          {isGenerating && (
+            <span className="absolute -left-5 top-1 animate-spin text-[#5d4dcd]">
+              <Loader2 size={14} />
+            </span>
           )}
         </div>
+      ) : (
+        <span
+          tabIndex={0}
+          style={{
+            ...outputStyle,
+            fontSize: "inherit",
+            fontWeight: "inherit",
+            lineHeight: "inherit",
+          }}
+          className={cn(
+            "block w-full transition-colors duration-200",
+            "hover:bg-gray-50/50 focus:bg-gray-50/50 rounded px-1 py-0.5",
+            !value && "text-gray-400"
+          )}
+        >
+          {value || placeholder}
+        </span>
       )}
     </div>
   );

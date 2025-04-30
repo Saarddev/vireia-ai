@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -26,8 +25,7 @@ import {
   Settings, 
   Wand2,
   CloudLightning,
-  Loader,
-  Scissors
+  Loader
 } from 'lucide-react';
 
 interface BuilderSidebarProps {
@@ -37,7 +35,6 @@ interface BuilderSidebarProps {
   aiGenerating: boolean;
   onSectionChange: (section: string) => void;
   onGenerateWithAI?: () => void;
-  onOpenTailorModal?: () => void;
 }
 
 const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
@@ -46,8 +43,7 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
   aiEnabled,
   aiGenerating,
   onSectionChange,
-  onGenerateWithAI,
-  onOpenTailorModal
+  onGenerateWithAI
 }) => {
   return (
     <>
@@ -186,7 +182,7 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="p-3 space-y-3">
+      <SidebarFooter className="p-3">
         <Button 
           variant="outline" 
           size="sm"
@@ -210,22 +206,6 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
               <span>Generate with AI</span>
             </>
           )}
-        </Button>
-        
-        <Button 
-          variant="default" 
-          size="sm"
-          className={cn(
-            "w-full justify-center gap-2 bg-resume-purple",
-            "hover:bg-resume-purple/90 transition-all duration-300",
-          )}
-          onClick={onOpenTailorModal}
-          disabled={aiGenerating || !aiEnabled}
-        >
-          <>
-            <Scissors className="h-4 w-4" />
-            <span>Tailor for Job</span>
-          </>
         </Button>
       </SidebarFooter>
     </>

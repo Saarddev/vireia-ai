@@ -134,26 +134,6 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
               display: list-item;
               margin-bottom: 0.25rem;
             }
-            /* Improved bullet point styling */
-            .bullet-list {
-              padding-left: 1.5rem;
-              list-style-type: disc;
-            }
-            .bullet-list li {
-              display: list-item;
-              margin-bottom: 0.5rem;
-              position: relative;
-            }
-            .custom-bullet {
-              position: relative;
-              padding-left: 1.5rem;
-            }
-            .custom-bullet:before {
-              content: "•";
-              position: absolute;
-              left: 0.5rem;
-              color: ${primaryColor};
-            }
           </style>
           ${settings.fontFamily ?
             `<link href="https://fonts.googleapis.com/css2?family=${settings.fontFamily}:wght@400;500;600;700&display=swap" rel="stylesheet">`
@@ -181,40 +161,6 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
 
   const handleZoomOut = () => {
     setZoomLevel(prev => Math.max(prev - 0.25, 0.5));
-  };
-
-  // Process text to properly handle bullet points
-  const processText = (text: string) => {
-    if (!text) return "";
-    
-    // Convert lines starting with - or • to proper HTML bullet points
-    const lines = text.split('\n');
-    let processed = '';
-    
-    lines.forEach((line, index) => {
-      const trimmedLine = line.trim();
-      if (trimmedLine.startsWith('-') || trimmedLine.startsWith('•')) {
-        // Strip the bullet character and trim
-        const content = trimmedLine.substring(1).trim();
-        if (content) {
-          // If this is the first bullet in a sequence, start a list
-          if (index === 0 || !processed.endsWith('</li>')) {
-            processed += '<ul class="bullet-list">';
-          }
-          processed += `<li>${content}</li>`;
-          
-          // If next line is not a bullet, close the list
-          if (index === lines.length - 1 || 
-              !(lines[index + 1].trim().startsWith('-') || lines[index + 1].trim().startsWith('•'))) {
-            processed += '</ul>';
-          }
-        }
-      } else if (trimmedLine) {
-        processed += `<p>${trimmedLine}</p>`;
-      }
-    });
-    
-    return processed;
   };
 
   return (
@@ -251,7 +197,6 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
                   settings={settings}
                   onUpdateData={onDataChange}
                   onGenerateWithAI={handleGenerateWithAI}
-                  processText={processText}
                 />
               ) : (
                 <div className="h-full flex items-center justify-center">

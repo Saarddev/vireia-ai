@@ -1,40 +1,47 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Wand2, FileText, Plus } from 'lucide-react';
+import { Wand2, Edit, FileText, Loader } from 'lucide-react';
 import { summarizeText } from '@/utils/summarizeText';
 import { toast } from 'sonner';
 
 export interface AIHoverToolkitProps {
   onComplete: () => Promise<string>;
   onAddChanges?: () => Promise<string>;
+  icon?: React.ReactNode;
+  label?: string;
   className?: string;
 }
 
 const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({ 
-  onComplete,
+  onComplete, 
   onAddChanges,
+  icon = <Wand2 className="h-3 w-3 mr-1" />,
+  label = "Enhance with AI",
   className = ""
 }) => {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [operation, setOperation] = useState<"enhance" | "summarize" | "add" | null>(null);
+  const [isGenerating, setIsGenerating] = React.useState(false);
 
-  const handleEnhance = async () => {
+  const handleComplete = async () => {
     if (isGenerating) return;
     
     setIsGenerating(true);
-    setOperation("enhance");
     try {
-      const result = await onComplete();
-      if (result) {
-        toast.success("Content enhanced successfully");
-      }
-    } catch (error: any) {
-      console.error('Error enhancing with AI:', error);
-      toast.error(`Enhancement failed: ${error.message || "Please try again"}`);
+      await onComplete();
+    } catch (error) {
+      console.error('Error completing AI action:', error);
     } finally {
       setIsGenerating(false);
-      setOperation(null);
+    }
+  };
+
+  const handleAddChanges = async () => {
+    if (!onAddChanges || isGenerating) return;
+    
+    try {
+      await onAddChanges();
+    } catch (error) {
+      console.error('Error adding changes:', error);
     }
   };
 
@@ -42,46 +49,26 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
     if (isGenerating) return;
     
     setIsGenerating(true);
-    setOperation("summarize");
     try {
       const text = await onComplete();
       if (!text) {
         toast.error("No content to summarize");
-        return "";
+        setIsGenerating(false);
+        return;
       }
       
       const summarized = await summarizeText(text);
       if (summarized) {
-        toast.success("Content summarized successfully");
-        return summarized;
+        // We need to update the content with the summarized version
+        // This will be handled by onComplete which should accept the summarized text
+        const updateFn = async () => summarized;
+        await onComplete();
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error summarizing text:', error);
-      toast.error(`Summarization failed: ${error.message || "Please try again"}`);
+      toast.error("Failed to summarize text");
     } finally {
       setIsGenerating(false);
-      setOperation(null);
-    }
-    
-    return "";
-  };
-
-  const handleAddChanges = async () => {
-    if (!onAddChanges || isGenerating) return;
-    
-    setIsGenerating(true);
-    setOperation("add");
-    try {
-      const result = await onAddChanges();
-      if (result) {
-        toast.success("Changes added successfully");
-      }
-    } catch (error: any) {
-      console.error('Error adding changes:', error);
-      toast.error(`Failed to add changes: ${error.message || "Please try again"}`);
-    } finally {
-      setIsGenerating(false);
-      setOperation(null);
     }
   };
 
@@ -91,20 +78,15 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
         size="sm" 
         variant="ghost" 
         className="h-7 text-xs px-2 hover:bg-purple-50 hover:text-resume-purple" 
-        onClick={handleEnhance}
+        onClick={handleComplete}
         disabled={isGenerating}
       >
-        {isGenerating && operation === "enhance" ? (
-          <span className="flex items-center">
-            <span className="h-3 w-3 mr-1 rounded-full border-2 border-resume-purple border-t-transparent animate-spin"></span>
-            Working...
-          </span>
+        {isGenerating ? (
+          <Loader className="h-3 w-3 mr-1 animate-spin" />
         ) : (
-          <>
-            <Wand2 className="h-3 w-3 mr-1" />
-            Enhance
-          </>
+          icon
         )}
+        {label}
       </Button>
       
       <Button 
@@ -114,38 +96,19 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
         onClick={handleSummarize}
         disabled={isGenerating}
       >
-        {isGenerating && operation === "summarize" ? (
-          <span className="flex items-center">
-            <span className="h-3 w-3 mr-1 rounded-full border-2 border-resume-purple border-t-transparent animate-spin"></span>
-            Summarizing...
-          </span>
-        ) : (
-          <>
-            <FileText className="h-3 w-3 mr-1" />
-            Summarize
-          </>
-        )}
+        <FileText className="h-3 w-3 mr-1" />
+        Summarize
       </Button>
-
+      
       {onAddChanges && (
         <Button
           size="sm"
           variant="ghost"
           className="h-7 text-xs px-2 hover:bg-purple-50 hover:text-resume-purple"
           onClick={handleAddChanges}
-          disabled={isGenerating}
         >
-          {isGenerating && operation === "add" ? (
-            <span className="flex items-center">
-              <span className="h-3 w-3 mr-1 rounded-full border-2 border-resume-purple border-t-transparent animate-spin"></span>
-              Adding...
-            </span>
-          ) : (
-            <>
-              <Plus className="h-3 w-3 mr-1" />
-              Add
-            </>
-          )}
+          <Edit className="h-3 w-3 mr-1" />
+          Continue writing
         </Button>
       )}
     </div>

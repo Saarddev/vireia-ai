@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { FileText, Wand2, Loader, List } from 'lucide-react';
+import { FileText, Wand2, Loader } from 'lucide-react';
 import { useForm } from "react-hook-form";
 import { Card } from "@/components/ui/card";
 import AIHoverToolkit from "@/components/AIHoverToolkit";
@@ -74,23 +74,6 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
     
     // Regular text
     return <p className="text-gray-700 whitespace-pre-line mt-2">{text}</p>;
-  };
-
-  // Add bullet points to the text area
-  const addBulletPoints = () => {
-    const currentText = form.getValues("summary");
-    
-    // If text is empty or doesn't end with a newline, add a bullet point at the end
-    if (!currentText.endsWith('\n') && currentText.length > 0) {
-      const updatedText = currentText + '\n- ';
-      form.setValue("summary", updatedText);
-      onChange(updatedText);
-    } else {
-      // Add a bullet point at the start or after the last newline
-      const updatedText = currentText + '- ';
-      form.setValue("summary", updatedText);
-      onChange(updatedText);
-    }
   };
 
   return (
@@ -173,18 +156,16 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
                             form.setValue("summary", result);
                             onChange(result);
                           }
-                          return result || "";
                         } catch (error) {
                           console.error("Error generating summary:", error);
-                          return "";
                         }
-                      }}
-                      onAddChanges={async () => {
-                        const currentText = form.getValues("summary");
-                        const newText = currentText + "\n- ";
-                        form.setValue("summary", newText);
-                        onChange(newText);
                         return "";
+                      }}
+                      onAddChanges={() => {
+                        const currentText = form.getValues("summary");
+                        form.setValue("summary", currentText + "\n• ");
+                        onChange(currentText + "\n• ");
+                        return Promise.resolve("");
                       }}
                     />
                   </div>
@@ -195,18 +176,9 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
                       {...field} 
                     />
                   </FormControl>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-2 text-gray-400 hover:text-resume-purple"
-                    onClick={addBulletPoints}
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
                 </div>
                 <FormDescription>
-                  Use bullet points (- ) to highlight your key achievements and skills. The AI can help format this for you.
+                  Use bullet points (• ) to highlight your key achievements and skills. The AI can help format this for you.
                 </FormDescription>
               </FormItem>
             )}

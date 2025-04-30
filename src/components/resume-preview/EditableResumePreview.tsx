@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Check } from 'lucide-react';
+import { Check, Loader } from 'lucide-react';
 import AIHoverToolkit from "@/components/AIHoverToolkit";
-import AITabContinuation from '@/components/AITabContinuation';
 
 interface EditableContentProps {
   content: string;
@@ -20,6 +20,7 @@ export const EditableContent: React.FC<EditableContentProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [showToolkit, setShowToolkit] = useState(false);
 
   const handleSave = (e?: React.FormEvent) => {
@@ -29,19 +30,21 @@ export const EditableContent: React.FC<EditableContentProps> = ({
   };
 
   const handleGenerate = async () => {
-    if (!onGenerateWithAI) return "";
+    if (!onGenerateWithAI) return Promise.resolve("");
     
+    setIsGenerating(true);
     try {
-      const result = await onGenerateWithAI();
-      if (result) {
-        setEditedContent(result);
-        return result;
-      }
-    } catch (error) {
-      console.error('Error generating content:', error);
+      await onGenerateWithAI();
+    } finally {
+      setIsGenerating(false);
     }
-    
-    return "";
+    return Promise.resolve("");
+  };
+
+  const handleContinue = () => {
+    const newText = editedContent + "\n";
+    setEditedContent(newText);
+    return Promise.resolve("");
   };
 
   const formatContent = (text: string) => {
@@ -89,15 +92,17 @@ export const EditableContent: React.FC<EditableContentProps> = ({
             showToolkit ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
           }`}>
             {onGenerateWithAI && (
-              <AIHoverToolkit onComplete={handleGenerate} />
+              <AIHoverToolkit 
+                onComplete={handleGenerate}
+                onAddChanges={handleContinue}
+              />
             )}
           </div>
-          
-          <AITabContinuation
+          <Textarea
             value={editedContent}
-            onChange={setEditedContent}
-            onGenerateWithAI={onGenerateWithAI}
+            onChange={(e) => setEditedContent(e.target.value)}
             className={`w-full min-h-[100px] p-2 border border-resume-purple focus:ring-resume-purple transition-all duration-200 ${className}`}
+            autoFocus
           />
         </div>
         <div className="flex justify-end mt-2 gap-2">
@@ -140,7 +145,10 @@ export const EditableContent: React.FC<EditableContentProps> = ({
           <div className={`absolute -top-10 left-0 z-10 transform transition-all duration-300 ease-out ${
             showToolkit ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
           }`}>
-            <AIHoverToolkit onComplete={handleGenerate} />
+            <AIHoverToolkit 
+              onComplete={handleGenerate}
+              onAddChanges={handleContinue}
+            />
           </div>
         )}
       </div>
