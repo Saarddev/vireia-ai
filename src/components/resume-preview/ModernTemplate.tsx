@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
@@ -96,6 +97,38 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
     }
   };
 
+  // Format text with proper bullet points
+  const formatBulletPoints = (text: string) => {
+    if (!text) return null;
+
+    if (text.includes('•') || text.includes('-') || text.includes('\n')) {
+      const lines = text.split('\n').filter(line => line.trim().length > 0);
+      
+      return (
+        <ul className="list-disc pl-4 space-y-0.5">
+          {lines.map((line, idx) => {
+            let bulletText = line.trim();
+            
+            // Remove bullet characters if they exist
+            if (bulletText.startsWith('•') || bulletText.startsWith('-')) {
+              bulletText = bulletText.substring(1).trim();
+            }
+            
+            if (!bulletText) return null;
+            
+            return (
+              <li key={idx} className="text-sm text-gray-700 relative">
+                <span>{bulletText}</span>
+              </li>
+            );
+          })}
+        </ul>
+      );
+    }
+    
+    return <p className="text-sm text-gray-700 whitespace-pre-line">{text}</p>;
+  };
+
   const nameClass = "text-xl font-bold text-gray-900 leading-tight tracking-tight pb-0 mb-1";
   const subtitleClass = "text-lg font-medium text-[#5d4dcd] mt-1 transition-all";
   const sectionHeaderClass = "text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide";
@@ -141,11 +174,14 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
 
       <div className="mb-6 resume-section">
         <h2 className={sectionHeaderClass}>Summary</h2>
+        <div className="rich-text-content">
+          {formatBulletPoints(safeData.summary)}
+        </div>
         <EditableField 
           value={safeData.summary} 
           placeholder="Experienced software engineer with 5+ years of experience in full-stack development. ..." 
           onSave={val => onUpdateData?.("summary", val)} 
-          className="text-sm text-gray-700 font-normal leading-relaxed" 
+          className="text-sm text-gray-700 font-normal leading-relaxed hidden" 
           onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("summary") : undefined} 
           minRows={2} 
           maxRows={4} 
@@ -204,10 +240,13 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
               minRows={1}
               maxRows={1}
             />
+            <div className="rich-text-content">
+              {formatBulletPoints(exp.description)}
+            </div>
             <EditableField
               value={exp.description}
               placeholder="Lead developer for the company's flagship product..."
-              className={experienceDescriptionClass}
+              className={`${experienceDescriptionClass} hidden`}
               onSave={val => handleFieldUpdate("experience", "description", val, exp.id)}
               onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-desc`) : undefined}
               minRows={1}
@@ -270,10 +309,13 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                 maxRows={1}
               />
             </div>
+            <div className="rich-text-content">
+              {formatBulletPoints(edu.description || "")}
+            </div>
             <EditableField
               value={edu.description || ""}
               placeholder="Specialization in Artificial Intelligence. GPA: 3.8/4.0"
-              className={experienceDescriptionClass}
+              className={`${experienceDescriptionClass} hidden`}
               onSave={val => handleFieldUpdate("education", "description", val, edu.id)}
               onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-desc`) : undefined}
               minRows={1}
@@ -337,10 +379,13 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                   maxRows={1}
                 />
               </div>
+              <div className="rich-text-content">
+                {formatBulletPoints(project.description)}
+              </div>
               <EditableField
                 value={project.description}
                 placeholder="Describe the project and your role..."
-                className={experienceDescriptionClass}
+                className={`${experienceDescriptionClass} hidden`}
                 onSave={val => handleFieldUpdate("projects", "description", val, project.id)}
                 minRows={1}
                 maxRows={3}

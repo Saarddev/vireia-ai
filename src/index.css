@@ -2,7 +2,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+ 
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -10,238 +10,92 @@
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
-
+ 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 262 83% 58%;
+ 
+    --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
-
-    --secondary: 260 40% 96.1%;
-    --secondary-foreground: 262 47.4% 11.2%;
-
-    --muted: 260 40% 96.1%;
-    --muted-foreground: 260 16.3% 46.9%;
-
-    --accent: 260 40% 96.1%;
-    --accent-foreground: 262 47.4% 11.2%;
-
+ 
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+ 
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+ 
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+ 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 260 31.8% 91.4%;
-    --input: 260 31.8% 91.4%;
-    --ring: 262 84% 60%;
-
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+ 
     --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 260 5.3% 26.1%;
-    --sidebar-primary: 260 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 260 4.8% 95.9%;
-    --sidebar-accent-foreground: 260 5.9% 10%;
-    --sidebar-border: 260 13% 91%;
-    --sidebar-ring: 262 91.2% 58%;
   }
-
+ 
   .dark {
-    --background: 262 84% 4.9%;
-    --foreground: 260 40% 98%;
-
-    --card: 262 84% 4.9%;
-    --card-foreground: 260 40% 98%;
-
-    --popover: 262 84% 4.9%;
-    --popover-foreground: 260 40% 98%;
-
-    --primary: 260 40% 98%;
-    --primary-foreground: 262 47.4% 11.2%;
-
-    --secondary: 260 32.6% 17.5%;
-    --secondary-foreground: 260 40% 98%;
-
-    --muted: 260 32.6% 17.5%;
-    --muted-foreground: 260 20.2% 65.1%;
-
-    --accent: 260 32.6% 17.5%;
-    --accent-foreground: 260 40% 98%;
-
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+ 
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+ 
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+ 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 260 40% 98%;
-
-    --border: 260 32.6% 17.5%;
-    --input: 260 32.6% 17.5%;
-    --ring: 260 26.8% 83.9%;
-    --sidebar-background: 260 5.9% 10%;
-    --sidebar-foreground: 260 4.8% 95.9%;
-    --sidebar-primary: 262 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 260 3.7% 15.9%;
-    --sidebar-accent-foreground: 260 4.8% 95.9%;
-    --sidebar-border: 260 3.7% 15.9%;
-    --sidebar-ring: 262 91.2% 58%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
   }
 }
-
+ 
 @layer base {
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
-  }
-  
-  html {
-    scroll-behavior: smooth;
+    @apply bg-background text-foreground;
   }
 }
 
-@layer utilities {
-  .bg-grid-pattern {
-    background-image: 
-      linear-gradient(to right, rgba(155, 135, 245, 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(155, 135, 245, 0.05) 1px, transparent 1px);
-    background-size: 40px 40px;
-  }
-  
-  /* Animation delays */
-  .animate-delay-100 {
-    animation-delay: 100ms;
-  }
-  
-  .animate-delay-200 {
-    animation-delay: 200ms;
-  }
-  
-  .animate-delay-250 {
-    animation-delay: 250ms;
-  }
-  
-  .animate-delay-300 {
-    animation-delay: 300ms;
-  }
-  
-  .animate-delay-400 {
-    animation-delay: 400ms;
-  }
-  
-  .animate-delay-500 {
-    animation-delay: 500ms;
-  }
-  
-  .animate-delay-700 {
-    animation-delay: 700ms;
-  }
-  
-  .animate-delay-1000 {
-    animation-delay: 1000ms;
-  }
-  
-  .translate-y-10 {
-    transform: translateY(40px);
-  }
-  
-  /* Scroll reveal utilities */
-  .reveal-on-scroll {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-  }
-  
-  .reveal-on-scroll.revealed {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  
-  /* Resume styles for PDF consistency */
-  @media print {
-    .resume-content {
-      padding: 20px 0px 0px 0px !important;
-      max-width: 100% !important;
-      border: none !important;
-      box-shadow: none !important;
-    }
-    
-    body {
-      background: white !important;
-    }
-    
-    .section-gap {
-      margin-bottom: 16px !important;
-    }
-    
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 0 !important;
-      margin-bottom: 8px !important;
-    }
-    
-    .text-primary-color { 
-      color: #5d4dcd !important;
-    }
-    
-    .bg-print-light {
-      background-color: #efeafc !important;
-    }
-    
-    .border-primary {
-      border-color: #5d4dcd !important;
-    }
-  }
+.resume-section .rich-text-content ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
 }
 
-.app-container {
-  max-width: 1440px;
-  margin: 0 auto;
+.resume-section .rich-text-content ul li {
+  position: relative;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #374151;
 }
 
-/* Custom animations */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-15px);
-  }
+.resume-section .rich-text-content ul li::marker {
+  color: #5d4dcd;
 }
 
-.animate-float {
-  animation: float 8s ease-in-out infinite;
-}
-
-/* Pulse animation for CTA elements */
-@keyframes soft-pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(155, 135, 245, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 10px rgba(155, 135, 245, 0);
-  }
-}
-
-.animate-soft-pulse {
-  animation: soft-pulse 3s infinite;
-}
-
-/* Dashboard specific animations */
-@keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-slide-up {
-  animation: slide-up 0.5s ease-out forwards;
-}
-
-/* Resume-specific styles */
-.resume-content {
-  padding: 30px 40px 26px 40px;
+.resume-section .rich-text-content p {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #374151;
 }

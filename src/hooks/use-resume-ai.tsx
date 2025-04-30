@@ -2,17 +2,18 @@
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export function useResumeAI() {
   const [isGenerating, setIsGenerating] = useState(false);
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
 
   const generateSummary = async (experience: string[], skills: string[]): Promise<string> => {
     setIsGenerating(true);
     try {
       // Validate input data
       if (!Array.isArray(experience) || experience.length === 0) {
-        toast({
+        uiToast({
           title: "Missing Experience",
           description: "Please add some work experience before generating a summary.",
         });
@@ -21,12 +22,15 @@ export function useResumeAI() {
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        toast({
+        uiToast({
           title: "Authentication Required",
           description: "Please sign in to use AI features",
         });
         throw new Error('Authentication required');
       }
+
+      console.log('Calling edge function with experience:', experience.length, 'items');
+      console.log('Skills data:', skills);
 
       const { data, error } = await supabase.functions.invoke('enhance-resume', {
         body: { 
@@ -42,7 +46,8 @@ export function useResumeAI() {
       }
       
       if (!data || !data.summary) {
-        toast({
+        console.error('Invalid data from edge function:', data);
+        uiToast({
           title: "Error",
           description: "No summary generated. Please try again.",
           variant: "destructive"
@@ -50,16 +55,25 @@ export function useResumeAI() {
         throw new Error('Invalid response from AI service');
       }
       
-      toast({
-        title: "Summary Generated",
-        description: "Your professional summary has been generated."
-      });
+      const summary = data.summary.trim();
+
+      // Format as bullet points if not already
+      let formattedSummary = summary;
+      if (!formattedSummary.includes('•') && !formattedSummary.includes('-')) {
+        const sentences = formattedSummary
+          .split(/[.!?]\s+/)
+          .filter(s => s.trim().length > 0)
+          .map(s => `• ${s.trim()}`);
+        formattedSummary = sentences.join('\n');
+      }
+
+      toast.success('Professional summary generated');
       
-      return data.summary;
+      return formattedSummary;
 
     } catch (error: any) {
       console.error('Error generating summary:', error);
-      toast({
+      uiToast({
         title: "Error",
         description: `Failed to generate summary: ${error.message || "Please try again"}`,
         variant: "destructive"
@@ -75,7 +89,7 @@ export function useResumeAI() {
     try {
       // Validate input data
       if (!Array.isArray(experience) || experience.length === 0) {
-        toast({
+        uiToast({
           title: "Missing Experience",
           description: "Please add some work experience before extracting skills.",
         });
@@ -84,7 +98,7 @@ export function useResumeAI() {
       
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        toast({
+        uiToast({
           title: "Authentication Required",
           description: "Please sign in to use AI features",
         });
@@ -107,10 +121,7 @@ export function useResumeAI() {
         throw new Error('Invalid skill data from AI service');
       }
       
-      toast({
-        title: "Skills Extracted",
-        description: `Found ${(data.technical?.length || 0) + (data.soft?.length || 0)} skills from your experience.`
-      });
+      toast.success(`Found ${(data.technical?.length || 0) + (data.soft?.length || 0)} skills from your experience`);
       
       return {
         technical: data.technical || [],
@@ -119,7 +130,7 @@ export function useResumeAI() {
 
     } catch (error: any) {
       console.error('Error extracting skills:', error);
-      toast({
+      uiToast({
         title: "Error",
         description: `Failed to extract skills: ${error.message || "Please try again"}`,
         variant: "destructive"
@@ -134,7 +145,7 @@ export function useResumeAI() {
     setIsGenerating(true);
     try {
       if (!description || description.trim() === '') {
-        toast({
+        uiToast({
           title: "Missing Content",
           description: "Please add some content before improving.",
         });
@@ -143,7 +154,7 @@ export function useResumeAI() {
       
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        toast({
+        uiToast({
           title: "Authentication Required",
           description: "Please sign in to use AI features",
         });
@@ -166,16 +177,13 @@ export function useResumeAI() {
         throw new Error('Invalid response from AI service');
       }
       
-      toast({
-        title: "Description Improved",
-        description: "Your job description has been enhanced."
-      });
+      toast.success('Description enhanced successfully');
       
       return data.improved;
 
     } catch (error: any) {
       console.error('Error improving description:', error);
-      toast({
+      uiToast({
         title: "Error",
         description: `Failed to improve description: ${error.message || "Please try again"}`,
         variant: "destructive"
