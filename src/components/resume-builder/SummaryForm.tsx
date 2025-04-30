@@ -173,16 +173,18 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
                             form.setValue("summary", result);
                             onChange(result);
                           }
+                          return result || "";
                         } catch (error) {
                           console.error("Error generating summary:", error);
+                          return "";
                         }
-                        return "";
                       }}
-                      onAddChanges={() => {
+                      onAddChanges={async () => {
                         const currentText = form.getValues("summary");
-                        form.setValue("summary", currentText + "\n- ");
-                        onChange(currentText + "\n- ");
-                        return Promise.resolve("");
+                        const newText = currentText + "\n- ";
+                        form.setValue("summary", newText);
+                        onChange(newText);
+                        return "";
                       }}
                     />
                   </div>

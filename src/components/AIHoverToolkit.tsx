@@ -7,12 +7,18 @@ import { toast } from 'sonner';
 
 export interface AIHoverToolkitProps {
   onComplete: () => Promise<string>;
+  onAddChanges?: () => Promise<string>;
   className?: string;
+  icon?: React.ReactNode;
+  label?: string;
 }
 
 const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({ 
   onComplete,
-  className = ""
+  onAddChanges,
+  className = "",
+  icon,
+  label
 }) => {
   const [isGenerating, setIsGenerating] = React.useState(false);
 
@@ -55,6 +61,19 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
     return "";
   };
 
+  const handleAddChanges = async () => {
+    if (!onAddChanges || isGenerating) return;
+    
+    setIsGenerating(true);
+    try {
+      await onAddChanges();
+    } catch (error) {
+      console.error('Error adding changes with AI:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <div className={`flex gap-1 ${className}`}>
       <Button 
@@ -71,8 +90,8 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
           </span>
         ) : (
           <>
-            <Wand2 className="h-3 w-3 mr-1" />
-            Enhance
+            {icon || <Wand2 className="h-3 w-3 mr-1" />}
+            {label || "Enhance"}
           </>
         )}
       </Button>
@@ -87,6 +106,19 @@ const AIHoverToolkit: React.FC<AIHoverToolkitProps> = ({
         <FileText className="h-3 w-3 mr-1" />
         Summarize
       </Button>
+
+      {onAddChanges && (
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-7 text-xs px-2 hover:bg-purple-50 hover:text-resume-purple"
+          onClick={handleAddChanges}
+          disabled={isGenerating}
+        >
+          <span className="h-3 w-3 mr-1 flex items-center justify-center">+</span>
+          Add
+        </Button>
+      )}
     </div>
   );
 };

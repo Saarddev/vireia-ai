@@ -28,10 +28,12 @@ const TailorResumeModal: React.FC<TailorResumeModalProps> = ({
   const [jobDescription, setJobDescription] = useState('');
   
   const handleSubmit = async () => {
-    if (jobDescription.trim()) {
-      await onSubmit(jobDescription);
-      setJobDescription('');
+    if (jobDescription.trim().length < 50) {
+      return; // Job description is too short to be useful
     }
+    
+    await onSubmit(jobDescription);
+    setJobDescription('');
   };
   
   return (
@@ -55,12 +57,17 @@ const TailorResumeModal: React.FC<TailorResumeModalProps> = ({
             </label>
             <Textarea
               id="job-description"
-              placeholder="Paste the full job description here..."
+              placeholder="Paste the full job description here (minimum 50 characters)..."
               className="min-h-[200px] resize-none"
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
               disabled={isSubmitting}
             />
+            {jobDescription.trim().length > 0 && jobDescription.trim().length < 50 && (
+              <p className="text-xs text-red-500">
+                Please enter a more detailed job description (at least 50 characters).
+              </p>
+            )}
           </div>
           
           <div className="bg-purple-50 border-resume-purple/20 border rounded-md p-3 text-sm">
@@ -87,7 +94,7 @@ const TailorResumeModal: React.FC<TailorResumeModalProps> = ({
           <Button 
             onClick={handleSubmit} 
             className="bg-resume-purple hover:bg-resume-purple/90"
-            disabled={!jobDescription.trim() || isSubmitting}
+            disabled={jobDescription.trim().length < 50 || isSubmitting}
           >
             {isSubmitting ? (
               <>

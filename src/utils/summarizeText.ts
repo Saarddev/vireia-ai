@@ -9,6 +9,16 @@ export const summarizeText = async (text: string): Promise<string> => {
       return '';
     }
 
+    // Add some error handling for very short text
+    if (text.trim().length < 20) {
+      toast.error('Text is too short to summarize meaningfully.');
+      return text;
+    }
+
+    toast.info('Summarizing text...', {
+      duration: 2000
+    });
+
     const { data, error } = await supabase.functions.invoke('enhance-resume', {
       body: {
         type: 'summarize',
@@ -18,7 +28,8 @@ export const summarizeText = async (text: string): Promise<string> => {
 
     if (error) {
       console.error('Supabase function error:', error);
-      throw error;
+      toast.error('Failed to summarize. AI service is temporarily unavailable.');
+      return text;
     }
     
     let summary = data?.summary || '';
@@ -63,7 +74,7 @@ export const summarizeText = async (text: string): Promise<string> => {
       .replace(/•\s+•/g, '•')
       .replace(/^\n+|\n+$/g, '');
     
-    console.log('Summarized text:', summary);
+    toast.success('Text summarized successfully!');
     return summary;
   } catch (error) {
     console.error('Error summarizing text:', error);

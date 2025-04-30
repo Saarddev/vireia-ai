@@ -230,6 +230,38 @@ Return in format: "MM YYYY - MM YYYY"`;
   }
 }
 
+function generateTailorResumePrompt(resumeData: any, jobDescription: string) {
+  return `
+As an experienced resume tailoring expert, optimize the following resume to match this specific job description:
+
+JOB DESCRIPTION:
+${jobDescription || 'Not provided'}
+
+CURRENT RESUME DATA:
+${JSON.stringify(resumeData, null, 2)}
+
+Your task:
+1. Identify key skills and qualifications from the job description
+2. Rewrite and reorganize resume content to highlight relevant experience
+3. Use ATS-friendly keywords and formatting
+4. Ensure bullet points start with strong action verbs
+5. Include specific achievements that match job requirements
+6. Keep the tailored resume authentic to the person's experience (no fabrication)
+7. Prioritize skills and experience most relevant to this position
+
+Return a complete JSON with the same structure as the input resume, but with optimized content:
+{
+  "personal": { same structure as input },
+  "summary": "tailored summary",
+  "experience": [ array with tailored descriptions ],
+  "education": [ same structure as input ],
+  "skills": { optimized skills that match job requirements },
+  "languages": [ same as input ],
+  "certifications": [ same as input ],
+  "projects": [ tailored if relevant or same as input ]
+}`;
+}
+
 function parseGeminiResponse(response: any, type: string) {
   if (!response?.candidates?.[0]?.content?.parts?.[0]?.text) {
     throw new Error('Invalid response format from Gemini API');
@@ -291,6 +323,15 @@ function parseGeminiResponse(response: any, type: string) {
       throw new Error('No valid JSON found in skills response');
     }
     
+    if (type === "tailor-resume") {
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const tailoredResume = JSON.parse(jsonMatch[0]);
+        return { tailoredResume };
+      }
+      throw new Error('No valid JSON found in tailor-resume response');
+    }
+    
     // For full resume enhancement
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
@@ -312,6 +353,7 @@ function parseGeminiResponse(response: any, type: string) {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -325,7 +367,7 @@ serve(async (req) => {
       throw new Error(`Invalid JSON in request body: ${err.message}`);
     });
     
-    const { type, text, linkedinData, resumeTemplate, experience, skills, description, educationContext, experienceContext } = requestData;
+    const { type, text, linkedinData, resumeTemplate, experience, skills, description, educationContext, experienceContext, resumeData, jobDescription } = requestData;
     
     if (!type) {
       throw new Error("Missing 'type' parameter in request");
@@ -358,6 +400,11 @@ serve(async (req) => {
       prompt = generateImprovementPrompt(description);
     } else if (requestType === "experience-description") {
       prompt = generateExperiencePrompt(experienceContext);
+    } else if (requestType === "tailor-resume") {
+      if (!resumeData || !jobDescription) {
+        throw new Error("Missing 'resumeData' or 'jobDescription' parameter for resume tailoring");
+      }
+      prompt = generateTailorResumePrompt(resumeData, jobDescription);
     } else {
       // Full resume enhancement
       if (!linkedinData) {
