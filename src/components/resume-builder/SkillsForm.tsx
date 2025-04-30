@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Form,
@@ -23,19 +22,17 @@ interface Skills {
 }
 
 interface SkillsFormProps {
-  data: Skills;
-  onChange: (data: Skills) => void;
-  onExtractSkills?: () => Promise<void>;
+  data: any;
+  onChange: (data: any) => void;
   isGenerating?: boolean;
-  onGenerateWithAI?: (text: string) => Promise<any>;
+  onExtractSkills: () => Promise<void>;
 }
 
 const SkillsForm: React.FC<SkillsFormProps> = ({ 
   data, 
   onChange, 
-  onExtractSkills,
   isGenerating = false,
-  onGenerateWithAI
+  onExtractSkills
 }) => {
   const [skills, setSkills] = useState<Skills>(data);
   const [activeTab, setActiveTab] = useState<string>("technical");

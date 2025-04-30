@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Wand2, Check, X, Loader } from "lucide-react";
+import { Check, X, Wand2, Loader, FileText } from "lucide-react";
+import AITabContinuation from '@/components/AITabContinuation';
+import { summarizeText } from '@/utils/summarizeText';
 
 interface EditableFieldProps {
   value: string;
@@ -49,63 +50,91 @@ const EditableField: React.FC<EditableFieldProps> = ({
   };
 
   const handleGenerateWithAI = async () => {
-    if (!onGenerateWithAI) return;
+    if (!onGenerateWithAI) return "";
 
     setIsGenerating(true);
     try {
       const generatedText = await onGenerateWithAI();
       if (generatedText) {
         setEditValue(generatedText);
-        onSave(generatedText);
+        return generatedText;
       }
     } catch (error) {
       console.error('Error generating content:', error);
     } finally {
       setIsGenerating(false);
     }
+    
+    return "";
   };
 
-  // Calculate rows based on content and min/max settings
-  const calculateRows = (text: string) => {
-    const lineCount = (text.match(/\n/g) || []).length + 1;
-    return Math.max(minRows, Math.min(lineCount, maxRows));
+  const handleSummarize = async () => {
+    if (!editValue.trim()) return "";
+
+    setIsGenerating(true);
+    try {
+      const summarized = await summarizeText(editValue);
+      if (summarized) {
+        setEditValue(summarized);
+        return summarized;
+      }
+    } catch (error) {
+      console.error('Error summarizing content:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+    
+    return "";
   };
 
   return (
     <div className={`editable-field relative transition-all duration-200 ${editing ? 'editing' : ''}`}>
       {editing ? (
         <div className="edit-mode w-full">
-          <Textarea
+          <AITabContinuation
             value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
+            onChange={setEditValue}
+            onGenerateWithAI={onGenerateWithAI} 
             placeholder={placeholder}
-            rows={calculateRows(editValue)}
             className={`w-full py-1 px-2 border border-gray-300 rounded text-sm focus:border-resume-purple focus:ring-1 focus:ring-resume-purple outline-none transition-all duration-200 ${className}`}
-            style={inputStyle}
-            autoFocus
+            minRows={minRows}
+            maxRows={maxRows}
           />
           <div className="flex items-center justify-end mt-1 gap-1">
             {onGenerateWithAI && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleGenerateWithAI}
-                className="text-xs h-7 px-2 text-resume-purple hover:bg-resume-purple/10"
-                disabled={isGenerating}
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader className="h-3 w-3 mr-1 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Wand2 className="h-3 w-3 mr-1" />
-                    AI
-                  </>
-                )}
-              </Button>
+              <>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleGenerateWithAI}
+                  className="text-xs h-7 px-2 text-resume-purple hover:bg-resume-purple/10"
+                  disabled={isGenerating}
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader className="h-3 w-3 mr-1 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="h-3 w-3 mr-1" />
+                      Enhance
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSummarize}
+                  className="text-xs h-7 px-2 text-resume-purple hover:bg-resume-purple/10"
+                  disabled={isGenerating}
+                >
+                  <FileText className="h-3 w-3 mr-1" />
+                  Summarize
+                </Button>
+              </>
             )}
             <Button
               type="button"

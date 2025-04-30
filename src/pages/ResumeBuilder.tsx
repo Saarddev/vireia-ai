@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -251,6 +250,11 @@ const ResumeBuilder = () => {
     }
   };
 
+  // Fix the type error for onExtractSkills - ensure it returns Promise<void> instead of Promise<string>
+  const handleExtractSkills = async (): Promise<void> => {
+    await handleGenerateWithAI("skills");
+  };
+
   const renderActiveForm = () => {
     switch (activeSection) {
       case "personal":
@@ -293,10 +297,7 @@ const ResumeBuilder = () => {
             data={resumeData.skills}
             onChange={(data) => handleDataChange("skills", data)}
             isGenerating={isGenerating}
-            onExtractSkills={async () => {
-              await handleGenerateWithAI("skills");
-              return "";
-            }}
+            onExtractSkills={handleExtractSkills}
           />
         );
       case "projects":
