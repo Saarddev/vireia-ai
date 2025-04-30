@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Form,
@@ -10,14 +11,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus, List } from 'lucide-react';
-import { useForm } from "react-hook-form";
+import { Trash2, Plus, CalendarIcon } from 'lucide-react';
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from 'date-fns';
-import { CalendarIcon } from "@radix-ui/react-icons";
 import AIHoverToolkit from "@/components/AIHoverToolkit";
 
 interface ExperienceFormProps {
@@ -32,7 +31,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
   onGenerateWithAI
 }) => {
   const [experiences, setExperiences] = useState(data);
-  const [openFields, setOpenFields] = useState({});
+  const [openFields, setOpenFields] = useState<Record<number, boolean>>({});
   const [unsavedChanges, setUnsavedChanges] = useState(false);
 
   useEffect(() => {
@@ -209,9 +208,9 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                     }}
                   />
                   <div className={`absolute -top-10 left-0 z-10 transform transition-all duration-300 ease-out ${
-                    openFields.description ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+                    openFields[experience.id + '_toolbar'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
                   }`}>
-                    {openFields.description && onGenerateWithAI && (
+                    {onGenerateWithAI && (
                       <AIHoverToolkit 
                         onComplete={async () => {
                           try {
