@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
@@ -11,13 +12,15 @@ interface ModernTemplateProps {
   settings?: any;
   onUpdateData?: (section: string, value: any) => void;
   onGenerateWithAI?: (section: string) => Promise<string>;
+  processText?: (text: string) => string;
 }
 
 const ModernTemplate: React.FC<ModernTemplateProps> = ({
   data,
   settings = {},
   onUpdateData,
-  onGenerateWithAI
+  onGenerateWithAI,
+  processText
 }) => {
   // Ensure data has all required properties with defaults
   const safeData = React.useMemo(() => {
@@ -96,6 +99,18 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
     }
   };
 
+  // Format text with proper bullet points
+  const formatText = (text: string) => {
+    if (!text) return '';
+    
+    if (processText) {
+      return processText(text);
+    }
+    
+    // Basic formatting if processText is not provided
+    return text.replace(/\n/g, '<br/>');
+  };
+
   const nameClass = "text-xl font-bold text-gray-900 leading-tight tracking-tight pb-0 mb-1";
   const subtitleClass = "text-lg font-medium text-[#5d4dcd] mt-1 transition-all";
   const sectionHeaderClass = "text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide";
@@ -148,7 +163,8 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           className="text-sm text-gray-700 font-normal leading-relaxed" 
           onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("summary") : undefined} 
           minRows={2} 
-          maxRows={4} 
+          maxRows={4}
+          renderHTML={formatText}
         />
       </div>
 
@@ -212,6 +228,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
               onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-desc`) : undefined}
               minRows={1}
               maxRows={3}
+              renderHTML={formatText}
             />
           </div>
         ))}
@@ -278,6 +295,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
               onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-desc`) : undefined}
               minRows={1}
               maxRows={2}
+              renderHTML={formatText}
             />
           </div>
         ))}
@@ -344,6 +362,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                 onSave={val => handleFieldUpdate("projects", "description", val, project.id)}
                 minRows={1}
                 maxRows={3}
+                renderHTML={formatText}
               />
               {project.technologies && project.technologies.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2">

@@ -1,225 +1,150 @@
-import React, { useState, useRef, useEffect } from "react";
+
+import React, { useState } from 'react';
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import AIHoverToolkit from "@/components/AIHoverToolkit";
-import { Loader2 } from "lucide-react";
+import { Wand2, Check, X, Loader } from "lucide-react";
 
 interface EditableFieldProps {
   value: string;
   placeholder: string;
   className?: string;
-  onSave: (val: string) => void;
+  onSave: (value: string) => void;
   onGenerateWithAI?: () => Promise<string>;
-  autoFocus?: boolean;
-  maxRows?: number;
   minRows?: number;
+  maxRows?: number;
   inputStyle?: React.CSSProperties;
   outputStyle?: React.CSSProperties;
+  renderHTML?: (text: string) => string;
 }
 
 const EditableField: React.FC<EditableFieldProps> = ({
   value,
   placeholder,
-  className,
+  className = '',
   onSave,
   onGenerateWithAI,
-  autoFocus = false,
-  maxRows = 5,
   minRows = 1,
+  maxRows = 4,
   inputStyle = {},
-  outputStyle = {}
+  outputStyle = {},
+  renderHTML
 }) => {
   const [editing, setEditing] = useState(false);
-  const [localValue, setLocalValue] = useState(value);
+  const [editValue, setEditValue] = useState(value);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [showToolkit, setShowToolkit] = useState(false);
-  const [streamingText, setStreamingText] = useState<string | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  useEffect(() => {
-    setLocalValue(value);
-  }, [value]);
-
-  useEffect(() => {
-    if (editing && textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      const scrollHeight = textareaRef.current.scrollHeight;
-      const rowHeight = 20;
-      const maxHeight = rowHeight * maxRows;
-      const minHeight = rowHeight * minRows;
-      const newHeight = Math.max(Math.min(scrollHeight, maxHeight), minHeight);
-      textareaRef.current.style.height = newHeight + "px";
-    }
-  }, [editing, localValue, maxRows, minRows]);
-
-  const streamGeneratedText = (current: string, generated: string) => {
-    setStreamingText(current);
-    let i = 0;
-    function next() {
-      setStreamingText(current + generated.slice(0, i));
-      if (i < generated.length) {
-        i++;
-        setTimeout(next, 18);
-      } else {
-        setStreamingText(null);
-        setLocalValue(current + generated);
-      }
-    }
-    next();
-  };
-
-  const handleAIComplete = async () => {
-    if (!onGenerateWithAI) return "";
-    setIsGenerating(true);
-    try {
-      const result = await onGenerateWithAI();
-      if (result) {
-        streamGeneratedText(localValue, result.replace(localValue, ""));
-      }
-      return "";
-    } catch (error) {
-      console.error("AI generation failed:", error);
-      return "";
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const handleAIContinue = async () => {
-    if (!onGenerateWithAI) return "";
-    setIsGenerating(true);
-    try {
-      const result = await onGenerateWithAI();
-      if (result && result.length > localValue.length) {
-        const added = result.slice(localValue.length);
-        streamGeneratedText(localValue, added);
-      }
-      return "";
-    } catch (error) {
-      console.error("AI continuation failed:", error);
-      return "";
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const startEdit = () => {
+  const handleEdit = () => {
+    setEditValue(value);
     setEditing(true);
-    setTimeout(() => textareaRef.current?.focus(), 5);
+  };
+
+  const handleCancel = () => {
+    setEditValue(value);
+    setEditing(false);
   };
 
   const handleSave = () => {
-    if (streamingText !== null) return;
+    onSave(editValue);
     setEditing(false);
-    if (localValue !== value) onSave(localValue.trim());
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSave();
-    } else if (e.key === "Escape") {
-      setEditing(false);
-      setLocalValue(value);
+  const handleGenerateWithAI = async () => {
+    if (!onGenerateWithAI) return;
+
+    setIsGenerating(true);
+    try {
+      const generatedText = await onGenerateWithAI();
+      if (generatedText) {
+        setEditValue(generatedText);
+        onSave(generatedText);
+      }
+    } catch (error) {
+      console.error('Error generating content:', error);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
+  // Calculate rows based on content and min/max settings
+  const calculateRows = (text: string) => {
+    const lineCount = (text.match(/\n/g) || []).length + 1;
+    return Math.max(minRows, Math.min(lineCount, maxRows));
+  };
+
   return (
-    <div 
-      className={cn(
-        "relative w-full group transition-colors min-h-[20px]",
-        className
-      )}
-      onClick={startEdit}
-      onMouseEnter={() => setShowToolkit(true)}
-      onMouseLeave={() => setShowToolkit(false)}
-      onFocus={() => setShowToolkit(true)}
-      onBlur={e => {
-        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-          handleSave();
-        }
-      }}
-    >
-      {editing || streamingText !== null ? (
-        <div className="relative w-full">
-          <textarea
-            ref={textareaRef}
-            className={cn(
-              "block w-full px-1 py-0.5 text-inherit font-inherit rounded",
-              "border border-gray-200 focus:border-[#5d4dcd] focus:ring-1 focus:ring-[#5d4dcd]",
-              "bg-white/95 shadow-sm transition-all outline-0 resize-none",
-              isGenerating && "opacity-70"
-            )}
-            value={streamingText !== null ? streamingText : localValue}
-            onChange={e => setLocalValue(e.target.value)}
-            onKeyDown={handleKeyDown}
+    <div className={`editable-field relative transition-all duration-200 ${editing ? 'editing' : ''}`}>
+      {editing ? (
+        <div className="edit-mode w-full">
+          <Textarea
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
             placeholder={placeholder}
-            readOnly={streamingText !== null}
-            style={{
-              fontFamily: "inherit",
-              fontSize: "inherit",
-              fontWeight: "inherit",
-              lineHeight: "inherit",
-              ...inputStyle
-            }}
-            autoFocus={autoFocus}
-            rows={minRows}
+            rows={calculateRows(editValue)}
+            className={`w-full py-1 px-2 border border-gray-300 rounded text-sm focus:border-resume-purple focus:ring-1 focus:ring-resume-purple outline-none transition-all duration-200 ${className}`}
+            style={inputStyle}
+            autoFocus
           />
-          <div className="absolute -right-2 -top-7 z-20 flex gap-1 opacity-90 bg-white shadow-sm rounded-md px-1 py-0.5 animate-fade-in">
+          <div className="flex items-center justify-end mt-1 gap-1">
+            {onGenerateWithAI && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleGenerateWithAI}
+                className="text-xs h-7 px-2 text-resume-purple hover:bg-resume-purple/10"
+                disabled={isGenerating}
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader className="h-3 w-3 mr-1 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="h-3 w-3 mr-1" />
+                    AI
+                  </>
+                )}
+              </Button>
+            )}
             <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleCancel}
+              className="text-xs h-7 px-2"
+            >
+              <X className="h-3 w-3 mr-1" />
+              Cancel
+            </Button>
+            <Button
+              type="button"
               variant="ghost"
               size="sm"
               onClick={handleSave}
-              disabled={isGenerating}
-              className="h-5 text-xs px-2"
+              className="text-xs h-7 px-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
             >
-              <span className="font-medium text-[#5d4dcd]">Save</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setEditing(false);
-                setLocalValue(value);
-              }}
-              disabled={isGenerating}
-              className="h-5 text-xs px-2"
-            >
-              <span className="text-gray-500">Cancel</span>
+              <Check className="h-3 w-3 mr-1" />
+              Save
             </Button>
           </div>
-          {onGenerateWithAI && (
-            <div className="absolute -right-2 -bottom-7 z-10 animate-fade-in">
-              <AIHoverToolkit
-                onComplete={handleAIComplete}
-                onAddChanges={handleAIContinue}
-                className="shadow-sm scale-90"
-              />
-            </div>
-          )}
-          {isGenerating && (
-            <span className="absolute -left-5 top-1 animate-spin text-[#5d4dcd]">
-              <Loader2 size={14} />
-            </span>
-          )}
         </div>
       ) : (
-        <span
-          tabIndex={0}
-          style={{
-            ...outputStyle,
-            fontSize: "inherit",
-            fontWeight: "inherit",
-            lineHeight: "inherit",
-          }}
-          className={cn(
-            "block w-full transition-colors duration-200",
-            "hover:bg-gray-50/50 focus:bg-gray-50/50 rounded px-1 py-0.5",
-            !value && "text-gray-400"
-          )}
+        <div
+          className={`view-mode cursor-pointer py-0.5 rounded hover:bg-gray-50 transition-all ${className}`}
+          onClick={handleEdit}
+          style={outputStyle}
         >
-          {value || placeholder}
-        </span>
+          {value ? (
+            renderHTML ? (
+              <div dangerouslySetInnerHTML={{ __html: renderHTML(value) }} />
+            ) : (
+              value
+            )
+          ) : (
+            <span className="text-gray-400 italic">{placeholder}</span>
+          )}
+        </div>
       )}
     </div>
   );
