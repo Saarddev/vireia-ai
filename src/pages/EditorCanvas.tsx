@@ -19,7 +19,7 @@ const EditorCanvas = () => {
         </header>
         
         <ScrollArea className="flex-1">
-          <div className="container py-6 h-full">
+          <div className="container py-6 h-full max-h-[calc(100vh-80px)] overflow-y-auto">
             <Card className="p-6">
               <p className="text-center text-muted-foreground">
                 Resume editor content would go here.

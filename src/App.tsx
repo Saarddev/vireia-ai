@@ -5,8 +5,8 @@ import {
   Route,
   Routes,
 } from 'react-router-dom';
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
+import { ThemeProvider } from "./components/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
 import Resume from './pages/Resume';
 import EditorCanvas from './pages/EditorCanvas';
 import JobPostings from './pages/JobPostings';
