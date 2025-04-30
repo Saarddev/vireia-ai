@@ -1,10 +1,10 @@
+
 import React, { useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ModernTemplate from './resume-preview/ModernTemplate';
 import PreviewControls from './resume-preview/PreviewControls';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { ResumeData } from '@/types/resume.d';
 
 // Function to extract all styles applied to an element and its descendants
@@ -177,40 +177,38 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
         </span>
       </PreviewControls>
       
-      <ScrollArea className="flex-1 h-full">
-        <div className="p-4 min-h-full">
-          <div className="min-h-full flex items-start justify-center pb-20">
-            <Card
-              className={cn(
-                "resume-content bg-white rounded-lg shadow-md p-6 md:p-8 transition-all duration-200 mx-auto",
-                "border border-gray-200 w-full max-w-[21cm]"
+      <div className="flex-1 overflow-auto p-4 relative">
+        <div className="min-h-full flex items-start justify-center pb-20">
+          <Card
+            className={cn(
+              "resume-content bg-white rounded-lg shadow-md p-6 md:p-8 transition-all duration-200 mx-auto",
+              "border border-gray-200 w-full max-w-[21cm]"
+            )}
+            style={{
+              transform: `scale(${zoomLevel})`,
+              transformOrigin: 'top center',
+              marginBottom: `${(zoomLevel - 1) * 100}%`
+            }}
+          >
+            <div ref={resumeContentRef} className="resume-content">
+              {template === 'modern' ? (
+                <ModernTemplate
+                  data={safeData}
+                  settings={settings}
+                  onUpdateData={onDataChange}
+                  onGenerateWithAI={handleGenerateWithAI}
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center">
+                  <p className="text-gray-500">
+                    {template.charAt(0).toUpperCase() + template.slice(1)} template preview
+                  </p>
+                </div>
               )}
-              style={{
-                transform: `scale(${zoomLevel})`,
-                transformOrigin: 'top center',
-                marginBottom: `${(zoomLevel - 1) * 100}%`
-              }}
-            >
-              <div ref={resumeContentRef} className="resume-content">
-                {template === 'modern' ? (
-                  <ModernTemplate
-                    data={safeData}
-                    settings={settings}
-                    onUpdateData={onDataChange}
-                    onGenerateWithAI={handleGenerateWithAI}
-                  />
-                ) : (
-                  <div className="h-full flex items-center justify-center">
-                    <p className="text-gray-500">
-                      {template.charAt(0).toUpperCase() + template.slice(1)} template preview
-                    </p>
-                  </div>
-                )}
-              </div>
-            </Card>
-          </div>
+            </div>
+          </Card>
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };

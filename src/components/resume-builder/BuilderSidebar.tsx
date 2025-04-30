@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -26,15 +25,7 @@ import {
   Settings, 
   Wand2,
   CloudLightning,
-  Loader,
-  Search,
-  ScrollText,
-  MapPin,
-  Award,
-  Globe,
-  FolderKanban,
-  PenTool,
-  Palette
+  Loader
 } from 'lucide-react';
 
 interface BuilderSidebarProps {
@@ -43,7 +34,7 @@ interface BuilderSidebarProps {
   aiEnabled: boolean;
   aiGenerating: boolean;
   onSectionChange: (section: string) => void;
-  onGenerateWithAI?: () => Promise<void>;
+  onGenerateWithAI?: () => void;
 }
 
 const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
@@ -84,7 +75,7 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
                   isActive={activeSection === "personal"}
                   onClick={() => onSectionChange("personal")}
                 >
-                  <UserRound className="h-4 w-4 text-resume-purple" />
+                  <UserRound className="h-4 w-4" />
                   <span>Personal Info</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -94,7 +85,7 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
                   isActive={activeSection === "summary"}
                   onClick={() => onSectionChange("summary")}
                 >
-                  <ScrollText className="h-4 w-4 text-resume-purple" />
+                  <FileText className="h-4 w-4" />
                   <span>Summary</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -104,7 +95,7 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
                   isActive={activeSection === "experience"}
                   onClick={() => onSectionChange("experience")}
                 >
-                  <Briefcase className="h-4 w-4 text-resume-purple" />
+                  <Briefcase className="h-4 w-4" />
                   <span>Experience</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -114,7 +105,7 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
                   isActive={activeSection === "education"}
                   onClick={() => onSectionChange("education")}
                 >
-                  <GraduationCap className="h-4 w-4 text-resume-purple" />
+                  <GraduationCap className="h-4 w-4" />
                   <span>Education</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -124,7 +115,7 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
                   isActive={activeSection === "skills"}
                   onClick={() => onSectionChange("skills")}
                 >
-                  <Award className="h-4 w-4 text-resume-purple" />
+                  <Code className="h-4 w-4" />
                   <span>Skills</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -134,18 +125,8 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
                   isActive={activeSection === "projects"}
                   onClick={() => onSectionChange("projects")}
                 >
-                  <FolderKanban className="h-4 w-4 text-resume-purple" />
+                  <Code className="h-4 w-4" />
                   <span>Projects</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  isActive={activeSection === "languages"}
-                  onClick={() => onSectionChange("languages")}
-                >
-                  <Globe className="h-4 w-4 text-resume-purple" />
-                  <span>Languages</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -163,7 +144,7 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
                   isActive={activeSection === "templates"}
                   onClick={() => onSectionChange("templates")}
                 >
-                  <LayoutPanelLeft className="h-4 w-4 text-resume-purple" />
+                  <LayoutPanelLeft className="h-4 w-4" />
                   <span>Templates</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -173,18 +154,8 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
                   isActive={activeSection === "settings"}
                   onClick={() => onSectionChange("settings")}
                 >
-                  <Settings className="h-4 w-4 text-resume-purple" />
+                  <Settings className="h-4 w-4" />
                   <span>Settings</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  isActive={activeSection === "design"}
-                  onClick={() => onSectionChange("design")}
-                >
-                  <Palette className="h-4 w-4 text-resume-purple" />
-                  <span>Design</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
