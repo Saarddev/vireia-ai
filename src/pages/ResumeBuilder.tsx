@@ -6,6 +6,7 @@ import { SidebarProvider, Sidebar, SidebarInset } from "@/components/ui/sidebar"
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import BuilderHeader from '@/components/resume-builder/BuilderHeader';
 import BuilderSidebar from '@/components/resume-builder/BuilderSidebar';
 import AISuggestion from '@/components/resume-builder/AISuggestion';
@@ -23,6 +24,7 @@ import { useResumeAI } from '@/hooks/use-resume-ai';
 import { supabase } from '@/integrations/supabase/client';
 import ProjectForm from '@/components/resume-builder/ProjectForm';
 import { Paintbrush } from 'lucide-react';
+import { Education, ResumeData } from '@/types/resume';
 
 interface AISuggestionData {
   type: string;
@@ -191,7 +193,7 @@ const ResumeBuilder = () => {
                   experienceContext: {
                     title: currentProject.title,
                     company: "Project", // Reuse the field
-                    location: currentProject.technologies?.join(", ") || "",
+                    location: (currentProject.technologies || []).join(", ") || "",
                     startDate: currentProject.startDate,
                     endDate: currentProject.endDate,
                     description: currentProject.description
@@ -302,7 +304,7 @@ const ResumeBuilder = () => {
       case "ai":
         return (
           <AIAssistant
-            resumeData={resumeData}
+            resumeData={resumeData as ResumeData}
             enabled={aiEnabled}
           />
         );
@@ -329,16 +331,18 @@ const ResumeBuilder = () => {
         />
 
         <div className="flex-1 flex">
-          <Sidebar side="left" variant="floating" collapsible="icon">
-            <BuilderSidebar
-              progress={calculateProgress(resumeData)}
-              activeSection={activeSection}
-              aiEnabled={aiEnabled}
-              aiGenerating={isGenerating}
-              onSectionChange={setActiveSection}
-              onGenerateWithAI={handleGenerateAI}
-            />
-          </Sidebar>
+          <SidebarProvider>
+            <Sidebar side="left" variant="floating" collapsible="icon">
+              <BuilderSidebar
+                progress={calculateProgress(resumeData)}
+                activeSection={activeSection}
+                aiEnabled={aiEnabled}
+                aiGenerating={isGenerating}
+                onSectionChange={setActiveSection}
+                onGenerateWithAI={handleGenerateAI}
+              />
+            </Sidebar>
+          </SidebarProvider>
 
           <SidebarInset className="flex flex-col p-4 lg:p-6">
             <AISuggestion
@@ -367,7 +371,7 @@ const ResumeBuilder = () => {
 
               <div className="xl:col-span-7 h-full overflow-auto">
                 <ResumePreview
-                  data={resumeData}
+                  data={resumeData as ResumeData}
                   template={selectedTemplate}
                   settings={resumeSettings}
                   onDataChange={(section, data) => handleDataChange(section, data)}

@@ -237,6 +237,39 @@ Return in format: "MM YYYY - MM YYYY"`;
   }
 }
 
+function generateATSScanPrompt(text: string) {
+  return `
+You are an expert ATS (Applicant Tracking System) analyzer with deep knowledge of how modern ATS systems work.
+Thoroughly analyze this resume content and provide a comprehensive ATS compatibility assessment:
+
+${text}
+
+Evaluate the resume based on the following criteria:
+1. Keyword optimization
+2. Formatting and structure
+3. Use of action verbs
+4. Quantifiable achievements
+5. Technical skill representation
+6. Overall ATS compatibility
+
+Return your analysis as a JSON object with the following structure:
+{
+  "score": <number 0-100 representing overall ATS compatibility>,
+  "metrics": [
+    {"name": "Keyword Optimization", "score": <0-100>},
+    {"name": "Formatting & Structure", "score": <0-100>},
+    {"name": "Action Verbs Usage", "score": <0-100>},
+    {"name": "Quantifiable Achievements", "score": <0-100>},
+    {"name": "Technical Skills Representation", "score": <0-100>}
+  ],
+  "strengths": [<array of 2-4 specific strengths as strings>],
+  "improvements": [<array of 2-4 specific areas for improvement as strings>],
+  "keywords": [<array of 5-10 highly relevant keywords that should be included>]
+}
+
+Provide a legitimate, accurate score that represents the resume's true ATS compatibility. Be honest but constructive.`;
+}
+
 function parseGeminiResponse(response: any, type: string) {
   if (!response?.candidates?.[0]?.content?.parts?.[0]?.text) {
     throw new Error('Invalid response format from Gemini API');
@@ -245,6 +278,14 @@ function parseGeminiResponse(response: any, type: string) {
   const text = response.candidates[0].content.parts[0].text;
   
   try {
+    if (type === "ats-scan") {
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      throw new Error('No valid JSON found in ATS scan response');
+    }
+
     if (type === "experience-description") {
       // Ensure description is returned as bullet points
       let formattedDescription = text.trim();
@@ -422,6 +463,12 @@ serve(async (req) => {
         throw new Error("Missing 'text' parameter for summarization");
       }
       prompt = generateSummarizationPrompt(text);
+    } else if (type === "ats-scan") {
+      if (!text) {
+        throw new Error("Missing 'text' parameter for ATS scanning");
+      }
+      prompt = generateATSScanPrompt(text);
+      console.log("Generating ATS scan with Gemini API");
     } else if (requestType.startsWith('education-')) {
       prompt = generateEducationPrompt(requestType, educationContext);
     } else if (requestType === "summary") {

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ZoomIn, ZoomOut, Download, Printer } from 'lucide-react';
+import { ZoomIn, ZoomOut, Download, Printer, FileText } from 'lucide-react';
 
 export interface PreviewControlsProps {
   zoomLevel: number;
@@ -9,6 +9,7 @@ export interface PreviewControlsProps {
   onZoomOut: () => void;
   onDownload: () => void;
   onPrint?: () => void;
+  onATSScan?: () => void;
   children?: React.ReactNode;
 }
 
@@ -18,6 +19,7 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
   onZoomOut,
   onDownload,
   onPrint,
+  onATSScan,
   children
 }) => {
   return (
@@ -46,6 +48,17 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
         </Button>
       </div>
       <div className="flex items-center space-x-2">
+        {onATSScan && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onATSScan}
+            className="text-resume-purple hover:bg-purple-50 border-purple-200 hover:border-purple-300"
+          >
+            <FileText className="w-4 h-4 mr-1.5" />
+            <span className="hidden sm:inline">ATS Scan</span>
+          </Button>
+        )}
         {onPrint && (
           <Button
             variant="outline"

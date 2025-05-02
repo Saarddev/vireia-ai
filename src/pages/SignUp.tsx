@@ -1,206 +1,165 @@
 
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { FileText, Mail, KeyRound } from 'lucide-react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
-import ResetPasswordDialog from '@/components/auth/ResetPasswordDialog';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+
+const signUpSchema = z.object({
+  email: z.string().email({ message: 'Please enter a valid email address' }),
+  password: z
+    .string()
+    .min(8, { message: 'Password must be at least 8 characters long' })
+    .regex(/[A-Z]/, { message: 'Password must contain at least one capital letter' })
+    .regex(/[0-9]/, { message: 'Password must contain at least one number' }),
+  confirmPassword: z.string(),
+  fullName: z.string().min(2, { message: 'Please enter your full name' }),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
+});
+
+type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showResetDialog, setShowResetDialog] = useState(false);
+  const form = useForm<SignUpFormValues>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+      fullName: '',
+    },
+  });
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    // Validate password match
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
-    }
-
-    // Validate password strength
-    if (password.length < 6) {
-      setError('Password should be at least 6 characters long');
-      setLoading(false);
-      return;
-    }
-
-    // Check if email already exists
+  const onSubmit = async (data: SignUpFormValues) => {
     try {
-      const { data: users, error: userError } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("email", email)
-        .single();
-
-      // If Supabase throws an error (like table doesn't have email), just proceed
-      if (!userError && users) {
-        setError('This email is already associated with an account.');
-        setLoading(false);
-        return;
-      }
-    } catch (checkError) {
-      // If there's an error checking the email, just proceed with signup
-      console.log("Error checking email:", checkError);
-    }
-
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+      const { error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            full_name: data.fullName,
+          },
+        },
       });
 
-      // Supabase may error for existing user, etc. Catch these as well.
-      if (error) {
-        if (error.message && error.message.toLowerCase().includes('user already registered')) {
-          setError('This email is already associated with an account.');
-        } else {
-          setError(error.message || 'An error occurred during sign up');
-        }
-        setLoading(false);
-        return;
-      }
-      
-      toast({
-        title: "Sign up successful 🎉",
-        description: "Check your inbox for a verification link.",
-      });
+      if (error) throw error;
 
-      // Wait briefly and then navigate
-      setTimeout(() => {
-        navigate('/sign-in');
-      }, 1200);
-
+      toast.success('Registration successful! Please check your email for verification.');
+      navigate('/sign-in');
     } catch (error: any) {
-      setError(error.message || "An error occurred during sign up");
-      toast({
-        title: "Sign up failed",
-        description: error.message || "An error occurred during sign up",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+      toast.error(error.message || 'An error occurred during registration.');
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-resume-purple/60 via-white/80 to-resume-violet/40 animate-fade-in">
-      <div className="p-4 border-b flex justify-center">
-        <div 
-          className="flex items-center gap-2 cursor-pointer"
-          onClick={() => navigate('/')}
-        >
-          <div className="bg-resume-purple rounded-lg p-1.5 shadow-md animate-float">
-            <FileText className="h-5 w-5 text-white" />
-          </div>
-          <span className="font-bold text-xl bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">ResumeAI</span>
-        </div>
-      </div>
-      <div className="flex-1 flex flex-col justify-center items-center bg-grid-pattern">
-        <Card className="w-full max-w-md rounded-2xl shadow-2xl border-0 bg-white/75 backdrop-blur-lg animate-fade-in">
-          <CardHeader>
-            <div className="flex flex-col items-center gap-2">
-              <CardTitle className="text-3xl font-extrabold text-center bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">
-                Create Account
-              </CardTitle>
-              <CardDescription className="text-center text-base text-resume-gray">
-                Start building your modern resume. It's fast, secure & free!
-              </CardDescription>
-            </div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-50 via-white to-purple-50/40 p-4">
+      <div className="w-full max-w-md">
+        <Card className="border-gray-100 shadow-xl">
+          <CardHeader className="space-y-1 text-center">
+            <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
+            <CardDescription>Enter your information to get started</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSignUp} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-2.5 h-5 w-5 text-resume-purple/70" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@email.com"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    className="pl-10"
-                    autoComplete="username"
-                    required
-                  />
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John Doe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="johndoe@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="●●●●●●●●" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="●●●●●●●●" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700">
+                  Create Account
+                </Button>
+              </form>
+            </Form>
+            <div className="mt-4">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator className="w-full" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-muted-foreground">Or continue with</span>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <KeyRound className="absolute left-3 top-2.5 h-5 w-5 text-resume-purple/70" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Create a strong password"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="pl-10"
-                    autoComplete="new-password"
-                    required
-                  />
-                </div>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <Button variant="outline" className="w-full">
+                  Google
+                </Button>
+                <Button variant="outline" className="w-full">
+                  GitHub
+                </Button>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <div className="relative">
-                  <KeyRound className="absolute left-3 top-2.5 h-5 w-5 text-resume-purple/70" />
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="Confirm your password"
-                    value={confirmPassword}
-                    onChange={e => setConfirmPassword(e.target.value)}
-                    className="pl-10"
-                    autoComplete="new-password"
-                    required
-                  />
-                </div>
-              </div>
-              {error && (
-                <div className="text-sm text-red-500 pt-1 text-center font-medium">
-                  {error}
-                </div>
-              )}
-              <Button
-                type="submit"
-                className="w-full bg-gradient-to-r from-resume-purple to-resume-violet hover:from-resume-purple-dark hover:to-resume-violet transition shadow-md"
-                disabled={loading}
-                size="lg"
-              >
-                {loading ? "Creating account..." : "Sign Up"}
-              </Button>
-            </form>
-            <div className="flex flex-col sm:flex-row justify-between mt-4 text-xs sm:text-sm text-resume-gray items-center">
-              <div>
-                Already have an account?{' '}
-                <Link to="/sign-in" className="text-resume-purple font-semibold hover:underline">Sign in</Link>
-              </div>
-              <button
-                onClick={() => setShowResetDialog(true)}
-                className="mt-2 sm:mt-0 text-resume-purple hover:underline font-semibold transition-all"
-                type="button"
-              >Forgot password?</button>
             </div>
           </CardContent>
+          <CardFooter className="flex flex-wrap items-center justify-between">
+            <div className="text-sm text-muted-foreground">
+              Already have an account?{' '}
+              <Link to="/sign-in" className="text-purple-600 hover:underline">
+                Sign in
+              </Link>
+            </div>
+          </CardFooter>
         </Card>
       </div>
-      <ResetPasswordDialog open={showResetDialog} onClose={() => setShowResetDialog(false)} />
     </div>
   );
 };

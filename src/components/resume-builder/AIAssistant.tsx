@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
+import ATSScanButton from './ATSScanButton';
 import { 
   Wand2, 
   BarChart3, 
@@ -28,7 +29,9 @@ import {
   Plus,
   ChevronDown,
   ChevronUp,
-  FileSpreadsheet
+  FileSpreadsheet,
+  FileText,
+  Award
 } from 'lucide-react';
 
 interface AIAssistantProps {
@@ -43,6 +46,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>("score");
   const [progress, setProgress] = useState(0);
   const [stage, setStage] = useState(0);
+  const [atsResults, setAtsResults] = useState<any>(null);
   
   // Animation for progress
   useEffect(() => {
@@ -87,6 +91,11 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
     }, 3000);
   };
 
+  const handleATSScanComplete = (results: any) => {
+    setAtsResults(results);
+    setExpandedSection("ats");
+  };
+
   const toggleSection = (section: string) => {
     if (expandedSection === section) {
       setExpandedSection(null);
@@ -107,25 +116,34 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
             Get personalized insights to build a standout resume
           </p>
         </div>
-        {enabled && !isAnalyzing && (
-          <Button 
-            onClick={handleAnalyze} 
-            className="bg-resume-purple hover:bg-resume-purple/90 flex items-center gap-2 shadow-md hover:shadow-xl transition-all"
-            disabled={isAnalyzing}
-          >
-            {isAnalyzing ? (
-              <>
-                <RefreshCw className="h-4 w-4 animate-spin" /> 
-                Analyzing...
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4" /> 
-                {analysisComplete ? "Re-Analyze Resume" : "Analyze Resume"}
-              </>
-            )}
-          </Button>
-        )}
+        <div className="flex gap-3">
+          {enabled && !isAnalyzing && (
+            <>
+              <ATSScanButton 
+                resumeData={resumeData}
+                onScanComplete={handleATSScanComplete}
+                disabled={!enabled}
+              />
+              <Button 
+                onClick={handleAnalyze} 
+                className="bg-resume-purple hover:bg-resume-purple/90 flex items-center gap-2 shadow-md hover:shadow-xl transition-all"
+                disabled={isAnalyzing}
+              >
+                {isAnalyzing ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin" /> 
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" /> 
+                    {analysisComplete ? "Re-Analyze Resume" : "Analyze Resume"}
+                  </>
+                )}
+              </Button>
+            </>
+          )}
+        </div>
       </div>
       
       {!enabled && (
@@ -197,6 +215,121 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
       
       {enabled && analysisComplete && (
         <div className="space-y-6">
+          {/* ATS Score Card */}
+          {atsResults && (
+            <Card className="overflow-hidden border-resume-purple/20 shadow-lg hover:shadow-xl transition-all">
+              <div 
+                className="p-6 border-b border-resume-purple/10 flex justify-between items-center cursor-pointer bg-white dark:bg-gray-900"
+                onClick={() => toggleSection("ats")}
+              >
+                <div className="flex items-center">
+                  <div className="h-10 w-10 rounded-full bg-resume-purple/10 flex items-center justify-center mr-4">
+                    <Award className="h-5 w-5 text-resume-purple" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">ATS Compatibility Score</h3>
+                    <p className="text-sm text-muted-foreground">How well your resume performs with Applicant Tracking Systems</p>
+                  </div>
+                </div>
+                <div className="flex items-center">
+                  <div className="text-right mr-4">
+                    <div className="text-3xl font-bold text-resume-purple">{atsResults.score || 0}</div>
+                    <Badge variant="outline" className={`
+                      ${atsResults.score >= 80 ? 'bg-green-50 text-green-600 border-green-200' : 
+                        atsResults.score >= 60 ? 'bg-yellow-50 text-yellow-600 border-yellow-200' : 
+                        'bg-red-50 text-red-600 border-red-200'}
+                    `}>
+                      {atsResults.score >= 80 ? 'Excellent' : 
+                       atsResults.score >= 60 ? 'Good' : 
+                       'Needs Improvement'}
+                    </Badge>
+                  </div>
+                  {expandedSection === "ats" ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                </div>
+              </div>
+              
+              {expandedSection === "ats" && (
+                <div className="p-6 space-y-6 bg-gray-50/80 dark:bg-gray-800/20 backdrop-blur-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      {(atsResults.metrics || []).map((metric: any, index: number) => (
+                        <div key={index} className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="font-medium">{metric.name}</span>
+                            <span className="text-resume-gray">{metric.score}%</span>
+                          </div>
+                          <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full transition-all duration-1000 ease-out ${
+                                metric.score >= 80 ? 'bg-green-500' : 
+                                metric.score >= 60 ? 'bg-blue-500' : 
+                                metric.score >= 40 ? 'bg-amber-500' : 
+                                'bg-red-500'
+                              }`}
+                              style={{ width: `${metric.score}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
+                        <h4 className="font-medium text-sm flex items-center mb-2">
+                          <ThumbsUp className="h-4 w-4 mr-2 text-green-500" /> ATS Strengths
+                        </h4>
+                        <ul className="text-sm space-y-2">
+                          {(atsResults.strengths || []).map((strength: string, index: number) => (
+                            <li key={index} className="flex items-start">
+                              <CheckCircle2 className="h-4 w-4 mr-2 text-green-500 mt-0.5 flex-shrink-0" />
+                              <span>{strength}</span>
+                            </li>
+                          ))}
+                          {(!atsResults.strengths || atsResults.strengths.length === 0) && (
+                            <li className="text-gray-500 italic">No strengths identified</li>
+                          )}
+                        </ul>
+                      </div>
+                      
+                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
+                        <h4 className="font-medium text-sm flex items-center mb-2">
+                          <Target className="h-4 w-4 mr-2 text-amber-500" /> Areas for Improvement
+                        </h4>
+                        <ul className="text-sm space-y-2">
+                          {(atsResults.improvements || []).map((improvement: string, index: number) => (
+                            <li key={index} className="flex items-start">
+                              <AlertCircle className="h-4 w-4 mr-2 text-amber-500 mt-0.5 flex-shrink-0" />
+                              <span>{improvement}</span>
+                            </li>
+                          ))}
+                          {(!atsResults.improvements || atsResults.improvements.length === 0) && (
+                            <li className="text-gray-500 italic">No areas for improvement identified</li>
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {atsResults.keywords && (
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
+                      <h4 className="font-medium text-sm flex items-center mb-3">
+                        <Search className="h-4 w-4 mr-2 text-resume-purple" /> 
+                        Recommended Keywords
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {atsResults.keywords.map((keyword: string, index: number) => (
+                          <Badge key={index} variant="secondary" className="bg-resume-purple/10 text-resume-purple border-resume-purple/20">
+                            {keyword}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </Card>
+          )}
+
           {/* Resume Score Card */}
           <Card className="overflow-hidden border-resume-purple/20 shadow-lg hover:shadow-xl transition-all">
             <div 
