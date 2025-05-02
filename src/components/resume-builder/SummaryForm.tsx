@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Form,
   FormControl,
@@ -31,6 +31,7 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
 }) => {
   const [showToolkit, setShowToolkit] = useState(false);
   const { toast } = useToast();
+  const generationRequestIdRef = useRef<string>(Date.now().toString());
   const form = useForm({
     defaultValues: {
       summary: data
@@ -76,6 +77,29 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
     return <p className="text-gray-700 whitespace-pre-line mt-2">{text}</p>;
   };
 
+  // Generate a unique ID for each generation request to prevent duplicates
+  const handleGenerateWithAI = async () => {
+    try {
+      // Generate a new request ID to ensure we get fresh results
+      generationRequestIdRef.current = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      
+      const result = await onGenerateWithAI();
+      if (result) {
+        form.setValue("summary", result);
+        onChange(result);
+      }
+      return "";
+    } catch (error) {
+      console.error("Error generating summary:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate summary. Please try again.",
+        variant: "destructive"
+      });
+      return "";
+    }
+  };
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4 flex items-center">
@@ -99,23 +123,7 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
               size="sm" 
               variant="outline" 
               className="mt-2 border-resume-purple text-resume-purple hover:bg-resume-purple hover:text-white transition-all duration-300"
-              onClick={async () => {
-                try {
-                  const result = await onGenerateWithAI();
-                  if (result) {
-                    form.setValue("summary", result);
-                    onChange(result);
-                  }
-                } catch (error) {
-                  console.error("Error generating summary:", error);
-                  toast({
-                    title: "Error",
-                    description: "Failed to generate summary. Please try again.",
-                    variant: "destructive"
-                  });
-                }
-                return "";
-              }}
+              onClick={handleGenerateWithAI}
               disabled={isGenerating}
             >
               {isGenerating ? (
@@ -149,18 +157,7 @@ const SummaryForm: React.FC<SummaryFormProps> = ({
                 >
                   <div className={`absolute -top-12 right-0 z-10 transform transition-opacity transition-transform duration-300 ease-out ${showToolkit ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
                     <AIHoverToolkit 
-                      onComplete={async () => {
-                        try {
-                          const result = await onGenerateWithAI();
-                          if (result) {
-                            form.setValue("summary", result);
-                            onChange(result);
-                          }
-                        } catch (error) {
-                          console.error("Error generating summary:", error);
-                        }
-                        return "";
-                      }}
+                      onComplete={handleGenerateWithAI}
                       onAddChanges={() => {
                         const currentText = form.getValues("summary");
                         form.setValue("summary", currentText + "\n• ");

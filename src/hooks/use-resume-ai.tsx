@@ -28,11 +28,22 @@ export function useResumeAI() {
         throw new Error('Authentication required');
       }
 
+      // Generate a cache key based on the input data to prevent duplicate summaries
+      const cacheKey = `summary-${JSON.stringify(experience).slice(0, 100)}-${JSON.stringify(skills).slice(0, 50)}`;
+      const cachedSummary = localStorage.getItem(cacheKey);
+      
+      // If we have a cached result and it's not for education, use it
+      if (cachedSummary && !cacheKey.toLowerCase().includes('education')) {
+        return cachedSummary;
+      }
+
       const { data, error } = await supabase.functions.invoke('enhance-resume', {
         body: { 
           type: 'summary',
           experience,
-          skills
+          skills,
+          // Add a parameter to signal we want to preserve user's content
+          preserveUserContent: true
         }
       });
 
@@ -54,6 +65,12 @@ export function useResumeAI() {
         title: "Summary Generated",
         description: "Your professional summary has been generated."
       });
+      
+      // Don't cache education summaries to prevent duplicates
+      if (!cacheKey.toLowerCase().includes('education')) {
+        // Cache the result with a unique key based on input data
+        localStorage.setItem(cacheKey, data.summary);
+      }
       
       return data.summary;
 
@@ -94,7 +111,8 @@ export function useResumeAI() {
       const { data, error } = await supabase.functions.invoke('enhance-resume', {
         body: { 
           type: 'skills',
-          experience
+          experience,
+          preserveUserContent: true
         }
       });
 
@@ -150,10 +168,21 @@ export function useResumeAI() {
         throw new Error('Authentication required');
       }
 
+      // Generate a unique cache key for each description
+      const descriptionHash = description.slice(0, 50);
+      const cacheKey = `improve-${descriptionHash}`;
+      
+      // Check if we have a cached result
+      const cachedResult = localStorage.getItem(cacheKey);
+      if (cachedResult) {
+        return cachedResult;
+      }
+
       const { data, error } = await supabase.functions.invoke('enhance-resume', {
         body: { 
           type: 'improve',
-          description
+          description,
+          preserveUserContent: true
         }
       });
 
@@ -170,6 +199,9 @@ export function useResumeAI() {
         title: "Description Improved",
         description: "Your job description has been enhanced."
       });
+      
+      // Cache the result
+      localStorage.setItem(cacheKey, data.improved);
       
       return data.improved;
 

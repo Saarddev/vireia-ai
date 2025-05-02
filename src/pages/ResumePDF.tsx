@@ -36,14 +36,19 @@ const ResumePDF = () => {
   };
 
   return (
-    <div className="max-w-[800px] mx-auto p-8 bg-white print:p-0" style={{
-      fontFamily: resumeSettings.fontFamily || 'Inter',
-      fontSize: `${resumeSettings.fontSize || 10}pt`,
-      lineHeight: "1.5",
-      // Added properties to help with page sizing
-      pageBreakInside: "avoid",
-      printColorAdjust: "exact"
-    }}>
+    <div 
+      className="max-w-[800px] mx-auto p-8 bg-white print:p-0 my-8 shadow-lg" 
+      style={{
+        fontFamily: resumeSettings.fontFamily || 'Inter',
+        fontSize: `${resumeSettings.fontSize || 10}pt`,
+        lineHeight: "1.5",
+        // Properties to help with page sizing
+        pageBreakInside: "avoid",
+        printColorAdjust: "exact",
+        minHeight: "100%",
+        overflowY: "auto"
+      }}
+    >
       {/* Header */}
       <div className="pb-2 border-b-2 border-[#5d4dcd] mb-3">
         <h1 className="text-2xl font-bold text-gray-900 leading-tight tracking-tight pb-0 mb-1">

@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
@@ -24,7 +25,7 @@ Return ONLY a clean list of 4-6 bullet points, each starting with "• " (bullet
 Do not include any other text, explanations, or formatting in your response. Just the bullet points.`;
 }
 
-function generateSummaryPrompt(experience: string[], skills: string[]) {
+function generateSummaryPrompt(experience: string[], skills: string[], preserveUserContent = false) {
   return `
 As an expert resume writer, create a professional summary that will stand out on an ATS-scanned resume. Focus on:
 
@@ -39,18 +40,22 @@ ${experience ? experience.join('\n') : 'Not provided'}
 Skills highlight:
 ${skills ? skills.join(', ') : 'Not provided'}
 
+${preserveUserContent ? "IMPORTANT: Use ONLY information from the provided experience and skills. DO NOT invent new details, roles, or achievements not mentioned in the input. Stick closely to the facts present in the provided experience." : ""}
+
 Write a concise, powerful summary (3-5 sentences) that positions the candidate as a high-value professional.
-Format the summary as 4-6 bullet points, each starting with "• " (bullet symbol followed by a space).
+Format the summary as 3-4 bullet points, each starting with "• " (bullet symbol followed by a space).
 Each bullet should start with a strong action verb or adjective.
 
 Return only the bullet-formatted summary text.`;
 }
 
-function generateSkillsPrompt(experience: string[]) {
+function generateSkillsPrompt(experience: string[], preserveUserContent = false) {
   return `
 Extract technical and soft skills from the following experience, focusing on ATS-friendly terms:
 
 ${experience ? experience.join('\n') : 'Not provided'}
+
+${preserveUserContent ? "IMPORTANT: Only extract skills that are ACTUALLY MENTIONED in the experience provided. Do not invent skills or include generic skills that aren't clearly indicated in the text." : ""}
 
 Return as JSON in this format - be specific and include skills that reveal both professional expertise and personal strengths:
 {
@@ -60,10 +65,10 @@ Return as JSON in this format - be specific and include skills that reveal both 
 
 For technical skills, focus on specific technologies, tools, and methodologies.
 For soft skills, identify transferable abilities like leadership, communication, and problem-solving.
-Limit to 8-12 most relevant technical skills and 5-8 most important soft skills.`;
+Limit to 8-12 most relevant technical skills and 5-8 most important soft skills that appear in the text.`;
 }
 
-function generateImprovementPrompt(description: string) {
+function generateImprovementPrompt(description: string, preserveUserContent = false) {
   return `
 Transform this resume description into impactful bullet points following these guidelines:
 
@@ -76,13 +81,15 @@ Transform this resume description into impactful bullet points following these g
 Original description:
 ${description || 'Not provided'}
 
+${preserveUserContent ? "IMPORTANT: Maintain the original meaning and core content of the description. Enhance and restructure but DO NOT add fictional achievements, technologies, or responsibilities that weren't in the original text." : ""}
+
 Format the output as 3-5 bullet points, each starting with "• " (bullet symbol followed by a space).
 Focus on quality over quantity - each bullet should demonstrate clear value and impact.
 
 Return only the formatted bullet points, with no additional text.`;
 }
 
-function generateExperiencePrompt(context: any = {}) {
+function generateExperiencePrompt(context: any = {}, preserveUserContent = false) {
   return `
 Create powerful bullet points for this work experience that will stand out on an ATS-scanned resume:
 
@@ -94,10 +101,12 @@ Duration: ${context?.startDate || 'Not specified'} to ${context?.endDate || 'Pre
 Current description (if any):
 ${context?.description || ''}
 
+${preserveUserContent ? "IMPORTANT: Enhance what's already provided but DO NOT add fabricated achievements or responsibilities. Stick to the information that can be reasonably inferred from the original text." : ""}
+
 Create 4-6 bullet points that:
 1. Start each bullet with a strong action verb in past tense
-2. Include specific achievements with quantifiable results (%, $, numbers)
-3. Highlight technologies, methodologies, and tools used
+2. Include specific achievements with quantifiable results (%, $, numbers) where appropriate
+3. Highlight technologies, methodologies, and tools used that are mentioned in the original text
 4. Demonstrate problem-solving abilities and business impact
 5. Incorporate keywords relevant to the job title and industry
 6. Keep each bullet to 1-2 concise lines
@@ -170,7 +179,7 @@ Return only a valid JSON resume with the following structure:
 }`;
 }
 
-function generateEducationPrompt(type: string, context: any = {}) {
+function generateEducationPrompt(type: string, context: any = {}, preserveUserContent = false) {
   const field = type.replace('education-', '');
   
   switch (field) {
@@ -179,6 +188,8 @@ function generateEducationPrompt(type: string, context: any = {}) {
 - Institution: ${context?.institution || 'Not specified'}
 - Field: ${context?.field || 'Not specified'}
 - Level: ${context?.level || "Bachelor's"}
+
+${preserveUserContent ? "IMPORTANT: If specific degree information is provided, format it professionally but do not change it substantially." : ""}
 
 Requirements:
 1. Be specific and formal
@@ -194,6 +205,8 @@ Return only the degree name.`;
 - Location: ${context?.location || 'Not specified'}
 - Field: ${context?.field || 'Not specified'}
 
+${preserveUserContent ? "IMPORTANT: If an institution name is already provided, return it with proper formatting but don't change it to a different institution." : ""}
+
 Requirements:
 1. Use the official institution name
 2. Be accurate and specific
@@ -207,6 +220,8 @@ Return only the institution name.`;
 - Degree: ${context?.degree || 'Not specified'}
 - Institution: ${context?.institution || 'Not specified'}
 - Field: ${context?.field || 'Not specified'}
+
+${preserveUserContent ? "IMPORTANT: If a description is already provided, enhance its format and clarity but preserve the core information and achievements mentioned." : ""}
 
 Create a description that:
 1. Highlights key achievements in a natural way
@@ -223,6 +238,8 @@ Return only the description.`;
       return `Generate education dates based on:
 - Degree Level: ${context?.degree || "Bachelor's"}
 - Current Status: ${context?.status || 'Graduated'}
+
+${preserveUserContent ? "IMPORTANT: If dates are already provided, maintain them with proper formatting." : ""}
 
 Requirements:
 1. Use MM YYYY format
@@ -449,7 +466,7 @@ serve(async (req) => {
       throw new Error(`Invalid JSON in request body: ${err.message}`);
     });
     
-    const { type, text, linkedinData, resumeTemplate, experience, skills, description, educationContext, experienceContext } = requestData;
+    const { type, text, linkedinData, resumeTemplate, experience, skills, description, educationContext, experienceContext, preserveUserContent } = requestData;
     
     if (!type) {
       throw new Error("Missing 'type' parameter in request");
@@ -470,24 +487,24 @@ serve(async (req) => {
       prompt = generateATSScanPrompt(text);
       console.log("Generating ATS scan with Gemini API");
     } else if (requestType.startsWith('education-')) {
-      prompt = generateEducationPrompt(requestType, educationContext);
+      prompt = generateEducationPrompt(requestType, educationContext, preserveUserContent);
     } else if (requestType === "summary") {
       if (!Array.isArray(experience) || experience.length === 0) {
         throw new Error("Insufficient experience data for summary generation");
       }
-      prompt = generateSummaryPrompt(experience, skills);
+      prompt = generateSummaryPrompt(experience, skills, preserveUserContent);
     } else if (requestType === "skills") {
       if (!Array.isArray(experience) || experience.length === 0) {
         throw new Error("Insufficient experience data for skills extraction");
       }
-      prompt = generateSkillsPrompt(experience);
+      prompt = generateSkillsPrompt(experience, preserveUserContent);
     } else if (requestType === "improve") {
       if (!description) {
         throw new Error("Missing 'description' parameter for improvement");
       }
-      prompt = generateImprovementPrompt(description);
+      prompt = generateImprovementPrompt(description, preserveUserContent);
     } else if (requestType === "experience-description") {
-      prompt = generateExperiencePrompt(experienceContext);
+      prompt = generateExperiencePrompt(experienceContext, preserveUserContent);
     } else {
       // Full resume enhancement
       if (!linkedinData) {
