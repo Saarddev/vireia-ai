@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -28,21 +27,26 @@ import {
   Plus,
   ChevronDown,
   ChevronUp,
-  FileSpreadsheet
+  FileSpreadsheet,
+  FileSearch
 } from 'lucide-react';
+import ATSScanButton from '../resume-preview/ATSScanButton';
+import { useToast } from "@/hooks/use-toast";
 
 interface AIAssistantProps {
   resumeData: any;
   enabled: boolean;
+  onUpdateResume?: (updatedResume: any) => void;
 }
 
-const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
+const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled, onUpdateResume }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState([]);
   const [expandedSection, setExpandedSection] = useState<string | null>("score");
   const [progress, setProgress] = useState(0);
   const [stage, setStage] = useState(0);
+  const { toast } = useToast();
   
   // Animation for progress
   useEffect(() => {
@@ -353,6 +357,75 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
                     <p className="text-muted-foreground">No suggestions yet. Click "Analyze Resume" to generate recommendations.</p>
                   </div>
                 )}
+              </div>
+            )}
+          </Card>
+          
+          {/* ATS Scanner - New Addition */}
+          <Card className="overflow-hidden border-resume-purple/20 shadow-lg hover:shadow-xl transition-all">
+            <div 
+              className="p-6 border-b border-resume-purple/10 flex justify-between items-center cursor-pointer bg-white dark:bg-gray-900"
+              onClick={() => toggleSection("ats")}
+            >
+              <div className="flex items-center">
+                <div className="h-10 w-10 rounded-full bg-resume-purple/10 flex items-center justify-center mr-4">
+                  <FileSearch className="h-5 w-5 text-resume-purple" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">ATS Resume Scanner</h3>
+                  <p className="text-sm text-muted-foreground">Optimize your resume for Applicant Tracking Systems</p>
+                </div>
+              </div>
+              <div>
+                {expandedSection === "ats" ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+              </div>
+            </div>
+            
+            {expandedSection === "ats" && (
+              <div className="p-6 space-y-4 bg-gray-50/80 dark:bg-gray-800/20 backdrop-blur-sm">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-100 dark:border-gray-700">
+                  <div className="space-y-4">
+                    <div className="flex flex-col items-center text-center mb-4">
+                      <FileSearch className="h-12 w-12 text-purple-600 mb-3" />
+                      <h3 className="text-lg font-medium">ATS Resume Scanner</h3>
+                      <p className="text-sm text-gray-600 max-w-md mt-1">
+                        Our ATS scanner analyzes your resume against industry standards and specific job descriptions, giving you actionable feedback to improve your chances of getting past automated filters.
+                      </p>
+                    </div>
+                    
+                    <div className="grid gap-4">
+                      <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                        <h4 className="font-medium text-sm mb-2 text-purple-800 dark:text-purple-200">What our ATS Scanner checks:</h4>
+                        <ul className="text-sm space-y-2">
+                          <li className="flex items-start">
+                            <CheckCircle2 className="h-4 w-4 text-green-500 mr-2 mt-0.5" /> 
+                            <span>Keyword matching with job descriptions</span>
+                          </li>
+                          <li className="flex items-start">
+                            <CheckCircle2 className="h-4 w-4 text-green-500 mr-2 mt-0.5" /> 
+                            <span>Resume formatting and structure</span>
+                          </li>
+                          <li className="flex items-start">
+                            <CheckCircle2 className="h-4 w-4 text-green-500 mr-2 mt-0.5" /> 
+                            <span>Content quality and impact statements</span>
+                          </li>
+                          <li className="flex items-start">
+                            <CheckCircle2 className="h-4 w-4 text-green-500 mr-2 mt-0.5" /> 
+                            <span>Industry-specific optimization</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row gap-3 mt-2 justify-center">
+                      <ATSScanButton 
+                        resumeData={resumeData}
+                        onUpdateResume={onUpdateResume}
+                        className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </Card>
