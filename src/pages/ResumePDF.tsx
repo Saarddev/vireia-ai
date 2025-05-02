@@ -12,11 +12,11 @@ const ResumePDF = () => {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
-  const formatBulletPoints = (text: string) => {
+  const formatBulletPoints = (text: string, limit?: number) => {
     if (!text) return [];
     
     // Handle text that already has bullet points
-    return text
+    const points = text
       .split('\n')
       .filter(point => point.trim() !== '')
       .map(point => {
@@ -30,21 +30,27 @@ const ResumePDF = () => {
         
         return cleanPoint;
       });
+    
+    // Apply limit if specified
+    return limit ? points.slice(0, limit) : points;
   };
 
   return (
     <div className="max-w-[800px] mx-auto p-8 bg-white print:p-0" style={{
       fontFamily: resumeSettings.fontFamily || 'Inter',
       fontSize: `${resumeSettings.fontSize || 10}pt`,
-      lineHeight: "1.5"
+      lineHeight: "1.5",
+      // Added properties to help with page sizing
+      pageBreakInside: "avoid",
+      printColorAdjust: "exact"
     }}>
       {/* Header */}
-      <div className="pb-4 border-b-2 border-[#5d4dcd] mb-4">
+      <div className="pb-2 border-b-2 border-[#5d4dcd] mb-3">
         <h1 className="text-2xl font-bold text-gray-900 leading-tight tracking-tight pb-0 mb-1">
           {resumeData.personal.name}
         </h1>
-        <p className="text-lg font-medium text-[#5d4dcd] mt-1">{resumeData.personal.title}</p>
-        <div className="flex flex-wrap text-sm text-gray-700 mt-2 gap-x-2 gap-y-1 items-center">
+        <p className="text-lg font-medium text-[#5d4dcd] mt-0.5">{resumeData.personal.title}</p>
+        <div className="flex flex-wrap text-sm text-gray-700 mt-1.5 gap-x-2 gap-y-1 items-center">
           {resumeData.personal.email && (
             <span className="inline-flex items-center">
               <span>{resumeData.personal.email}</span>
@@ -91,28 +97,28 @@ const ResumePDF = () => {
         </div>
       </div>
 
-      {/* Summary */}
+      {/* Summary - Limited to exactly 3 bullet points */}
       {resumeData.summary && (
-        <div className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">
+        <div className="mb-4">
+          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide">
             Summary
           </h2>
           <ul className="list-disc pl-4 text-sm text-gray-700 font-normal leading-relaxed">
-            {formatBulletPoints(resumeData.summary).map((point, index) => (
-              <li key={index} className="mb-1.5">{point}</li>
+            {formatBulletPoints(resumeData.summary, 3).map((point, index) => (
+              <li key={index} className="mb-1">{point}</li>
             ))}
           </ul>
         </div>
       )}
 
-      {/* Experience */}
+      {/* Experience - Slightly more compact */}
       {resumeData.experience.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">
+        <div className="mb-4">
+          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide">
             Experience
           </h2>
           {resumeData.experience.map((exp, index) => (
-            <div key={index} className="mb-4 last:mb-0">
+            <div key={index} className="mb-3 last:mb-0">
               <div className="flex items-baseline justify-between flex-wrap gap-x-2">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-gray-800 text-sm">{exp.title}</h3>
@@ -124,9 +130,9 @@ const ResumePDF = () => {
               <p className="text-sm text-[#5d4dcd] font-medium my-0.5">
                 {exp.company}, {exp.location}
               </p>
-              <ul className="list-disc pl-4 text-sm text-gray-700 mt-2 font-normal leading-relaxed">
+              <ul className="list-disc pl-4 text-sm text-gray-700 mt-1 font-normal leading-relaxed">
                 {formatBulletPoints(exp.description).map((point, i) => (
-                  <li key={i} className="mb-1.5">{point}</li>
+                  <li key={i} className="mb-1">{point}</li>
                 ))}
               </ul>
             </div>
@@ -134,14 +140,14 @@ const ResumePDF = () => {
         </div>
       )}
 
-      {/* Projects */}
+      {/* Projects - More compact */}
       {resumeData.projects && resumeData.projects.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">
+        <div className="mb-4">
+          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide">
             Projects
           </h2>
           {resumeData.projects.map((project: Project, index) => (
-            <div key={index} className="mb-4 last:mb-0">
+            <div key={index} className="mb-3 last:mb-0">
               <div className="flex items-baseline justify-between flex-wrap gap-x-2">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-gray-800 text-sm">{project.title}</h3>
@@ -150,15 +156,15 @@ const ResumePDF = () => {
                   {project.startDate} - {project.endDate}
                 </span>
               </div>
-              <ul className="list-disc pl-4 text-sm text-gray-700 mt-2 font-normal leading-relaxed">
+              <ul className="list-disc pl-4 text-sm text-gray-700 mt-1 font-normal leading-relaxed">
                 {formatBulletPoints(project.description).map((point, i) => (
-                  <li key={i} className="mb-1.5">{point}</li>
+                  <li key={i} className="mb-1">{point}</li>
                 ))}
               </ul>
               {project.technologies && project.technologies.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2">
+                <div className="flex flex-wrap gap-1 mt-1">
                   {project.technologies.map((tech, i) => (
-                    <span key={i} className="px-2 py-0.5 bg-[#efeafc] rounded-sm text-sm border-[0.5px] border-[#dad3f8] shadow-xs text-violet-400 font-normal">
+                    <span key={i} className="px-1.5 py-0.5 bg-[#efeafc] rounded-sm text-xs border-[0.5px] border-[#dad3f8] shadow-xs text-violet-400 font-normal">
                       {tech}
                     </span>
                   ))}
@@ -169,7 +175,7 @@ const ResumePDF = () => {
                   href={project.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-[#5d4dcd] hover:text-[#4a3da3] mt-1 inline-block"
+                  className="text-xs text-[#5d4dcd] hover:text-[#4a3da3] mt-1 inline-block"
                 >
                   View Project →
                 </a>
@@ -179,14 +185,14 @@ const ResumePDF = () => {
         </div>
       )}
 
-      {/* Education */}
+      {/* Education - More compact */}
       {resumeData.education.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">
+        <div className="mb-4">
+          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide">
             Education
           </h2>
           {resumeData.education.map((edu, index) => (
-            <div key={index} className="mb-4 last:mb-0">
+            <div key={index} className="mb-3 last:mb-0">
               <div className="flex items-baseline justify-between flex-wrap gap-x-2">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-gray-800 text-sm">{edu.degree}</h3>
@@ -199,9 +205,9 @@ const ResumePDF = () => {
                 {edu.institution}, {edu.location}
               </p>
               {edu.description && (
-                <ul className="list-disc pl-4 text-sm text-gray-700 mt-2 font-normal leading-relaxed">
+                <ul className="list-disc pl-4 text-sm text-gray-700 mt-1 font-normal leading-relaxed">
                   {formatBulletPoints(edu.description).map((point, i) => (
-                    <li key={i} className="mb-1.5">{point}</li>
+                    <li key={i} className="mb-1">{point}</li>
                   ))}
                 </ul>
               )}
@@ -210,18 +216,18 @@ const ResumePDF = () => {
         </div>
       )}
 
-      {/* Skills */}
+      {/* Skills - More compact */}
       {(resumeData.skills.technical.length > 0 || resumeData.skills.soft.length > 0) && (
-        <div className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">
+        <div className="mb-4">
+          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide">
             Skills
           </h2>
           {resumeData.skills.technical.length > 0 && (
-            <div className="mb-3">
-              <div className="font-medium text-gray-700 text-sm mb-1.5">Technical Skills</div>
-              <div className="flex flex-wrap gap-1.5 mt-1">
+            <div className="mb-2">
+              <div className="font-medium text-gray-700 text-sm mb-1">Technical Skills</div>
+              <div className="flex flex-wrap gap-1 mt-1">
                 {resumeData.skills.technical.map((skill, i) => (
-                  <span key={i} className="px-2 py-0.5 bg-[#efeafc] rounded-sm text-sm border-[0.5px] border-[#dad3f8] shadow-xs text-violet-400 font-normal">
+                  <span key={i} className="px-1.5 py-0.5 bg-[#efeafc] rounded-sm text-xs border-[0.5px] border-[#dad3f8] shadow-xs text-violet-400 font-normal">
                     {skill}
                   </span>
                 ))}
@@ -230,10 +236,10 @@ const ResumePDF = () => {
           )}
           {resumeData.skills.soft.length > 0 && (
             <div>
-              <div className="font-medium text-gray-700 text-sm mb-1.5">Soft Skills</div>
-              <div className="flex flex-wrap gap-1.5 mt-1">
+              <div className="font-medium text-gray-700 text-sm mb-1">Soft Skills</div>
+              <div className="flex flex-wrap gap-1 mt-1">
                 {resumeData.skills.soft.map((skill, i) => (
-                  <span key={i} className="px-2 py-0.5 bg-[#f3f3f3] text-gray-600 font-medium rounded-sm text-sm border-[0.5px] border-[#e5e5e5]">
+                  <span key={i} className="px-1.5 py-0.5 bg-[#f3f3f3] text-gray-600 font-medium rounded-sm text-xs border-[0.5px] border-[#e5e5e5]">
                     {skill}
                   </span>
                 ))}

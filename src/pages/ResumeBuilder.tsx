@@ -258,7 +258,7 @@ const ResumeBuilder = () => {
     }
   };
 
-  const handleGenerateAI = async (): Promise<void> => {
+  const handleGenerateAI = async () => {
     try {
       await handleGenerateWithAI(activeSection);
     } catch (error) {
