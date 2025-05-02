@@ -52,16 +52,18 @@ export const summarizeText = async (text: string): Promise<string> => {
     summary = summary
       .replace(/•\s*/g, '• ') // Standardize bullet points
       .replace(/[-*]\s+/g, '• ') // Replace markdown bullets with •
+      .replace(/\n+/g, '\n') // Remove extra line breaks
       .split('\n')
       .map(line => line.trim())
       .filter(line => line.length > 0)
       .map(line => line.startsWith('•') ? line : `• ${line}`)
       .join('\n');
     
-    // Clean up extra spaces and ensure no double bullets
+    // Ensure we have proper spacing around bullet points for display
     summary = summary
       .replace(/•\s+•/g, '•')
-      .replace(/^\n+|\n+$/g, '');
+      .replace(/^\n+|\n+$/g, '')
+      .replace(/([.!?])\s*(?=•)/g, '$1\n'); // Add newline before bullet points
     
     console.log('Summarized text:', summary);
     return summary;

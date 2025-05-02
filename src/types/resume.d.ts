@@ -1,16 +1,6 @@
 
-export interface Personal {
-  name: string;
-  title: string;
-  email: string;
-  phone: string;
-  location: string;
-  linkedin?: string;
-  website?: string;
-}
-
 export interface Experience {
-  id?: string;
+  id: string;
   company: string;
   title: string;
   location: string;
@@ -20,63 +10,44 @@ export interface Experience {
 }
 
 export interface Education {
-  id?: string;
+  id: string;
   institution: string;
   degree: string;
-  field?: string;
   location: string;
+  field?: string;
   startDate: string;
   endDate: string;
-  description?: string;
-}
-
-export interface Skills {
-  technical: string[];
-  soft: string[];
+  description: string;
 }
 
 export interface Project {
-  id?: string;
+  id: string;
   title: string;
   description: string;
-  technologies?: string[];
-  link?: string;
+  technologies: string[];
   startDate: string;
   endDate: string;
-}
-
-export interface LinkedInData {
-  full_name?: string;
-  headline?: string;
-  location?: string;
-  linkedin_url?: string;
-  experience?: any[];
-  education?: any[];
-}
-
-export interface ResumeSettings {
-  fontFamily: string;
-  fontSize: number;
-  primaryColor: string;
-  secondaryColor: string;
-  accentColor: string;
-  paperSize: "a4" | "letter" | "legal";
-  margins: "narrow" | "normal" | "wide";
+  link?: string;
 }
 
 export interface ResumeData {
-  personal: Personal;
+  personal: {
+    name: string;
+    title: string;
+    email: string;
+    phone: string;
+    location: string;
+    linkedin: string;
+    website: string;
+  };
   summary: string;
   experience: Experience[];
   education: Education[];
-  skills: Skills;
+  skills: {
+    technical: string[];
+    soft: string[];
+  };
   languages: string[];
   certifications: string[];
   projects: Project[];
-}
-
-export interface CreateResumeDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onResumeCreated?: () => Promise<void>;
 }

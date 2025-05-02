@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -179,6 +180,32 @@ const ResumeBuilder = () => {
           return "";
         }
 
+        case "project-desc": {
+          if (Array.isArray(resumeData.projects)) {
+            const currentProject = resumeData.projects.find(project => project);
+
+            if (currentProject) {
+              const { data, error } = await supabase.functions.invoke('enhance-resume', {
+                body: {
+                  type: 'experience-description', // Reuse the same prompt format
+                  experienceContext: {
+                    title: currentProject.title,
+                    company: "Project", // Reuse the field
+                    location: currentProject.technologies?.join(", ") || "",
+                    startDate: currentProject.startDate,
+                    endDate: currentProject.endDate,
+                    description: currentProject.description
+                  }
+                }
+              });
+
+              if (error) throw error;
+              return data?.description || "";
+            }
+          }
+          return "";
+        }
+
         default:
           return "";
       }
@@ -193,6 +220,14 @@ const ResumeBuilder = () => {
     }
     
     return "";
+  };
+
+  const handleGenerateAI = async (): Promise<void> => {
+    try {
+      await handleGenerateWithAI(activeSection);
+    } catch (error) {
+      console.error('Error generating with AI:', error);
+    }
   };
 
   const renderActiveForm = () => {
@@ -301,9 +336,7 @@ const ResumeBuilder = () => {
               aiEnabled={aiEnabled}
               aiGenerating={isGenerating}
               onSectionChange={setActiveSection}
-              onGenerateWithAI={async () => {
-                await handleGenerateWithAI(activeSection);
-              }}
+              onGenerateWithAI={handleGenerateAI}
             />
           </Sidebar>
 

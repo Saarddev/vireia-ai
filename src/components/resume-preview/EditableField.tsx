@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -124,6 +125,26 @@ const EditableField: React.FC<EditableFieldProps> = ({
     }
   };
 
+  // Function to render bullet points properly in read-only view
+  const renderBulletPoints = (text: string) => {
+    if (!text) return placeholder;
+    
+    if (text.includes('•')) {
+      return (
+        <div className="bullet-list">
+          {text.split('\n').map((line, i) => (
+            <React.Fragment key={i}>
+              <div className="bullet-line">{line}</div>
+              {i < text.split('\n').length - 1 && <br />}
+            </React.Fragment>
+          ))}
+        </div>
+      );
+    }
+    
+    return text || placeholder;
+  };
+
   return (
     <div 
       className={cn(
@@ -204,7 +225,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
           )}
         </div>
       ) : (
-        <span
+        <div
           tabIndex={0}
           style={{
             ...outputStyle,
@@ -218,8 +239,8 @@ const EditableField: React.FC<EditableFieldProps> = ({
             !value && "text-gray-400"
           )}
         >
-          {value || placeholder}
-        </span>
+          {renderBulletPoints(value)}
+        </div>
       )}
     </div>
   );

@@ -245,3 +245,29 @@
 .resume-content {
   padding: 30px 40px 26px 40px;
 }
+
+/* Bullet point formatting */
+.bullet-line {
+  display: flex;
+  align-items: flex-start;
+  text-align: left;
+  padding-left: 0;
+}
+
+.bullet-line:before {
+  content: "";
+  margin-right: 0;
+}
+
+.bullet-list {
+  text-align: left;
+}
+
+/* Fix for bullet points in PDF export */
+@media print {
+  .bullet-line {
+    display: list-item;
+    list-style-position: outside;
+    margin-left: 1em;
+  }
+}

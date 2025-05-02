@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createEnhancedResume } from '@/services/resumeEnhancementService';
 import { toast } from 'sonner';
-import { Loader } from 'lucide-react';
+import { FileText, Linkedin, Loader, ArrowRight } from 'lucide-react';
 
 export interface CreateResumeDialogProps {
   open: boolean;
@@ -74,50 +74,124 @@ export default function CreateResumeDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <form onSubmit={handleCreate}>
-          <DialogHeader>
-            <DialogTitle>Create a New Resume</DialogTitle>
-            <DialogDescription>
-              Enter your LinkedIn URL to automatically generate a professional resume with AI.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right col-span-1">
-                Name
-              </Label>
-              <Input
-                id="name"
-                placeholder="My Professional Resume"
-                value={resumeName}
-                onChange={(e) => setResumeName(e.target.value)}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="linkedin" className="text-right col-span-1">
-                LinkedIn
-              </Label>
-              <Input
-                id="linkedin"
-                placeholder="https://linkedin.com/in/yourname"
-                value={linkedinUrl}
-                onChange={(e) => setLinkedinUrl(e.target.value)}
-                className="col-span-3"
-              />
-            </div>
-            {error && (
-              <p className="text-red-500 text-sm mt-1">{error}</p>
-            )}
+      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden">
+        <div className="flex flex-col md:flex-row">
+          {/* Left side - Form */}
+          <div className="p-6 flex-1">
+            <form onSubmit={handleCreate} className="space-y-5">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-semibold text-resume-purple">Create Your Resume</DialogTitle>
+                <DialogDescription className="text-sm text-gray-500 mt-1">
+                  Import your professional data from LinkedIn and let AI create a personalized resume for you.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-medium">
+                    Resume Name
+                  </Label>
+                  <Input
+                    id="name"
+                    placeholder="My Professional Resume"
+                    value={resumeName}
+                    onChange={(e) => setResumeName(e.target.value)}
+                    className="w-full border-gray-300 focus:border-resume-purple"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="linkedin" className="text-sm font-medium flex items-center gap-1">
+                    <Linkedin className="h-4 w-4 text-[#0A66C2]" />
+                    LinkedIn Profile URL
+                  </Label>
+                  <Input
+                    id="linkedin"
+                    placeholder="https://linkedin.com/in/yourname"
+                    value={linkedinUrl}
+                    onChange={(e) => setLinkedinUrl(e.target.value)}
+                    className="w-full border-gray-300 focus:border-resume-purple"
+                  />
+                  <p className="text-xs text-gray-500">
+                    We'll use your profile data to generate a professional resume
+                  </p>
+                </div>
+                
+                {error && (
+                  <div className="text-red-500 text-sm bg-red-50 border border-red-100 rounded-md p-2 mt-2">
+                    {error}
+                  </div>
+                )}
+              </div>
+              
+              <DialogFooter className="pt-2">
+                <Button 
+                  type="submit" 
+                  disabled={isCreating}
+                  className="w-full bg-resume-purple hover:bg-resume-purple-dark transition-colors"
+                >
+                  {isCreating ? (
+                    <span className="flex items-center gap-2">
+                      <Loader className="h-4 w-4 animate-spin" />
+                      Creating Resume...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Create Resume
+                    </span>
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
           </div>
-          <DialogFooter>
-            <Button type="submit" disabled={isCreating} className="gap-2">
-              {isCreating && <Loader className="h-4 w-4 animate-spin" />}
-              {isCreating ? 'Creating...' : 'Create Resume'}
-            </Button>
-          </DialogFooter>
-        </form>
+          
+          {/* Right side - Info box */}
+          <div className="bg-purple-50 p-6 flex-1 hidden md:block">
+            <div className="h-full flex flex-col justify-center">
+              <h3 className="font-semibold text-resume-purple mb-3">How It Works</h3>
+              
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <div className="bg-resume-purple rounded-full w-5 h-5 flex items-center justify-center text-white text-xs mt-0.5">
+                    1
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Connect LinkedIn</p>
+                    <p className="text-xs text-gray-600">Provide your LinkedIn URL to import your professional data</p>
+                  </div>
+                </li>
+                
+                <li className="flex items-start gap-3">
+                  <div className="bg-resume-purple rounded-full w-5 h-5 flex items-center justify-center text-white text-xs mt-0.5">
+                    2
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">AI Enhancement</p>
+                    <p className="text-xs text-gray-600">Our AI analyzes and improves your experience to sound professional</p>
+                  </div>
+                </li>
+                
+                <li className="flex items-start gap-3">
+                  <div className="bg-resume-purple rounded-full w-5 h-5 flex items-center justify-center text-white text-xs mt-0.5">
+                    3
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Edit & Customize</p>
+                    <p className="text-xs text-gray-600">Refine your resume with our easy-to-use editor</p>
+                  </div>
+                </li>
+              </ul>
+              
+              <div className="mt-6 bg-white rounded-lg p-3 border border-purple-100 shadow-sm">
+                <p className="text-xs text-gray-500 italic">
+                  "This tool helped me create an ATS-friendly resume in minutes and landed me 3 interviews in my first week!"
+                </p>
+                <p className="text-xs font-medium mt-2">— Sarah K., Software Engineer</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

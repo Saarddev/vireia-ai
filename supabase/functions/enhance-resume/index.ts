@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
@@ -12,27 +11,27 @@ const corsHeaders = {
 function generateSummarizationPrompt(text: string) {
   return `
 Convert the following text into clear, concise bullet points that highlight key achievements and skills. Make each point:
-- Start with an action verb
+- Start with a strong action verb in past tense (e.g., Implemented, Developed, Led)
 - Be concise and impactful (1-2 lines each)
-- Include specific achievements with measurable results when possible
-- Focus on the most relevant information
+- Include specific achievements with measurable results (numbers, percentages)
+- Focus on outcomes and value delivered
 - Be ATS-friendly for resume scanning
 
 Original text:
 ${text}
 
-Return ONLY a clean list of 3-6 bullet points, each starting with "• " (bullet symbol followed by a space), with one bullet point per line. 
+Return ONLY a clean list of 4-6 bullet points, each starting with "• " (bullet symbol followed by a space), with one bullet point per line. 
 Do not include any other text, explanations, or formatting in your response. Just the bullet points.`;
 }
 
 function generateSummaryPrompt(experience: string[], skills: string[]) {
   return `
-As a thoughtful resume writer with empathy for job seekers, help create a warm, engaging professional summary that feels genuinely human. Consider:
+As an expert resume writer, create a professional summary that will stand out on an ATS-scanned resume. Focus on:
 
-1. The real person behind these experiences and their unique journey
-2. Their personal blend of skills and how they've applied them
-3. The story of their career progression and aspirations
-4. Use natural language that resonates with both the person and potential employers
+1. The candidate's key strengths, experiences, and unique value proposition
+2. Their specific technical abilities and domain expertise
+3. Quantifiable achievements and career progression
+4. Industry-relevant keywords for ATS optimization
 
 Current experience context:
 ${experience ? experience.join('\n') : 'Not provided'}
@@ -40,14 +39,16 @@ ${experience ? experience.join('\n') : 'Not provided'}
 Skills highlight:
 ${skills ? skills.join(', ') : 'Not provided'}
 
-Write a brief, authentic summary that feels conversational and human while still highlighting professional achievements. Avoid corporate jargon when possible. Show the person behind the professional.
+Write a concise, powerful summary (3-5 sentences) that positions the candidate as a high-value professional.
+Format the summary as 4-6 bullet points, each starting with "• " (bullet symbol followed by a space).
+Each bullet should start with a strong action verb or adjective.
 
-Return only the summary text.`;
+Return only the bullet-formatted summary text.`;
 }
 
 function generateSkillsPrompt(experience: string[]) {
   return `
-Extract technical and soft skills from the following experience, focusing on what makes this person unique:
+Extract technical and soft skills from the following experience, focusing on ATS-friendly terms:
 
 ${experience ? experience.join('\n') : 'Not provided'}
 
@@ -55,30 +56,35 @@ Return as JSON in this format - be specific and include skills that reveal both 
 {
   "technical": ["skill1", "skill2"],
   "soft": ["skill1", "skill2"]
-}`;
+}
+
+For technical skills, focus on specific technologies, tools, and methodologies.
+For soft skills, identify transferable abilities like leadership, communication, and problem-solving.
+Limit to 8-12 most relevant technical skills and 5-8 most important soft skills.`;
 }
 
 function generateImprovementPrompt(description: string) {
   return `
-As an experienced resume writer who cares about helping people tell their authentic story, enhance this description to be more engaging and impactful:
+Transform this resume description into impactful bullet points following these guidelines:
 
-1. Use warm, natural language that reflects real human experiences and personality
-2. Incorporate specific achievements that showcase the person's unique contributions
-3. Balance professional accomplishments with hints of personal investment and passion
-4. Maintain a confident but humble tone that feels authentic
-5. Keep the voice active and engaging while preserving their unique voice
+1. Start each bullet with a strong action verb (e.g., Led, Developed, Implemented)
+2. Focus on accomplishments, not just responsibilities
+3. Include metrics and quantifiable results when possible
+4. Highlight specific technologies and methodologies used
+5. Ensure each bullet is ATS-friendly and keyword optimized
 
 Original description:
 ${description || 'Not provided'}
 
-Enhance this while keeping it genuine and distinctly human. The result should sound like something the person would actually say about themselves, not generic corporate speak.
+Format the output as 3-5 bullet points, each starting with "• " (bullet symbol followed by a space).
+Focus on quality over quantity - each bullet should demonstrate clear value and impact.
 
-Return only the improved description.`;
+Return only the formatted bullet points, with no additional text.`;
 }
 
 function generateExperiencePrompt(context: any = {}) {
   return `
-As an empathetic resume writer, help craft a compelling description for this work experience that feels authentic and human:
+Create powerful bullet points for this work experience that will stand out on an ATS-scanned resume:
 
 Job Title: ${context?.title || 'Not specified'}
 Company: ${context?.company || 'Not specified'}
@@ -88,15 +94,16 @@ Duration: ${context?.startDate || 'Not specified'} to ${context?.endDate || 'Pre
 Current description (if any):
 ${context?.description || ''}
 
-Please create or enhance this description to:
-1. Use natural language that feels like how a real person would talk about their work
-2. Include specific achievements and metrics when possible
-3. Show both professional impact and personal growth
-4. Highlight transferable skills and problem-solving abilities
-5. Keep it concise but meaningful - around 2-3 sentences
-6. Maintain the person's authentic voice and avoid corporate jargon when possible
+Create 4-6 bullet points that:
+1. Start each bullet with a strong action verb in past tense
+2. Include specific achievements with quantifiable results (%, $, numbers)
+3. Highlight technologies, methodologies, and tools used
+4. Demonstrate problem-solving abilities and business impact
+5. Incorporate keywords relevant to the job title and industry
+6. Keep each bullet to 1-2 concise lines
 
-Return only the description text.`;
+Return only the bullet points, with each point starting with "• " (bullet symbol followed by a space).
+Each point should be on its own line with no other text or formatting.`;
 }
 
 function generateFullResumePrompt(linkedinData: any, template: string = 'modern') {
@@ -239,7 +246,30 @@ function parseGeminiResponse(response: any, type: string) {
   
   try {
     if (type === "experience-description") {
-      return { description: text.trim() };
+      // Ensure description is returned as bullet points
+      let formattedDescription = text.trim();
+      
+      // If there are no bullet points in the response, format as bullet points
+      if (!formattedDescription.includes('•') && !formattedDescription.includes('-')) {
+        const sentences = formattedDescription
+          .split(/[.!?]\s+/)
+          .filter(line => line.trim().length > 0)
+          .map(line => line.trim())
+          .filter(line => line.length > 0);
+        
+        formattedDescription = sentences.map(line => `• ${line}`).join('\n');
+      } else {
+        // If bullet points exist but need formatting
+        formattedDescription = formattedDescription
+          .replace(/[-*]\s+/g, '• ') // Replace markdown bullets with •
+          .split('\n')
+          .map(line => line.trim())
+          .filter(line => line.length > 0) // Remove empty lines
+          .map(line => line.startsWith('•') ? line : `• ${line}`) // Ensure each line starts with a bullet
+          .join('\n');
+      }
+      
+      return { description: formattedDescription };
     }
     
     if (type.startsWith('education-')) {
@@ -252,7 +282,45 @@ function parseGeminiResponse(response: any, type: string) {
     }
     
     if (type === "summary" || type === "improve") {
-      return { [type === "summary" ? "summary" : "improved"]: text.trim() };
+      // Format summary as bullet points
+      let formattedSummary = text.trim();
+      
+      // If there are no bullet points in the response, format as bullet points
+      if (!formattedSummary.includes('•') && !formattedSummary.includes('-')) {
+        const sentences = formattedSummary
+          .split(/[.!?]\s+/)
+          .filter(line => line.trim().length > 0)
+          .map(line => {
+            // Ensure each bullet starts with an action verb
+            let point = line.trim();
+            if (!/^[A-Z][a-z]+ed|^[A-Z][a-z]+ing|^[A-Z][a-z]+s\b/.test(point)) {
+              const actionVerbs = ['Developed', 'Implemented', 'Created', 'Led', 'Managed', 'Executed', 'Improved', 
+                'Achieved', 'Increased', 'Reduced', 'Delivered', 'Designed', 'Established', 'Coordinated', 'Transformed'];
+              const randomVerb = actionVerbs[Math.floor(Math.random() * actionVerbs.length)];
+              point = `${randomVerb} ${point.charAt(0).toLowerCase() + point.slice(1)}`;
+            }
+            return point;
+          })
+          .filter(line => line.length > 0);
+        
+        formattedSummary = sentences.map(line => `• ${line}`).join('\n');
+      } else {
+        // If bullet points exist but need formatting
+        formattedSummary = formattedSummary
+          .replace(/[-*]\s+/g, '• ') // Replace markdown bullets with •
+          .split('\n')
+          .map(line => line.trim())
+          .filter(line => line.length > 0) // Remove empty lines
+          .map(line => {
+            if (!line.startsWith('•')) {
+              return `• ${line}`;
+            }
+            return line;
+          }) // Ensure each line starts with a bullet
+          .join('\n');
+      }
+      
+      return { [type === "summary" ? "summary" : "improved"]: formattedSummary };
     }
     
     if (type === "summarize") {
@@ -264,7 +332,17 @@ function parseGeminiResponse(response: any, type: string) {
         const sentences = summary
           .split(/[.!?]\s+/)
           .filter(line => line.trim().length > 0)
-          .map(line => line.trim())
+          .map(line => {
+            // Ensure each bullet starts with an action verb
+            let point = line.trim();
+            if (!/^[A-Z][a-z]+ed|^[A-Z][a-z]+ing|^[A-Z][a-z]+s\b/.test(point)) {
+              const actionVerbs = ['Developed', 'Implemented', 'Created', 'Led', 'Managed', 'Executed', 'Improved', 
+                'Achieved', 'Increased', 'Reduced', 'Delivered', 'Designed', 'Established', 'Coordinated', 'Transformed'];
+              const randomVerb = actionVerbs[Math.floor(Math.random() * actionVerbs.length)];
+              point = `${randomVerb} ${point.charAt(0).toLowerCase() + point.slice(1)}`;
+            }
+            return point;
+          })
           .filter(line => line.length > 0);
         
         summary = sentences.map(line => `• ${line}`).join('\n');
@@ -275,7 +353,12 @@ function parseGeminiResponse(response: any, type: string) {
           .split('\n')
           .map(line => line.trim())
           .filter(line => line.length > 0) // Remove empty lines
-          .map(line => line.startsWith('•') ? line : `• ${line}`) // Ensure each line starts with a bullet
+          .map(line => {
+            if (!line.startsWith('•')) {
+              return `• ${line}`;
+            }
+            return line;
+          }) // Ensure each line starts with a bullet
           .join('\n');
       }
       
