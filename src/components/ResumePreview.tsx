@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -20,6 +20,12 @@ const getAllStyles = (element: Element): string => {
     styles += getAllStyles(element.children[i]);
   }
   return styles;
+};
+
+// Function to estimate page count based on content height
+const estimatePageCount = (contentHeight: number, pageHeight: number): number => {
+  if (pageHeight <= 0) return 1;
+  return Math.ceil(contentHeight / pageHeight);
 };
 
 interface ResumePreviewProps {
@@ -62,6 +68,31 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
   const { isMobile } = useIsMobile();
   const [zoomLevel, setZoomLevel] = React.useState(1);
   const resumeContentRef = useRef<HTMLDivElement>(null);
+  const [pageCount, setPageCount] = useState(1);
+
+  // Effect to estimate page count whenever content changes
+  useEffect(() => {
+    if (!resumeContentRef.current) return;
+
+    const checkPageCount = () => {
+      const contentHeight = resumeContentRef.current?.scrollHeight || 0;
+      // A4 paper height in pixels (roughly 1123px at 96 DPI)
+      const pageHeight = 1123; 
+      const pages = estimatePageCount(contentHeight, pageHeight);
+      setPageCount(pages);
+    };
+
+    // Initial check
+    checkPageCount();
+    
+    // Also check when window resizes
+    const handleResize = () => {
+      checkPageCount();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [data, zoomLevel]);
 
   const handleGenerateWithAI = async (section: string): Promise<string> => {
     if (onGenerateWithAI) {
@@ -91,7 +122,9 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
     const bulletElements = clonedResumeContent.querySelectorAll('.bullet-line');
     bulletElements.forEach(bulletEl => {
       const textContent = bulletEl.textContent || '';
-      if (textContent.startsWith('• ')) {
+      if (textContent.startsWith('• • ')) {
+        bulletEl.textContent = textContent.replace('• • ', '• ');
+      } else if (textContent.startsWith('• ')) {
         bulletEl.textContent = textContent;
       }
     });
@@ -197,6 +230,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
         onZoomOut={handleZoomOut}
         onDownload={handleDownloadPDF}
         onPrint={handlePrint}
+        pageCount={pageCount}
       >
         <span className="text-sm text-gray-600 ml-2">
           {Math.round(zoomLevel * 100)}%

@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ZoomIn, ZoomOut, Download, Printer } from 'lucide-react';
+import { ZoomIn, ZoomOut, Download, Printer, Check, AlertCircle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export interface PreviewControlsProps {
   zoomLevel: number;
@@ -9,6 +10,7 @@ export interface PreviewControlsProps {
   onZoomOut: () => void;
   onDownload: () => void;
   onPrint?: () => void;
+  pageCount?: number;
   children?: React.ReactNode;
 }
 
@@ -18,6 +20,7 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
   onZoomOut,
   onDownload,
   onPrint,
+  pageCount = 1,
   children
 }) => {
   return (
@@ -45,6 +48,23 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
           <ZoomIn className="w-4 h-4" />
         </Button>
       </div>
+      
+      {pageCount > 1 && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center text-amber-500 text-xs font-medium">
+                <AlertCircle className="w-3.5 h-3.5 mr-1" />
+                <span>Content exceeds one page</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">Your resume is longer than one page. Consider condensing your content.</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+      
       <div className="flex items-center space-x-2">
         {onPrint && (
           <Button
