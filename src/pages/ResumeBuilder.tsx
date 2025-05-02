@@ -92,14 +92,14 @@ const ResumeBuilder = () => {
     }
   };
 
-  const handleGenerateWithAI = async (section: string): Promise<void> => {
+  const handleGenerateWithAI = async (section: string): Promise<string> => {
     if (!aiEnabled) {
       toast({
         title: "AI is disabled",
         description: "Please enable AI to use this feature",
         variant: "destructive"
       });
-      return;
+      return "";
     }
 
     try {
@@ -116,7 +116,7 @@ const ResumeBuilder = () => {
           
           const summary = await generateSummary(experienceDescriptions, allSkills);
           if (summary) handleDataChange("summary", summary);
-          break;
+          return summary || "";
         }
         case "skills": {
           const experienceDescriptions = Array.isArray(resumeData.experience) 
@@ -127,7 +127,7 @@ const ResumeBuilder = () => {
           if (skills) {
             handleDataChange("skills", skills);
           }
-          break;
+          return "";
         }
         case "education-desc": {
           if (Array.isArray(resumeData.education)) {
@@ -165,7 +165,7 @@ const ResumeBuilder = () => {
               }
             }
           }
-          break;
+          return "";
         }
         
         case "experience-desc": {
@@ -203,7 +203,7 @@ const ResumeBuilder = () => {
               }
             }
           }
-          break;
+          return "";
         }
 
         case "project-desc": {
@@ -241,11 +241,11 @@ const ResumeBuilder = () => {
               }
             }
           }
-          break;
+          return "";
         }
         
         default:
-          break;
+          return "";
       }
     } catch (error) {
       console.error('Error generating with AI:', error);
@@ -254,6 +254,7 @@ const ResumeBuilder = () => {
         description: "Failed to generate with AI. Please try again.",
         variant: "destructive"
       });
+      return "";
     }
   };
 
@@ -337,7 +338,7 @@ const ResumeBuilder = () => {
       case "ai":
         return (
           <AIAssistant
-            resumeData={resumeData}
+            resumeData={resumeData as any}
             enabled={aiEnabled}
           />
         );
@@ -362,7 +363,7 @@ const ResumeBuilder = () => {
         onShare={() => { }}
       />
 
-      <div className="flex-1 flex">
+      <div className="flex-1 flex w-full">
         <SidebarProvider defaultOpen={!isMobile}>
           <Sidebar side="left" variant="floating" collapsible="icon">
             <BuilderSidebar
@@ -374,54 +375,54 @@ const ResumeBuilder = () => {
               onGenerateWithAI={handleGenerateAI}
             />
           </Sidebar>
-        </SidebarProvider>
+          
+          <SidebarInset className="flex flex-col p-4 lg:p-6 w-full">
+            <AISuggestion
+              suggestion={aiSuggestion}
+              onDismiss={dismissAiSuggestion}
+              onApply={applyAiSuggestion}
+            />
 
-        <SidebarInset className="flex flex-col p-4 lg:p-6">
-          <AISuggestion
-            suggestion={aiSuggestion}
-            onDismiss={dismissAiSuggestion}
-            onApply={applyAiSuggestion}
-          />
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 h-[calc(100vh-8rem)] w-full">
+              <div className="xl:col-span-5 h-full overflow-auto">
+                <Card className="h-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 overflow-hidden shadow-xl">
+                  <CardContent className="p-4 lg:p-6 h-full overflow-auto">
+                    <div className="max-w-2xl space-y-6">
+                      {isLoading ? (
+                        <div className="flex flex-col items-center justify-center h-full space-y-4 py-20">
+                          <div className="w-16 h-16 border-4 border-resume-purple border-t-transparent rounded-full animate-spin"></div>
+                          <p className="text-resume-gray text-lg">Loading resume...</p>
+                        </div>
+                      ) : (
+                        renderActiveForm()
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 h-[calc(100vh-8rem)]">
-            <div className="xl:col-span-5 h-full overflow-auto">
-              <Card className="h-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 overflow-hidden shadow-xl">
-                <CardContent className="p-4 lg:p-6 h-full overflow-auto">
-                  <div className="max-w-2xl space-y-6">
-                    {isLoading ? (
-                      <div className="flex flex-col items-center justify-center h-full space-y-4 py-20">
-                        <div className="w-16 h-16 border-4 border-resume-purple border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-resume-gray text-lg">Loading resume...</p>
-                      </div>
-                    ) : (
-                      renderActiveForm()
-                    )}
+              <div className="xl:col-span-7 h-full overflow-auto">
+                <ResumePreview
+                  data={resumeData as any}
+                  template={selectedTemplate}
+                  settings={resumeSettings}
+                  onDataChange={(section, data) => handleDataChange(section, data)}
+                  onGenerateWithAI={handleGenerateWithAI}
+                />
+                {resumeId && (
+                  <div className="mt-4 flex justify-center">
+                    <Link to={`/resume/canvas/${resumeId}`}>
+                      <Button variant="outline" className="flex items-center gap-2">
+                        <Paintbrush className="h-4 w-4" />
+                        Open in Canvas Editor
+                      </Button>
+                    </Link>
                   </div>
-                </CardContent>
-              </Card>
+                )}
+              </div>
             </div>
-
-            <div className="xl:col-span-7 h-full overflow-auto">
-              <ResumePreview
-                data={resumeData}
-                template={selectedTemplate}
-                settings={resumeSettings}
-                onDataChange={(section, data) => handleDataChange(section, data)}
-                onGenerateWithAI={handleGenerateWithAI}
-              />
-              {resumeId && (
-                <div className="mt-4 flex justify-center">
-                  <Link to={`/resume/canvas/${resumeId}`}>
-                    <Button variant="outline" className="flex items-center gap-2">
-                      <Paintbrush className="h-4 w-4" />
-                      Open in Canvas Editor
-                    </Button>
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </SidebarInset>
+          </SidebarInset>
+        </SidebarProvider>
       </div>
     </div>
   );
