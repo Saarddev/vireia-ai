@@ -1,9 +1,9 @@
-
 import React, { useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ModernTemplate from './resume-preview/ModernTemplate';
+import ProfessionalTemplate from './resume-preview/ProfessionalTemplate';
 import PreviewControls from './resume-preview/PreviewControls';
 import { ResumeData } from '@/types/resume.d';
 
@@ -315,6 +315,13 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
             <div ref={resumeContentRef} className="resume-content">
               {template === 'modern' ? (
                 <ModernTemplate
+                  data={safeData}
+                  settings={settings}
+                  onUpdateData={onDataChange}
+                  onGenerateWithAI={handleGenerateWithAI}
+                />
+              ) : template === 'professional' ? (
+                <ProfessionalTemplate
                   data={safeData}
                   settings={settings}
                   onUpdateData={onDataChange}
