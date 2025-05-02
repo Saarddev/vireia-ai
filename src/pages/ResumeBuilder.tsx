@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { Calendar } from "@/components/ui/calendar"
 import {
   Popover,
@@ -40,7 +41,7 @@ import {
 import BuilderSidebar from '@/components/resume-builder/BuilderSidebar';
 import ResumePreview from '@/components/ResumePreview';
 import { templates } from '@/data/templates';
-import { ResumeData } from '@/types/resume';
+import { ResumeData, Experience, Education, Project } from '@/types/resume';
 import { useResumeAI } from '@/hooks/use-resume-ai';
 import AIAssistant from '@/components/resume-builder/AIAssistant';
 
@@ -98,20 +99,20 @@ const ResumeBuilder: React.FC = () => {
     }
 
     // Experience
-    totalFields += resumeData.experience.length * 4; // position, company, startDate, description
+    totalFields += resumeData.experience.length * 4; // title, company, startDate, description
     resumeData.experience.forEach(exp => {
-      if (exp.position) completedFields++;
+      if (exp.title) completedFields++;
       if (exp.company) completedFields++;
       if (exp.startDate) completedFields++;
       if (exp.description) completedFields++;
     });
 
     // Education
-    totalFields += resumeData.education.length * 3; // institution, degree, graduationDate
+    totalFields += resumeData.education.length * 3; // institution, degree, date
     resumeData.education.forEach(edu => {
       if (edu.institution) completedFields++;
       if (edu.degree) completedFields++;
-      if (edu.graduationDate) completedFields++;
+      if (edu.date) completedFields++;
     });
 
     // Skills
@@ -134,11 +135,10 @@ const ResumeBuilder: React.FC = () => {
     setDisplayData(updatedResume);
   };
 
-  // Fixing the TypeScript error with the handleGenerateWithAI function
   const handleGenerateWithAI = async (section: string): Promise<void> => {
     if (section === "summary") {
       const experienceText = resumeData.experience.map(job => 
-        `${job.position} at ${job.company}: ${job.description}`
+        `${job.title} at ${job.company}: ${job.description}`
       ).join("\n");
       
       try {
@@ -153,7 +153,10 @@ const ResumeBuilder: React.FC = () => {
             ...prev,
             summary
           }));
-          toast.success("Professional summary generated!");
+          toast({
+            title: "Professional summary generated!",
+            description: "Your summary has been updated with AI assistance"
+          });
         }
       } catch (error) {
         console.error("Error generating summary:", error);
@@ -198,7 +201,7 @@ const ResumeBuilder: React.FC = () => {
       
       <main className="flex-1 flex overflow-hidden">
         <div className="w-72 border-r border-gray-200 flex flex-col h-full overflow-hidden">
-          <Sidebar 
+          <BuilderSidebar 
             progress={progress}
             activeSection={activeSection}
             aiEnabled={isAIEnabled}
@@ -278,10 +281,10 @@ const ResumeBuilder: React.FC = () => {
                       <h4 className="text-lg font-semibold mb-2">Job {index + 1}</h4>
                       <div className="grid gap-4">
                         <div className="grid gap-2">
-                          <Label htmlFor={`position-${index}`}>Position</Label>
-                          <Input id={`position-${index}`} value={exp.position} onChange={(e) => {
+                          <Label htmlFor={`title-${index}`}>Position</Label>
+                          <Input id={`title-${index}`} value={exp.title} onChange={(e) => {
                             const newExperience = [...resumeData.experience];
-                            newExperience[index] = { ...exp, position: e.target.value };
+                            newExperience[index] = { ...exp, title: e.target.value };
                             handleDataChange("experience", newExperience);
                           }} />
                         </div>
@@ -312,7 +315,7 @@ const ResumeBuilder: React.FC = () => {
                       </div>
                     </div>
                   ))}
-                  <Button onClick={() => handleDataChange("experience", [...resumeData.experience, { position: "", company: "", startDate: "", description: "" }])}>
+                  <Button onClick={() => handleDataChange("experience", [...resumeData.experience, { title: "", company: "", startDate: "", description: "" } as Experience])}>
                     Add Experience
                   </Button>
                 </CardContent>
@@ -347,17 +350,17 @@ const ResumeBuilder: React.FC = () => {
                           }} />
                         </div>
                         <div className="grid gap-2">
-                          <Label htmlFor={`graduationDate-${index}`}>Graduation Date</Label>
-                          <Input id={`graduationDate-${index}`} type="date" value={edu.graduationDate} onChange={(e) => {
+                          <Label htmlFor={`date-${index}`}>Graduation Date</Label>
+                          <Input id={`date-${index}`} type="date" value={edu.date} onChange={(e) => {
                             const newEducation = [...resumeData.education];
-                            newEducation[index] = { ...edu, graduationDate: e.target.value };
+                            newEducation[index] = { ...edu, date: e.target.value };
                             handleDataChange("education", newEducation);
                           }} />
                         </div>
                       </div>
                     </div>
                   ))}
-                  <Button onClick={() => handleDataChange("education", [...resumeData.education, { institution: "", degree: "", graduationDate: "" }])}>
+                  <Button onClick={() => handleDataChange("education", [...resumeData.education, { institution: "", degree: "", date: "" } as Education])}>
                     Add Education
                   </Button>
                 </CardContent>
@@ -453,10 +456,10 @@ const ResumeBuilder: React.FC = () => {
                       <h4 className="text-lg font-semibold mb-2">Project {index + 1}</h4>
                       <div className="grid gap-4">
                         <div className="grid gap-2">
-                          <Label htmlFor={`name-${index}`}>Name</Label>
-                          <Input id={`name-${index}`} value={project.name} onChange={(e) => {
+                          <Label htmlFor={`title-${index}`}>Name</Label>
+                          <Input id={`title-${index}`} value={project.title} onChange={(e) => {
                             const newProjects = [...resumeData.projects];
-                            newProjects[index] = { ...project, name: e.target.value };
+                            newProjects[index] = { ...project, title: e.target.value };
                             handleDataChange("projects", newProjects);
                           }} />
                         </div>
@@ -479,7 +482,7 @@ const ResumeBuilder: React.FC = () => {
                       </div>
                     </div>
                   ))}
-                  <Button onClick={() => handleDataChange("projects", [...resumeData.projects, { name: "", description: "", link: "" }])}>
+                  <Button onClick={() => handleDataChange("projects", [...resumeData.projects, { title: "", description: "", link: "", technologies: [] } as Project])}>
                     Add Project
                   </Button>
                 </CardContent>
@@ -580,7 +583,7 @@ const ResumeBuilder: React.FC = () => {
 
             {activeTab === "ai" && (
               <AIAssistant 
-                resumeData={displayData} 
+                resumeData={resumeData} 
                 enabled={isAIEnabled}
                 onUpdateResume={handleResumeUpdate}
               />
