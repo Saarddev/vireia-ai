@@ -24,6 +24,7 @@ import { useResumeAI } from '@/hooks/use-resume-ai';
 import { supabase } from '@/integrations/supabase/client';
 import ProjectForm from '@/components/resume-builder/ProjectForm';
 import { Paintbrush } from 'lucide-react';
+// Import the Education and ResumeData types from types/resume.ts, not types/resume.d.ts to avoid conflicts
 import { Education, ResumeData } from '@/types/resume';
 
 interface AISuggestionData {
@@ -91,14 +92,14 @@ const ResumeBuilder = () => {
     }
   };
 
-  const handleGenerateWithAI = async (section: string): Promise<string> => {
+  const handleGenerateWithAI = async (section: string): Promise<void> => {
     if (!aiEnabled) {
       toast({
         title: "AI is disabled",
         description: "Please enable AI to use this feature",
         variant: "destructive"
       });
-      return "";
+      return;
     }
 
     try {
@@ -114,7 +115,7 @@ const ResumeBuilder = () => {
           ];
           
           const summary = await generateSummary(experienceDescriptions, allSkills);
-          if (summary) return summary;
+          if (summary) handleDataChange("summary", summary);
           break;
         }
         case "skills": {
@@ -125,7 +126,6 @@ const ResumeBuilder = () => {
           const skills = await extractSkills(experienceDescriptions);
           if (skills) {
             handleDataChange("skills", skills);
-            return "";
           }
           break;
         }
@@ -150,10 +150,22 @@ const ResumeBuilder = () => {
               });
 
               if (error) throw error;
-              return data?.description || "";
+              if (data?.description) {
+                // Find the current education in the array and update its description
+                const updatedEducation = [...resumeData.education];
+                const eduIndex = updatedEducation.findIndex(edu => edu.id === currentEdu.id);
+                
+                if (eduIndex !== -1) {
+                  updatedEducation[eduIndex] = {
+                    ...updatedEducation[eduIndex],
+                    description: data.description
+                  };
+                  handleDataChange("education", updatedEducation);
+                }
+              }
             }
           }
-          return "";
+          break;
         }
         
         case "experience-desc": {
@@ -176,10 +188,22 @@ const ResumeBuilder = () => {
               });
 
               if (error) throw error;
-              return data?.description || "";
+              if (data?.description) {
+                // Find the current experience in the array and update its description
+                const updatedExperience = [...resumeData.experience];
+                const expIndex = updatedExperience.findIndex(exp => exp.id === currentExp.id);
+                
+                if (expIndex !== -1) {
+                  updatedExperience[expIndex] = {
+                    ...updatedExperience[expIndex],
+                    description: data.description
+                  };
+                  handleDataChange("experience", updatedExperience);
+                }
+              }
             }
           }
-          return "";
+          break;
         }
 
         case "project-desc": {
@@ -202,14 +226,26 @@ const ResumeBuilder = () => {
               });
 
               if (error) throw error;
-              return data?.description || "";
+              if (data?.description) {
+                // Find the current project in the array and update its description
+                const updatedProjects = [...resumeData.projects];
+                const projectIndex = updatedProjects.findIndex(proj => proj.id === currentProject.id);
+                
+                if (projectIndex !== -1) {
+                  updatedProjects[projectIndex] = {
+                    ...updatedProjects[projectIndex],
+                    description: data.description
+                  };
+                  handleDataChange("projects", updatedProjects);
+                }
+              }
             }
           }
-          return "";
+          break;
         }
-
+        
         default:
-          return "";
+          break;
       }
     } catch (error) {
       console.error('Error generating with AI:', error);
@@ -218,10 +254,7 @@ const ResumeBuilder = () => {
         description: "Failed to generate with AI. Please try again.",
         variant: "destructive"
       });
-      return "";
     }
-    
-    return "";
   };
 
   const handleGenerateAI = async (): Promise<void> => {
@@ -304,7 +337,7 @@ const ResumeBuilder = () => {
       case "ai":
         return (
           <AIAssistant
-            resumeData={resumeData as ResumeData}
+            resumeData={resumeData}
             enabled={aiEnabled}
           />
         );
@@ -318,81 +351,79 @@ const ResumeBuilder = () => {
   };
 
   return (
-    <SidebarProvider defaultOpen={!isMobile}>
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50/80 via-background to-purple-50/60 dark:from-gray-900/90 dark:via-gray-900/50 dark:to-gray-900/90">
-        <BuilderHeader
-          name={resumeTitle || resumeData.personal.name || "New Resume"}
-          isSaving={false}
-          aiEnabled={aiEnabled}
-          onSave={handleSave}
-          onAIToggle={handleAIToggle}
-          onDownload={() => { }}
-          onShare={() => { }}
-        />
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50/80 via-background to-purple-50/60 dark:from-gray-900/90 dark:via-gray-900/50 dark:to-gray-900/90">
+      <BuilderHeader
+        name={resumeTitle || resumeData.personal.name || "New Resume"}
+        isSaving={false}
+        aiEnabled={aiEnabled}
+        onSave={handleSave}
+        onAIToggle={handleAIToggle}
+        onDownload={() => { }}
+        onShare={() => { }}
+      />
 
-        <div className="flex-1 flex">
-          <SidebarProvider>
-            <Sidebar side="left" variant="floating" collapsible="icon">
-              <BuilderSidebar
-                progress={calculateProgress(resumeData)}
-                activeSection={activeSection}
-                aiEnabled={aiEnabled}
-                aiGenerating={isGenerating}
-                onSectionChange={setActiveSection}
-                onGenerateWithAI={handleGenerateAI}
-              />
-            </Sidebar>
-          </SidebarProvider>
-
-          <SidebarInset className="flex flex-col p-4 lg:p-6">
-            <AISuggestion
-              suggestion={aiSuggestion}
-              onDismiss={dismissAiSuggestion}
-              onApply={applyAiSuggestion}
+      <div className="flex-1 flex">
+        <SidebarProvider defaultOpen={!isMobile}>
+          <Sidebar side="left" variant="floating" collapsible="icon">
+            <BuilderSidebar
+              progress={calculateProgress(resumeData)}
+              activeSection={activeSection}
+              aiEnabled={aiEnabled}
+              aiGenerating={isGenerating}
+              onSectionChange={setActiveSection}
+              onGenerateWithAI={handleGenerateAI}
             />
+          </Sidebar>
+        </SidebarProvider>
 
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 h-[calc(100vh-8rem)]">
-              <div className="xl:col-span-5 h-full overflow-auto">
-                <Card className="h-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 overflow-hidden shadow-xl">
-                  <CardContent className="p-4 lg:p-6 h-full overflow-auto">
-                    <div className="max-w-2xl space-y-6">
-                      {isLoading ? (
-                        <div className="flex flex-col items-center justify-center h-full space-y-4 py-20">
-                          <div className="w-16 h-16 border-4 border-resume-purple border-t-transparent rounded-full animate-spin"></div>
-                          <p className="text-resume-gray text-lg">Loading resume...</p>
-                        </div>
-                      ) : (
-                        renderActiveForm()
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+        <SidebarInset className="flex flex-col p-4 lg:p-6">
+          <AISuggestion
+            suggestion={aiSuggestion}
+            onDismiss={dismissAiSuggestion}
+            onApply={applyAiSuggestion}
+          />
 
-              <div className="xl:col-span-7 h-full overflow-auto">
-                <ResumePreview
-                  data={resumeData as ResumeData}
-                  template={selectedTemplate}
-                  settings={resumeSettings}
-                  onDataChange={(section, data) => handleDataChange(section, data)}
-                  onGenerateWithAI={handleGenerateWithAI}
-                />
-                {resumeId && (
-                  <div className="mt-4 flex justify-center">
-                    <Link to={`/resume/canvas/${resumeId}`}>
-                      <Button variant="outline" className="flex items-center gap-2">
-                        <Paintbrush className="h-4 w-4" />
-                        Open in Canvas Editor
-                      </Button>
-                    </Link>
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 h-[calc(100vh-8rem)]">
+            <div className="xl:col-span-5 h-full overflow-auto">
+              <Card className="h-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 overflow-hidden shadow-xl">
+                <CardContent className="p-4 lg:p-6 h-full overflow-auto">
+                  <div className="max-w-2xl space-y-6">
+                    {isLoading ? (
+                      <div className="flex flex-col items-center justify-center h-full space-y-4 py-20">
+                        <div className="w-16 h-16 border-4 border-resume-purple border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-resume-gray text-lg">Loading resume...</p>
+                      </div>
+                    ) : (
+                      renderActiveForm()
+                    )}
                   </div>
-                )}
-              </div>
+                </CardContent>
+              </Card>
             </div>
-          </SidebarInset>
-        </div>
+
+            <div className="xl:col-span-7 h-full overflow-auto">
+              <ResumePreview
+                data={resumeData}
+                template={selectedTemplate}
+                settings={resumeSettings}
+                onDataChange={(section, data) => handleDataChange(section, data)}
+                onGenerateWithAI={handleGenerateWithAI}
+              />
+              {resumeId && (
+                <div className="mt-4 flex justify-center">
+                  <Link to={`/resume/canvas/${resumeId}`}>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <Paintbrush className="h-4 w-4" />
+                      Open in Canvas Editor
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </SidebarInset>
       </div>
-    </SidebarProvider>
+    </div>
   );
 };
 
