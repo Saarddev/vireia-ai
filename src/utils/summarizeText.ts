@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -156,8 +157,10 @@ const enhanceATSResults = (data: any, resumeData: any): any => {
     .filter(keyword => typeof keyword === 'string' && keyword.trim().length > 0)
     .sort((a, b) => {
       // Prioritize keywords that appear in the resume
-      const aInResume = resumeData.plainTextVersion?.toLowerCase().includes(a.toLowerCase()) ? 1 : 0;
-      const bInResume = resumeData.plainTextVersion?.toLowerCase().includes(b.toLowerCase()) ? 1 : 0;
+      const aInResume = typeof resumeData.plainTextVersion === 'string' ? 
+        resumeData.plainTextVersion.toLowerCase().includes(a.toString().toLowerCase()) ? 1 : 0 : 0;
+      const bInResume = typeof resumeData.plainTextVersion === 'string' ? 
+        resumeData.plainTextVersion.toLowerCase().includes(b.toString().toLowerCase()) ? 1 : 0 : 0;
       return bInResume - aInResume;
     });
   
@@ -373,4 +376,64 @@ const extractResumeText = (resumeData: any): string => {
   }
   
   return textParts.join('\n\n');
+};
+
+// New function for enhancing resume text, limiting to 4-5 points max
+export const enhanceResumeText = async (text: string, sectionType: string = 'general'): Promise<string> => {
+  try {
+    if (!text || text.trim() === '') {
+      toast.error('No content to enhance. Please add some text first.');
+      return '';
+    }
+
+    const { data, error } = await supabase.functions.invoke('enhance-resume', {
+      body: {
+        type: 'enhance',
+        text,
+        sectionType
+      }
+    });
+
+    if (error) {
+      console.error('Supabase function error:', error);
+      throw error;
+    }
+    
+    let enhanced = data?.enhanced || '';
+    
+    if (!enhanced || enhanced.trim() === '') {
+      toast.error('AI could not enhance the content. Try with more details.');
+      return text;
+    }
+    
+    // Format and limit bullet points based on section type
+    let maxPoints = sectionType === 'summary' ? 3 : 5;
+    
+    // Clean up and standardize bullet points
+    enhanced = enhanced
+      .replace(/•\s*/g, '• ') // Standardize bullet points
+      .replace(/[-*]\s+/g, '• ') // Replace markdown bullets with •
+      .replace(/\n+/g, '\n') // Remove extra line breaks
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
+      .map(line => line.startsWith('•') ? line : `• ${line}`)
+      // Limit to maxPoints
+      .slice(0, maxPoints)
+      .join('\n');
+    
+    // Ensure proper spacing
+    enhanced = enhanced
+      .replace(/•\s+•/g, '•')
+      .replace(/^\n+|\n+$/g, '')
+      .replace(/([.!?])\s*(?=•)/g, '$1\n'); // Add newline before bullet points
+    
+    console.log('Enhanced text:', enhanced);
+    toast.success('Content enhanced successfully!');
+    return enhanced;
+  } catch (error) {
+    console.error('Error enhancing text:', error);
+    toast.error('Failed to enhance text. Please try again.');
+    return text;
+  }
 };

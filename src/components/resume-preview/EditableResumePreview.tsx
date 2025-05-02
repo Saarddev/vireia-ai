@@ -4,19 +4,23 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Check, Loader } from 'lucide-react';
 import AIHoverToolkit from "@/components/AIHoverToolkit";
+import { enhanceResumeText } from '@/utils/summarizeText';
+import { toast } from 'sonner';
 
 interface EditableContentProps {
   content: string;
   onSave: (content: string) => void;
   className?: string;
   onGenerateWithAI?: () => Promise<string>;
+  sectionType?: string;
 }
 
 export const EditableContent: React.FC<EditableContentProps> = ({ 
   content, 
   onSave, 
   className = "", 
-  onGenerateWithAI 
+  onGenerateWithAI,
+  sectionType = "general"
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
@@ -35,6 +39,26 @@ export const EditableContent: React.FC<EditableContentProps> = ({
     setIsGenerating(true);
     try {
       await onGenerateWithAI();
+    } finally {
+      setIsGenerating(false);
+    }
+    return Promise.resolve("");
+  };
+
+  const handleEnhance = async () => {
+    if (!editedContent) {
+      toast.error("Please add some content before enhancing");
+      return Promise.resolve("");
+    }
+    
+    setIsGenerating(true);
+    try {
+      const enhancedText = await enhanceResumeText(editedContent, sectionType);
+      if (enhancedText) {
+        setEditedContent(enhancedText);
+      }
+    } catch (error) {
+      console.error("Error enhancing text:", error);
     } finally {
       setIsGenerating(false);
     }
@@ -91,12 +115,24 @@ export const EditableContent: React.FC<EditableContentProps> = ({
           <div className={`absolute -top-10 left-0 z-10 transform transition-all duration-300 ease-out ${
             showToolkit ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
           }`}>
-            {onGenerateWithAI && (
+            <div className="flex space-x-1">
               <AIHoverToolkit 
                 onComplete={handleGenerate}
                 onAddChanges={handleContinue}
               />
-            )}
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="h-7 px-2 text-xs border-resume-purple text-resume-purple hover:bg-resume-purple/10 whitespace-nowrap"
+                onClick={() => handleEnhance()}
+                disabled={isGenerating}
+              >
+                {isGenerating ? (
+                  <Loader className="h-3 w-3 animate-spin mr-1" /> 
+                ) : null}
+                Enhance Text
+              </Button>
+            </div>
           </div>
           <Textarea
             value={editedContent}
@@ -141,16 +177,27 @@ export const EditableContent: React.FC<EditableContentProps> = ({
         ) : (
           <p className="text-gray-400 italic">Click to edit</p>
         )}
-        {onGenerateWithAI && (
-          <div className={`absolute -top-10 left-0 z-10 transform transition-all duration-300 ease-out ${
-            showToolkit ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-          }`}>
+        <div className={`absolute -top-10 left-0 z-10 transform transition-all duration-300 ease-out ${
+          showToolkit ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+        }`}>
+          <div className="flex space-x-1">
             <AIHoverToolkit 
               onComplete={handleGenerate}
               onAddChanges={handleContinue}
             />
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="h-7 px-2 text-xs border-resume-purple text-resume-purple hover:bg-resume-purple/10 whitespace-nowrap"
+              onClick={() => {
+                setIsEditing(true);
+                setTimeout(() => handleEnhance(), 100);
+              }}
+            >
+              Enhance Text
+            </Button>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -6,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
-import ATSScanButton from './ATSScanButton';
+import { scanResumeWithATS } from '@/utils/summarizeText';
 import { 
   Wand2, 
   BarChart3, 
@@ -33,6 +32,7 @@ import {
   FileText,
   Award
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface AIAssistantProps {
   resumeData: any;
@@ -42,11 +42,15 @@ interface AIAssistantProps {
 const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState([]);
   const [expandedSection, setExpandedSection] = useState<string | null>("score");
   const [progress, setProgress] = useState(0);
   const [stage, setStage] = useState(0);
   const [atsResults, setAtsResults] = useState<any>(null);
+  const [jobDescription, setJobDescription] = useState('');
+  const [jobMatchResults, setJobMatchResults] = useState<any>(null);
+  const [jobMatchScore, setJobMatchScore] = useState<number | null>(null);
+  const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
+  const [scoreHistory, setScoreHistory] = useState<any[]>([]);
   
   // Animation for progress
   useEffect(() => {
@@ -74,34 +78,360 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
     }
   }, [isAnalyzing, progress, stage]);
   
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     setIsAnalyzing(true);
     setProgress(0);
     setStage(0);
     
-    setTimeout(() => {
+    try {
+      // Create ATS-friendly text for better scanning
+      const plainTextResume = generateATSText(resumeData);
+      
+      // Pass the ATS-friendly text to the scanner
+      const results = await scanResumeWithATS({
+        ...resumeData,
+        plainTextVersion: plainTextResume
+      });
+      
+      if (results) {
+        setAtsResults(results);
+        
+        // Also generate AI suggestions based on the ATS results
+        generateAISuggestions(results);
+        
+        // Add to score history
+        const newHistoryEntry = {
+          date: new Date().toISOString(),
+          score: results.score,
+          event: 'Resume Analysis'
+        };
+        setScoreHistory(prev => [newHistoryEntry, ...prev]);
+      }
+    } catch (error) {
+      console.error("Error analyzing resume:", error);
+      toast.error("Failed to analyze resume. Please try again.");
+    } finally {
       setIsAnalyzing(false);
       setAnalysisComplete(true);
-      setAiSuggestions([
-        { id: "s1", type: "improvement", section: "summary", text: "Your summary lacks quantifiable achievements. Consider adding metrics to showcase your impact." },
-        { id: "s2", type: "improvement", section: "experience", text: "Add more action verbs to your job descriptions to make them more dynamic." },
-        { id: "s3", type: "keyword", section: "skills", text: "Consider adding 'Python' to your technical skills to match current job market demands." },
-        { id: "s4", type: "optimization", section: "general", text: "Your resume could benefit from a more consistent formatting throughout all sections." },
-      ]);
-    }, 3000);
+    }
   };
-
-  const handleATSScanComplete = (results: any) => {
-    setAtsResults(results);
-    setExpandedSection("ats");
+  
+  // Function to generate ATS-friendly text for better parsing (same as in ATSScanButton)
+  const generateATSText = (data: any): string => {
+    const lines = [];
+    
+    // Personal information
+    if (data.personal) {
+      lines.push(`${data.personal.name || ''}`);
+      lines.push(`${data.personal.title || ''}`);
+      
+      const contactInfo = [];
+      if (data.personal.email) contactInfo.push(data.personal.email);
+      if (data.personal.phone) contactInfo.push(data.personal.phone);
+      if (data.personal.location) contactInfo.push(data.personal.location);
+      if (contactInfo.length > 0) lines.push(contactInfo.join(' | '));
+      
+      if (data.personal.linkedin) lines.push(`LinkedIn: ${data.personal.linkedin}`);
+      if (data.personal.website) lines.push(`Website: ${data.personal.website}`);
+    }
+    
+    // Summary - strictly limited to 3 bullet points
+    if (data.summary) {
+      lines.push('');
+      lines.push('SUMMARY');
+      lines.push('-------');
+      const summaryPoints = data.summary.split('\n')
+        .filter((line: string) => line.trim())
+        .slice(0, 3); // Strict limit to 3 bullet points
+      lines.push(...summaryPoints);
+    }
+    
+    // Experience
+    if (data.experience && data.experience.length > 0) {
+      lines.push('');
+      lines.push('EXPERIENCE');
+      lines.push('----------');
+      data.experience.forEach((exp: any) => {
+        lines.push(`${exp.title} | ${exp.company} | ${exp.location} | ${exp.startDate} - ${exp.endDate}`);
+        if (exp.description) {
+          const descPoints = exp.description.split('\n')
+            .filter((line: string) => line.trim())
+            .map((point: string) => point.replace(/^[-•*]\s*/, '').trim()) // Clean up bullet points
+            .filter((point: string, index: number, self: string[]) => 
+              // Remove duplicate or very similar points
+              self.findIndex(p => p.toLowerCase().includes(point.toLowerCase().substring(0, 10))) === index
+            );
+          lines.push(...descPoints.map((point: string) => `- ${point}`));
+        }
+        lines.push('');
+      });
+    }
+    
+    // Projects
+    if (data.projects && data.projects.length > 0) {
+      lines.push('');
+      lines.push('PROJECTS');
+      lines.push('--------');
+      data.projects.forEach((project: any) => {
+        lines.push(`${project.title} | ${project.startDate} - ${project.endDate}`);
+        if (project.technologies && project.technologies.length > 0) {
+          lines.push(`Technologies: ${project.technologies.join(', ')}`);
+        }
+        if (project.description) {
+          const descPoints = project.description.split('\n')
+            .filter((line: string) => line.trim())
+            .map((point: string) => point.replace(/^[-•*]\s*/, '').trim()) // Clean up bullet points
+            .filter((point: string, index: number, self: string[]) => 
+              // Remove duplicate or very similar points
+              self.findIndex(p => p.toLowerCase().includes(point.toLowerCase().substring(0, 10))) === index
+            );
+          lines.push(...descPoints.map((point: string) => `- ${point}`));
+        }
+        if (project.link) lines.push(`Link: ${project.link}`);
+        lines.push('');
+      });
+    }
+    
+    // Education
+    if (data.education && data.education.length > 0) {
+      lines.push('');
+      lines.push('EDUCATION');
+      lines.push('---------');
+      data.education.forEach((edu: any) => {
+        lines.push(`${edu.degree}${edu.field ? ` in ${edu.field}` : ''} | ${edu.institution} | ${edu.location} | ${edu.startDate} - ${edu.endDate}`);
+        if (edu.description) {
+          const descPoints = edu.description.split('\n')
+            .filter((line: string) => line.trim())
+            .map((point: string) => point.replace(/^[-•*]\s*/, '').trim()) // Clean up bullet points
+            .filter((point: string, index: number, self: string[]) => 
+              // Remove duplicate or very similar points
+              self.findIndex(p => p.toLowerCase().includes(point.toLowerCase().substring(0, 10))) === index
+            );
+          lines.push(...descPoints.map((point: string) => `- ${point}`));
+        }
+        lines.push('');
+      });
+    }
+    
+    // Skills - ensure unique skills without repetition
+    if (data.skills) {
+      lines.push('');
+      lines.push('SKILLS');
+      lines.push('------');
+      if (data.skills.technical && data.skills.technical.length > 0) {
+        // Remove duplicate or very similar skills
+        const uniqueTechnical = [...new Set(data.skills.technical)];
+        lines.push(`Technical Skills: ${uniqueTechnical.join(', ')}`);
+      }
+      if (data.skills.soft && data.skills.soft.length > 0) {
+        // Remove duplicate or very similar skills
+        const uniqueSoft = [...new Set(data.skills.soft)];
+        lines.push(`Soft Skills: ${uniqueSoft.join(', ')}`);
+      }
+    }
+    
+    return lines.join('\n');
   };
-
+  
+  // Generate AI suggestions based on ATS results
+  const generateAISuggestions = (results: any) => {
+    const suggestions = [];
+    
+    // Add suggestions based on improvements
+    if (results.improvements && results.improvements.length > 0) {
+      results.improvements.forEach((improvement: string, index: number) => {
+        // Determine which section this improvement likely applies to
+        let section = "general";
+        if (improvement.toLowerCase().includes("summary")) section = "summary";
+        else if (improvement.toLowerCase().includes("experience")) section = "experience";
+        else if (improvement.toLowerCase().includes("skill")) section = "skills";
+        else if (improvement.toLowerCase().includes("education")) section = "education";
+        else if (improvement.toLowerCase().includes("project")) section = "projects";
+        
+        suggestions.push({
+          id: `imp-${index}`,
+          type: "improvement",
+          section,
+          text: improvement
+        });
+      });
+    }
+    
+    // Add suggestions based on missing keywords
+    if (results.keywords && results.keywords.length > 0) {
+      const topKeywords = results.keywords.slice(0, 5);
+      suggestions.push({
+        id: "keyword-1",
+        type: "keyword",
+        section: "skills",
+        text: `Consider adding these top keywords to strengthen your resume: ${topKeywords.join(", ")}`
+      });
+    }
+    
+    // Add suggestions based on score metrics
+    if (results.metrics && results.metrics.length > 0) {
+      const lowestMetric = [...results.metrics].sort((a, b) => a.score - b.score)[0];
+      
+      if (lowestMetric && lowestMetric.score < 70) {
+        let suggestion = "";
+        if (lowestMetric.name === "Impact Statements") {
+          suggestion = "Add more quantifiable achievements with metrics to strengthen impact statements.";
+        } else if (lowestMetric.name === "Content Quality") {
+          suggestion = "Enhance your experience descriptions with more detailed and relevant content.";
+        } else if (lowestMetric.name === "Keyword Optimization") {
+          suggestion = "Add more industry-specific keywords throughout your resume.";
+        } else if (lowestMetric.name === "ATS Compatibility") {
+          suggestion = "Improve formatting for better ATS compatibility. Avoid tables, graphics or unusual formatting.";
+        }
+        
+        if (suggestion) {
+          suggestions.push({
+            id: `metric-${lowestMetric.name}`,
+            type: "optimization",
+            section: "general",
+            text: suggestion
+          });
+        }
+      }
+    }
+    
+    // Limit to 5 suggestions maximum
+    setAiSuggestions(suggestions.slice(0, 5));
+  };
+  
+  const analyzeJobMatch = async () => {
+    if (!jobDescription || jobDescription.trim() === '') {
+      toast.error("Please enter a job description first");
+      return;
+    }
+    
+    toast.loading("Analyzing job match...");
+    
+    try {
+      // First get the ATS results if not already available
+      let atsData = atsResults;
+      if (!atsData) {
+        const plainTextResume = generateATSText(resumeData);
+        atsData = await scanResumeWithATS({
+          ...resumeData,
+          plainTextVersion: plainTextResume
+        });
+      }
+      
+      // Calculate match score based on keyword presence
+      const resumeText = atsData.plainTextVersion || JSON.stringify(resumeData);
+      
+      // Extract key requirements from job description
+      const requirements = extractRequirements(jobDescription);
+      
+      // Check how many requirements match the resume
+      let matchCount = 0;
+      const matchDetails = requirements.map(req => {
+        const isMatch = resumeText.toLowerCase().includes(req.toLowerCase());
+        if (isMatch) matchCount++;
+        return { requirement: req, matched: isMatch };
+      });
+      
+      const matchPercentage = requirements.length > 0 ? 
+        Math.round((matchCount / requirements.length) * 100) : 0;
+      
+      // Generate recommendations
+      const missingRequirements = matchDetails
+        .filter(item => !item.matched)
+        .map(item => item.requirement);
+      
+      // Set job match results
+      setJobMatchResults({
+        score: matchPercentage,
+        matches: matchCount,
+        total: requirements.length,
+        matched: matchDetails.filter(item => item.matched).map(item => item.requirement),
+        missing: missingRequirements,
+        recommendations: generateRecommendations(missingRequirements)
+      });
+      
+      setJobMatchScore(matchPercentage);
+      setExpandedSection("jobmatch");
+      toast.dismiss();
+      toast.success("Job match analysis complete!");
+      
+    } catch (error) {
+      console.error("Error analyzing job match:", error);
+      toast.dismiss();
+      toast.error("Failed to analyze job match");
+    }
+  };
+  
+  const extractRequirements = (jobDesc: string): string[] => {
+    // Split by common requirement indicators
+    const lines = jobDesc
+      .split(/\n|•|-|\*|\\|\/|●/)
+      .map(line => line.trim())
+      .filter(line => line.length > 10); // Filter out short lines
+      
+    // Identify likely requirements (skills, experiences, education)
+    const requirements = lines.filter(line => 
+      line.match(/experience|skill|knowledge|proficien|expert|understand|familiar|degree|education|ability/i) 
+      && !line.match(/we offer|benefit|opportunit|what you'll get|package/i)
+    );
+    
+    // If we couldn't identify specific requirements, fall back to extracting keywords
+    if (requirements.length < 3) {
+      const keywordMatches = jobDesc.match(/\b([A-Z][A-Za-z]*|[A-Za-z]{2,}[+#])\b/g) || [];
+      const keywords = [...new Set(keywordMatches)]
+        .filter(word => word.length > 2) 
+        .filter(word => !word.match(/^(The|And|For|With|This|That|Have|From|Will|More|Your|You|Our|Their|About|Which)$/i));
+      
+      return keywords.slice(0, 10); // Limit to 10 keywords
+    }
+    
+    // Clean up the requirements
+    return requirements
+      .map(req => req.replace(/^(.*?):/, '').trim()) // Remove prefixes like "Requirements:"
+      .filter(req => req.length > 0)
+      .slice(0, 15); // Limit to 15 requirements
+  };
+  
+  const generateRecommendations = (missingReqs: string[]): string[] => {
+    if (missingReqs.length === 0) return ["Your resume already addresses all key requirements!"];
+    
+    const recs = [];
+    
+    if (missingReqs.length > 3) {
+      recs.push(`Consider adding these key missing skills: ${missingReqs.slice(0, 3).join(", ")}`);
+    } else {
+      missingReqs.forEach(req => {
+        recs.push(`Add details about your experience with ${req}`);
+      });
+    }
+    
+    if (missingReqs.length > 3) {
+      recs.push("Customize your summary to better align with the job requirements");
+    }
+    
+    if (recs.length < 2) {
+      recs.push("Highlight relevant projects that demonstrate your capabilities in the required areas");
+    }
+    
+    return recs;
+  };
+  
   const toggleSection = (section: string) => {
     if (expandedSection === section) {
       setExpandedSection(null);
     } else {
       setExpandedSection(section);
     }
+  };
+  
+  const handleApplySuggestion = (id: string) => {
+    toast.success("Suggestion applied! The resume will be updated.");
+    // Remove the suggestion from the list
+    setAiSuggestions(prev => prev.filter(s => s.id !== id));
+  };
+  
+  const handleRemoveSuggestion = (id: string) => {
+    setAiSuggestions(prev => prev.filter(s => s.id !== id));
   };
   
   return (
@@ -118,30 +448,23 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
         </div>
         <div className="flex gap-3">
           {enabled && !isAnalyzing && (
-            <>
-              <ATSScanButton 
-                resumeData={resumeData}
-                onScanComplete={handleATSScanComplete}
-                disabled={!enabled}
-              />
-              <Button 
-                onClick={handleAnalyze} 
-                className="bg-resume-purple hover:bg-resume-purple/90 flex items-center gap-2 shadow-md hover:shadow-xl transition-all"
-                disabled={isAnalyzing}
-              >
-                {isAnalyzing ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 animate-spin" /> 
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4" /> 
-                    {analysisComplete ? "Re-Analyze Resume" : "Analyze Resume"}
-                  </>
-                )}
-              </Button>
-            </>
+            <Button 
+              onClick={handleAnalyze} 
+              className="bg-gradient-to-r from-resume-purple to-blue-500 hover:from-resume-purple/90 hover:to-blue-600 text-white flex items-center gap-2 shadow-md hover:shadow-xl transition-all"
+              disabled={isAnalyzing}
+            >
+              {isAnalyzing ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" /> 
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" /> 
+                  {analysisComplete ? "Re-Analyze Resume" : "Analyze Resume"}
+                </>
+              )}
+            </Button>
           )}
         </div>
       </div>
@@ -184,7 +507,12 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
                 <span>Progress</span>
                 <span>{progress}%</span>
               </div>
-              <Progress value={progress} className="h-2" />
+              <Progress value={progress} className="h-2 bg-gray-100">
+                <div 
+                  className="h-full bg-gradient-to-r from-resume-purple to-blue-500 rounded-full transition-all ease-in-out duration-300" 
+                  style={{ width: `${progress}%` }}
+                />
+              </Progress>
               
               <div className="grid grid-cols-3 gap-2 mt-4">
                 <div className={`rounded-lg border p-2 text-center text-xs ${stage >= 0 ? 'border-resume-purple bg-resume-purple/5' : 'border-gray-200'}`}>
@@ -219,11 +547,11 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
           {atsResults && (
             <Card className="overflow-hidden border-resume-purple/20 shadow-lg hover:shadow-xl transition-all">
               <div 
-                className="p-6 border-b border-resume-purple/10 flex justify-between items-center cursor-pointer bg-white dark:bg-gray-900"
+                className="p-6 border-b border-resume-purple/10 flex justify-between items-center cursor-pointer bg-gradient-to-r from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-800/80"
                 onClick={() => toggleSection("ats")}
               >
                 <div className="flex items-center">
-                  <div className="h-10 w-10 rounded-full bg-resume-purple/10 flex items-center justify-center mr-4">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-resume-purple/30 to-blue-400/20 flex items-center justify-center mr-4">
                     <Award className="h-5 w-5 text-resume-purple" />
                   </div>
                   <div>
@@ -261,10 +589,10 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
                           <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                             <div 
                               className={`h-full transition-all duration-1000 ease-out ${
-                                metric.score >= 80 ? 'bg-green-500' : 
-                                metric.score >= 60 ? 'bg-blue-500' : 
-                                metric.score >= 40 ? 'bg-amber-500' : 
-                                'bg-red-500'
+                                metric.score >= 80 ? 'bg-gradient-to-r from-green-400 to-green-500' : 
+                                metric.score >= 60 ? 'bg-gradient-to-r from-blue-400 to-blue-500' : 
+                                metric.score >= 40 ? 'bg-gradient-to-r from-amber-400 to-amber-500' : 
+                                'bg-gradient-to-r from-red-400 to-red-500'
                               }`}
                               style={{ width: `${metric.score}%` }}
                             />
@@ -274,7 +602,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
                     </div>
                     
                     <div className="space-y-4">
-                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
+                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
                         <h4 className="font-medium text-sm flex items-center mb-2">
                           <ThumbsUp className="h-4 w-4 mr-2 text-green-500" /> ATS Strengths
                         </h4>
@@ -291,7 +619,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
                         </ul>
                       </div>
                       
-                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
+                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
                         <h4 className="font-medium text-sm flex items-center mb-2">
                           <Target className="h-4 w-4 mr-2 text-amber-500" /> Areas for Improvement
                         </h4>
@@ -311,7 +639,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
                   </div>
                   
                   {atsResults.keywords && (
-                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
                       <h4 className="font-medium text-sm flex items-center mb-3">
                         <Search className="h-4 w-4 mr-2 text-resume-purple" /> 
                         Recommended Keywords
@@ -333,11 +661,11 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
           {/* Resume Score Card */}
           <Card className="overflow-hidden border-resume-purple/20 shadow-lg hover:shadow-xl transition-all">
             <div 
-              className="p-6 border-b border-resume-purple/10 flex justify-between items-center cursor-pointer bg-white dark:bg-gray-900"
+              className="p-6 border-b border-resume-purple/10 flex justify-between items-center cursor-pointer bg-gradient-to-r from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-800/80"
               onClick={() => toggleSection("score")}
             >
               <div className="flex items-center">
-                <div className="h-10 w-10 rounded-full bg-resume-purple/10 flex items-center justify-center mr-4">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-resume-purple/30 to-blue-400/20 flex items-center justify-center mr-4">
                   <BarChart3 className="h-5 w-5 text-resume-purple" />
                 </div>
                 <div>
@@ -347,8 +675,18 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
               </div>
               <div className="flex items-center">
                 <div className="text-right mr-4">
-                  <div className="text-3xl font-bold text-resume-purple">76</div>
-                  <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">Above Average</Badge>
+                  <div className="text-3xl font-bold text-resume-purple">
+                    {atsResults ? atsResults.score : 76}
+                  </div>
+                  <Badge variant="outline" className={`
+                    ${atsResults && atsResults.score >= 80 ? 'bg-green-50 text-green-600 border-green-200' : 
+                      atsResults && atsResults.score >= 60 ? 'bg-yellow-50 text-yellow-600 border-yellow-200' : 
+                      'bg-red-50 text-red-600 border-red-200'}
+                  `}>
+                    {atsResults && atsResults.score >= 80 ? 'Excellent' : 
+                     atsResults && atsResults.score >= 60 ? 'Good' : 
+                     'Needs Improvement'}
+                  </Badge>
                 </div>
                 {expandedSection === "score" ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
               </div>
@@ -358,246 +696,11 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
               <div className="p-6 space-y-6 bg-gray-50/80 dark:bg-gray-800/20 backdrop-blur-sm">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
-                    {[
-                      { name: "Content Quality", score: 85, color: "bg-green-500" },
-                      { name: "ATS Compatibility", score: 92, color: "bg-blue-500" },
-                      { name: "Keyword Optimization", score: 68, color: "bg-amber-500" },
-                      { name: "Impact Statements", score: 62, color: "bg-red-500" }
-                    ].map((metric) => (
+                    {(atsResults?.metrics || [
+                      { name: "Content Quality", score: 85 },
+                      { name: "ATS Compatibility", score: 92 },
+                      { name: "Keyword Optimization", score: 68 },
+                      { name: "Impact Statements", score: 62 }
+                    ]).map((metric: any) => (
                       <div key={metric.name} className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="font-medium">{metric.name}</span>
-                          <span className="text-resume-gray">{metric.score}%</span>
-                        </div>
-                        <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full ${metric.color} transition-all duration-1000 ease-out`}
-                            style={{ width: `${metric.score}%` }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
-                      <h4 className="font-medium text-sm flex items-center mb-2">
-                        <ThumbsUp className="h-4 w-4 mr-2 text-green-500" /> Strengths
-                      </h4>
-                      <ul className="text-sm space-y-2">
-                        <li className="flex items-start">
-                          <CheckCircle2 className="h-4 w-4 mr-2 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span>Strong professional experience with clear progression</span>
-                        </li>
-                        <li className="flex items-start">
-                          <CheckCircle2 className="h-4 w-4 mr-2 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span>Good balance of technical and soft skills</span>
-                        </li>
-                        <li className="flex items-start">
-                          <CheckCircle2 className="h-4 w-4 mr-2 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span>Clear education section with relevant details</span>
-                        </li>
-                      </ul>
-                    </div>
-                    
-                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
-                      <h4 className="font-medium text-sm flex items-center mb-2">
-                        <Target className="h-4 w-4 mr-2 text-amber-500" /> Areas for Improvement
-                      </h4>
-                      <ul className="text-sm space-y-2">
-                        <li className="flex items-start">
-                          <AlertCircle className="h-4 w-4 mr-2 text-amber-500 mt-0.5 flex-shrink-0" />
-                          <span>Add more quantifiable achievements to showcase impact</span>
-                        </li>
-                        <li className="flex items-start">
-                          <AlertCircle className="h-4 w-4 mr-2 text-amber-500 mt-0.5 flex-shrink-0" />
-                          <span>Strengthen action verbs in experience descriptions</span>
-                        </li>
-                        <li className="flex items-start">
-                          <AlertCircle className="h-4 w-4 mr-2 text-amber-500 mt-0.5 flex-shrink-0" />
-                          <span>Include more industry-specific keywords</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </Card>
-          
-          {/* AI Suggestions */}
-          <Card className="overflow-hidden border-resume-purple/20 shadow-lg hover:shadow-xl transition-all">
-            <div 
-              className="p-6 border-b border-resume-purple/10 flex justify-between items-center cursor-pointer bg-white dark:bg-gray-900"
-              onClick={() => toggleSection("suggestions")}
-            >
-              <div className="flex items-center">
-                <div className="h-10 w-10 rounded-full bg-resume-purple/10 flex items-center justify-center mr-4">
-                  <Sparkles className="h-5 w-5 text-resume-purple" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">AI Suggestions</h3>
-                  <p className="text-sm text-muted-foreground">Smart recommendations to enhance your resume</p>
-                </div>
-              </div>
-              <div>
-                {expandedSection === "suggestions" ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-              </div>
-            </div>
-            
-            {expandedSection === "suggestions" && (
-              <div className="p-6 space-y-4 bg-gray-50/80 dark:bg-gray-800/20 backdrop-blur-sm">
-                {aiSuggestions.length > 0 ? (
-                  <div className="space-y-3">
-                    {aiSuggestions.map((suggestion) => (
-                      <div key={suggestion.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700 flex justify-between items-start">
-                        <div className="space-y-1 flex-1">
-                          <div className="flex items-center">
-                            <Badge className="bg-resume-purple text-white mr-2">{suggestion.section}</Badge>
-                            {suggestion.type === "improvement" && (
-                              <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">improvement</Badge>
-                            )}
-                            {suggestion.type === "keyword" && (
-                              <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">keyword</Badge>
-                            )}
-                            {suggestion.type === "optimization" && (
-                              <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200">optimization</Badge>
-                            )}
-                          </div>
-                          <p className="text-sm">{suggestion.text}</p>
-                        </div>
-                        <div className="flex items-center gap-2 ml-4">
-                          <Button variant="outline" size="sm" className="h-8 px-2">
-                            <Zap className="h-3.5 w-3.5 mr-1 text-resume-purple" /> Apply
-                          </Button>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <Trash className="h-3.5 w-3.5 text-gray-400" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    <Button variant="outline" className="w-full mt-2">
-                      <Plus className="mr-2 h-4 w-4" /> Generate More Suggestions
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="text-center py-6">
-                    <p className="text-muted-foreground">No suggestions yet. Click "Analyze Resume" to generate recommendations.</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </Card>
-          
-          {/* Job Match Analysis */}
-          <Card className="overflow-hidden border-resume-purple/20 shadow-lg hover:shadow-xl transition-all">
-            <div 
-              className="p-6 border-b border-resume-purple/10 flex justify-between items-center cursor-pointer bg-white dark:bg-gray-900"
-              onClick={() => toggleSection("jobmatch")}
-            >
-              <div className="flex items-center">
-                <div className="h-10 w-10 rounded-full bg-resume-purple/10 flex items-center justify-center mr-4">
-                  <Target className="h-5 w-5 text-resume-purple" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Job Match Analysis</h3>
-                  <p className="text-sm text-muted-foreground">See how your resume matches specific job descriptions</p>
-                </div>
-              </div>
-              <div>
-                {expandedSection === "jobmatch" ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-              </div>
-            </div>
-            
-            {expandedSection === "jobmatch" && (
-              <div className="p-6 space-y-4 bg-gray-50/80 dark:bg-gray-800/20 backdrop-blur-sm">
-                <div className="text-sm mb-3">Paste a job description to see how well your resume matches the requirements:</div>
-                
-                <div className="space-y-4">
-                  <Textarea 
-                    placeholder="Paste job description here..." 
-                    className="min-h-[120px] resize-y border-gray-200 focus:border-resume-purple"
-                  />
-                  
-                  <div className="flex gap-2">
-                    <Button className="bg-resume-purple hover:bg-resume-purple-dark flex-1">
-                      <Search className="mr-2 h-4 w-4" /> Analyze Match
-                    </Button>
-                    <Button variant="outline">
-                      <UploadCloud className="mr-2 h-4 w-4" /> Upload Job PDF
-                    </Button>
-                  </div>
-                  
-                  <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-dashed border-gray-200 dark:border-gray-700 text-center">
-                    <div className="flex justify-center mb-2">
-                      <BadgeCheck className="h-10 w-10 text-gray-300 dark:text-gray-600" />
-                    </div>
-                    <h4 className="text-sm font-medium mb-1">Job Match Results</h4>
-                    <p className="text-xs text-muted-foreground">Your job match analysis will appear here</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </Card>
-          
-          {/* Resume History */}
-          <Card className="overflow-hidden border-resume-purple/20 shadow-lg hover:shadow-xl transition-all">
-            <div 
-              className="p-6 border-b border-resume-purple/10 flex justify-between items-center cursor-pointer bg-white dark:bg-gray-900"
-              onClick={() => toggleSection("history")}
-            >
-              <div className="flex items-center">
-                <div className="h-10 w-10 rounded-full bg-resume-purple/10 flex items-center justify-center mr-4">
-                  <Clock className="h-5 w-5 text-resume-purple" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Resume History</h3>
-                  <p className="text-sm text-muted-foreground">Track improvements over time</p>
-                </div>
-              </div>
-              <div>
-                {expandedSection === "history" ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-              </div>
-            </div>
-            
-            {expandedSection === "history" && (
-              <div className="p-6 space-y-4 bg-gray-50/80 dark:bg-gray-800/20 backdrop-blur-sm">
-                <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-4">
-                  <div className="text-sm font-medium">Score History</div>
-                  <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">Last 30 days</Badge>
-                </div>
-                
-                <div className="h-40 flex items-center justify-center">
-                  <div className="text-center">
-                    <p className="text-muted-foreground text-sm">Not enough data to display score history</p>
-                    <p className="text-xs text-muted-foreground mt-1">Continue improving your resume to track progress</p>
-                  </div>
-                </div>
-                
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
-                  <h4 className="text-sm font-medium mb-3 flex items-center">
-                    <TrendingUp className="h-4 w-4 mr-2 text-resume-purple" /> 
-                    Resume Evolution
-                  </h4>
-                  
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center text-xs border-b border-gray-100 dark:border-gray-700 pb-2">
-                      <div className="flex items-center">
-                        <Badge variant="outline" className="h-5 mr-2 bg-gray-50 text-gray-600 border-gray-200">Today</Badge>
-                        <span>Initial Analysis</span>
-                      </div>
-                      <Badge className="bg-resume-purple">76/100</Badge>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </Card>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default AIAssistant;
+                        <div
