@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -309,8 +308,13 @@ const ResumeBuilder = () => {
             onChange={(data) => handleDataChange("skills", data)}
             isGenerating={isGenerating}
             onExtractSkills={async () => {
-              await handleGenerateWithAI("skills");
-              return "";
+              try {
+                await handleGenerateWithAI("skills");
+                return;
+              } catch (error) {
+                console.error('Error extracting skills:', error);
+                return;
+              }
             }}
           />
         );

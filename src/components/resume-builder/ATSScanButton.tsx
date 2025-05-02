@@ -54,14 +54,14 @@ const ATSScanButton: React.FC<ATSScanButtonProps> = ({ resumeData, onScanComplet
       if (data.personal.website) lines.push(`Website: ${data.personal.website}`);
     }
     
-    // Summary - limited to 3 bullet points
+    // Summary - strictly limited to 3 bullet points
     if (data.summary) {
       lines.push('');
       lines.push('SUMMARY');
       lines.push('-------');
       const summaryPoints = data.summary.split('\n')
         .filter((line: string) => line.trim())
-        .slice(0, 3); // Limit to 3 bullet points
+        .slice(0, 3); // Strict limit to 3 bullet points
       lines.push(...summaryPoints);
     }
     
@@ -73,8 +73,14 @@ const ATSScanButton: React.FC<ATSScanButtonProps> = ({ resumeData, onScanComplet
       data.experience.forEach((exp: any) => {
         lines.push(`${exp.title} | ${exp.company} | ${exp.location} | ${exp.startDate} - ${exp.endDate}`);
         if (exp.description) {
-          const descPoints = exp.description.split('\n').filter((line: string) => line.trim());
-          lines.push(...descPoints.map((point: string) => `- ${point.replace(/^[-•*]\s*/, '')}`));
+          const descPoints = exp.description.split('\n')
+            .filter((line: string) => line.trim())
+            .map((point: string) => point.replace(/^[-•*]\s*/, '').trim()) // Clean up bullet points
+            .filter((point: string, index: number, self: string[]) => 
+              // Remove duplicate or very similar points
+              self.findIndex(p => p.toLowerCase().includes(point.toLowerCase().substring(0, 10))) === index
+            );
+          lines.push(...descPoints.map((point: string) => `- ${point}`));
         }
         lines.push('');
       });
@@ -91,8 +97,14 @@ const ATSScanButton: React.FC<ATSScanButtonProps> = ({ resumeData, onScanComplet
           lines.push(`Technologies: ${project.technologies.join(', ')}`);
         }
         if (project.description) {
-          const descPoints = project.description.split('\n').filter((line: string) => line.trim());
-          lines.push(...descPoints.map((point: string) => `- ${point.replace(/^[-•*]\s*/, '')}`));
+          const descPoints = project.description.split('\n')
+            .filter((line: string) => line.trim())
+            .map((point: string) => point.replace(/^[-•*]\s*/, '').trim()) // Clean up bullet points
+            .filter((point: string, index: number, self: string[]) => 
+              // Remove duplicate or very similar points
+              self.findIndex(p => p.toLowerCase().includes(point.toLowerCase().substring(0, 10))) === index
+            );
+          lines.push(...descPoints.map((point: string) => `- ${point}`));
         }
         if (project.link) lines.push(`Link: ${project.link}`);
         lines.push('');
@@ -107,23 +119,33 @@ const ATSScanButton: React.FC<ATSScanButtonProps> = ({ resumeData, onScanComplet
       data.education.forEach((edu: any) => {
         lines.push(`${edu.degree}${edu.field ? ` in ${edu.field}` : ''} | ${edu.institution} | ${edu.location} | ${edu.startDate} - ${edu.endDate}`);
         if (edu.description) {
-          const descPoints = edu.description.split('\n').filter((line: string) => line.trim());
-          lines.push(...descPoints.map((point: string) => `- ${point.replace(/^[-•*]\s*/, '')}`));
+          const descPoints = edu.description.split('\n')
+            .filter((line: string) => line.trim())
+            .map((point: string) => point.replace(/^[-•*]\s*/, '').trim()) // Clean up bullet points
+            .filter((point: string, index: number, self: string[]) => 
+              // Remove duplicate or very similar points
+              self.findIndex(p => p.toLowerCase().includes(point.toLowerCase().substring(0, 10))) === index
+            );
+          lines.push(...descPoints.map((point: string) => `- ${point}`));
         }
         lines.push('');
       });
     }
     
-    // Skills
+    // Skills - ensure unique skills without repetition
     if (data.skills) {
       lines.push('');
       lines.push('SKILLS');
       lines.push('------');
       if (data.skills.technical && data.skills.technical.length > 0) {
-        lines.push(`Technical Skills: ${data.skills.technical.join(', ')}`);
+        // Remove duplicate or very similar skills
+        const uniqueTechnical = [...new Set(data.skills.technical)];
+        lines.push(`Technical Skills: ${uniqueTechnical.join(', ')}`);
       }
       if (data.skills.soft && data.skills.soft.length > 0) {
-        lines.push(`Soft Skills: ${data.skills.soft.join(', ')}`);
+        // Remove duplicate or very similar skills
+        const uniqueSoft = [...new Set(data.skills.soft)];
+        lines.push(`Soft Skills: ${uniqueSoft.join(', ')}`);
       }
     }
     
@@ -139,12 +161,12 @@ const ATSScanButton: React.FC<ATSScanButtonProps> = ({ resumeData, onScanComplet
       {isScanning ? (
         <>
           <FileText className="h-4 w-4 animate-pulse" /> 
-          Scanning...
+          Analyzing Resume...
         </>
       ) : (
         <>
           <Zap className="h-4 w-4" /> 
-          Scan Resume with ATS
+          Scan with ATS Optimizer
         </>
       )}
     </Button>
