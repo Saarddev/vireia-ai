@@ -108,11 +108,11 @@ const ResumeBuilder: React.FC = () => {
     });
 
     // Education
-    totalFields += resumeData.education.length * 3; // institution, degree, date
+    totalFields += resumeData.education.length * 3; // institution, degree, graduation year
     resumeData.education.forEach(edu => {
       if (edu.institution) completedFields++;
       if (edu.degree) completedFields++;
-      if (edu.date) completedFields++;
+      if (edu.startDate) completedFields++;  // Changed from date to startDate
     });
 
     // Skills
@@ -350,17 +350,17 @@ const ResumeBuilder: React.FC = () => {
                           }} />
                         </div>
                         <div className="grid gap-2">
-                          <Label htmlFor={`date-${index}`}>Graduation Date</Label>
-                          <Input id={`date-${index}`} type="date" value={edu.date} onChange={(e) => {
+                          <Label htmlFor={`startDate-${index}`}>Graduation Date</Label>
+                          <Input id={`startDate-${index}`} type="date" value={edu.startDate} onChange={(e) => {
                             const newEducation = [...resumeData.education];
-                            newEducation[index] = { ...edu, date: e.target.value };
+                            newEducation[index] = { ...edu, startDate: e.target.value };
                             handleDataChange("education", newEducation);
                           }} />
                         </div>
                       </div>
                     </div>
                   ))}
-                  <Button onClick={() => handleDataChange("education", [...resumeData.education, { institution: "", degree: "", date: "" } as Education])}>
+                  <Button onClick={() => handleDataChange("education", [...resumeData.education, { institution: "", degree: "", startDate: "", field: "", location: "", endDate: "", gpa: 0 } as Education])}>
                     Add Education
                   </Button>
                 </CardContent>
