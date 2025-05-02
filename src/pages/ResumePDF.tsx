@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useResumeData } from '@/hooks/use-resume-data';
@@ -13,18 +14,18 @@ const ResumePDF = () => {
 
   const formatBulletPoints = (text: string) => {
     if (!text) return [];
+    
+    // Handle text that already has bullet points
     return text
       .split('\n')
       .filter(point => point.trim() !== '')
       .map(point => {
+        // Clean up the point by removing any existing bullet symbols
         let cleanPoint = point.trim().replace(/^[-•*]\s*/, '');
         
+        // Ensure point starts with an action verb if possible
         if (!/^[A-Z][a-z]+ed|^[A-Z][a-z]+ing|^[A-Z][a-z]+s\b/.test(cleanPoint)) {
           cleanPoint = cleanPoint.charAt(0).toUpperCase() + cleanPoint.slice(1);
-        }
-        
-        if (!/\d/.test(cleanPoint)) {
-          return cleanPoint;
         }
         
         return cleanPoint;

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -24,8 +25,8 @@ import {
   LayoutPanelLeft, 
   Settings, 
   Wand2,
-  CloudLightning,
-  Loader
+  Loader,
+  FolderKanban
 } from 'lucide-react';
 
 interface BuilderSidebarProps {
@@ -47,35 +48,49 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
 }) => {
   return (
     <>
-      <SidebarHeader className="p-4 flex flex-col gap-3">
+      <SidebarHeader className="px-5 py-4 flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-resume-purple dark:text-resume-purple-light font-display">
+          <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-indigo-500 bg-clip-text text-transparent font-display">
             Resume Builder
           </h3>
           <SidebarTrigger />
         </div>
         
-        <div className="flex gap-2 items-center bg-muted/30 rounded-lg p-2">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex justify-between items-center">
+            <span className="text-xs font-medium text-gray-500">Completion</span>
+            <span className="text-xs font-medium text-gray-500">{progress}%</span>
+          </div>
           <Progress 
             value={progress} 
-            className="h-2" 
-            indicatorClassName="bg-resume-purple"
+            className="h-2 bg-gray-100" 
+            indicatorClassName="bg-gradient-to-r from-purple-600 to-indigo-500"
           />
-          <span className="text-xs font-medium text-muted-foreground">{progress}%</span>
         </div>
       </SidebarHeader>
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Resume Sections</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-gray-500 font-medium px-5">
+            Resume Sections
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   isActive={activeSection === "personal"}
                   onClick={() => onSectionChange("personal")}
+                  className={cn(
+                    "transition-all duration-200 flex items-center gap-3 px-5 py-2.5 rounded-lg",
+                    activeSection === "personal" 
+                      ? "bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-600 font-medium" 
+                      : "hover:bg-gray-50"
+                  )}
                 >
-                  <UserRound className="h-4 w-4" />
+                  <UserRound className={cn(
+                    "h-4 w-4 transition-colors",
+                    activeSection === "personal" ? "text-purple-500" : "text-gray-500"
+                  )} />
                   <span>Personal Info</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -84,8 +99,17 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
                 <SidebarMenuButton 
                   isActive={activeSection === "summary"}
                   onClick={() => onSectionChange("summary")}
+                  className={cn(
+                    "transition-all duration-200 flex items-center gap-3 px-5 py-2.5 rounded-lg",
+                    activeSection === "summary" 
+                      ? "bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-600 font-medium" 
+                      : "hover:bg-gray-50"
+                  )}
                 >
-                  <FileText className="h-4 w-4" />
+                  <FileText className={cn(
+                    "h-4 w-4 transition-colors",
+                    activeSection === "summary" ? "text-purple-500" : "text-gray-500"
+                  )} />
                   <span>Summary</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -94,8 +118,17 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
                 <SidebarMenuButton 
                   isActive={activeSection === "experience"}
                   onClick={() => onSectionChange("experience")}
+                  className={cn(
+                    "transition-all duration-200 flex items-center gap-3 px-5 py-2.5 rounded-lg",
+                    activeSection === "experience" 
+                      ? "bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-600 font-medium" 
+                      : "hover:bg-gray-50"
+                  )}
                 >
-                  <Briefcase className="h-4 w-4" />
+                  <Briefcase className={cn(
+                    "h-4 w-4 transition-colors",
+                    activeSection === "experience" ? "text-purple-500" : "text-gray-500"
+                  )} />
                   <span>Experience</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -104,8 +137,17 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
                 <SidebarMenuButton 
                   isActive={activeSection === "education"}
                   onClick={() => onSectionChange("education")}
+                  className={cn(
+                    "transition-all duration-200 flex items-center gap-3 px-5 py-2.5 rounded-lg",
+                    activeSection === "education" 
+                      ? "bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-600 font-medium" 
+                      : "hover:bg-gray-50"
+                  )}
                 >
-                  <GraduationCap className="h-4 w-4" />
+                  <GraduationCap className={cn(
+                    "h-4 w-4 transition-colors",
+                    activeSection === "education" ? "text-purple-500" : "text-gray-500"
+                  )} />
                   <span>Education</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -114,8 +156,17 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
                 <SidebarMenuButton 
                   isActive={activeSection === "skills"}
                   onClick={() => onSectionChange("skills")}
+                  className={cn(
+                    "transition-all duration-200 flex items-center gap-3 px-5 py-2.5 rounded-lg",
+                    activeSection === "skills" 
+                      ? "bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-600 font-medium" 
+                      : "hover:bg-gray-50"
+                  )}
                 >
-                  <Code className="h-4 w-4" />
+                  <Code className={cn(
+                    "h-4 w-4 transition-colors",
+                    activeSection === "skills" ? "text-purple-500" : "text-gray-500"
+                  )} />
                   <span>Skills</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -124,8 +175,17 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
                 <SidebarMenuButton 
                   isActive={activeSection === "projects"}
                   onClick={() => onSectionChange("projects")}
+                  className={cn(
+                    "transition-all duration-200 flex items-center gap-3 px-5 py-2.5 rounded-lg",
+                    activeSection === "projects" 
+                      ? "bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-600 font-medium" 
+                      : "hover:bg-gray-50"
+                  )}
                 >
-                  <Code className="h-4 w-4" />
+                  <FolderKanban className={cn(
+                    "h-4 w-4 transition-colors",
+                    activeSection === "projects" ? "text-purple-500" : "text-gray-500"
+                  )} />
                   <span>Projects</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -133,18 +193,29 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
           </SidebarGroupContent>
         </SidebarGroup>
         
-        <SidebarSeparator />
+        <SidebarSeparator className="my-4" />
         
         <SidebarGroup>
-          <SidebarGroupLabel>Customization</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-gray-500 font-medium px-5">
+            Customization
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   isActive={activeSection === "templates"}
                   onClick={() => onSectionChange("templates")}
+                  className={cn(
+                    "transition-all duration-200 flex items-center gap-3 px-5 py-2.5 rounded-lg",
+                    activeSection === "templates" 
+                      ? "bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-600 font-medium" 
+                      : "hover:bg-gray-50"
+                  )}
                 >
-                  <LayoutPanelLeft className="h-4 w-4" />
+                  <LayoutPanelLeft className={cn(
+                    "h-4 w-4 transition-colors",
+                    activeSection === "templates" ? "text-purple-500" : "text-gray-500"
+                  )} />
                   <span>Templates</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -153,8 +224,17 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
                 <SidebarMenuButton 
                   isActive={activeSection === "settings"}
                   onClick={() => onSectionChange("settings")}
+                  className={cn(
+                    "transition-all duration-200 flex items-center gap-3 px-5 py-2.5 rounded-lg",
+                    activeSection === "settings" 
+                      ? "bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-600 font-medium" 
+                      : "hover:bg-gray-50"
+                  )}
                 >
-                  <Settings className="h-4 w-4" />
+                  <Settings className={cn(
+                    "h-4 w-4 transition-colors",
+                    activeSection === "settings" ? "text-purple-500" : "text-gray-500"
+                  )} />
                   <span>Settings</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -164,14 +244,19 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
                   isActive={activeSection === "ai"}
                   onClick={() => onSectionChange("ai")}
                   className={cn(
-                    "w-full gap-2",
-                    activeSection === "ai" ? "text-resume-purple" : "text-muted-foreground"
+                    "transition-all duration-200 flex items-center gap-3 px-5 py-2.5 rounded-lg",
+                    activeSection === "ai" 
+                      ? "bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-600 font-medium" 
+                      : "hover:bg-gray-50"
                   )}
                 >
                   <div className="relative">
-                    <Wand2 className="h-4 w-4" />
+                    <Wand2 className={cn(
+                      "h-4 w-4 transition-colors",
+                      activeSection === "ai" ? "text-purple-500" : "text-gray-500"
+                    )} />
                     {aiEnabled && (
-                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-resume-purple rounded-full" />
+                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-purple-600 to-indigo-500 rounded-full" />
                     )}
                   </div>
                   <span>AI Assistant</span>
@@ -182,14 +267,15 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="p-3">
+      <SidebarFooter className="p-4">
         <Button 
           variant="outline" 
           size="sm"
           className={cn(
-            "w-full justify-center gap-2 border-resume-purple/20 text-resume-purple",
-            "hover:bg-resume-purple/10 hover:border-resume-purple transition-all duration-300",
-            "dark:border-resume-purple-light/20 dark:text-resume-purple-light dark:hover:bg-resume-purple-light/10",
+            "w-full justify-center gap-2 border border-transparent",
+            "bg-gradient-to-r from-purple-100 to-indigo-100 hover:from-purple-200 hover:to-indigo-200",
+            "text-purple-600 font-medium",
+            "transition-all duration-300 shadow-sm",
             aiGenerating && "animate-pulse"
           )}
           onClick={onGenerateWithAI}

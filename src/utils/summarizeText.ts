@@ -48,7 +48,7 @@ export const summarizeText = async (text: string): Promise<string> => {
       }
     }
     
-    // Clean up and standardize bullet points
+    // Clean up and standardize bullet points - making sure not to duplicate them
     summary = summary
       .replace(/•\s*/g, '• ') // Standardize bullet points
       .replace(/[-*]\s+/g, '• ') // Replace markdown bullets with •

@@ -86,6 +86,15 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
 
     // Clone the resume content node to avoid modifying the original
     const clonedResumeContent = resumeContentRef.current.cloneNode(true) as HTMLDivElement;
+    
+    // Fix the bullet points display to prevent double rendering
+    const bulletElements = clonedResumeContent.querySelectorAll('.bullet-line');
+    bulletElements.forEach(bulletEl => {
+      const textContent = bulletEl.textContent || '';
+      if (textContent.startsWith('• ')) {
+        bulletEl.textContent = textContent;
+      }
+    });
 
     // Extract all computed styles
     let allStyles = '';
@@ -134,6 +143,16 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
               display: list-item;
               margin-bottom: 0.25rem;
             }
+            /* Fix for bullet points in PDF export */
+            .bullet-line:before {
+              content: "" !important;
+              margin-right: 0 !important;
+            }
+            .bullet-line {
+              display: list-item !important;
+              list-style-position: outside !important;
+              margin-left: 1em !important;
+            }
           </style>
           ${settings.fontFamily ?
             `<link href="https://fonts.googleapis.com/css2?family=${settings.fontFamily}:wght@400;500;600;700&display=swap" rel="stylesheet">`
@@ -144,6 +163,13 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
           ${resumeHTMLContent}
           <script>
             window.onload = () => {
+              // Fix bullet points display before printing
+              document.querySelectorAll('.bullet-line').forEach(item => {
+                if (item.textContent && item.textContent.startsWith('• • ')) {
+                  item.textContent = item.textContent.replace('• • ', '• ');
+                }
+              });
+              
               window.print();
               window.close();
             };
@@ -177,7 +203,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
         </span>
       </PreviewControls>
       
-      <div className="flex-1 overflow-auto p-4 relative">
+      <div className="flex-1 overflow-auto p-4 relative scroll-smooth scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
         <div className="min-h-full flex items-start justify-center pb-20">
           <Card
             className={cn(

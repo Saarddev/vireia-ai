@@ -132,12 +132,16 @@ const EditableField: React.FC<EditableFieldProps> = ({
     if (text.includes('•')) {
       return (
         <div className="bullet-list">
-          {text.split('\n').map((line, i) => (
-            <React.Fragment key={i}>
-              <div className="bullet-line">{line}</div>
-              {i < text.split('\n').length - 1 && <br />}
-            </React.Fragment>
-          ))}
+          {text.split('\n').map((line, i) => {
+            // Make sure we don't double the bullet points
+            const cleanLine = line.replace(/^•\s*•\s*/, '• ');
+            return (
+              <React.Fragment key={i}>
+                <div className="bullet-line">{cleanLine}</div>
+                {i < text.split('\n').length - 1 && <br />}
+              </React.Fragment>
+            );
+          })}
         </div>
       );
     }

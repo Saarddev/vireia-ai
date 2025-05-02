@@ -21,18 +21,18 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
   children
 }) => {
   return (
-    <div className="flex items-center justify-between p-2 bg-white border-b sticky top-0 z-10">
-      <div className="flex items-center">
+    <div className="flex items-center justify-between p-3 bg-white border-b sticky top-0 z-10 shadow-sm">
+      <div className="flex items-center space-x-1">
         <Button
           variant="ghost"
           size="sm"
           onClick={onZoomOut}
           disabled={zoomLevel <= 0.5}
-          className="text-gray-600 hover:text-gray-900"
+          className="text-gray-600 hover:text-gray-900 h-8 w-8 p-0"
         >
           <ZoomOut className="w-4 h-4" />
         </Button>
-        <div className="flex items-center mx-1">
+        <div className="flex items-center mx-1 min-w-[60px] justify-center">
           {children}
         </div>
         <Button
@@ -40,7 +40,7 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
           size="sm"
           onClick={onZoomIn}
           disabled={zoomLevel >= 2}
-          className="text-gray-600 hover:text-gray-900"
+          className="text-gray-600 hover:text-gray-900 h-8 w-8 p-0"
         >
           <ZoomIn className="w-4 h-4" />
         </Button>
@@ -51,9 +51,9 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
             variant="outline"
             size="sm"
             onClick={onPrint}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-gray-600 hover:bg-gray-50 border-gray-200"
           >
-            <Printer className="w-4 h-4 mr-1" />
+            <Printer className="w-4 h-4 mr-1.5" />
             <span className="hidden sm:inline">Print</span>
           </Button>
         )}
@@ -61,9 +61,9 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
           variant="outline"
           size="sm"
           onClick={onDownload}
-          className="text-gray-600 hover:text-gray-900"
+          className="text-purple-600 hover:bg-purple-50 border-purple-200 hover:border-purple-300"
         >
-          <Download className="w-4 h-4 mr-1" />
+          <Download className="w-4 h-4 mr-1.5" />
           <span className="hidden sm:inline">Download PDF</span>
         </Button>
       </div>
