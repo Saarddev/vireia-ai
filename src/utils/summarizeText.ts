@@ -65,9 +65,6 @@ export const summarizeText = async (text: string): Promise<string> => {
       .replace(/^\n+|\n+$/g, '')
       .replace(/([.!?])\s*(?=•)/g, '$1\n'); // Add newline before bullet points
     
-    // Fix duplicate bullets
-    summary = summary.replace(/• • /g, '• ');
-    
     console.log('Summarized text:', summary);
     return summary;
   } catch (error) {

@@ -1,645 +1,395 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { SidebarProvider, Sidebar, SidebarInset } from "@/components/ui/sidebar";
+import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
-import { useToast } from "@/components/ui/use-toast";
-import { Calendar } from "@/components/ui/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { CalendarIcon } from "lucide-react"
-import { cn } from "@/lib/utils";
-import { format } from "date-fns"
-import { DateRange } from "react-day-picker"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
-} from "@/components/ui/command"
-import { supabase } from '@/integrations/supabase/client';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
+import BuilderHeader from '@/components/resume-builder/BuilderHeader';
 import BuilderSidebar from '@/components/resume-builder/BuilderSidebar';
+import AISuggestion from '@/components/resume-builder/AISuggestion';
 import ResumePreview from '@/components/ResumePreview';
-import { templates } from '@/data/templates';
-import { ResumeData, Experience, Education, Project } from '@/types/resume';
-import { useResumeAI } from '@/hooks/use-resume-ai';
+import PersonalInfoForm from '@/components/resume-builder/PersonalInfoForm';
+import ExperienceForm from '@/components/resume-builder/ExperienceForm';
+import EducationForm from '@/components/resume-builder/EducationForm';
+import SkillsForm from '@/components/resume-builder/SkillsForm';
+import SummaryForm from '@/components/resume-builder/SummaryForm';
 import AIAssistant from '@/components/resume-builder/AIAssistant';
+import TemplateSelector from '@/components/resume-builder/TemplateSelector';
+import ResumeSettings from '@/components/resume-builder/ResumeSettings';
+import { useResumeData } from '@/hooks/use-resume-data';
+import { useResumeAI } from '@/hooks/use-resume-ai';
+import { supabase } from '@/integrations/supabase/client';
+import ProjectForm from '@/components/resume-builder/ProjectForm';
+import { Paintbrush } from 'lucide-react';
 
-const ResumeBuilder: React.FC = () => {
-  const [resumeData, setResumeData] = useState<ResumeData>({
-    personal: {
-      name: "",
-      title: "",
-      email: "",
-      phone: "",
-      location: "",
-      linkedin: "",
-      website: ""
-    },
-    summary: "",
-    experience: [],
-    education: [],
-    skills: { technical: [], soft: [] },
-    languages: [],
-    certifications: [],
-    projects: []
-  });
-  const [displayData, setDisplayData] = useState<ResumeData>(resumeData);
-  const [activeSection, setActiveSection] = useState("personal");
-  const [activeTab, setActiveTab] = useState("personal");
-  const [template, setTemplate] = useState("modern");
-  const [isAIEnabled, setIsAIEnabled] = useState(true);
-  const [isAIGenerating, setIsAIGenerating] = useState(false);
-  const [settings, setSettings] = useState({
-    fontFamily: 'Inter',
-    fontSize: 10,
-    primaryColor: '#5d4dcd',
-    paperSize: 'a4',
-    margins: 'normal'
-  });
+interface AISuggestionData {
+  type: string;
+  section: string;
+  content: string;
+}
+
+const ResumeBuilder = () => {
+  const { resumeId } = useParams();
+  const { isMobile } = useIsMobile();
   const { toast } = useToast();
-  const { generateSummary } = useResumeAI();
+  const [activeSection, setActiveSection] = useState("personal");
+  const [aiEnabled, setAiEnabled] = useState(true);
+  const [aiSuggestion, setAiSuggestion] = useState<AISuggestionData | null>(null);
 
-  const calculateProgress = useCallback(() => {
-    let completedFields = 0;
-    let totalFields = 0;
+  const {
+    isLoading,
+    resumeData,
+    setResumeData,
+    resumeTitle,
+    selectedTemplate,
+    setSelectedTemplate,
+    resumeSettings,
+    setResumeSettings,
+    calculateProgress,
+    handleSave
+  } = useResumeData(resumeId);
 
-    // Personal Info
-    totalFields += 7;
-    for (const key in resumeData.personal) {
-      if (resumeData.personal[key as keyof typeof resumeData.personal]) {
-        completedFields++;
-      }
-    }
-
-    // Summary
-    totalFields++;
-    if (resumeData.summary) {
-      completedFields++;
-    }
-
-    // Experience
-    totalFields += resumeData.experience.length * 4; // title, company, startDate, description
-    resumeData.experience.forEach(exp => {
-      if (exp.title) completedFields++;
-      if (exp.company) completedFields++;
-      if (exp.startDate) completedFields++;
-      if (exp.description) completedFields++;
-    });
-
-    // Education
-    totalFields += resumeData.education.length * 3; // institution, degree, graduation year
-    resumeData.education.forEach(edu => {
-      if (edu.institution) completedFields++;
-      if (edu.degree) completedFields++;
-      if (edu.startDate) completedFields++;  // Changed from date to startDate
-    });
-
-    // Skills
-    totalFields += resumeData.skills.technical.length + resumeData.skills.soft.length;
-    completedFields += resumeData.skills.technical.length + resumeData.skills.soft.length;
-
-    const progress = (completedFields / totalFields) * 100;
-    return isFinite(progress) ? Math.min(Math.max(progress, 0), 100) : 0;
-  }, [resumeData]);
-
-  const progress = calculateProgress();
+  const {
+    isGenerating,
+    generateSummary,
+    extractSkills,
+    improveDescription
+  } = useResumeAI();
 
   const handleDataChange = (section: string, data: any) => {
-    setResumeData(prev => ({ ...prev, [section]: data }));
-    setDisplayData(prev => ({ ...prev, [section]: data }));
-  };
-
-  const handleResumeUpdate = (updatedResume: ResumeData) => {
-    setResumeData(updatedResume);
-    setDisplayData(updatedResume);
-  };
-
-  const handleGenerateWithAI = async (section: string): Promise<void> => {
-    if (section === "summary") {
-      const experienceText = resumeData.experience.map(job => 
-        `${job.title} at ${job.company}: ${job.description}`
-      ).join("\n");
-      
-      try {
-        setIsAIGenerating(true);
-        const summary = await generateSummary(experienceText, [
-          ...resumeData.skills.technical,
-          ...resumeData.skills.soft
-        ]);
-        
-        if (summary) {
-          setResumeData(prev => ({
-            ...prev,
-            summary
-          }));
-          toast({
-            title: "Professional summary generated!",
-            description: "Your summary has been updated with AI assistance"
-          });
-        }
-      } catch (error) {
-        console.error("Error generating summary:", error);
-      } finally {
-        setIsAIGenerating(false);
-      }
-    }
-  };
-
-  const handleToggleAI = () => {
-    setIsAIEnabled(prev => !prev);
-    toast({
-      title: `AI Assistant ${isAIEnabled ? "disabled" : "enabled"}`,
-      description: `AI features are now ${isAIEnabled ? "disabled" : "enabled"}.`
-    });
+    setResumeData(prev => ({
+      ...prev,
+      [section]: data
+    }));
   };
 
   const handleSettingsChange = (newSettings: any) => {
-    setSettings(prev => ({ ...prev, ...newSettings }));
+    setResumeSettings(prev => ({
+      ...prev,
+      ...newSettings
+    }));
   };
 
-  const handleTabChange = (tabName: string) => {
-    setActiveTab(tabName);
-    
-    // Only update active section if it's not a template tab
-    if (!["templates", "settings", "ai"].includes(tabName)) {
-      setActiveSection(tabName);
+  const handleAIToggle = (enabled: boolean) => {
+    setAiEnabled(enabled);
+  };
+
+  const dismissAiSuggestion = () => {
+    setAiSuggestion(null);
+  };
+
+  const applyAiSuggestion = () => {
+    if (aiSuggestion) {
+      if (aiSuggestion.section === "summary") {
+        handleDataChange("summary", aiSuggestion.content);
+      }
+      setAiSuggestion(null);
+    }
+  };
+
+  const handleGenerateWithAI = async (section: string): Promise<string> => {
+    if (!aiEnabled) {
+      toast({
+        title: "AI is disabled",
+        description: "Please enable AI to use this feature",
+        variant: "destructive"
+      });
+      return "";
+    }
+
+    try {
+      switch (section) {
+        case "summary": {
+          const experienceDescriptions = Array.isArray(resumeData.experience) 
+            ? resumeData.experience.map(exp => exp.description)
+            : [];
+
+          const allSkills = [
+            ...(Array.isArray(resumeData.skills?.technical) ? resumeData.skills.technical : []),
+            ...(Array.isArray(resumeData.skills?.soft) ? resumeData.skills.soft : [])
+          ];
+          
+          const summary = await generateSummary(experienceDescriptions, allSkills);
+          if (summary) return summary;
+          break;
+        }
+        case "skills": {
+          const experienceDescriptions = Array.isArray(resumeData.experience) 
+            ? resumeData.experience.map(exp => exp.description)
+            : [];
+            
+          const skills = await extractSkills(experienceDescriptions);
+          if (skills) {
+            handleDataChange("skills", skills);
+            return "";
+          }
+          break;
+        }
+        case "education-desc": {
+          if (Array.isArray(resumeData.education)) {
+            const currentEdu = resumeData.education.find(edu => edu);
+
+            if (currentEdu) {
+              const { data, error } = await supabase.functions.invoke('enhance-resume', {
+                body: {
+                  type: `education-description`,
+                  educationContext: {
+                    degree: currentEdu.degree,
+                    institution: currentEdu.institution,
+                    location: currentEdu.location,
+                    field: currentEdu.field || '',
+                    startDate: currentEdu.startDate,
+                    endDate: currentEdu.endDate,
+                    status: currentEdu.endDate === 'Present' ? 'Current' : 'Graduated'
+                  }
+                }
+              });
+
+              if (error) throw error;
+              return data?.description || "";
+            }
+          }
+          return "";
+        }
+        
+        case "experience-desc": {
+          if (Array.isArray(resumeData.experience)) {
+            const currentExp = resumeData.experience.find(exp => exp);
+
+            if (currentExp) {
+              const { data, error } = await supabase.functions.invoke('enhance-resume', {
+                body: {
+                  type: 'experience-description',
+                  experienceContext: {
+                    title: currentExp.title,
+                    company: currentExp.company,
+                    location: currentExp.location,
+                    startDate: currentExp.startDate,
+                    endDate: currentExp.endDate,
+                    description: currentExp.description
+                  }
+                }
+              });
+
+              if (error) throw error;
+              return data?.description || "";
+            }
+          }
+          return "";
+        }
+
+        case "project-desc": {
+          if (Array.isArray(resumeData.projects)) {
+            const currentProject = resumeData.projects.find(project => project);
+
+            if (currentProject) {
+              const { data, error } = await supabase.functions.invoke('enhance-resume', {
+                body: {
+                  type: 'experience-description', // Reuse the same prompt format
+                  experienceContext: {
+                    title: currentProject.title,
+                    company: "Project", // Reuse the field
+                    location: currentProject.technologies?.join(", ") || "",
+                    startDate: currentProject.startDate,
+                    endDate: currentProject.endDate,
+                    description: currentProject.description
+                  }
+                }
+              });
+
+              if (error) throw error;
+              return data?.description || "";
+            }
+          }
+          return "";
+        }
+
+        default:
+          return "";
+      }
+    } catch (error) {
+      console.error('Error generating with AI:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate with AI. Please try again.",
+        variant: "destructive"
+      });
+      return "";
     }
     
-    // Deep copy the resumeData to avoid type issues
-    const safeResumeData = JSON.parse(JSON.stringify(resumeData));
-    
-    setDisplayData(safeResumeData);
+    return "";
+  };
+
+  const handleGenerateAI = async (): Promise<void> => {
+    try {
+      await handleGenerateWithAI(activeSection);
+    } catch (error) {
+      console.error('Error generating with AI:', error);
+    }
+  };
+
+  const renderActiveForm = () => {
+    switch (activeSection) {
+      case "personal":
+        return (
+          <PersonalInfoForm
+            data={resumeData.personal}
+            onChange={(data) => handleDataChange("personal", data)}
+          />
+        );
+      case "summary":
+        return (
+          <SummaryForm
+            data={resumeData.summary}
+            onChange={(data) => handleDataChange("summary", data)}
+            isGenerating={isGenerating}
+            onGenerateWithAI={() => handleGenerateWithAI("summary")}
+          />
+        );
+      case "experience":
+        return (
+          <ExperienceForm
+            data={resumeData.experience}
+            onChange={(data) => handleDataChange("experience", data)}
+            onGenerateWithAI={async (text: string) => {
+              const improved = await improveDescription(text);
+              return improved || "";
+            }}
+          />
+        );
+      case "education":
+        return (
+          <EducationForm
+            data={resumeData.education}
+            onChange={(data) => handleDataChange("education", data)}
+          />
+        );
+      case "skills":
+        return (
+          <SkillsForm
+            data={resumeData.skills}
+            onChange={(data) => handleDataChange("skills", data)}
+            isGenerating={isGenerating}
+            onExtractSkills={async () => {
+              await handleGenerateWithAI("skills");
+              return "";
+            }}
+          />
+        );
+      case "projects":
+        return (
+          <ProjectForm
+            data={resumeData.projects || []}
+            onChange={(data) => handleDataChange("projects", data)}
+          />
+        );
+      case "templates":
+        return (
+          <TemplateSelector
+            selectedTemplate={selectedTemplate}
+            onSelect={setSelectedTemplate}
+          />
+        );
+      case "settings":
+        return (
+          <ResumeSettings
+            settings={resumeSettings}
+            onChange={handleSettingsChange}
+          />
+        );
+      case "ai":
+        return (
+          <AIAssistant
+            resumeData={resumeData}
+            enabled={aiEnabled}
+          />
+        );
+      default:
+        return (
+          <div className="p-4 text-center">
+            <p>Select a section to edit</p>
+          </div>
+        );
+    }
   };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      <BuilderHeader 
-        onToggleAI={handleToggleAI}
-        isAIEnabled={isAIEnabled}
-      />
-      
-      <main className="flex-1 flex overflow-hidden">
-        <div className="w-72 border-r border-gray-200 flex flex-col h-full overflow-hidden">
-          <BuilderSidebar 
-            progress={progress}
-            activeSection={activeSection}
-            aiEnabled={isAIEnabled}
-            aiGenerating={isAIGenerating}
-            onSectionChange={handleTabChange}
-            onGenerateWithAI={() => handleGenerateWithAI("summary")}
-          />
-        </div>
-        
-        <div className="flex-1 overflow-hidden flex">
-          <div className="w-1/2 overflow-auto px-8 py-6">
-            {activeTab === "personal" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Personal Information</CardTitle>
-                  <CardDescription>Enter your basic details</CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="name">Full Name</Label>
-                    <Input id="name" value={resumeData.personal.name} onChange={(e) => handleDataChange("personal", { ...resumeData.personal, name: e.target.value })} />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="title">Title</Label>
-                    <Input id="title" value={resumeData.personal.title} onChange={(e) => handleDataChange("personal", { ...resumeData.personal, title: e.target.value })} />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" value={resumeData.personal.email} onChange={(e) => handleDataChange("personal", { ...resumeData.personal, email: e.target.value })} />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="phone">Phone</Label>
-                    <Input id="phone" type="tel" value={resumeData.personal.phone} onChange={(e) => handleDataChange("personal", { ...resumeData.personal, phone: e.target.value })} />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="location">Location</Label>
-                    <Input id="location" value={resumeData.personal.location} onChange={(e) => handleDataChange("personal", { ...resumeData.personal, location: e.target.value })} />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="linkedin">LinkedIn</Label>
-                    <Input id="linkedin" type="url" value={resumeData.personal.linkedin} onChange={(e) => handleDataChange("personal", { ...resumeData.personal, linkedin: e.target.value })} />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="website">Website</Label>
-                    <Input id="website" type="url" value={resumeData.personal.website} onChange={(e) => handleDataChange("personal", { ...resumeData.personal, website: e.target.value })} />
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-            
-            {activeTab === "summary" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Summary</CardTitle>
-                  <CardDescription>Write a brief overview of your qualifications</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="summary">Summary</Label>
-                      <Textarea id="summary" value={resumeData.summary} onChange={(e) => handleDataChange("summary", e.target.value)} className="min-h-[100px]" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-            
-            {activeTab === "experience" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Experience</CardTitle>
-                  <CardDescription>Detail your work experience</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {resumeData.experience.map((exp, index) => (
-                    <div key={index} className="mb-6 border rounded-md p-4">
-                      <h4 className="text-lg font-semibold mb-2">Job {index + 1}</h4>
-                      <div className="grid gap-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor={`title-${index}`}>Position</Label>
-                          <Input id={`title-${index}`} value={exp.title} onChange={(e) => {
-                            const newExperience = [...resumeData.experience];
-                            newExperience[index] = { ...exp, title: e.target.value };
-                            handleDataChange("experience", newExperience);
-                          }} />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label htmlFor={`company-${index}`}>Company</Label>
-                          <Input id={`company-${index}`} value={exp.company} onChange={(e) => {
-                            const newExperience = [...resumeData.experience];
-                            newExperience[index] = { ...exp, company: e.target.value };
-                            handleDataChange("experience", newExperience);
-                          }} />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label htmlFor={`startDate-${index}`}>Start Date</Label>
-                          <Input id={`startDate-${index}`} type="date" value={exp.startDate} onChange={(e) => {
-                            const newExperience = [...resumeData.experience];
-                            newExperience[index] = { ...exp, startDate: e.target.value };
-                            handleDataChange("experience", newExperience);
-                          }} />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label htmlFor={`description-${index}`}>Description</Label>
-                          <Textarea id={`description-${index}`} value={exp.description} onChange={(e) => {
-                            const newExperience = [...resumeData.experience];
-                            newExperience[index] = { ...exp, description: e.target.value };
-                            handleDataChange("experience", newExperience);
-                          }} className="min-h-[80px]" />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  <Button onClick={() => handleDataChange("experience", [...resumeData.experience, { title: "", company: "", startDate: "", description: "" } as Experience])}>
-                    Add Experience
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-            
-            {activeTab === "education" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Education</CardTitle>
-                  <CardDescription>Detail your education history</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {resumeData.education.map((edu, index) => (
-                    <div key={index} className="mb-6 border rounded-md p-4">
-                      <h4 className="text-lg font-semibold mb-2">Education {index + 1}</h4>
-                      <div className="grid gap-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor={`institution-${index}`}>Institution</Label>
-                          <Input id={`institution-${index}`} value={edu.institution} onChange={(e) => {
-                            const newEducation = [...resumeData.education];
-                            newEducation[index] = { ...edu, institution: e.target.value };
-                            handleDataChange("education", newEducation);
-                          }} />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label htmlFor={`degree-${index}`}>Degree</Label>
-                          <Input id={`degree-${index}`} value={edu.degree} onChange={(e) => {
-                            const newEducation = [...resumeData.education];
-                            newEducation[index] = { ...edu, degree: e.target.value };
-                            handleDataChange("education", newEducation);
-                          }} />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label htmlFor={`startDate-${index}`}>Graduation Date</Label>
-                          <Input id={`startDate-${index}`} type="date" value={edu.startDate} onChange={(e) => {
-                            const newEducation = [...resumeData.education];
-                            newEducation[index] = { ...edu, startDate: e.target.value };
-                            handleDataChange("education", newEducation);
-                          }} />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  <Button onClick={() => handleDataChange("education", [...resumeData.education, { institution: "", degree: "", startDate: "", field: "", location: "", endDate: "", gpa: 0 } as Education])}>
-                    Add Education
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-            
-            {activeTab === "skills" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Skills</CardTitle>
-                  <CardDescription>List your technical and soft skills</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="technicalSkills">Technical Skills</Label>
-                      <Input
-                        id="technicalSkills"
-                        placeholder="Add a technical skill"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            const skill = (e.target as HTMLInputElement).value.trim();
-                            if (skill && !resumeData.skills.technical.includes(skill)) {
-                              handleDataChange("skills", { ...resumeData.skills, technical: [...resumeData.skills.technical, skill] });
-                            }
-                            (e.target as HTMLInputElement).value = '';
-                          }
-                        }}
-                      />
-                      <div className="flex flex-wrap gap-1">
-                        {resumeData.skills.technical.map((skill, index) => (
-                          <Badge key={index} variant="secondary" className="mr-1">
-                            {skill}
-                            <Button variant="ghost" size="icon" className="ml-2 -mr-1 h-4 w-4" onClick={() => {
-                              const newSkills = [...resumeData.skills.technical];
-                              newSkills.splice(index, 1);
-                              handleDataChange("skills", { ...resumeData.skills, technical: newSkills });
-                            }}>
-                              <span className="sr-only">Remove</span>
-                              <X />
-                            </Button>
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="softSkills">Soft Skills</Label>
-                      <Input
-                        id="softSkills"
-                        placeholder="Add a soft skill"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            const skill = (e.target as HTMLInputElement).value.trim();
-                            if (skill && !resumeData.skills.soft.includes(skill)) {
-                              handleDataChange("skills", { ...resumeData.skills, soft: [...resumeData.skills.soft, skill] });
-                            }
-                            (e.target as HTMLInputElement).value = '';
-                          }
-                        }}
-                      />
-                      <div className="flex flex-wrap gap-1">
-                        {resumeData.skills.soft.map((skill, index) => (
-                          <Badge key={index} variant="secondary" className="mr-1">
-                            {skill}
-                            <Button variant="ghost" size="icon" className="ml-2 -mr-1 h-4 w-4" onClick={() => {
-                              const newSkills = [...resumeData.skills.soft];
-                              newSkills.splice(index, 1);
-                              handleDataChange("skills", { ...resumeData.skills, soft: newSkills });
-                            }}>
-                              <span className="sr-only">Remove</span>
-                              <X />
-                            </Button>
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-            
-            {activeTab === "projects" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Projects</CardTitle>
-                  <CardDescription>Showcase your personal projects</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {resumeData.projects.map((project, index) => (
-                    <div key={index} className="mb-6 border rounded-md p-4">
-                      <h4 className="text-lg font-semibold mb-2">Project {index + 1}</h4>
-                      <div className="grid gap-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor={`title-${index}`}>Name</Label>
-                          <Input id={`title-${index}`} value={project.title} onChange={(e) => {
-                            const newProjects = [...resumeData.projects];
-                            newProjects[index] = { ...project, title: e.target.value };
-                            handleDataChange("projects", newProjects);
-                          }} />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label htmlFor={`description-${index}`}>Description</Label>
-                          <Textarea id={`description-${index}`} value={project.description} onChange={(e) => {
-                            const newProjects = [...resumeData.projects];
-                            newProjects[index] = { ...project, description: e.target.value };
-                            handleDataChange("projects", newProjects);
-                          }} className="min-h-[80px]" />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label htmlFor={`link-${index}`}>Link</Label>
-                          <Input id={`link-${index}`} type="url" value={project.link} onChange={(e) => {
-                            const newProjects = [...resumeData.projects];
-                            newProjects[index] = { ...project, link: e.target.value };
-                            handleDataChange("projects", newProjects);
-                          }} />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  <Button onClick={() => handleDataChange("projects", [...resumeData.projects, { title: "", description: "", link: "", technologies: [] } as Project])}>
-                    Add Project
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-            
-            {activeTab === "templates" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Templates</CardTitle>
-                  <CardDescription>Choose a resume template</CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-wrap gap-4">
-                  {templates.map(tmpl => (
-                    <div key={tmpl.id} className="w-40">
-                      <img src={tmpl.image} alt={tmpl.name} className="rounded-md shadow-sm" />
-                      <Button variant="outline" className="w-full mt-2" onClick={() => setTemplate(tmpl.id)}>
-                        {tmpl.name}
-                      </Button>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-            
-            {activeTab === "settings" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Settings</CardTitle>
-                  <CardDescription>Customize your resume</CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="fontFamily">Font Family</Label>
-                    <Select value={settings.fontFamily} onValueChange={(value) => handleSettingsChange({ fontFamily: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select font" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Inter">Inter</SelectItem>
-                        <SelectItem value="Arial">Arial</SelectItem>
-                        <SelectItem value="Helvetica">Helvetica</SelectItem>
-                        <SelectItem value="Times New Roman">Times New Roman</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="fontSize">Font Size</Label>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">8</span>
-                      <Slider
-                        defaultValue={[settings.fontSize]}
-                        max={14}
-                        min={8}
-                        step={1}
-                        onValueChange={(value) => handleSettingsChange({ fontSize: value[0] })}
-                        className="w-[70%] mx-2"
-                      />
-                      <span className="text-sm text-muted-foreground">14</span>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="primaryColor">Primary Color</Label>
-                    <Input type="color" value={settings.primaryColor} onChange={(e) => handleSettingsChange({ primaryColor: e.target.value })} />
-                  </div>
+    <SidebarProvider defaultOpen={!isMobile}>
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50/80 via-background to-purple-50/60 dark:from-gray-900/90 dark:via-gray-900/50 dark:to-gray-900/90">
+        <BuilderHeader
+          name={resumeTitle || resumeData.personal.name || "New Resume"}
+          isSaving={false}
+          aiEnabled={aiEnabled}
+          onSave={handleSave}
+          onAIToggle={handleAIToggle}
+          onDownload={() => { }}
+          onShare={() => { }}
+        />
 
-                  <div className="space-y-2">
-                    <Label>Paper Size</Label>
-                    <Select value={settings.paperSize} onValueChange={(value) => handleSettingsChange({ paperSize: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select paper size" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="a4">A4</SelectItem>
-                        <SelectItem value="letter">Letter</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Margins</Label>
-                    <Select value={settings.margins} onValueChange={(value) => handleSettingsChange({ margins: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select margin size" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="normal">Normal</SelectItem>
-                        <SelectItem value="narrow">Narrow</SelectItem>
-                        <SelectItem value="wide">Wide</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {activeTab === "ai" && (
-              <AIAssistant 
-                resumeData={resumeData} 
-                enabled={isAIEnabled}
-                onUpdateResume={handleResumeUpdate}
-              />
-            )}
-          </div>
-          
-          <div className="w-1/2 bg-gray-50 border-l border-gray-100">
-            <ResumePreview 
-              data={displayData}
-              template={template}
-              settings={settings}
-              onDataChange={handleDataChange}
-              onGenerateWithAI={handleGenerateWithAI}
+        <div className="flex-1 flex">
+          <Sidebar side="left" variant="floating" collapsible="icon">
+            <BuilderSidebar
+              progress={calculateProgress(resumeData)}
+              activeSection={activeSection}
+              aiEnabled={aiEnabled}
+              aiGenerating={isGenerating}
+              onSectionChange={setActiveSection}
+              onGenerateWithAI={handleGenerateAI}
             />
-          </div>
+          </Sidebar>
+
+          <SidebarInset className="flex flex-col p-4 lg:p-6">
+            <AISuggestion
+              suggestion={aiSuggestion}
+              onDismiss={dismissAiSuggestion}
+              onApply={applyAiSuggestion}
+            />
+
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 h-[calc(100vh-8rem)]">
+              <div className="xl:col-span-5 h-full overflow-auto">
+                <Card className="h-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-gray-100/60 dark:border-gray-800/60 overflow-hidden shadow-xl">
+                  <CardContent className="p-4 lg:p-6 h-full overflow-auto">
+                    <div className="max-w-2xl space-y-6">
+                      {isLoading ? (
+                        <div className="flex flex-col items-center justify-center h-full space-y-4 py-20">
+                          <div className="w-16 h-16 border-4 border-resume-purple border-t-transparent rounded-full animate-spin"></div>
+                          <p className="text-resume-gray text-lg">Loading resume...</p>
+                        </div>
+                      ) : (
+                        renderActiveForm()
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="xl:col-span-7 h-full overflow-auto">
+                <ResumePreview
+                  data={resumeData}
+                  template={selectedTemplate}
+                  settings={resumeSettings}
+                  onDataChange={(section, data) => handleDataChange(section, data)}
+                  onGenerateWithAI={handleGenerateWithAI}
+                />
+                {resumeId && (
+                  <div className="mt-4 flex justify-center">
+                    <Link to={`/resume/canvas/${resumeId}`}>
+                      <Button variant="outline" className="flex items-center gap-2">
+                        <Paintbrush className="h-4 w-4" />
+                        Open in Canvas Editor
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          </SidebarInset>
         </div>
-      </main>
-    </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
 export default ResumeBuilder;
-
-interface BuilderHeaderProps {
-  onToggleAI: () => void;
-  isAIEnabled: boolean;
-}
-
-const BuilderHeader: React.FC<BuilderHeaderProps> = ({ onToggleAI, isAIEnabled }) => {
-  return (
-    <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6">
-      <h1 className="text-lg font-semibold">Resume Builder</h1>
-      <div className="flex items-center gap-4">
-        <Label htmlFor="ai-toggle" className="text-sm font-medium text-gray-700">
-          AI Assistant
-        </Label>
-        <Switch id="ai-toggle" checked={isAIEnabled} onCheckedChange={onToggleAI} />
-      </div>
-    </header>
-  );
-};
-
-const X = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="lucide lucide-x"
-  >
-    <path d="M18 6 6 18" />
-    <path d="M6 6 18 18" />
-  </svg>
-);

@@ -9,9 +9,6 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import ResetPasswordDialog from '@/components/auth/ResetPasswordDialog';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -22,25 +19,6 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showResetDialog, setShowResetDialog] = useState(false);
-
-  const formSchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(6),
-    confirmPassword: z.string().min(6),
-    fullName: z.string(),
-    terms: z.boolean().default(false),
-  });
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      confirmPassword: "",
-      fullName: "",
-      terms: false,
-    },
-  });
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();

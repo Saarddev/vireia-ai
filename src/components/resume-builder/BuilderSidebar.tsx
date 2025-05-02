@@ -14,7 +14,6 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
   SidebarSeparator,
-  SidebarProvider
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { 
@@ -48,7 +47,7 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
   onGenerateWithAI
 }) => {
   return (
-    <SidebarProvider>
+    <>
       <SidebarHeader className="px-5 py-4 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-indigo-500 bg-clip-text text-transparent font-display">
@@ -295,7 +294,7 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
           )}
         </Button>
       </SidebarFooter>
-    </SidebarProvider>
+    </>
   );
 };
 
