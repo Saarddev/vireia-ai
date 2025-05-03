@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -39,6 +40,7 @@ const ResumeBuilder = () => {
   const [activeSection, setActiveSection] = useState("personal");
   const [aiEnabled, setAiEnabled] = useState(true);
   const [aiSuggestion, setAiSuggestion] = useState<AISuggestionData | null>(null);
+  const [customStyles, setCustomStyles] = useState<Record<string, any>>({});
 
   const {
     isLoading,
@@ -71,6 +73,16 @@ const ResumeBuilder = () => {
     setResumeSettings(prev => ({
       ...prev,
       ...newSettings
+    }));
+  };
+
+  const handleStyleChange = (styles: Record<string, any>) => {
+    setCustomStyles(styles);
+    
+    // Also save the styles to the resumeSettings
+    setResumeSettings(prev => ({
+      ...prev,
+      customStyles: styles
     }));
   };
 
@@ -265,6 +277,35 @@ const ResumeBuilder = () => {
     }
   };
 
+  // Custom save handler that includes the custom styles
+  const handleSaveWithStyles = async () => {
+    try {
+      // First, update resumeSettings with the latest custom styles
+      if (Object.keys(customStyles).length > 0) {
+        const updatedSettings = {
+          ...resumeSettings,
+          customStyles
+        };
+        setResumeSettings(updatedSettings);
+      }
+      
+      // Then call the regular save function
+      await handleSave();
+      
+      toast({
+        title: "Resume Saved",
+        description: "Your resume and custom styles have been saved.",
+      });
+    } catch (error) {
+      console.error('Error saving resume with styles:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save resume. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const renderActiveForm = () => {
     switch (activeSection) {
       case "personal":
@@ -361,7 +402,7 @@ const ResumeBuilder = () => {
         name={resumeTitle || resumeData.personal.name || "New Resume"}
         isSaving={false}
         aiEnabled={aiEnabled}
-        onSave={handleSave}
+        onSave={handleSaveWithStyles}
         onAIToggle={handleAIToggle}
         onDownload={() => { }}
         onShare={() => { }}
@@ -412,6 +453,8 @@ const ResumeBuilder = () => {
                   settings={resumeSettings}
                   onDataChange={(section, data) => handleDataChange(section, data)}
                   onGenerateWithAI={handleGenerateWithAI}
+                  onStyleChange={handleStyleChange}
+                  customStyles={resumeSettings.customStyles || customStyles}
                 />
                 {resumeId && (
                   <div className="mt-4 flex justify-center">

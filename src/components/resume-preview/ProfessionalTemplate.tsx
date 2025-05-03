@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useResumeAI } from '@/hooks/use-resume-ai';
-import { Experience, Education } from '@/types/resume';
+import { Experience, Education, Project } from '@/types/resume';
 
 interface ProfessionalTemplateProps {
   data: any;
@@ -208,7 +208,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
           <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
             Projects
           </h2>
-          {data.projects.map((project: any) => (
+          {data.projects.map((project: Project) => (
             <div key={project.id} className="mb-3">
               <div className="flex justify-between items-baseline">
                 <h3 className="text-base font-semibold" style={{ color: handleSecondaryColor() }}>

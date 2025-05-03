@@ -12,6 +12,9 @@ const ResumePDF = () => {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
+  // Extract custom styles from settings if they exist
+  const customStyles = resumeSettings?.customStyles || {};
+
   const formatBulletPoints = (text: string, limit?: number) => {
     if (!text) return [];
     
@@ -35,6 +38,43 @@ const ResumePDF = () => {
     return limit ? points.slice(0, limit) : points;
   };
 
+  // Function to get section style from custom styles
+  const getSectionStyle = (section: string, property: string, defaultValue: any) => {
+    if (customStyles && customStyles[section] && customStyles[section][property] !== undefined) {
+      return customStyles[section][property];
+    }
+    return defaultValue;
+  };
+
+  // Generate styles for section headers
+  const getSectionHeaderStyle = (section: string) => {
+    return {
+      textAlign: getSectionStyle(section, 'textAlign', 'left'),
+      color: getSectionStyle(section, 'color', '#5d4dcd'),
+      fontWeight: getSectionStyle(section, 'fontWeight', 'semibold'),
+      textDecoration: getSectionStyle(section, 'textDecoration', 'none'),
+    };
+  };
+
+  // Generate styles for section content
+  const getSectionContentStyle = (section: string) => {
+    return {
+      fontSize: getSectionStyle(section, 'fontSize', 'inherit'),
+      fontStyle: getSectionStyle(section, 'fontStyle', 'normal'),
+    };
+  };
+
+  // For header section which might be centered
+  const getHeaderStyle = () => {
+    const textAlign = getSectionStyle('header', 'textAlign', 'left');
+    return {
+      textAlign: textAlign,
+    };
+  };
+
+  const headerStyle = getHeaderStyle();
+  const isHeaderCentered = headerStyle.textAlign === 'center';
+
   return (
     <div 
       className="max-w-[800px] mx-auto p-8 bg-white print:p-0 my-8 shadow-lg" 
@@ -50,12 +90,12 @@ const ResumePDF = () => {
       }}
     >
       {/* Header */}
-      <div className="pb-2 border-b-2 border-[#5d4dcd] mb-3">
+      <div className="pb-2 border-b-2 border-[#5d4dcd] mb-3" style={headerStyle}>
         <h1 className="text-2xl font-bold text-gray-900 leading-tight tracking-tight pb-0 mb-1">
           {resumeData.personal.name}
         </h1>
         <p className="text-lg font-medium text-[#5d4dcd] mt-0.5">{resumeData.personal.title}</p>
-        <div className="flex flex-wrap text-sm text-gray-700 mt-1.5 gap-x-2 gap-y-1 items-center">
+        <div className={`flex flex-wrap ${isHeaderCentered ? 'justify-center text-xs' : 'text-sm'} text-gray-700 mt-1.5 gap-x-2 gap-y-1 items-center`}>
           {resumeData.personal.email && (
             <span className="inline-flex items-center">
               <span>{resumeData.personal.email}</span>
@@ -105,10 +145,16 @@ const ResumePDF = () => {
       {/* Summary - Limited to exactly 3 bullet points */}
       {resumeData.summary && (
         <div className="mb-4">
-          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide">
+          <h2 
+            className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide"
+            style={getSectionHeaderStyle('summary')}
+          >
             Summary
           </h2>
-          <ul className="list-disc pl-4 text-sm text-gray-700 font-normal leading-relaxed">
+          <ul 
+            className="list-disc pl-4 text-sm text-gray-700 font-normal leading-relaxed"
+            style={getSectionContentStyle('summary')}
+          >
             {formatBulletPoints(resumeData.summary, 3).map((point, index) => (
               <li key={index} className="mb-1">{point}</li>
             ))}
@@ -119,138 +165,158 @@ const ResumePDF = () => {
       {/* Experience - Slightly more compact */}
       {resumeData.experience.length > 0 && (
         <div className="mb-4">
-          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide">
+          <h2 
+            className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide"
+            style={getSectionHeaderStyle('experience')}
+          >
             Experience
           </h2>
-          {resumeData.experience.map((exp, index) => (
-            <div key={index} className="mb-3 last:mb-0">
-              <div className="flex items-baseline justify-between flex-wrap gap-x-2">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-gray-800 text-sm">{exp.title}</h3>
+          <div style={getSectionContentStyle('experience')}>
+            {resumeData.experience.map((exp, index) => (
+              <div key={index} className="mb-3 last:mb-0">
+                <div className="flex items-baseline justify-between flex-wrap gap-x-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-gray-800 text-sm">{exp.title}</h3>
+                  </div>
+                  <span className="text-sm text-gray-600 whitespace-nowrap">
+                    {exp.startDate} - {exp.endDate}
+                  </span>
                 </div>
-                <span className="text-sm text-gray-600 whitespace-nowrap">
-                  {exp.startDate} - {exp.endDate}
-                </span>
+                <p className="text-sm text-[#5d4dcd] font-medium my-0.5">
+                  {exp.company}, {exp.location}
+                </p>
+                <ul className="list-disc pl-4 text-sm text-gray-700 mt-1 font-normal leading-relaxed">
+                  {formatBulletPoints(exp.description).map((point, i) => (
+                    <li key={i} className="mb-1">{point}</li>
+                  ))}
+                </ul>
               </div>
-              <p className="text-sm text-[#5d4dcd] font-medium my-0.5">
-                {exp.company}, {exp.location}
-              </p>
-              <ul className="list-disc pl-4 text-sm text-gray-700 mt-1 font-normal leading-relaxed">
-                {formatBulletPoints(exp.description).map((point, i) => (
-                  <li key={i} className="mb-1">{point}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 
       {/* Projects - More compact */}
       {resumeData.projects && resumeData.projects.length > 0 && (
         <div className="mb-4">
-          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide">
+          <h2 
+            className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide"
+            style={getSectionHeaderStyle('projects')}
+          >
             Projects
           </h2>
-          {resumeData.projects.map((project: Project, index) => (
-            <div key={index} className="mb-3 last:mb-0">
-              <div className="flex items-baseline justify-between flex-wrap gap-x-2">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-gray-800 text-sm">{project.title}</h3>
+          <div style={getSectionContentStyle('projects')}>
+            {resumeData.projects.map((project: Project, index) => (
+              <div key={index} className="mb-3 last:mb-0">
+                <div className="flex items-baseline justify-between flex-wrap gap-x-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-gray-800 text-sm">{project.title}</h3>
+                  </div>
+                  <span className="text-sm text-gray-600 whitespace-nowrap">
+                    {project.startDate} - {project.endDate}
+                  </span>
                 </div>
-                <span className="text-sm text-gray-600 whitespace-nowrap">
-                  {project.startDate} - {project.endDate}
-                </span>
-              </div>
-              <ul className="list-disc pl-4 text-sm text-gray-700 mt-1 font-normal leading-relaxed">
-                {formatBulletPoints(project.description).map((point, i) => (
-                  <li key={i} className="mb-1">{point}</li>
-                ))}
-              </ul>
-              {project.technologies && project.technologies.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {project.technologies.map((tech, i) => (
-                    <span key={i} className="px-1.5 py-0.5 bg-[#efeafc] rounded-sm text-xs border-[0.5px] border-[#dad3f8] shadow-xs text-violet-400 font-normal">
-                      {tech}
-                    </span>
+                <ul className="list-disc pl-4 text-sm text-gray-700 mt-1 font-normal leading-relaxed">
+                  {formatBulletPoints(project.description).map((point, i) => (
+                    <li key={i} className="mb-1">{point}</li>
                   ))}
-                </div>
-              )}
-              {project.link && (
-                <a
-                  href={project.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-[#5d4dcd] hover:text-[#4a3da3] mt-1 inline-block"
-                >
-                  View Project →
-                </a>
-              )}
-            </div>
-          ))}
+                </ul>
+                {project.technologies && project.technologies.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {project.technologies.map((tech, i) => (
+                      <span key={i} className="px-1.5 py-0.5 bg-[#efeafc] rounded-sm text-xs border-[0.5px] border-[#dad3f8] shadow-xs text-violet-400 font-normal">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {project.link && (
+                  <a
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-[#5d4dcd] hover:text-[#4a3da3] mt-1 inline-block"
+                  >
+                    View Project →
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
       {/* Education - More compact */}
       {resumeData.education.length > 0 && (
         <div className="mb-4">
-          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide">
+          <h2 
+            className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide"
+            style={getSectionHeaderStyle('education')}
+          >
             Education
           </h2>
-          {resumeData.education.map((edu, index) => (
-            <div key={index} className="mb-3 last:mb-0">
-              <div className="flex items-baseline justify-between flex-wrap gap-x-2">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-gray-800 text-sm">{edu.degree}</h3>
+          <div style={getSectionContentStyle('education')}>
+            {resumeData.education.map((edu, index) => (
+              <div key={index} className="mb-3 last:mb-0">
+                <div className="flex items-baseline justify-between flex-wrap gap-x-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-gray-800 text-sm">{edu.degree}</h3>
+                  </div>
+                  <span className="text-sm text-gray-600 whitespace-nowrap">
+                    {edu.startDate} - {edu.endDate}
+                  </span>
                 </div>
-                <span className="text-sm text-gray-600 whitespace-nowrap">
-                  {edu.startDate} - {edu.endDate}
-                </span>
+                <p className="text-sm text-[#5d4dcd] font-medium my-0.5">
+                  {edu.institution}, {edu.location}
+                </p>
+                {edu.description && (
+                  <ul className="list-disc pl-4 text-sm text-gray-700 mt-1 font-normal leading-relaxed">
+                    {formatBulletPoints(edu.description).map((point, i) => (
+                      <li key={i} className="mb-1">{point}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              <p className="text-sm text-[#5d4dcd] font-medium my-0.5">
-                {edu.institution}, {edu.location}
-              </p>
-              {edu.description && (
-                <ul className="list-disc pl-4 text-sm text-gray-700 mt-1 font-normal leading-relaxed">
-                  {formatBulletPoints(edu.description).map((point, i) => (
-                    <li key={i} className="mb-1">{point}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 
       {/* Skills - More compact */}
       {(resumeData.skills.technical.length > 0 || resumeData.skills.soft.length > 0) && (
         <div className="mb-4">
-          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide">
+          <h2 
+            className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide"
+            style={getSectionHeaderStyle('skills')}
+          >
             Skills
           </h2>
-          {resumeData.skills.technical.length > 0 && (
-            <div className="mb-2">
-              <div className="font-medium text-gray-700 text-sm mb-1">Technical Skills</div>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {resumeData.skills.technical.map((skill, i) => (
-                  <span key={i} className="px-1.5 py-0.5 bg-[#efeafc] rounded-sm text-xs border-[0.5px] border-[#dad3f8] shadow-xs text-violet-400 font-normal">
-                    {skill}
-                  </span>
-                ))}
+          <div style={getSectionContentStyle('skills')}>
+            {resumeData.skills.technical.length > 0 && (
+              <div className="mb-2">
+                <div className="font-medium text-gray-700 text-sm mb-1">Technical Skills</div>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {resumeData.skills.technical.map((skill, i) => (
+                    <span key={i} className="px-1.5 py-0.5 bg-[#efeafc] rounded-sm text-xs border-[0.5px] border-[#dad3f8] shadow-xs text-violet-400 font-normal">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-          {resumeData.skills.soft.length > 0 && (
-            <div>
-              <div className="font-medium text-gray-700 text-sm mb-1">Soft Skills</div>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {resumeData.skills.soft.map((skill, i) => (
-                  <span key={i} className="px-1.5 py-0.5 bg-[#f3f3f3] text-gray-600 font-medium rounded-sm text-xs border-[0.5px] border-[#e5e5e5]">
-                    {skill}
-                  </span>
-                ))}
+            )}
+            {resumeData.skills.soft.length > 0 && (
+              <div>
+                <div className="font-medium text-gray-700 text-sm mb-1">Soft Skills</div>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {resumeData.skills.soft.map((skill, i) => (
+                    <span key={i} className="px-1.5 py-0.5 bg-[#f3f3f3] text-gray-600 font-medium rounded-sm text-xs border-[0.5px] border-[#e5e5e5]">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </div>
