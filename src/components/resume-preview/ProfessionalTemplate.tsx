@@ -4,14 +4,18 @@ import { useResumeAI } from '@/hooks/use-resume-ai';
 
 interface ProfessionalTemplateProps {
   data: any;
-  onUpdateData: (key: string, value: any) => void;
-  isEditMode: boolean;
+  settings?: any; // Add the missing settings prop
+  onUpdateData?: (key: string, value: any) => void;
+  onGenerateWithAI?: (section: string) => Promise<string>;
+  isEditMode?: boolean;
 }
 
 const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ 
   data, 
-  onUpdateData,
-  isEditMode 
+  settings = {},
+  onUpdateData = () => {},
+  onGenerateWithAI,
+  isEditMode = true
 }) => {
   const { improveDescription, isGenerating } = useResumeAI();
 
@@ -49,8 +53,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
     return improveDescription(description);
   };
 
-  // Just fixing the type error in the file
-  // Add or modify the function to convert technologies from an array to a string
+  // Fix the type error when handling technologies
   const formatTechnologies = (technologies: string[] | undefined): string => {
     if (!technologies || technologies.length === 0) {
       return '';

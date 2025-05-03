@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
@@ -6,7 +5,7 @@ import AddSectionItem from './AddSectionItem';
 import ContactInfo from './ContactInfo';
 import { v4 as uuidv4 } from 'uuid';
 import { Experience, Education, Project } from '@/types/resume.d';
-import { ChromePicker } from 'react-colorful';
+import { ChromePicker } from 'react-color';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { 
   Select, 

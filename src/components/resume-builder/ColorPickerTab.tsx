@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { HexColorPicker } from "react-colorful";
+import { ChromePicker } from "react-color"; // Correct import from react-color
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Circle, Palette } from 'lucide-react';
 
@@ -49,7 +48,7 @@ const ColorPickerTab: React.FC<ColorPickerProps> = ({ colors, onChange }) => {
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-3">
-                <HexColorPicker color={color} onChange={(newColor) => onChange(newColor, type as any)} />
+                <ChromePicker color={color} onChange={(newColor) => onChange(newColor, type as any)} />
                 <Input
                   value={color}
                   onChange={(e) => onChange(e.target.value, type as any)}
