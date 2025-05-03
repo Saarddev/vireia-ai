@@ -7,12 +7,10 @@ interface ContactInfoProps {
   personal: any;
   onUpdateData?: (section: string, value: any) => void;
   onGenerateWithAI?: (section: string) => Promise<string>;
-  compact?: boolean;
 }
 
-const ContactInfo: React.FC<ContactInfoProps> = ({ personal, onUpdateData, onGenerateWithAI, compact = false }) => {
-  // Make contact fields more compact when compact mode is enabled
-  const contactFieldClass = `inline px-1 py-0 rounded bg-transparent border-none ${compact ? "text-xs max-w-[100px]" : "text-sm max-w-[180px]"} min-w-[60px]`;
+const ContactInfo: React.FC<ContactInfoProps> = ({ personal, onUpdateData, onGenerateWithAI }) => {
+  const contactFieldClass = "inline px-1 py-0 rounded bg-transparent border-none text-sm focus:bg-gray-100 text-gray-700 min-w-[60px] max-w-[180px]";
   const contactDivider = <span className="mx-1 text-gray-400">|</span>;
 
   const isValidUrl = (urlString: string): boolean => {
@@ -46,27 +44,27 @@ const ContactInfo: React.FC<ContactInfoProps> = ({ personal, onUpdateData, onGen
     value: personal.email,
     placeholder: "john.smith@example.com",
     ai: "personal-email",
-    icon: compact ? null : <Mail className="h-3.5 w-3.5 mr-1" />,
+    icon: <Mail className="h-3.5 w-3.5 mr-1" />,
     link: personal.email ? `mailto:${personal.email}` : ''
   }, {
     key: 'phone',
     value: personal.phone,
     placeholder: "(555) 123-4567",
     ai: "personal-phone",
-    icon: compact ? null : <Phone className="h-3.5 w-3.5 mr-1" />,
+    icon: <Phone className="h-3.5 w-3.5 mr-1" />,
     link: personal.phone ? `tel:${personal.phone}` : ''
   }, {
     key: 'location',
     value: personal.location,
     placeholder: "San Francisco, CA",
     ai: "personal-location",
-    icon: compact ? null : <MapPin className="h-3.5 w-3.5 mr-1" />
+    icon: <MapPin className="h-3.5 w-3.5 mr-1" />
   }, ...(personal.linkedin ? [{
     key: 'linkedin',
-    value: compact ? "LinkedIn" : getDisplayUrl(personal.linkedin),
+    value: "LinkedIn",
     placeholder: "linkedin.com/in/johnsmith",
     ai: "personal-linkedin",
-    icon: compact ? null : <Linkedin className="h-3.5 w-3.5 mr-1" />,
+    icon: <Linkedin className="h-3.5 w-3.5 mr-1" />,
     link: personal.linkedin ? formatLink(
       personal.linkedin.includes('linkedin.com') ? 
       personal.linkedin : 
@@ -74,18 +72,16 @@ const ContactInfo: React.FC<ContactInfoProps> = ({ personal, onUpdateData, onGen
     ) : ''
   }] : []), ...(personal.website && isValidUrl(personal.website) ? [{
     key: 'website',
-    value: compact ? "Portfolio" : getDisplayUrl(personal.website),
+    value: getDisplayUrl(personal.website),
     placeholder: "johnsmith.dev",
     ai: "personal-website",
-    icon: compact ? null : <LinkIcon className="h-3.5 w-3.5 mr-1" />,
+    icon: <LinkIcon className="h-3.5 w-3.5 mr-1" />,
     link: formatLink(personal.website)
   }] : [])];
 
-  const contactItemsToDisplay = contactItems.filter(item => item.value);
-
   return (
-    <div className={`flex flex-wrap ${compact ? 'justify-center text-xs space-x-1' : 'text-sm'} text-gray-700 mt-2 gap-x-2 gap-y-1 items-center print:flex-row print:gap-x-2 print:gap-y-0`}>
-      {contactItemsToDisplay.map((item, idx) => (
+    <div className="flex flex-wrap text-sm text-gray-700 mt-2 gap-x-2 gap-y-1 items-center print:flex-row print:gap-x-2 print:gap-y-0">
+      {contactItems.map((item, idx) => (
         <React.Fragment key={item.key}>
           {idx > 0 && contactDivider}
           <div className="inline-flex items-center">

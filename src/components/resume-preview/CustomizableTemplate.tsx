@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
 import AddSectionItem from './AddSectionItem';
 import ContactInfo from './ContactInfo';
 import { v4 as uuidv4 } from 'uuid';
-import { Experience, Education, Project, SegmentStyles } from '@/types/resume';
+import { Experience, Education, Project } from '@/types/resume.d';
 import { ChromePicker } from 'react-color';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { 
@@ -32,8 +33,18 @@ interface CustomizableTemplateProps {
   settings?: any;
   onUpdateData?: (section: string, value: any) => void;
   onGenerateWithAI?: (section: string) => Promise<string>;
-  onStyleChange?: (styles: Record<string, SegmentStyles>) => void;
-  segmentStyles?: Record<string, SegmentStyles>;
+}
+
+interface SegmentStyles {
+  color: string;
+  backgroundColor: string;
+  textAlign: 'left' | 'center' | 'right';
+  fontSize: string;
+  fontWeight: string;
+  fontStyle: string;
+  textDecoration: string;
+  padding: string;
+  margin: string;
 }
 
 const defaultSegmentStyles: SegmentStyles = {
@@ -52,12 +63,10 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
   data,
   settings = {},
   onUpdateData,
-  onGenerateWithAI,
-  onStyleChange,
-  segmentStyles: initialStyles
+  onGenerateWithAI
 }) => {
-  // Default segment styles or use provided styles
-  const [segmentStyles, setSegmentStyles] = useState<Record<string, SegmentStyles>>(initialStyles || {
+  // Default segment styles
+  const [segmentStyles, setSegmentStyles] = useState<Record<string, SegmentStyles>>({
     header: { ...defaultSegmentStyles, color: '#5d4dcd', fontSize: '1.25rem', fontWeight: 'bold' },
     summary: { ...defaultSegmentStyles },
     experience: { ...defaultSegmentStyles },
@@ -146,28 +155,17 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
   };
 
   const handleStyleChange = (segment: string, property: keyof SegmentStyles, value: any) => {
-    // Ensure the segment exists in the styles object
-    const currentStyles = segmentStyles[segment] || { ...defaultSegmentStyles };
-    
-    const updatedStyles = {
-      ...segmentStyles,
+    setSegmentStyles(prev => ({
+      ...prev,
       [segment]: {
-        ...currentStyles,
+        ...prev[segment],
         [property]: value
       }
-    };
-    
-    setSegmentStyles(updatedStyles);
-    
-    // Notify parent component about style changes if callback provided
-    if (onStyleChange) {
-      onStyleChange(updatedStyles);
-    }
+    }));
   };
 
   const StyleControls = ({ segment }: { segment: string }) => {
-    // Ensure we have a valid styles object for this segment
-    const currentStyles = segmentStyles[segment] || { ...defaultSegmentStyles };
+    const currentStyles = segmentStyles[segment];
 
     return (
       <div className="absolute top-0 right-0 z-10 bg-white dark:bg-gray-850 shadow-lg rounded-lg p-3 border border-gray-200 dark:border-gray-700 flex flex-wrap gap-2 w-64">
@@ -227,13 +225,13 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
           <span className="text-xs">Font Size</span>
           <Slider 
             className="flex-1" 
-            defaultValue={[parseFloat(currentStyles.fontSize) || 1]} 
+            defaultValue={[parseFloat(currentStyles.fontSize)]} 
             min={0.75} 
             max={2} 
             step={0.05} 
             onValueChange={(values) => handleStyleChange(segment, 'fontSize', `${values[0]}rem`)} 
           />
-          <span className="text-xs">{parseFloat(currentStyles.fontSize || "1").toFixed(2)}</span>
+          <span className="text-xs">{parseFloat(currentStyles.fontSize).toFixed(2)}</span>
         </div>
         
         <div className="flex items-center gap-2 w-full mt-2">
@@ -284,8 +282,7 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
   };
 
   const applySegmentStyles = (segment: string) => {
-    // Add safety check to ensure the segment exists in the styles
-    const style = segmentStyles[segment] || defaultSegmentStyles;
+    const style = segmentStyles[segment];
     return {
       color: style.color,
       backgroundColor: style.backgroundColor,
@@ -294,46 +291,6 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
       fontWeight: style.fontWeight,
       fontStyle: style.fontStyle,
       textDecoration: style.textDecoration,
-      padding: style.padding,
-      margin: style.margin
-    };
-  };
-
-  const applyHeaderStyles = () => {
-    // Add safety check to ensure 'header' segment exists in the styles
-    const style = segmentStyles.header || defaultSegmentStyles;
-    
-    return {
-      color: style.color,
-      backgroundColor: style.backgroundColor,
-      textAlign: style.textAlign as any,
-      fontSize: style.fontSize,
-      fontWeight: style.fontWeight,
-      fontStyle: style.fontStyle,
-      textDecoration: style.textDecoration,
-      padding: style.padding,
-      margin: style.margin
-    };
-  };
-
-  const applySectionTitleStyles = (segment: string) => {
-    // Add safety check to ensure the segment exists in the styles
-    const style = segmentStyles[segment] || defaultSegmentStyles;
-    return {
-      color: style.color,
-      backgroundColor: style.backgroundColor,
-      textAlign: style.textAlign as any,
-      fontWeight: style.fontWeight,
-      textDecoration: style.textDecoration
-    };
-  };
-
-  const applySectionContentStyles = (segment: string) => {
-    // Add safety check to ensure the segment exists in the styles
-    const style = segmentStyles[segment] || defaultSegmentStyles;
-    return {
-      fontSize: style.fontSize,
-      fontStyle: style.fontStyle,
       padding: style.padding,
       margin: style.margin
     };
@@ -349,15 +306,12 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
         onClick={() => setActiveSegment(id === activeSegment ? null : id)}
       >
         {activeSegment === id && <StyleControls segment={id} />}
-        <div>
+        <div style={applySegmentStyles(id)}>
           {children}
         </div>
       </div>
     );
   };
-
-  // Determine if header should use compact layout
-  const isHeaderCentered = segmentStyles.header?.textAlign === 'center' || false;
 
   return (
     <div 
@@ -371,292 +325,254 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
       }}
     >
       <SegmentWrapper id="header">
-        <div style={applyHeaderStyles()}>
-          <EditableField
-            value={safeData.personal.name}
-            placeholder="John Smith"
-            className="text-xl font-bold text-gray-900 leading-tight tracking-tight pb-0 mb-1"
-            onSave={val => onUpdateData?.("personal", { ...safeData.personal, name: val })}
-            onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-name") : undefined}
-            minRows={1}
-            maxRows={1}
-          />
-          <EditableField
-            value={safeData.personal.title}
-            placeholder="Software Engineer"
-            className="text-lg font-medium mt-1 transition-all"
-            onSave={val => onUpdateData?.("personal", { ...safeData.personal, title: val })}
-            onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-title") : undefined}
-            minRows={1}
-            maxRows={1}
-          />
-          <ContactInfo
-            personal={safeData.personal}
-            onUpdateData={onUpdateData}
-            onGenerateWithAI={onGenerateWithAI}
-            compact={isHeaderCentered}
-          />
-        </div>
+        <EditableField
+          value={safeData.personal.name}
+          placeholder="John Smith"
+          className="text-xl font-bold text-gray-900 leading-tight tracking-tight pb-0 mb-1"
+          onSave={val => onUpdateData?.("personal", { ...safeData.personal, name: val })}
+          onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-name") : undefined}
+          minRows={1}
+          maxRows={1}
+        />
+        <EditableField
+          value={safeData.personal.title}
+          placeholder="Software Engineer"
+          className="text-lg font-medium mt-1 transition-all"
+          onSave={val => onUpdateData?.("personal", { ...safeData.personal, title: val })}
+          onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-title") : undefined}
+          minRows={1}
+          maxRows={1}
+        />
+        <ContactInfo
+          personal={safeData.personal}
+          onUpdateData={onUpdateData}
+          onGenerateWithAI={onGenerateWithAI}
+        />
       </SegmentWrapper>
 
       <SegmentWrapper id="summary">
-        <h2 
-          className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide"
-          style={applySectionTitleStyles("summary")}
-        >
-          Summary
-        </h2>
-        <div style={applySectionContentStyles("summary")}>
-          <EditableField 
-            value={safeData.summary} 
-            placeholder="Experienced software engineer with 5+ years of experience in full-stack development. ..." 
-            onSave={val => onUpdateData?.("summary", val)} 
-            className="text-sm text-gray-700 font-normal leading-relaxed" 
-            onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("summary") : undefined} 
-            minRows={2} 
-            maxRows={4} 
-          />
-        </div>
+        <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">Summary</h2>
+        <EditableField 
+          value={safeData.summary} 
+          placeholder="Experienced software engineer with 5+ years of experience in full-stack development. ..." 
+          onSave={val => onUpdateData?.("summary", val)} 
+          className="text-sm text-gray-700 font-normal leading-relaxed" 
+          onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("summary") : undefined} 
+          minRows={2} 
+          maxRows={4} 
+        />
       </SegmentWrapper>
 
       <SegmentWrapper id="experience">
-        <h2 
-          className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide"
-          style={applySectionTitleStyles("experience")}
-        >
-          Experience
-        </h2>
-        <div style={applySectionContentStyles("experience")}>
-          {safeData.experience.map((exp: Experience) => (
-            <div key={exp.id} className="mb-5 last:mb-0 resume-item">
-              <div className="flex items-baseline justify-between flex-wrap gap-x-2">
-                <div className="flex-1 min-w-0">
-                  <EditableField
-                    value={exp.title}
-                    placeholder="Senior Software Engineer"
-                    className="font-medium text-gray-800 text-sm"
-                    onSave={val => handleFieldUpdate("experience", "title", val, exp.id)}
-                    onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-title`) : undefined}
-                    minRows={1}
-                    maxRows={1}
-                  />
-                </div>
+        <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">Experience</h2>
+        {safeData.experience.map((exp: Experience) => (
+          <div key={exp.id} className="mb-5 last:mb-0 resume-item">
+            <div className="flex items-baseline justify-between flex-wrap gap-x-2">
+              <div className="flex-1 min-w-0">
                 <EditableField
-                  value={`${exp.startDate} - ${exp.endDate}`}
-                  placeholder="Jan 2022 - Present"
-                  className="text-sm text-gray-600 ml-3 whitespace-nowrap min-w-[100px] max-w-[160px]"
-                  onSave={val => {
-                    const [startDate, endDate] = val.split(" - ");
-                    handleFieldUpdate("experience", "startDate", startDate || "", exp.id);
-                    handleFieldUpdate("experience", "endDate", endDate || "", exp.id);
-                  }}
-                  onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-dates`) : undefined}
+                  value={exp.title}
+                  placeholder="Senior Software Engineer"
+                  className="font-medium text-gray-800 text-sm"
+                  onSave={val => handleFieldUpdate("experience", "title", val, exp.id)}
+                  onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-title`) : undefined}
                   minRows={1}
                   maxRows={1}
                 />
               </div>
               <EditableField
-                value={exp.company && exp.location ? `${exp.company}, ${exp.location}` : exp.company || exp.location || ""}
-                placeholder="Tech Solutions Inc., San Francisco, CA"
-                className="text-sm font-medium my-0.5"
+                value={`${exp.startDate} - ${exp.endDate}`}
+                placeholder="Jan 2022 - Present"
+                className="text-sm text-gray-600 ml-3 whitespace-nowrap min-w-[100px] max-w-[160px]"
                 onSave={val => {
-                  let [company, ...locParts] = val.split(",");
-                  const location = locParts.join(",").trim();
-                  handleFieldUpdate("experience", "company", company?.trim() || "", exp.id);
-                  handleFieldUpdate("experience", "location", location, exp.id);
+                  const [startDate, endDate] = val.split(" - ");
+                  handleFieldUpdate("experience", "startDate", startDate || "", exp.id);
+                  handleFieldUpdate("experience", "endDate", endDate || "", exp.id);
                 }}
-                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-company`) : undefined}
+                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-dates`) : undefined}
                 minRows={1}
                 maxRows={1}
               />
-              <EditableField
-                value={exp.description}
-                placeholder="Lead developer for the company's flagship product..."
-                className="text-sm text-gray-700 mt-1 font-normal leading-relaxed"
-                onSave={val => handleFieldUpdate("experience", "description", val, exp.id)}
-                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-desc`) : undefined}
-                minRows={1}
-                maxRows={3}
-              />
             </div>
-          ))}
-          <AddSectionItem onAdd={handleAddExperience} />
-        </div>
+            <EditableField
+              value={exp.company && exp.location ? `${exp.company}, ${exp.location}` : exp.company || exp.location || ""}
+              placeholder="Tech Solutions Inc., San Francisco, CA"
+              className="text-sm font-medium my-0.5"
+              onSave={val => {
+                let [company, ...locParts] = val.split(",");
+                const location = locParts.join(",").trim();
+                handleFieldUpdate("experience", "company", company?.trim() || "", exp.id);
+                handleFieldUpdate("experience", "location", location, exp.id);
+              }}
+              onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-company`) : undefined}
+              minRows={1}
+              maxRows={1}
+            />
+            <EditableField
+              value={exp.description}
+              placeholder="Lead developer for the company's flagship product..."
+              className="text-sm text-gray-700 mt-1 font-normal leading-relaxed"
+              onSave={val => handleFieldUpdate("experience", "description", val, exp.id)}
+              onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-desc`) : undefined}
+              minRows={1}
+              maxRows={3}
+            />
+          </div>
+        ))}
+        <AddSectionItem onAdd={handleAddExperience} />
       </SegmentWrapper>
 
       <SegmentWrapper id="education">
-        <h2 
-          className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide"
-          style={applySectionTitleStyles("education")}
-        >
-          Education
-        </h2>
-        <div style={applySectionContentStyles("education")}>
-          {safeData.education.map((edu: Education) => (
-            <div key={edu.id} className="mb-5 last:mb-0 resume-item">
-              <div className="flex items-baseline justify-between flex-wrap gap-x-2">
-                <div className="flex-1 min-w-0">
-                  <EditableField
-                    value={edu.degree}
-                    placeholder="Master of Science in Computer Science"
-                    className="font-medium text-gray-800 text-sm"
-                    onSave={val => handleFieldUpdate("education", "degree", val, edu.id)}
-                    onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-degree`) : undefined}
-                    minRows={1}
-                    maxRows={1}
-                  />
-                  <EditableField
-                    value={edu.institution && edu.location ? `${edu.institution}, ${edu.location}` : edu.institution || edu.location || ""}
-                    placeholder="Stanford University, Stanford, CA"
-                    className="text-sm font-medium my-0.5"
-                    onSave={val => {
-                      let [inst, ...locParts] = val.split(",");
-                      const location = locParts.join(",").trim();
-                      handleFieldUpdate("education", "institution", inst?.trim() || "", edu.id);
-                      handleFieldUpdate("education", "location", location, edu.id);
-                    }}
-                    onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-institution`) : undefined}
-                    minRows={1}
-                    maxRows={1}
-                  />
-                </div>
+        <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">Education</h2>
+        {safeData.education.map((edu: Education) => (
+          <div key={edu.id} className="mb-5 last:mb-0 resume-item">
+            <div className="flex items-baseline justify-between flex-wrap gap-x-2">
+              <div className="flex-1 min-w-0">
                 <EditableField
-                  value={`${edu.startDate} - ${edu.endDate}`}
-                  placeholder="Sep 2017 - May 2019"
-                  className="text-sm text-gray-600 ml-3 whitespace-nowrap min-w-[100px] max-w-[160px]"
+                  value={edu.degree}
+                  placeholder="Master of Science in Computer Science"
+                  className="font-medium text-gray-800 text-sm"
+                  onSave={val => handleFieldUpdate("education", "degree", val, edu.id)}
+                  onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-degree`) : undefined}
+                  minRows={1}
+                  maxRows={1}
+                />
+                <EditableField
+                  value={edu.institution && edu.location ? `${edu.institution}, ${edu.location}` : edu.institution || edu.location || ""}
+                  placeholder="Stanford University, Stanford, CA"
+                  className="text-sm font-medium my-0.5"
                   onSave={val => {
-                    const [startDate, endDate] = val.split(" - ");
-                    handleFieldUpdate("education", "startDate", startDate || "", edu.id);
-                    handleFieldUpdate("education", "endDate", endDate || "", edu.id);
+                    let [inst, ...locParts] = val.split(",");
+                    const location = locParts.join(",").trim();
+                    handleFieldUpdate("education", "institution", inst?.trim() || "", edu.id);
+                    handleFieldUpdate("education", "location", location, edu.id);
                   }}
-                  onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-dates`) : undefined}
+                  onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-institution`) : undefined}
                   minRows={1}
                   maxRows={1}
                 />
               </div>
               <EditableField
-                value={edu.description || ""}
-                placeholder="Specialization in Artificial Intelligence. GPA: 3.8/4.0"
-                className="text-sm text-gray-700 font-normal leading-relaxed"
-                onSave={val => handleFieldUpdate("education", "description", val, edu.id)}
-                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-desc`) : undefined}
+                value={`${edu.startDate} - ${edu.endDate}`}
+                placeholder="Sep 2017 - May 2019"
+                className="text-sm text-gray-600 ml-3 whitespace-nowrap min-w-[100px] max-w-[160px]"
+                onSave={val => {
+                  const [startDate, endDate] = val.split(" - ");
+                  handleFieldUpdate("education", "startDate", startDate || "", edu.id);
+                  handleFieldUpdate("education", "endDate", endDate || "", edu.id);
+                }}
+                onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-dates`) : undefined}
                 minRows={1}
-                maxRows={2}
+                maxRows={1}
               />
             </div>
-          ))}
-          <AddSectionItem onAdd={handleAddEducation} />
-        </div>
+            <EditableField
+              value={edu.description || ""}
+              placeholder="Specialization in Artificial Intelligence. GPA: 3.8/4.0"
+              className="text-sm text-gray-700 font-normal leading-relaxed"
+              onSave={val => handleFieldUpdate("education", "description", val, edu.id)}
+              onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-desc`) : undefined}
+              minRows={1}
+              maxRows={2}
+            />
+          </div>
+        ))}
+        <AddSectionItem onAdd={handleAddEducation} />
       </SegmentWrapper>
 
       <SegmentWrapper id="skills">
-        <h2 
-          className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide"
-          style={applySectionTitleStyles("skills")}
-        >
-          Skills
-        </h2>
-        <div style={applySectionContentStyles("skills")}>
-          <div className="mb-3">
-            <div className="font-medium text-gray-700 text-sm mb-1.5">Technical Skills</div>
-            <div className="flex flex-wrap gap-1.5 mt-1">
-              {safeData.skills.technical.map((skill: string, i: number) => (
-                <span key={i} className="px-2 py-0.5 bg-[#efeafc] rounded-sm text-sm border-[0.5px] border-[#dad3f8] shadow-xs transition whitespace-nowrap text-violet-400 font-normal">
-                  {skill}
-                </span>
-              ))}
-            </div>
+        <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">Skills</h2>
+        <div className="mb-3">
+          <div className="font-medium text-gray-700 text-sm mb-1.5">Technical Skills</div>
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            {safeData.skills.technical.map((skill: string, i: number) => (
+              <span key={i} className="px-2 py-0.5 bg-[#efeafc] rounded-sm text-sm border-[0.5px] border-[#dad3f8] shadow-xs transition whitespace-nowrap text-violet-400 font-normal">
+                {skill}
+              </span>
+            ))}
           </div>
-          <div>
-            <div className="font-medium text-gray-700 text-sm mb-1.5">Soft Skills</div>
-            <div className="flex flex-wrap gap-1.5 mt-1">
-              {safeData.skills.soft.map((skill: string, i: number) => (
-                <span key={i} className="px-2 py-0.5 bg-[#f3f3f3] text-gray-600 font-medium rounded-sm text-sm border-[0.5px] border-[#e5e5e5] transition whitespace-nowrap">
-                  {skill}
-                </span>
-              ))}
-            </div>
+        </div>
+        <div>
+          <div className="font-medium text-gray-700 text-sm mb-1.5">Soft Skills</div>
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            {safeData.skills.soft.map((skill: string, i: number) => (
+              <span key={i} className="px-2 py-0.5 bg-[#f3f3f3] text-gray-600 font-medium rounded-sm text-sm border-[0.5px] border-[#e5e5e5] transition whitespace-nowrap">
+                {skill}
+              </span>
+            ))}
           </div>
         </div>
       </SegmentWrapper>
 
       {safeData.projects && safeData.projects.length > 0 && (
         <SegmentWrapper id="projects">
-          <h2 
-            className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide"
-            style={applySectionTitleStyles("projects")}
-          >
-            Projects
-          </h2>
-          <div style={applySectionContentStyles("projects")}>
-            {safeData.projects.map((project: Project) => (
-              <div key={project.id} className="mb-5 last:mb-0 resume-item">
-                <div className="flex items-baseline justify-between flex-wrap gap-x-2">
-                  <div className="flex-1 min-w-0">
-                    <EditableField
-                      value={project.title}
-                      placeholder="Project Name"
-                      className="font-medium text-gray-800 text-sm"
-                      onSave={val => handleFieldUpdate("projects", "title", val, project.id)}
-                      minRows={1}
-                      maxRows={1}
-                    />
-                  </div>
+          <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">Projects</h2>
+          {safeData.projects.map((project: Project) => (
+            <div key={project.id} className="mb-5 last:mb-0 resume-item">
+              <div className="flex items-baseline justify-between flex-wrap gap-x-2">
+                <div className="flex-1 min-w-0">
                   <EditableField
-                    value={`${project.startDate} - ${project.endDate}`}
-                    placeholder="Jan 2023 - Present"
-                    className="text-sm text-gray-600 ml-3 whitespace-nowrap min-w-[100px] max-w-[160px]"
-                    onSave={val => {
-                      const [startDate, endDate] = val.split(" - ");
-                      handleFieldUpdate("projects", "startDate", startDate || "", project.id);
-                      handleFieldUpdate("projects", "endDate", endDate || "", project.id);
-                    }}
+                    value={project.title}
+                    placeholder="Project Name"
+                    className="font-medium text-gray-800 text-sm"
+                    onSave={val => handleFieldUpdate("projects", "title", val, project.id)}
                     minRows={1}
                     maxRows={1}
                   />
                 </div>
                 <EditableField
-                  value={project.description}
-                  placeholder="Describe the project and your role..."
-                  className="text-sm text-gray-700 font-normal leading-relaxed"
-                  onSave={val => handleFieldUpdate("projects", "description", val, project.id)}
+                  value={`${project.startDate} - ${project.endDate}`}
+                  placeholder="Jan 2023 - Present"
+                  className="text-sm text-gray-600 ml-3 whitespace-nowrap min-w-[100px] max-w-[160px]"
+                  onSave={val => {
+                    const [startDate, endDate] = val.split(" - ");
+                    handleFieldUpdate("projects", "startDate", startDate || "", project.id);
+                    handleFieldUpdate("projects", "endDate", endDate || "", project.id);
+                  }}
                   minRows={1}
-                  maxRows={3}
+                  maxRows={1}
                 />
-                {project.technologies && project.technologies.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {project.technologies.map((tech: string, i: number) => (
-                      <span key={i} className="px-2 py-0.5 bg-[#efeafc] rounded-sm text-sm border-[0.5px] border-[#dad3f8] shadow-xs transition whitespace-nowrap text-violet-400 font-normal">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                {project.link && (
-                  <a
-                    href={project.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-resume-purple hover:text-resume-purple-dark mt-1 inline-block"
-                  >
-                    View Project →
-                  </a>
-                )}
               </div>
-            ))}
-            <AddSectionItem onAdd={() => {
-              const newProject = {
-                id: uuidv4(),
-                title: "",
-                description: "",
-                technologies: [],
-                startDate: "",
-                endDate: "",
-                link: ""
-              };
-              onUpdateData?.("projects", [...(safeData.projects || []), newProject]);
-            }} />
-          </div>
+              <EditableField
+                value={project.description}
+                placeholder="Describe the project and your role..."
+                className="text-sm text-gray-700 font-normal leading-relaxed"
+                onSave={val => handleFieldUpdate("projects", "description", val, project.id)}
+                minRows={1}
+                maxRows={3}
+              />
+              {project.technologies && project.technologies.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {project.technologies.map((tech: string, i: number) => (
+                    <span key={i} className="px-2 py-0.5 bg-[#efeafc] rounded-sm text-sm border-[0.5px] border-[#dad3f8] shadow-xs transition whitespace-nowrap text-violet-400 font-normal">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {project.link && (
+                <a
+                  href={project.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-resume-purple hover:text-resume-purple-dark mt-1 inline-block"
+                >
+                  View Project →
+                </a>
+              )}
+            </div>
+          ))}
+          <AddSectionItem onAdd={() => {
+            const newProject = {
+              id: uuidv4(),
+              title: "",
+              description: "",
+              technologies: [],
+              startDate: "",
+              endDate: "",
+              link: ""
+            };
+            onUpdateData?.("projects", [...(safeData.projects || []), newProject]);
+          }} />
         </SegmentWrapper>
       )}
     </div>

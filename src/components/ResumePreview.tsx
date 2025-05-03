@@ -6,7 +6,7 @@ import ModernTemplate from './resume-preview/ModernTemplate';
 import CustomizableTemplate from './resume-preview/CustomizableTemplate';
 import ProfessionalTemplate from './resume-preview/ProfessionalTemplate';
 import PreviewControls from './resume-preview/PreviewControls';
-import { ResumeData } from '@/types/resume';
+import { ResumeData } from '@/types/resume.d';
 import AIAnalysisDrawer from './resume-builder/AIAnalysisDrawer';
 
 interface ResumePreviewProps {
@@ -16,8 +16,6 @@ interface ResumePreviewProps {
   onDataChange?: (section: string, data: any) => void;
   onGenerateWithAI?: (section: string) => Promise<string>;
   showAIAnalysis?: boolean;
-  onStyleChange?: (styles: Record<string, any>) => void;
-  customStyles?: Record<string, any>;
 }
 
 const ResumePreview: React.FC<ResumePreviewProps> = ({
@@ -26,9 +24,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
   settings = {},
   onDataChange,
   onGenerateWithAI,
-  showAIAnalysis = false,
-  onStyleChange,
-  customStyles = {}
+  showAIAnalysis = false
 }) => {
   // Ensure data is valid and complete with defaults
   const safeData: ResumeData = React.useMemo(() => {
@@ -65,12 +61,6 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
 
   const handlePrint = () => {
     window.print();
-  };
-
-  const handleStyleChange = (styles: Record<string, any>) => {
-    if (onStyleChange) {
-      onStyleChange(styles);
-    }
   };
 
   const handleDownloadPDF = () => {
@@ -319,8 +309,6 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
             settings={settings}
             onUpdateData={onDataChange}
             onGenerateWithAI={onGenerateWithAI}
-            onStyleChange={handleStyleChange}
-            segmentStyles={customStyles}
           />
         );
       default:
