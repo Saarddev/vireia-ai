@@ -84,7 +84,7 @@ const ContactInfo: React.FC<ContactInfoProps> = ({ personal, onUpdateData, onGen
   const contactItemsToDisplay = contactItems.filter(item => item.value);
 
   return (
-    <div className={`flex flex-wrap ${compact ? 'justify-center text-xs space-x-2' : 'text-sm'} text-gray-700 mt-2 gap-x-2 gap-y-1 items-center print:flex-row print:gap-x-2 print:gap-y-0`}>
+    <div className={`flex flex-wrap ${compact ? 'justify-center text-xs space-x-1' : 'text-sm'} text-gray-700 mt-2 gap-x-2 gap-y-1 items-center print:flex-row print:gap-x-2 print:gap-y-0`}>
       {contactItemsToDisplay.map((item, idx) => (
         <React.Fragment key={item.key}>
           {idx > 0 && contactDivider}

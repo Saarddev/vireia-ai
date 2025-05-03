@@ -4,7 +4,7 @@ import EditableField from './EditableField';
 import AddSectionItem from './AddSectionItem';
 import ContactInfo from './ContactInfo';
 import { v4 as uuidv4 } from 'uuid';
-import { Experience, Education, Project } from '@/types/resume';
+import { Experience, Education, Project, SegmentStyles } from '@/types/resume';
 import { ChromePicker } from 'react-color';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { 
@@ -32,20 +32,8 @@ interface CustomizableTemplateProps {
   settings?: any;
   onUpdateData?: (section: string, value: any) => void;
   onGenerateWithAI?: (section: string) => Promise<string>;
-  onStyleChange?: (styles: Record<string, any>) => void;
+  onStyleChange?: (styles: Record<string, SegmentStyles>) => void;
   segmentStyles?: Record<string, SegmentStyles>;
-}
-
-interface SegmentStyles {
-  color: string;
-  backgroundColor: string;
-  textAlign: 'left' | 'center' | 'right';
-  fontSize: string;
-  fontWeight: string;
-  fontStyle: string;
-  textDecoration: string;
-  padding: string;
-  margin: string;
 }
 
 const defaultSegmentStyles: SegmentStyles = {
@@ -158,10 +146,13 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
   };
 
   const handleStyleChange = (segment: string, property: keyof SegmentStyles, value: any) => {
+    // Ensure the segment exists in the styles object
+    const currentStyles = segmentStyles[segment] || { ...defaultSegmentStyles };
+    
     const updatedStyles = {
       ...segmentStyles,
       [segment]: {
-        ...segmentStyles[segment],
+        ...currentStyles,
         [property]: value
       }
     };
@@ -175,7 +166,8 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
   };
 
   const StyleControls = ({ segment }: { segment: string }) => {
-    const currentStyles = segmentStyles[segment];
+    // Ensure we have a valid styles object for this segment
+    const currentStyles = segmentStyles[segment] || { ...defaultSegmentStyles };
 
     return (
       <div className="absolute top-0 right-0 z-10 bg-white dark:bg-gray-850 shadow-lg rounded-lg p-3 border border-gray-200 dark:border-gray-700 flex flex-wrap gap-2 w-64">
@@ -235,13 +227,13 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
           <span className="text-xs">Font Size</span>
           <Slider 
             className="flex-1" 
-            defaultValue={[parseFloat(currentStyles.fontSize)]} 
+            defaultValue={[parseFloat(currentStyles.fontSize) || 1]} 
             min={0.75} 
             max={2} 
             step={0.05} 
             onValueChange={(values) => handleStyleChange(segment, 'fontSize', `${values[0]}rem`)} 
           />
-          <span className="text-xs">{parseFloat(currentStyles.fontSize).toFixed(2)}</span>
+          <span className="text-xs">{parseFloat(currentStyles.fontSize || "1").toFixed(2)}</span>
         </div>
         
         <div className="flex items-center gap-2 w-full mt-2">

@@ -23,25 +23,14 @@ import { useResumeAI } from '@/hooks/use-resume-ai';
 import { supabase } from '@/integrations/supabase/client';
 import ProjectForm from '@/components/resume-builder/ProjectForm';
 import { Paintbrush } from 'lucide-react';
-// Import the Education and ResumeData types from types/resume.ts, not types/resume.d.ts to avoid conflicts
-import { Education, ResumeData } from '@/types/resume';
+// Import the types from types/resume.ts
+import { Education, ResumeData, ResumeSettings, SegmentStyles } from '@/types/resume';
 
 interface AISuggestionData {
   type: string;
   section: string;
   content: string;
 }
-
-type ResumeSettings = {
-  fontFamily: string;
-  fontSize: number;
-  primaryColor: string;
-  secondaryColor: string;
-  accentColor: string;
-  paperSize: string;
-  margins: string;
-  customStyles?: Record<string, any>;
-};
 
 const ResumeBuilder = () => {
   const { resumeId } = useParams();
@@ -50,7 +39,7 @@ const ResumeBuilder = () => {
   const [activeSection, setActiveSection] = useState("personal");
   const [aiEnabled, setAiEnabled] = useState(true);
   const [aiSuggestion, setAiSuggestion] = useState<AISuggestionData | null>(null);
-  const [customStyles, setCustomStyles] = useState<Record<string, any>>({});
+  const [customStyles, setCustomStyles] = useState<Record<string, SegmentStyles>>({});
 
   const {
     isLoading,
@@ -86,7 +75,7 @@ const ResumeBuilder = () => {
     }));
   };
 
-  const handleStyleChange = (styles: Record<string, any>) => {
+  const handleStyleChange = (styles: Record<string, SegmentStyles>) => {
     setCustomStyles(styles);
     
     // Also save the styles to the resumeSettings

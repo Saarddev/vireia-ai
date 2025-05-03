@@ -56,6 +56,18 @@ export interface ResumeData {
   projects: Project[];
 }
 
+export interface SegmentStyles {
+  color: string;
+  backgroundColor: string;
+  textAlign: 'left' | 'center' | 'right';
+  fontSize: string;
+  fontWeight: string;
+  fontStyle: string;
+  textDecoration: string;
+  padding: string;
+  margin: string;
+}
+
 export interface ResumeSettings {
   fontFamily: string;
   fontSize: number;
@@ -64,6 +76,7 @@ export interface ResumeSettings {
   accentColor: string;
   paperSize: string;
   margins: string;
+  customStyles?: Record<string, SegmentStyles>;
 }
 
 export interface LinkedInData {

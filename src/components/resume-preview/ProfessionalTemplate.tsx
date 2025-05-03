@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useResumeAI } from '@/hooks/use-resume-ai';
-import { Experience, Education, Project } from '@/types/resume';
+import { Experience, Education, Project, SegmentStyles } from '@/types/resume';
 
 interface ProfessionalTemplateProps {
   data: any;
