@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
@@ -293,7 +292,8 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
   };
 
   const applySegmentStyles = (segment: string) => {
-    const style = segmentStyles[segment];
+    // Add safety check to ensure the segment exists in the styles
+    const style = segmentStyles[segment] || defaultSegmentStyles;
     return {
       color: style.color,
       backgroundColor: style.backgroundColor,
@@ -308,8 +308,9 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
   };
 
   const applyHeaderStyles = () => {
-    const style = segmentStyles.header;
-    // We only apply text-align to the container, not to the content itself
+    // Add safety check to ensure 'header' segment exists in the styles
+    const style = segmentStyles.header || defaultSegmentStyles;
+    
     return {
       color: style.color,
       backgroundColor: style.backgroundColor,
@@ -324,7 +325,8 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
   };
 
   const applySectionTitleStyles = (segment: string) => {
-    const style = segmentStyles[segment];
+    // Add safety check to ensure the segment exists in the styles
+    const style = segmentStyles[segment] || defaultSegmentStyles;
     return {
       color: style.color,
       backgroundColor: style.backgroundColor,
@@ -335,7 +337,8 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
   };
 
   const applySectionContentStyles = (segment: string) => {
-    const style = segmentStyles[segment];
+    // Add safety check to ensure the segment exists in the styles
+    const style = segmentStyles[segment] || defaultSegmentStyles;
     return {
       fontSize: style.fontSize,
       fontStyle: style.fontStyle,
@@ -360,6 +363,9 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
       </div>
     );
   };
+
+  // Determine if header should use compact layout
+  const isHeaderCentered = segmentStyles.header?.textAlign === 'center' || false;
 
   return (
     <div 
@@ -396,7 +402,7 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
             personal={safeData.personal}
             onUpdateData={onUpdateData}
             onGenerateWithAI={onGenerateWithAI}
-            compact={segmentStyles.header.textAlign === 'center'}
+            compact={isHeaderCentered}
           />
         </div>
       </SegmentWrapper>

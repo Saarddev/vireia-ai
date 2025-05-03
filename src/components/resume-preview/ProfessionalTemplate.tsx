@@ -66,6 +66,26 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
     return technologies.join(', ');
   };
 
+  // Process custom styles if available
+  const getCustomStyle = (section: string, property: string, defaultValue: string) => {
+    if (settings?.customStyles && 
+        settings.customStyles[section] && 
+        settings.customStyles[section][property] !== undefined) {
+      return settings.customStyles[section][property];
+    }
+    return defaultValue;
+  };
+
+  // Apply title styles from custom styles
+  const getSectionTitleStyle = (section: string) => {
+    return {
+      color: handlePrimaryColor(),
+      textAlign: getCustomStyle(section, 'textAlign', 'left'),
+      fontWeight: getCustomStyle(section, 'fontWeight', 'semibold'),
+      textDecoration: getCustomStyle(section, 'textDecoration', 'none')
+    };
+  };
+
   return (
     <div className="print:p-0" style={{ fontSize: `${settings.fontSize || 11}pt` }}>
       {/* Header Section */}
@@ -108,7 +128,14 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
       {/* Summary Section */}
       {data.summary && (
         <div className="mb-4">
-          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+          <h2 
+            className="text-lg font-semibold border-b-2 mb-2" 
+            style={{ 
+              borderColor: handlePrimaryColor(), 
+              color: handlePrimaryColor(),
+              textAlign: getCustomStyle('summary', 'textAlign', 'left') as any
+            }}
+          >
             Summary
           </h2>
           <p className="text-sm">
@@ -120,7 +147,14 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
       {/* Experience Section */}
       {data.experience && data.experience.length > 0 && (
         <div className="mb-4">
-          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+          <h2 
+            className="text-lg font-semibold border-b-2 mb-2" 
+            style={{ 
+              borderColor: handlePrimaryColor(), 
+              color: handlePrimaryColor(),
+              textAlign: getCustomStyle('experience', 'textAlign', 'left') as any
+            }}
+          >
             Experience
           </h2>
           {data.experience.map((exp: Experience) => (
@@ -151,7 +185,14 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
       {/* Education Section */}
       {data.education && data.education.length > 0 && (
         <div className="mb-4">
-          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+          <h2 
+            className="text-lg font-semibold border-b-2 mb-2" 
+            style={{ 
+              borderColor: handlePrimaryColor(), 
+              color: handlePrimaryColor(),
+              textAlign: getCustomStyle('education', 'textAlign', 'left') as any
+            }}
+          >
             Education
           </h2>
           {data.education.map((edu: Education) => (
@@ -180,7 +221,14 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
       {/* Skills Section */}
       {data.skills && (data.skills.technical?.length > 0 || data.skills.soft?.length > 0) && (
         <div className="mb-4">
-          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+          <h2 
+            className="text-lg font-semibold border-b-2 mb-2" 
+            style={{ 
+              borderColor: handlePrimaryColor(), 
+              color: handlePrimaryColor(),
+              textAlign: getCustomStyle('skills', 'textAlign', 'left') as any
+            }}
+          >
             Skills
           </h2>
           {data.skills.technical?.length > 0 && (
@@ -205,7 +253,14 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
       {/* Projects Section */}
       {data.projects && data.projects.length > 0 && (
         <div className="mb-4">
-          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+          <h2 
+            className="text-lg font-semibold border-b-2 mb-2" 
+            style={{ 
+              borderColor: handlePrimaryColor(), 
+              color: handlePrimaryColor(),
+              textAlign: getCustomStyle('projects', 'textAlign', 'left') as any
+            }}
+          >
             Projects
           </h2>
           {data.projects.map((project: Project) => (
@@ -249,7 +304,14 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
       {/* Languages Section */}
       {data.languages && data.languages.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+          <h2 
+            className="text-lg font-semibold border-b-2 mb-2" 
+            style={{ 
+              borderColor: handlePrimaryColor(), 
+              color: handlePrimaryColor(),
+              textAlign: getCustomStyle('languages', 'textAlign', 'left') as any
+            }}
+          >
             Languages
           </h2>
           <p className="text-sm">

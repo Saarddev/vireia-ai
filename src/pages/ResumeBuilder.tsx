@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -32,6 +31,17 @@ interface AISuggestionData {
   section: string;
   content: string;
 }
+
+type ResumeSettings = {
+  fontFamily: string;
+  fontSize: number;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  paperSize: string;
+  margins: string;
+  customStyles?: Record<string, any>;
+};
 
 const ResumeBuilder = () => {
   const { resumeId } = useParams();
@@ -282,9 +292,9 @@ const ResumeBuilder = () => {
     try {
       // First, update resumeSettings with the latest custom styles
       if (Object.keys(customStyles).length > 0) {
-        const updatedSettings = {
+        const updatedSettings: ResumeSettings = {
           ...resumeSettings,
-          customStyles
+          customStyles: customStyles
         };
         setResumeSettings(updatedSettings);
       }

@@ -11,7 +11,8 @@ interface ContactInfoProps {
 }
 
 const ContactInfo: React.FC<ContactInfoProps> = ({ personal, onUpdateData, onGenerateWithAI, compact = false }) => {
-  const contactFieldClass = `inline px-1 py-0 rounded bg-transparent border-none text-sm focus:bg-gray-100 text-gray-700 ${compact ? "max-w-[120px]" : "max-w-[180px]"} min-w-[60px]`;
+  // Make contact fields more compact when compact mode is enabled
+  const contactFieldClass = `inline px-1 py-0 rounded bg-transparent border-none ${compact ? "text-xs max-w-[100px]" : "text-sm max-w-[180px]"} min-w-[60px]`;
   const contactDivider = <span className="mx-1 text-gray-400">|</span>;
 
   const isValidUrl = (urlString: string): boolean => {
@@ -83,7 +84,7 @@ const ContactInfo: React.FC<ContactInfoProps> = ({ personal, onUpdateData, onGen
   const contactItemsToDisplay = contactItems.filter(item => item.value);
 
   return (
-    <div className={`flex flex-wrap ${compact ? 'justify-center text-xs' : 'text-sm'} text-gray-700 mt-2 gap-x-2 gap-y-1 items-center print:flex-row print:gap-x-2 print:gap-y-0`}>
+    <div className={`flex flex-wrap ${compact ? 'justify-center text-xs space-x-2' : 'text-sm'} text-gray-700 mt-2 gap-x-2 gap-y-1 items-center print:flex-row print:gap-x-2 print:gap-y-0`}>
       {contactItemsToDisplay.map((item, idx) => (
         <React.Fragment key={item.key}>
           {idx > 0 && contactDivider}
