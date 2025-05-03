@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { cn } from "@/lib/utils";
@@ -6,6 +5,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import ModernTemplate from './resume-preview/ModernTemplate';
 import PreviewControls from './resume-preview/PreviewControls';
 import { ResumeData } from '@/types/resume.d';
+import AIAnalysisDrawer from './resume-builder/AIAnalysisDrawer';
 
 interface ResumePreviewProps {
   data: ResumeData;
@@ -13,6 +13,7 @@ interface ResumePreviewProps {
   settings?: any;
   onDataChange?: (section: string, data: any) => void;
   onGenerateWithAI?: (section: string) => Promise<string>;
+  showAIAnalysis?: boolean;
 }
 
 const ResumePreview: React.FC<ResumePreviewProps> = ({
@@ -20,7 +21,8 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
   template,
   settings = {},
   onDataChange,
-  onGenerateWithAI
+  onGenerateWithAI,
+  showAIAnalysis = false
 }) => {
   // Ensure data is valid and complete with defaults
   const safeData: ResumeData = React.useMemo(() => {
@@ -294,6 +296,11 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
         onDownload={handleDownloadPDF}
         onPrint={handlePrint}
       >
+        {showAIAnalysis && (
+          <div className="ml-auto mr-2">
+            <AIAnalysisDrawer resumeData={data} />
+          </div>
+        )}
         <span className="text-sm text-gray-600 ml-2">
           {Math.round(zoomLevel * 100)}%
         </span>
@@ -315,10 +322,10 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
             <div ref={resumeContentRef} className="resume-content">
               {template === 'modern' ? (
                 <ModernTemplate
-                  data={safeData}
+                  data={data}
                   settings={settings}
                   onUpdateData={onDataChange}
-                  onGenerateWithAI={handleGenerateWithAI}
+                  onGenerateWithAI={onGenerateWithAI}
                 />
               ) : (
                 <div className="h-full flex items-center justify-center">

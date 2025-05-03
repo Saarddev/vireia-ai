@@ -40,7 +40,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ resumeData, enabled }) => {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold flex items-center">
+          <h2 className="text-2xl font-semibold flex items-center text-gray-800 dark:text-white">
             <Brain className="mr-3 h-6 w-6 text-resume-purple" />
             AI Resume Analysis Hub
           </h2>

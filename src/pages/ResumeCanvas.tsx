@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -26,7 +25,8 @@ import {
   Check,
   Eye,
   Wand2,
-  Layout
+  Layout,
+  Brain
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -52,8 +52,11 @@ import {
   SelectTrigger, 
   SelectValue
 } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ResumeData, Project } from '@/types/resume';
 import { Badge } from "@/components/ui/badge";
+import AIAssistant from '@/components/resume-builder/AIAssistant';
+import AIAnalysisDrawer from '@/components/resume-builder/AIAnalysisDrawer';
 
 const CANVAS_PADDING = 40;
 const DEFAULT_ZOOM = 100;
@@ -77,6 +80,7 @@ const ResumeCanvas = () => {
   const [isSectionEditorOpen, setIsSectionEditorOpen] = useState(false);
   const [editingField, setEditingField] = useState<{section: string; field?: string; itemId?: string; value: string}>({section: '', value: ''});
   const { isGenerating, improveDescription, generateSummary, extractSkills } = useResumeAI();
+  const [isAIAnalysisOpen, setIsAIAnalysisOpen] = useState(false);
 
   const { 
     isLoading, 
@@ -350,6 +354,10 @@ const ResumeCanvas = () => {
     return () => clearInterval(saveInterval);
   }, [resumeData, resumeId]);
 
+  const toggleAIAnalysis = () => {
+    setIsAIAnalysisOpen(!isAIAnalysisOpen);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
@@ -432,6 +440,12 @@ const ResumeCanvas = () => {
               <ZoomIn className="h-3.5 w-3.5" />
             </Button>
           </div>
+          
+          <AIAnalysisDrawer 
+            resumeData={resumeData}
+            isOpen={isAIAnalysisOpen}
+            onOpenChange={setIsAIAnalysisOpen}
+          />
           
           <Button 
             variant="outline" 
@@ -985,6 +999,22 @@ const ResumeCanvas = () => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Layout Tool</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm"
+                    onClick={toggleAIAnalysis}
+                  >
+                    <Brain className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>AI Analysis</TooltipContent>
               </Tooltip>
             </TooltipProvider>
             

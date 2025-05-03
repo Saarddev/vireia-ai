@@ -1,9 +1,12 @@
 
 import React from 'react';
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { BarChart3, ChevronUp, ChevronDown, Sparkles, Clock, Trash, CheckCircle2, FileText } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Sparkles, ChevronDown, ChevronUp, Check, X, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { format } from 'date-fns';
 
 interface ResumeScoreCardProps {
   atsResults: any;
@@ -15,159 +18,196 @@ interface ResumeScoreCardProps {
   onRemoveSuggestion: (id: string) => void;
 }
 
-export const ResumeScoreCard: React.FC<ResumeScoreCardProps> = ({ 
-  atsResults, 
+export const ResumeScoreCard: React.FC<ResumeScoreCardProps> = ({
+  atsResults,
   aiSuggestions,
   scoreHistory,
-  expandedSection, 
+  expandedSection,
   toggleSection,
   onApplySuggestion,
   onRemoveSuggestion
 }) => {
+  if (!atsResults) return null;
+  
+  // Prepare data for the line chart
+  const chartData = scoreHistory.slice(0, 7).map(entry => ({
+    date: format(new Date(entry.date), 'MMM d'),
+    score: entry.score,
+  })).reverse();
+  
   return (
-    <Card className="overflow-hidden border-resume-purple/20 shadow-lg hover:shadow-xl transition-all">
-      <div 
-        className="p-6 border-b border-resume-purple/10 flex justify-between items-center cursor-pointer bg-gradient-to-r from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-800/80"
-        onClick={() => toggleSection("score")}
+    <Card className="border border-gray-200 dark:border-gray-700 shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+      <CardHeader 
+        className="cursor-pointer pb-3 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900"
+        onClick={() => toggleSection('score')}
       >
-        <div className="flex items-center">
-          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-resume-purple/30 to-blue-400/20 flex items-center justify-center mr-4">
-            <BarChart3 className="h-5 w-5 text-resume-purple" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-lg">Resume Score</h3>
-            <p className="text-sm text-muted-foreground">Industry benchmarked evaluation</p>
-          </div>
-        </div>
-        <div className="flex items-center">
-          <div className="text-right mr-4">
-            <div className="text-3xl font-bold text-resume-purple">
-              {atsResults ? atsResults.score : 76}
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="bg-resume-purple/10 p-2 rounded-full">
+              <Sparkles className="h-5 w-5 text-resume-purple" />
             </div>
-            <Badge variant="outline" className={`
-              ${atsResults && atsResults.score >= 80 ? 'bg-green-50 text-green-600 border-green-200' : 
-                atsResults && atsResults.score >= 60 ? 'bg-yellow-50 text-yellow-600 border-yellow-200' : 
-                'bg-red-50 text-red-600 border-red-200'}
-            `}>
-              {atsResults && atsResults.score >= 80 ? 'Excellent' : 
-               atsResults && atsResults.score >= 60 ? 'Good' : 
-               'Needs Improvement'}
-            </Badge>
+            <div>
+              <CardTitle className="text-lg font-semibold flex items-center">
+                Resume Score Analysis
+                <Badge 
+                  className="ml-2 bg-resume-purple/10 text-resume-purple dark:text-resume-purple-light border-resume-purple/30"
+                >
+                  Score: {atsResults.score}/100
+                </Badge>
+              </CardTitle>
+              <p className="text-sm text-resume-gray mt-1">
+                AI-powered resume strength metrics and optimization suggestions
+              </p>
+            </div>
           </div>
-          {expandedSection === "score" ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+          <Button variant="ghost" size="icon" className="rounded-full">
+            {expandedSection === 'score' ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+          </Button>
         </div>
-      </div>
+        <div className="mt-3 px-1">
+          <Progress 
+            value={atsResults.score} 
+            max={100} 
+            className="h-2.5 rounded-full bg-gray-100 dark:bg-gray-700" 
+            indicatorClassName={`${
+              atsResults.score < 60 ? 'bg-red-500' :
+              atsResults.score < 80 ? 'bg-yellow-500' :
+              'bg-green-500'
+            }`}
+          />
+          <div className="flex justify-between mt-1 text-xs text-resume-gray">
+            <span>Needs Work</span>
+            <span>Good</span>
+            <span>Excellent</span>
+          </div>
+        </div>
+      </CardHeader>
       
-      {expandedSection === "score" && (
-        <div className="p-6 space-y-6 bg-gray-50/80 dark:bg-gray-800/20 backdrop-blur-sm">
+      {expandedSection === 'score' && (
+        <CardContent className="pt-4 pb-6 bg-white dark:bg-gray-800 animate-fade-in">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              {(atsResults?.metrics || [
-                { name: "Content Quality", score: 85 },
-                { name: "ATS Compatibility", score: 92 },
-                { name: "Keyword Optimization", score: 68 },
-                { name: "Impact Statements", score: 62 }
-              ]).map((metric: any) => (
-                <div key={metric.name} className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="font-medium">{metric.name}</span>
-                    <span className="text-resume-gray">{metric.score}%</span>
-                  </div>
-                  <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full transition-all duration-1000 ease-out ${
-                        metric.score >= 80 ? 'bg-gradient-to-r from-green-400 to-green-500' : 
-                        metric.score >= 60 ? 'bg-gradient-to-r from-blue-400 to-blue-500' : 
-                        metric.score >= 40 ? 'bg-gradient-to-r from-amber-400 to-amber-500' : 
-                        'bg-gradient-to-r from-red-400 to-red-500'
-                      }`}
-                      style={{ width: `${metric.score}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="space-y-4">
-              {/* AI Suggestions */}
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
-                <h4 className="font-medium text-sm flex items-center mb-2">
-                  <Sparkles className="h-4 w-4 mr-2 text-resume-purple" /> AI Suggestions
-                </h4>
-                
-                {aiSuggestions.length > 0 ? (
-                  <div className="space-y-3">
-                    {aiSuggestions.map((suggestion) => (
-                      <div key={suggestion.id} className="bg-resume-purple/5 rounded-md p-3 text-sm">
-                        <div className="flex justify-between items-start">
-                          <p>{suggestion.text}</p>
-                          <div className="flex gap-1 ml-2">
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="h-6 w-6 p-0" 
-                              onClick={() => onApplySuggestion(suggestion.id)}
-                            >
-                              <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="h-6 w-6 p-0" 
-                              onClick={() => onRemoveSuggestion(suggestion.id)}
-                            >
-                              <Trash className="h-3.5 w-3.5 text-red-400" />
-                            </Button>
-                          </div>
-                        </div>
-                        <Badge 
-                          variant="outline" 
-                          className="mt-2 text-xs bg-white/50 dark:bg-gray-900/50"
-                        >
-                          {suggestion.section}
-                        </Badge>
+            {/* Metrics Section */}
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">Key Metrics</h3>
+                <div className="space-y-3">
+                  {atsResults.metrics && atsResults.metrics.map((metric: any, i: number) => (
+                    <div key={i} className="space-y-1">
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-700 dark:text-gray-300">{metric.name}</span>
+                        <span className={`font-medium ${
+                          metric.score < 60 ? 'text-red-500' :
+                          metric.score < 80 ? 'text-yellow-500' :
+                          'text-green-500'
+                        }`}>{metric.score}/100</span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500 italic">
-                    No suggestions available. Run an analysis to generate suggestions.
-                  </p>
-                )}
+                      <Progress 
+                        value={metric.score} 
+                        max={100} 
+                        className="h-1.5 rounded-full bg-gray-100 dark:bg-gray-700" 
+                        indicatorClassName={`${
+                          metric.score < 60 ? 'bg-red-500' :
+                          metric.score < 80 ? 'bg-yellow-500' :
+                          'bg-green-500'
+                        }`}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
               
-              {/* History Tracking */}
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
-                <h4 className="font-medium text-sm flex items-center mb-2">
-                  <Clock className="h-4 w-4 mr-2 text-blue-500" /> Resume History
-                </h4>
-                
-                {scoreHistory.length > 0 ? (
-                  <div className="space-y-2">
-                    {scoreHistory.map((entry, index) => (
-                      <div key={index} className="flex items-center justify-between text-sm border-b border-gray-100 dark:border-gray-700 pb-1">
-                        <div className="flex items-center">
-                          <FileText className="h-3.5 w-3.5 mr-2 text-gray-500" />
-                          <span>{entry.event}</span>
+              {/* Keywords Section */}
+              <div>
+                <h3 className="text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">Top Keywords Detected</h3>
+                <div className="flex flex-wrap gap-2">
+                  {atsResults.keywords && atsResults.keywords.slice(0, 10).map((keyword: string, i: number) => (
+                    <Badge 
+                      key={i}
+                      className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                    >
+                      {keyword}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            {/* Chart Section */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Score History</h3>
+              {chartData.length > 1 ? (
+                <div className="h-[140px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e5e5" />
+                      <XAxis dataKey="date" tick={{fontSize: 12}} stroke="#9ca3af" />
+                      <YAxis domain={[0, 100]} tick={{fontSize: 12}} stroke="#9ca3af" />
+                      <Tooltip />
+                      <Line 
+                        type="monotone" 
+                        dataKey="score" 
+                        stroke="#8b5cf6" 
+                        strokeWidth={2}
+                        activeDot={{ r: 6 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-[140px] bg-gray-50 dark:bg-gray-900/50 rounded-md">
+                  <div className="text-center text-gray-500 dark:text-gray-400">
+                    <Clock className="mx-auto h-6 w-6 mb-2 opacity-70" />
+                    <p className="text-sm">Score history will appear after multiple analyses</p>
+                  </div>
+                </div>
+              )}
+              
+              {/* AI Suggestions */}
+              <div className="mt-6">
+                <h3 className="text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">AI Suggestions</h3>
+                {aiSuggestions.length > 0 ? (
+                  <div className="space-y-3">
+                    {aiSuggestions.map((suggestion, i) => (
+                      <div 
+                        key={i}
+                        className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800/30 rounded-md p-3 relative"
+                      >
+                        <div className="pr-16">
+                          <p className="text-sm text-gray-700 dark:text-gray-300">{suggestion.text}</p>
+                          <Badge className="mt-2 bg-resume-purple/20 text-resume-purple border-none">
+                            {suggestion.section.charAt(0).toUpperCase() + suggestion.section.slice(1)}
+                          </Badge>
                         </div>
-                        <div className="flex items-center">
-                          <span className="font-medium text-resume-purple">{entry.score}</span>
-                          <span className="text-xs text-gray-500 ml-2">
-                            {new Date(entry.date).toLocaleDateString()}
-                          </span>
+                        <div className="absolute top-2 right-2 flex space-x-1">
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="h-7 w-7 p-0 rounded-full text-green-600 hover:text-green-700 hover:bg-green-100"
+                            onClick={() => onApplySuggestion(suggestion.id)}
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="h-7 w-7 p-0 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                            onClick={() => onRemoveSuggestion(suggestion.id)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500 italic">
-                    No history available yet.
-                  </p>
+                  <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-md text-center text-gray-500 dark:text-gray-400">
+                    No suggestions available at this time
+                  </div>
                 )}
               </div>
             </div>
           </div>
-        </div>
+        </CardContent>
       )}
     </Card>
   );
