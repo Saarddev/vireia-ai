@@ -3,6 +3,8 @@ import { Card } from '@/components/ui/card';
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ModernTemplate from './resume-preview/ModernTemplate';
+import CustomizableTemplate from './resume-preview/CustomizableTemplate';
+import ProfessionalTemplate from './resume-preview/ProfessionalTemplate';
 import PreviewControls from './resume-preview/PreviewControls';
 import { ResumeData } from '@/types/resume.d';
 import AIAnalysisDrawer from './resume-builder/AIAnalysisDrawer';
@@ -279,6 +281,47 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
     return lines.join('\n');
   };
 
+  // Function to render the selected template
+  const renderTemplate = () => {
+    switch (template) {
+      case 'modern':
+        return (
+          <ModernTemplate
+            data={data}
+            settings={settings}
+            onUpdateData={onDataChange}
+            onGenerateWithAI={onGenerateWithAI}
+          />
+        );
+      case 'professional':
+        return (
+          <ProfessionalTemplate
+            data={data}
+            settings={settings}
+            onUpdateData={onDataChange}
+            onGenerateWithAI={onGenerateWithAI}
+          />
+        );
+      case 'customizable':
+        return (
+          <CustomizableTemplate
+            data={data}
+            settings={settings}
+            onUpdateData={onDataChange}
+            onGenerateWithAI={onGenerateWithAI}
+          />
+        );
+      default:
+        return (
+          <div className="h-full flex items-center justify-center">
+            <p className="text-gray-500">
+              {template.charAt(0).toUpperCase() + template.slice(1)} template preview
+            </p>
+          </div>
+        );
+    }
+  };
+
   const handleZoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 0.25, 2));
   };
@@ -320,20 +363,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
             }}
           >
             <div ref={resumeContentRef} className="resume-content">
-              {template === 'modern' ? (
-                <ModernTemplate
-                  data={data}
-                  settings={settings}
-                  onUpdateData={onDataChange}
-                  onGenerateWithAI={onGenerateWithAI}
-                />
-              ) : (
-                <div className="h-full flex items-center justify-center">
-                  <p className="text-gray-500">
-                    {template.charAt(0).toUpperCase() + template.slice(1)} template preview
-                  </p>
-                </div>
-              )}
+              {renderTemplate()}
             </div>
           </Card>
         </div>

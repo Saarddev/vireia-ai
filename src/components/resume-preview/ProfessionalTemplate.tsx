@@ -1,4 +1,3 @@
-
 import React from 'react';
 import EditableField from './EditableField';
 import { useResumeAI } from '@/hooks/use-resume-ai';
@@ -48,6 +47,15 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
   // Generate AI-enhanced description for an experience entry
   const handleGenerateWithAI = (description: string) => {
     return improveDescription(description);
+  };
+
+  // Just fixing the type error in the file
+  // Add or modify the function to convert technologies from an array to a string
+  const formatTechnologies = (technologies: string[] | undefined): string => {
+    if (!technologies || technologies.length === 0) {
+      return '';
+    }
+    return technologies.join(', ');
   };
 
   return (
