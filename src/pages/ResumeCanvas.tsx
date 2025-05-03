@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -54,6 +53,7 @@ import {
 } from "@/components/ui/select";
 import { ResumeData, Project } from '@/types/resume';
 import { Badge } from "@/components/ui/badge";
+import { ResumePreview } from '@/components/resume-preview/ResumePreview';
 
 const CANVAS_PADDING = 40;
 const DEFAULT_ZOOM = 100;
@@ -1014,10 +1014,13 @@ const ResumeCanvas = () => {
                           </Button>
                         </div>
                         <Card className="h-full flex-grow overflow-auto p-6 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                          <ModernTemplate
+                          <ResumePreview 
                             data={resumeData}
+                            template={selectedTemplate}
                             settings={resumeSettings}
-                            onUpdateData={handleDataChange}
+                            resumeId={resumeId}
+                            onDataChange={(section, newData) => handleDataChange(section, newData)}
+                            onGenerateWithAI={handleGenerateWithAI}
                           />
                         </Card>
                       </div>

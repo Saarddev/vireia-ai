@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider, Sidebar, SidebarInset } from "@/components/ui/sidebar";
@@ -354,6 +354,17 @@ const ResumeBuilder = () => {
         );
     }
   };
+
+  // Update the useEffect block after resumeId is loaded to handle section redirection from URL params
+  React.useEffect(() => {
+    // Check if we have a section parameter in the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const sectionParam = urlParams.get('section');
+    
+    if (sectionParam && ['personal', 'summary', 'experience', 'education', 'skills', 'projects', 'templates', 'settings', 'ai'].includes(sectionParam)) {
+      setActiveSection(sectionParam);
+    }
+  }, [resumeId]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50/80 via-background to-purple-50/60 dark:from-gray-900/90 dark:via-gray-900/50 dark:to-gray-900/90">

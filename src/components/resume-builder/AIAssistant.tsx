@@ -4,7 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useResumeAnalysis } from '@/hooks/use-resume-analysis';
-import { Brain, RefreshCw, Sparkles, AlertCircle, Wand2 } from 'lucide-react';
+import { 
+  Brain, 
+  RefreshCw, 
+  Sparkles, 
+  AlertCircle, 
+  Wand2,
+  BarChart3
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { ATSScoreCard } from './resume-analysis/ATSScoreCard';
 import { ResumeScoreCard } from './resume-analysis/ResumeScoreCard';
