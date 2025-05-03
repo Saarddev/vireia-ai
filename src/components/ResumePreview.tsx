@@ -1,12 +1,9 @@
+
 import React, { useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { Brain } from "lucide-react";
 import ModernTemplate from './resume-preview/ModernTemplate';
-import ProfessionalTemplate from './resume-preview/ProfessionalTemplate';
 import PreviewControls from './resume-preview/PreviewControls';
 import { ResumeData } from '@/types/resume.d';
 
@@ -14,7 +11,6 @@ interface ResumePreviewProps {
   data: ResumeData;
   template: string;
   settings?: any;
-  resumeId?: string;
   onDataChange?: (section: string, data: any) => void;
   onGenerateWithAI?: (section: string) => Promise<string>;
 }
@@ -23,7 +19,6 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
   data,
   template,
   settings = {},
-  resumeId,
   onDataChange,
   onGenerateWithAI
 }) => {
@@ -305,20 +300,6 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
       </PreviewControls>
       
       <div className="flex-1 overflow-auto p-4 relative scroll-smooth scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        {resumeId && (
-          <div className="absolute top-2 right-2 z-10">
-            <Link to={`/resume/builder/${resumeId}?section=ai`}>
-              <Button 
-                className="bg-resume-purple hover:bg-resume-purple/90 text-white shadow-lg hover:shadow-xl transition-all flex items-center gap-2" 
-                size="sm"
-              >
-                <Brain className="h-4 w-4" />
-                AI Analysis
-              </Button>
-            </Link>
-          </div>
-        )}
-        
         <div className="min-h-full flex items-start justify-center pb-20">
           <Card
             className={cn(
@@ -338,12 +319,6 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
                   settings={settings}
                   onUpdateData={onDataChange}
                   onGenerateWithAI={handleGenerateWithAI}
-                />
-              ) : template === 'professional' ? (
-                <ProfessionalTemplate
-                  data={safeData}
-                  onUpdateData={onDataChange}
-                  isEditMode={!!onDataChange}
                 />
               ) : (
                 <div className="h-full flex items-center justify-center">

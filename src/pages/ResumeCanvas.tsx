@@ -1,363 +1,1159 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import ResumePreview from '@/components/ResumePreview';
-import { supabaseClient } from '@/integrations/supabase/client';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Printer, Download, Share2 } from 'lucide-react';
-import { useToast } from "@/components/ui/use-toast"
+
+import React, { useState, useRef, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { useResumeData } from '@/hooks/use-resume-data';
+import { useResumeAI } from '@/hooks/use-resume-ai';
+import { summarizeText } from '@/utils/summarizeText';
+import { 
+  Download, 
+  Undo, 
+  Redo, 
+  Move, 
+  PanelLeft, 
+  ChevronLeft,
+  Share2,
+  Plus,
+  Settings as SettingsIcon,
+  Layers,
+  Save,
+  ZoomIn,
+  ZoomOut,
+  X,
+  FileText,
+  List,
+  Edit,
+  Check,
+  Eye,
+  Wand2,
+  Layout
+} from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { MoreVertical } from 'lucide-react';
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import { Separator } from "@/components/ui/separator"
-import { useResume } from '@/hooks/use-resume';
-import { useNavigate } from 'react-router-dom';
-import { AIAssistant } from '@/components/resume-builder/AIAssistant';
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Slider } from "@/components/ui/slider";
+import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
+import { Card, CardContent } from '@/components/ui/card';
+import { ResumeLoadingSkeleton } from '@/components/resume-preview/LoadingSkeleton';
+import ModernTemplate from '@/components/resume-preview/ModernTemplate';
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue
+} from "@/components/ui/select";
+import { ResumeData, Project } from '@/types/resume';
+import { Badge } from "@/components/ui/badge";
+
+const CANVAS_PADDING = 40;
+const DEFAULT_ZOOM = 100;
+const PAPER_SIZES = {
+  a4: { width: '210mm', height: '297mm', ratio: 1.414 },
+  letter: { width: '8.5in', height: '11in', ratio: 1.294 },
+  legal: { width: '8.5in', height: '14in', ratio: 1.647 },
+};
 
 const ResumeCanvas = () => {
-  const { resumeId } = useParams<{ resumeId: string }>();
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [template, setTemplate] = useState('modern');
-  const [settings, setSettings] = useState({
-    fontFamily: 'Inter',
-    fontSize: 10,
-    primaryColor: '#5d4dcd',
-    margins: 'normal'
-  });
-  const [aiAssistantEnabled, setAiAssistantEnabled] = useState(false);
+  const { resumeId } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast()
-  const { deleteResume } = useResume();
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [activeTool, setActiveTool] = useState<string>("select");
+  const [zoom, setZoom] = useState(DEFAULT_ZOOM);
+  const [undoStack, setUndoStack] = useState<any[]>([]);
+  const [redoStack, setRedoStack] = useState<any[]>([]);
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [isInEditMode, setIsInEditMode] = useState(false);
+  const [isSectionEditorOpen, setIsSectionEditorOpen] = useState(false);
+  const [editingField, setEditingField] = useState<{section: string; field?: string; itemId?: string; value: string}>({section: '', value: ''});
+  const { isGenerating, improveDescription, generateSummary, extractSkills } = useResumeAI();
 
-  useEffect(() => {
-    if (!resumeId) {
-      setError(new Error("Resume ID is missing."));
-      setLoading(false);
-      return;
-    }
+  const { 
+    isLoading, 
+    resumeData, 
+    setResumeData, 
+    resumeTitle, 
+    setResumeTitle,
+    selectedTemplate, 
+    setSelectedTemplate, 
+    resumeSettings, 
+    setResumeSettings,
+    calculateProgress,
+    handleSave
+  } = useResumeData(resumeId);
 
-    const fetchResumeData = async () => {
-      try {
-        setLoading(true);
-        const { data: resumeData, error: resumeError } = await supabaseClient
-          .from('resumes')
-          .select('*')
-          .eq('id', resumeId)
-          .single();
+  // Track history for undo/redo
+  const addToHistory = (newData: any) => {
+    setUndoStack((prev) => [...prev, JSON.stringify(resumeData)]);
+    setRedoStack([]);
+  };
 
-        if (resumeError) {
-          throw resumeError;
-        }
+  const handleZoomChange = (value: number[]) => {
+    setZoom(value[0]);
+  };
 
-        if (resumeData) {
-          setData(resumeData.data);
-          setTemplate(resumeData.template || 'modern');
-          setSettings(resumeData.settings || {
-            fontFamily: 'Inter',
-            fontSize: 10,
-            primaryColor: '#5d4dcd',
-            margins: 'normal'
-          });
-        } else {
-          setError(new Error("Resume not found."));
-        }
-      } catch (err: any) {
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(prev + 10, 200));
+  };
 
-    fetchResumeData();
-  }, [resumeId]);
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(prev - 10, 50));
+  };
 
-  const handleDataChange = async (section: string, newData: any) => {
-    setData(prevData => ({
-      ...prevData,
-      [section]: newData
-    }));
+  const handleZoomReset = () => {
+    setZoom(DEFAULT_ZOOM);
+  };
 
+  const handleDownload = async () => {
     try {
-      const { error } = await supabaseClient
-        .from('resumes')
-        .update({ data: { ...data, [section]: newData } })
-        .eq('id', resumeId);
-
-      if (error) {
-        throw error;
-      }
-    } catch (err: any) {
-      toast({
-        title: "Error updating resume",
-        description: err.message,
-        variant: "destructive",
-      })
+      toast.success("Preparing your resume for download...");
+      // In a real implementation, we would generate and download a PDF
+      window.open(`/resume/pdf/${resumeId}`, '_blank');
+    } catch (error) {
+      console.error('Error downloading resume:', error);
+      toast.error('Failed to download resume');
     }
   };
 
-  const handleTemplateChange = async (newTemplate: string) => {
-    setTemplate(newTemplate);
-
-    try {
-      const { error } = await supabaseClient
-        .from('resumes')
-        .update({ template: newTemplate })
-        .eq('id', resumeId);
-
-      if (error) {
-        throw error;
-      }
-    } catch (err: any) {
-      toast({
-        title: "Error updating template",
-        description: err.message,
-        variant: "destructive",
-      })
-    }
+  const handleUndo = () => {
+    if (undoStack.length === 0) return;
+    
+    const lastState = undoStack[undoStack.length - 1];
+    setUndoStack(undoStack.slice(0, -1));
+    setRedoStack([...redoStack, JSON.stringify(resumeData)]);
+    
+    // Apply the undo action
+    setResumeData(JSON.parse(lastState));
   };
 
-  const handleSettingsChange = async (newSettings: any) => {
-    setSettings(newSettings);
+  const handleRedo = () => {
+    if (redoStack.length === 0) return;
+    
+    const nextState = redoStack[redoStack.length - 1];
+    setRedoStack(redoStack.slice(0, -1));
+    setUndoStack([...undoStack, JSON.stringify(resumeData)]);
+    
+    // Apply the redo action
+    setResumeData(JSON.parse(nextState));
+  };
 
-    try {
-      const { error } = await supabaseClient
-        .from('resumes')
-        .update({ settings: newSettings })
-        .eq('id', resumeId);
+  const handleBackToBuilder = () => {
+    navigate(`/resume/builder/${resumeId}`);
+  };
 
-      if (error) {
-        throw error;
+  const handleChangeTool = (tool: string) => {
+    setActiveTool(tool);
+  };
+
+  const handleSaveChanges = async () => {
+    await handleSave();
+    toast.success("Resume saved successfully!");
+  };
+
+  const handleDataChange = (section: string, data: any) => {
+    addToHistory(resumeData);
+    setResumeData((prev: ResumeData) => {
+      if (section === 'personal') {
+        return { ...prev, personal: data };
+      } else if (section === 'summary') {
+        return { ...prev, summary: data };
+      } else {
+        // For array sections: experience, education, projects etc.
+        return { ...prev, [section]: data };
       }
-    } catch (err: any) {
-      toast({
-        title: "Error updating settings",
-        description: err.message,
-        variant: "destructive",
-      })
+    });
+  };
+
+  const handleAddItem = (section: string) => {
+    if (section === 'experience') {
+      setResumeData((prev: ResumeData) => ({
+        ...prev,
+        experience: [
+          ...prev.experience,
+          {
+            id: uuidv4(),
+            title: "",
+            company: "",
+            location: "",
+            startDate: "",
+            endDate: "",
+            description: ""
+          }
+        ]
+      }));
+    } else if (section === 'education') {
+      setResumeData((prev: ResumeData) => ({
+        ...prev,
+        education: [
+          ...prev.education,
+          {
+            id: uuidv4(),
+            degree: "",
+            institution: "",
+            field: "",
+            location: "",
+            startDate: "",
+            endDate: "",
+            description: ""
+          }
+        ]
+      }));
+    } else if (section === 'projects') {
+      setResumeData((prev: ResumeData) => ({
+        ...prev,
+        projects: [
+          ...prev.projects,
+          {
+            id: uuidv4(),
+            title: "",
+            description: "",
+            technologies: [],
+            startDate: "",
+            endDate: "",
+            link: ""
+          } as Project
+        ]
+      }));
     }
+    setActiveSection(section);
+  };
+
+  const handleRemoveItem = (section: string, id: string) => {
+    addToHistory(resumeData);
+    setResumeData((prev: ResumeData) => {
+      const items = [...prev[section]];
+      const updatedItems = items.filter(item => item.id !== id);
+      return { ...prev, [section]: updatedItems };
+    });
+  };
+
+  const handleFieldEdit = (section: string, field?: string, itemId?: string, initialValue?: string) => {
+    setEditingField({
+      section,
+      field,
+      itemId,
+      value: initialValue || ''
+    });
+    setIsSectionEditorOpen(true);
+  };
+
+  const handleSaveField = async () => {
+    const { section, field, itemId, value } = editingField;
+    
+    if (section === 'summary') {
+      handleDataChange('summary', value);
+    } else if (section === 'personal' && field) {
+      handleDataChange('personal', {
+        ...resumeData.personal,
+        [field]: value
+      });
+    } else if (itemId && field && ['experience', 'education', 'projects'].includes(section)) {
+      const items = [...resumeData[section]];
+      const itemIndex = items.findIndex(item => item.id === itemId);
+      
+      if (itemIndex >= 0) {
+        const updatedItem = { ...items[itemIndex], [field]: value };
+        items[itemIndex] = updatedItem;
+        handleDataChange(section, items);
+      }
+    }
+    
+    setIsSectionEditorOpen(false);
   };
 
   const handleGenerateWithAI = async (section: string): Promise<string> => {
     try {
-      const response = await fetch('/api/ai/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          section: section,
-          data: data[section] || '',
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to generate content: ${response.statusText}`);
+      if (section.startsWith('summary')) {
+        // Extract experience descriptions for better summary generation
+        const experienceText = resumeData.experience
+          .map(exp => exp.description)
+          .join('\n\n');
+          
+        if (!experienceText || experienceText.trim() === '') {
+          toast.error("Please add some experience details first to generate a better summary");
+          return "";
+        }
+          
+        const skills = [...resumeData.skills.technical, ...resumeData.skills.soft];
+        
+        const generatedSummary = await generateSummary(
+          resumeData.experience.map(e => e.description), 
+          skills
+        );
+        
+        if (generatedSummary) {
+          handleDataChange('summary', generatedSummary);
+          return generatedSummary;
+        }
+      } else if (section.startsWith('experience-desc') && editingField.itemId) {
+        const experience = resumeData.experience.find(e => e.id === editingField.itemId);
+        if (experience) {
+          const currentText = editingField.value || experience.description;
+          
+          if (!currentText || currentText.trim() === '') {
+            toast.error("Please add some content first to improve");
+            return "";
+          }
+          
+          const improved = await improveDescription(currentText);
+          if (improved) {
+            // Update in the editing field rather than immediately saving
+            setEditingField(prev => ({ ...prev, value: improved }));
+            return improved;
+          }
+        }
+      } else if (section.startsWith('education-desc') && editingField.itemId) {
+        const education = resumeData.education.find(e => e.id === editingField.itemId);
+        if (education) {
+          const currentText = editingField.value || education.description || '';
+          
+          if (!currentText || currentText.trim() === '') {
+            toast.error("Please add some content first to improve");
+            return "";
+          }
+          
+          // We'll also use improveDescription for education descriptions
+          const improved = await improveDescription(currentText);
+          if (improved) {
+            setEditingField(prev => ({ ...prev, value: improved }));
+            return improved;
+          }
+        }
       }
-
-      const result = await response.json();
-      return result.content;
-    } catch (error: any) {
-      console.error("Error generating content:", error);
-      toast({
-        title: "Error generating content",
-        description: error.message,
-        variant: "destructive",
-      })
-      return '';
+      
+      return "";
+    } catch (error) {
+      console.error('AI generation error:', error);
+      toast.error("Failed to generate content with AI");
+      return "";
     }
   };
 
-  const handleDeleteResume = async () => {
-    if (!resumeId) {
-      toast({
-        title: "Error deleting resume",
-        description: "Resume ID is missing.",
-        variant: "destructive",
-      })
-      return;
-    }
+  useEffect(() => {
+    // Auto-save changes every 30 seconds
+    const saveInterval = setInterval(() => {
+      if (resumeData && resumeId) {
+        handleSave().catch(console.error);
+      }
+    }, 30000);
+    
+    return () => clearInterval(saveInterval);
+  }, [resumeData, resumeId]);
 
-    try {
-      await deleteResume(resumeId);
-      toast({
-        title: "Resume deleted",
-        description: "Your resume has been successfully deleted.",
-      })
-      navigate('/resumes');
-    } catch (error: any) {
-      toast({
-        title: "Error deleting resume",
-        description: error.message,
-        variant: "destructive",
-      })
-    }
-  };
-
-  if (loading) {
-    return <div className="container mx-auto p-4">
-      <Card className="p-4 space-y-4">
-        <Skeleton className="h-10 w-[200px]" />
-        <Skeleton className="h-4 w-[300px]" />
-        <Skeleton className="h-[500px]" />
-      </Card>
-    </div>;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-12 h-12 border-4 border-resume-purple border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-resume-purple dark:text-resume-purple-light text-lg">Loading your resume canvas...</p>
+        </div>
+      </div>
+    );
   }
 
-  if (error) {
-    return <div className="container mx-auto p-4">
-      <Card className="p-4">
-        <h2 className="text-lg font-semibold">Error:</h2>
-        <p>{error.message}</p>
-      </Card>
-    </div>;
-  }
-
-  if (!data) {
-    return <div className="container mx-auto p-4">
-      <Card className="p-4">
-        <p>No data found for this resume.</p>
-      </Card>
-    </div>;
-  }
+  const paperSize = PAPER_SIZES[resumeSettings.paperSize || 'a4'];
 
   return (
-    <div className="container max-w-5xl mx-auto my-8 space-y-4">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Resume Builder</h1>
-        <div className="flex gap-2">
-          <Button variant="outline">
-            <Printer className="mr-2 h-4 w-4" />
-            Print
+    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <header className="flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm h-14">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={handleBackToBuilder}
+            className="flex items-center text-gray-600 dark:text-gray-300 hover:text-resume-purple"
+          >
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            <span>Back</span>
           </Button>
-          <Button>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-medium text-gray-800 dark:text-white truncate max-w-[200px]">
+              {resumeTitle || "Untitled Resume"}
+            </h1>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+              onClick={() => {
+                const newTitle = prompt("Enter a new title for your resume", resumeTitle);
+                if (newTitle) setResumeTitle(newTitle);
+              }}
+            >
+              <Edit className="h-3 w-3 text-gray-600 dark:text-gray-300" />
+            </Button>
+          </div>
+          <Badge variant="outline" className="bg-purple-50 dark:bg-purple-900/20 text-resume-purple dark:text-resume-purple-light border-resume-purple/30">
+            Canvas Editor
+          </Badge>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={handleUndo} disabled={undoStack.length === 0}
+                  className="text-gray-600 dark:text-gray-400 hover:text-resume-purple dark:hover:text-resume-purple-light">
+                  <Undo className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Undo</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={handleRedo} disabled={redoStack.length === 0}
+                  className="text-gray-600 dark:text-gray-400 hover:text-resume-purple dark:hover:text-resume-purple-light">
+                  <Redo className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Redo</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <div className="flex items-center space-x-1 px-2 py-1 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800">
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleZoomOut}>
+              <ZoomOut className="h-3.5 w-3.5" />
+            </Button>
+            <span className="text-xs text-gray-600 dark:text-gray-300 w-10 text-center">{zoom}%</span>
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleZoomIn}>
+              <ZoomIn className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+          
+          <Button 
+            variant="outline" 
+            className="ml-2 border-resume-purple/30 text-resume-purple dark:text-resume-purple-light hover:bg-resume-purple/10" 
+            onClick={handleSaveChanges}
+          >
+            <Save className="mr-2 h-4 w-4" />
+            Save
+          </Button>
+          <Button 
+            variant="default" 
+            className="bg-resume-purple hover:bg-resume-purple/90 text-white" 
+            onClick={handleDownload}
+          >
             <Download className="mr-2 h-4 w-4" />
             Download
           </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open dropdown menu</span>
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => navigate(`/resume/builder/${resumeId}?section=settings`)}
-              >
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={handleDeleteResume}
-                className="text-red-500 focus:text-red-500"
-              >
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        </div>
+      </header>
+      
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Sidebar - Toggleable */}
+        {showSidebar && (
+          <div className="w-72 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-y-auto transition-all duration-200 ease-in-out shadow-md">
+            <Tabs defaultValue="content" className="w-full">
+              <TabsList className="w-full grid grid-cols-2 p-1 m-2 bg-gray-100 dark:bg-gray-700 rounded-md">
+                <TabsTrigger 
+                  value="content" 
+                  className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-resume-purple dark:data-[state=active]:text-resume-purple-light data-[state=active]:shadow-sm"
+                >
+                  Content
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="style"
+                  className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-resume-purple dark:data-[state=active]:text-resume-purple-light data-[state=active]:shadow-sm"
+                >
+                  Style
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="content" className="p-3 space-y-4">
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Sections</h3>
+                  {Object.entries({
+                    personal: "Personal Info",
+                    summary: "Summary", 
+                    experience: "Experience",
+                    education: "Education",
+                    skills: "Skills",
+                    projects: "Projects"
+                  }).map(([key, label]) => (
+                    <div 
+                      key={key} 
+                      className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors ${activeSection === key ? 'bg-purple-100 dark:bg-purple-900/40 text-resume-purple dark:text-resume-purple-light' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                      onClick={() => setActiveSection(key)}
+                    >
+                      <span className="text-sm">{label}</span>
+                      {key === 'summary' && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs hover:bg-purple-200 dark:hover:bg-purple-800"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleFieldEdit('summary', undefined, undefined, resumeData.summary);
+                          }}
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          Edit
+                        </Button>
+                      )}
+                      {['experience', 'education', 'projects'].includes(key) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs hover:bg-purple-200 dark:hover:bg-purple-800"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddItem(key);
+                          }}
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                
+                {activeSection === 'personal' && (
+                  <div className="space-y-2 pl-2 animate-fade-in">
+                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Personal Information</h4>
+                    {Object.entries(resumeData.personal).map(([field, value]) => (
+                      <div 
+                        key={field}
+                        className="flex items-center justify-between text-sm p-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
+                      >
+                        <span className="capitalize text-gray-700 dark:text-gray-300">{field}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 text-xs text-resume-purple dark:text-resume-purple-light"
+                          onClick={() => handleFieldEdit('personal', field, undefined, value as string)}
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          Edit
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {activeSection === 'experience' && (
+                  <div className="space-y-2 pl-2 animate-fade-in">
+                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Experience Items</h4>
+                    {resumeData.experience.map((exp) => (
+                      <div 
+                        key={exp.id}
+                        className="flex flex-col space-y-1 p-2 border border-gray-100 dark:border-gray-700 rounded hover:border-gray-200 dark:hover:border-gray-600 transition-colors bg-white dark:bg-gray-800 shadow-sm"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{exp.title || "New Position"}</span>
+                          <div className="flex space-x-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-1.5 text-xs text-resume-purple dark:text-resume-purple-light"
+                              onClick={() => handleFieldEdit('experience', 'description', exp.id, exp.description)}
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-1.5 text-xs text-red-500 dark:text-red-400"
+                              onClick={() => handleRemoveItem('experience', exp.id || '')}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{exp.company}, {exp.startDate} - {exp.endDate}</div>
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-2 border-dashed border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:text-resume-purple hover:border-resume-purple dark:hover:text-resume-purple-light dark:hover:border-resume-purple-light"
+                      onClick={() => handleAddItem('experience')}
+                    >
+                      <Plus className="h-3.5 w-3.5 mr-1" />
+                      Add Experience
+                    </Button>
+                  </div>
+                )}
+                
+                {activeSection === 'education' && (
+                  <div className="space-y-2 pl-2 animate-fade-in">
+                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Education Items</h4>
+                    {resumeData.education.map((edu) => (
+                      <div 
+                        key={edu.id}
+                        className="flex flex-col space-y-1 p-2 border border-gray-100 dark:border-gray-700 rounded hover:border-gray-200 dark:hover:border-gray-600 transition-colors bg-white dark:bg-gray-800 shadow-sm"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{edu.degree || "New Degree"}</span>
+                          <div className="flex space-x-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-1.5 text-xs text-resume-purple dark:text-resume-purple-light"
+                              onClick={() => handleFieldEdit('education', 'description', edu.id, edu.description || '')}
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-1.5 text-xs text-red-500 dark:text-red-400"
+                              onClick={() => handleRemoveItem('education', edu.id || '')}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{edu.institution}, {edu.startDate} - {edu.endDate}</div>
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-2 border-dashed border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:text-resume-purple hover:border-resume-purple dark:hover:text-resume-purple-light dark:hover:border-resume-purple-light"
+                      onClick={() => handleAddItem('education')}
+                    >
+                      <Plus className="h-3.5 w-3.5 mr-1" />
+                      Add Education
+                    </Button>
+                  </div>
+                )}
+                
+                {activeSection === 'projects' && (
+                  <div className="space-y-2 pl-2 animate-fade-in">
+                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Project Items</h4>
+                    {resumeData.projects.map((project) => (
+                      <div 
+                        key={project.id}
+                        className="flex flex-col space-y-1 p-2 border border-gray-100 dark:border-gray-700 rounded hover:border-gray-200 dark:hover:border-gray-600 transition-colors bg-white dark:bg-gray-800 shadow-sm"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{project.title || "New Project"}</span>
+                          <div className="flex space-x-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-1.5 text-xs text-resume-purple dark:text-resume-purple-light"
+                              onClick={() => handleFieldEdit('projects', 'description', project.id, project.description)}
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-1.5 text-xs text-red-500 dark:text-red-400"
+                              onClick={() => handleRemoveItem('projects', project.id || '')}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{project.startDate} - {project.endDate}</div>
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-2 border-dashed border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:text-resume-purple hover:border-resume-purple dark:hover:text-resume-purple-light dark:hover:border-resume-purple-light"
+                      onClick={() => handleAddItem('projects')}
+                    >
+                      <Plus className="h-3.5 w-3.5 mr-1" />
+                      Add Project
+                    </Button>
+                  </div>
+                )}
+                
+                {activeSection === 'skills' && (
+                  <div className="space-y-3 pl-2 animate-fade-in">
+                    <div>
+                      <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Technical Skills</h4>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {resumeData.skills.technical.map((skill, index) => (
+                          <div key={index} className="group relative flex items-center">
+                            <span className="px-2 py-1 bg-[#efeafc] dark:bg-[#352a70] rounded-sm text-xs border-[0.5px] border-[#dad3f8] dark:border-[#4b3e96] text-violet-600 dark:text-violet-300 font-medium">
+                              {skill}
+                            </span>
+                            <button 
+                              className="absolute -right-1 -top-1 h-4 w-4 bg-red-500 rounded-full text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => {
+                                const newTechnical = [...resumeData.skills.technical];
+                                newTechnical.splice(index, 1);
+                                handleDataChange('skills', {
+                                  ...resumeData.skills,
+                                  technical: newTechnical
+                                });
+                              }}
+                            >
+                              <X className="h-2 w-2" />
+                            </button>
+                          </div>
+                        ))}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-6 px-2 text-xs"
+                          onClick={() => {
+                            const skill = prompt("Enter a new technical skill");
+                            if (skill) {
+                              handleDataChange('skills', {
+                                ...resumeData.skills,
+                                technical: [...resumeData.skills.technical, skill]
+                              });
+                            }
+                          }}
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Soft Skills</h4>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {resumeData.skills.soft.map((skill, index) => (
+                          <div key={index} className="group relative flex items-center">
+                            <span className="px-2 py-1 bg-[#f3f3f3] dark:bg-[#333333] rounded-sm text-xs border-[0.5px] border-[#e5e5e5] dark:border-[#444444] text-gray-700 dark:text-gray-300 font-medium">
+                              {skill}
+                            </span>
+                            <button 
+                              className="absolute -right-1 -top-1 h-4 w-4 bg-red-500 rounded-full text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => {
+                                const newSoft = [...resumeData.skills.soft];
+                                newSoft.splice(index, 1);
+                                handleDataChange('skills', {
+                                  ...resumeData.skills,
+                                  soft: newSoft
+                                });
+                              }}
+                            >
+                              <X className="h-2 w-2" />
+                            </button>
+                          </div>
+                        ))}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-6 px-2 text-xs"
+                          onClick={() => {
+                            const skill = prompt("Enter a new soft skill");
+                            if (skill) {
+                              handleDataChange('skills', {
+                                ...resumeData.skills,
+                                soft: [...resumeData.skills.soft, skill]
+                              });
+                            }
+                          }}
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-2 flex items-center gap-1 border-resume-purple/30 text-resume-purple dark:text-resume-purple-light hover:bg-resume-purple/10"
+                      onClick={async () => {
+                        try {
+                          toast.info("Analyzing your experience to extract skills...");
+                          const extractedSkills = await extractSkills(
+                            resumeData.experience.map(e => e.description)
+                          );
+                          
+                          if (extractedSkills) {
+                            handleDataChange('skills', extractedSkills);
+                            toast.success("Skills extracted successfully!");
+                          }
+                        } catch (error) {
+                          console.error(error);
+                          toast.error("Failed to extract skills");
+                        }
+                      }}
+                      disabled={isGenerating}
+                    >
+                      <Wand2 className="h-3.5 w-3.5 mr-1" />
+                      Extract from Experience
+                    </Button>
+                  </div>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="style" className="p-3 space-y-4">
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Template</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div 
+                      className={`p-2 border rounded-md cursor-pointer transition-all duration-200 ${selectedTemplate === 'modern' ? 'border-resume-purple dark:border-resume-purple-light bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-resume-purple/50 dark:hover:border-resume-purple-light/50'}`}
+                      onClick={() => setSelectedTemplate('modern')}
+                    >
+                      <div className="h-16 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md mb-1 flex flex-col p-1">
+                        <div className="w-1/2 h-2 bg-resume-purple dark:bg-resume-purple-light rounded mb-1"></div>
+                        <div className="w-1/3 h-1 bg-gray-200 dark:bg-gray-700 rounded mb-1.5"></div>
+                        <div className="flex space-x-1">
+                          <div className="w-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                          <div className="w-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                          <div className="w-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                        </div>
+                      </div>
+                      <p className="text-xs text-center text-gray-700 dark:text-gray-300">Modern</p>
+                    </div>
+                    <div 
+                      className={`p-2 border rounded-md cursor-pointer transition-all duration-200 ${selectedTemplate === 'classic' ? 'border-resume-purple dark:border-resume-purple-light bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-resume-purple/50 dark:hover:border-resume-purple-light/50'}`}
+                      onClick={() => setSelectedTemplate('classic')}
+                    >
+                      <div className="h-16 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md mb-1 flex flex-col p-1 items-center">
+                        <div className="w-2/3 h-2 bg-gray-800 dark:bg-gray-200 rounded mb-1"></div>
+                        <div className="w-1/2 h-1 bg-gray-200 dark:bg-gray-700 rounded mb-1.5"></div>
+                        <div className="w-full border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                        <div className="w-full flex justify-between">
+                          <div className="w-1/4 h-1 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                          <div className="w-1/4 h-1 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        </div>
+                      </div>
+                      <p className="text-xs text-center text-gray-700 dark:text-gray-300">Classic</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Colors</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <div 
+                      className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600 cursor-pointer transition-transform hover:scale-110"
+                      style={{ backgroundColor: resumeSettings.primaryColor }}
+                      onClick={() => {
+                        const color = prompt("Enter primary color (hex format)", resumeSettings.primaryColor);
+                        if (color && /^#[0-9A-Fa-f]{6}$/.test(color)) {
+                          setResumeSettings({...resumeSettings, primaryColor: color});
+                        }
+                      }}
+                    ></div>
+                    <div 
+                      className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600 cursor-pointer transition-transform hover:scale-110"
+                      style={{ backgroundColor: resumeSettings.secondaryColor }}
+                      onClick={() => {
+                        const color = prompt("Enter secondary color (hex format)", resumeSettings.secondaryColor);
+                        if (color && /^#[0-9A-Fa-f]{6}$/.test(color)) {
+                          setResumeSettings({...resumeSettings, secondaryColor: color});
+                        }
+                      }}
+                    ></div>
+                    <div 
+                      className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600 cursor-pointer transition-transform hover:scale-110"
+                      style={{ backgroundColor: resumeSettings.accentColor }}
+                      onClick={() => {
+                        const color = prompt("Enter accent color (hex format)", resumeSettings.accentColor);
+                        if (color && /^#[0-9A-Fa-f]{6}$/.test(color)) {
+                          setResumeSettings({...resumeSettings, accentColor: color});
+                        }
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Typography</h3>
+                  <div>
+                    <Label className="text-xs text-gray-600 dark:text-gray-400">Font Family</Label>
+                    <Select 
+                      value={resumeSettings.fontFamily} 
+                      onValueChange={(value) => setResumeSettings({...resumeSettings, fontFamily: value})}
+                    >
+                      <SelectTrigger className="h-8 mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                        <SelectValue placeholder="Select font" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Inter">Inter</SelectItem>
+                        <SelectItem value="Roboto">Roboto</SelectItem>
+                        <SelectItem value="Lato">Lato</SelectItem>
+                        <SelectItem value="Open Sans">Open Sans</SelectItem>
+                        <SelectItem value="Montserrat">Montserrat</SelectItem>
+                        <SelectItem value="Playfair Display">Playfair Display</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-600 dark:text-gray-400">Font Size</span>
+                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{resumeSettings.fontSize}pt</span>
+                    </div>
+                    <Slider 
+                      defaultValue={[resumeSettings.fontSize]} 
+                      min={8} 
+                      max={14} 
+                      step={0.5} 
+                      className="w-full"
+                      onValueChange={(value) => setResumeSettings({...resumeSettings, fontSize: value[0]})}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label className="text-xs text-gray-600 dark:text-gray-400">Paper Size</Label>
+                    <Select 
+                      value={resumeSettings.paperSize} 
+                      onValueChange={(value: "a4" | "letter" | "legal") => setResumeSettings({...resumeSettings, paperSize: value})}
+                    >
+                      <SelectTrigger className="h-8 mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                        <SelectValue placeholder="Select size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="a4">A4</SelectItem>
+                        <SelectItem value="letter">US Letter</SelectItem>
+                        <SelectItem value="legal">US Legal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label className="text-xs text-gray-600 dark:text-gray-400">Margins</Label>
+                    <Select 
+                      value={resumeSettings.margins} 
+                      onValueChange={(value: "narrow" | "normal" | "wide") => setResumeSettings({...resumeSettings, margins: value})}
+                    >
+                      <SelectTrigger className="h-8 mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                        <SelectValue placeholder="Select margins" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="narrow">Narrow (0.5")</SelectItem>
+                        <SelectItem value="normal">Normal (1")</SelectItem>
+                        <SelectItem value="wide">Wide (1.5")</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
+        
+        {/* Main Canvas Area */}
+        <div className="flex-1 overflow-hidden bg-gray-100 dark:bg-gray-900/50 relative">
+          <div className="absolute top-2 left-2 z-10">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-sm"
+              onClick={() => setShowSidebar(!showSidebar)}
+            >
+              <PanelLeft className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="absolute top-2 right-2 z-10 flex space-x-1">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant={activeTool === 'select' ? 'default' : 'outline'} 
+                    size="icon" 
+                    className={activeTool === 'select' ? 'bg-resume-purple' : 'bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm'}
+                    onClick={() => handleChangeTool('select')}
+                  >
+                    <Move className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Select Tool</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant={activeTool === 'layout' ? 'default' : 'outline'} 
+                    size="icon" 
+                    className={activeTool === 'layout' ? 'bg-resume-purple' : 'bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm'}
+                    onClick={() => handleChangeTool('layout')}
+                  >
+                    <Layout className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Layout Tool</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl w-[95vw] h-[90vh]">
+                      <div className="h-full flex flex-col">
+                        <div className="flex justify-end gap-2 mb-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={handleDownload}
+                            className="border-resume-purple/30 text-resume-purple hover:bg-resume-purple/10"
+                          >
+                            <Download className="mr-2 h-4 w-4" /> Download PDF
+                          </Button>
+                        </div>
+                        <Card className="h-full flex-grow overflow-auto p-6 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                          <ModernTemplate
+                            data={resumeData}
+                            settings={resumeSettings}
+                            onUpdateData={handleDataChange}
+                          />
+                        </Card>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </TooltipTrigger>
+                <TooltipContent>Preview</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          
+          <div 
+            className="h-full w-full overflow-auto p-8 flex items-center justify-center"
+            style={{ cursor: activeTool === 'move' ? 'move' : 'default' }}
+          >
+            <div 
+              ref={canvasRef}
+              className="bg-white dark:bg-gray-800 shadow-xl transition-transform duration-200 overflow-hidden my-4"
+              style={{ 
+                transform: `scale(${zoom / 100})`,
+                width: paperSize.width,
+                height: 'auto', // Changed to auto to respect content height
+                minHeight: '90vh', // Added min-height for better visibility on tablets/desktop
+                maxHeight: '100%',
+                transformOrigin: 'center top',
+                boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)'
+              }}
+            >
+              <div className="w-full h-full p-6">
+                {isLoading ? (
+                  <ResumeLoadingSkeleton />
+                ) : (
+                  <ModernTemplate
+                    data={resumeData}
+                    settings={resumeSettings}
+                    onUpdateData={handleDataChange}
+                    onGenerateWithAI={handleGenerateWithAI}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
-          <ResumePreview
-            data={data}
-            template={template}
-            settings={settings}
-            resumeId={resumeId}
-            onDataChange={handleDataChange}
-            onGenerateWithAI={handleGenerateWithAI}
-          />
-        </div>
-        <div className="space-y-4">
-          <Card className="p-4">
-            <h2 className="text-lg font-semibold mb-2">Template</h2>
-            <div className="flex gap-2">
+      {/* Section editor dialog */}
+      <Dialog open={isSectionEditorOpen} onOpenChange={setIsSectionEditorOpen}>
+        <DialogContent className="max-w-2xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col space-y-4">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">{
+              editingField.section === 'summary' ? 'Edit Summary' :
+              editingField.section === 'personal' ? `Edit ${editingField.field}` :
+              editingField.section.includes('experience') ? 'Edit Experience' :
+              editingField.section.includes('education') ? 'Edit Education' :
+              'Edit Content'
+            }</h2>
+            
+            <div className="flex flex-col space-y-2">
+              <Label className="text-gray-700 dark:text-gray-300">Content</Label>
+              <Textarea 
+                value={editingField.value}
+                onChange={(e) => setEditingField({...editingField, value: e.target.value})}
+                className="min-h-[200px] bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+              />
+            </div>
+            
+            {(editingField.section === 'experience-desc' || editingField.section.includes('experience')) && (
               <Button
-                variant={template === 'modern' ? 'default' : 'outline'}
-                onClick={() => handleTemplateChange('modern')}
+                variant="outline"
+                onClick={async () => {
+                  const improved = await handleGenerateWithAI('experience-desc');
+                  if (improved) {
+                    setEditingField({...editingField, value: improved});
+                  }
+                }}
+                disabled={isGenerating}
+                className="border-resume-purple/30 text-resume-purple dark:text-resume-purple-light hover:bg-resume-purple/10"
               >
-                Modern
+                <Wand2 className="mr-2 h-4 w-4" />
+                {isGenerating ? 'Improving...' : 'Improve with AI'}
+              </Button>
+            )}
+            
+            {(editingField.section === 'education-desc' || editingField.section.includes('education')) && (
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  const improved = await handleGenerateWithAI('education-desc');
+                  if (improved) {
+                    setEditingField({...editingField, value: improved});
+                  }
+                }}
+                disabled={isGenerating}
+                className="border-resume-purple/30 text-resume-purple dark:text-resume-purple-light hover:bg-resume-purple/10"
+              >
+                <Wand2 className="mr-2 h-4 w-4" />
+                {isGenerating ? 'Improving...' : 'Improve with AI'}
+              </Button>
+            )}
+            
+            {editingField.section === 'summary' && (
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  const summary = await handleGenerateWithAI('summary');
+                  if (summary) {
+                    setEditingField({...editingField, value: summary});
+                  }
+                }}
+                disabled={isGenerating}
+                className="border-resume-purple/30 text-resume-purple dark:text-resume-purple-light hover:bg-resume-purple/10"
+              >
+                <Wand2 className="mr-2 h-4 w-4" />
+                {isGenerating ? 'Generating...' : 'Generate Summary with AI'}
+              </Button>
+            )}
+            
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsSectionEditorOpen(false)}
+                className="text-gray-700 dark:text-gray-300"
+              >
+                Cancel
               </Button>
               <Button
-                variant={template === 'professional' ? 'default' : 'outline'}
-                onClick={() => handleTemplateChange('professional')}
+                onClick={handleSaveField}
+                className="bg-resume-purple hover:bg-resume-purple/90 text-white"
               >
-                Professional
+                <Check className="mr-2 h-4 w-4" />
+                Save
               </Button>
             </div>
-          </Card>
-
-          <Card className="p-4">
-            <h2 className="text-lg font-semibold mb-2">Settings</h2>
-            <div className="space-y-2">
-              <div>
-                <Label htmlFor="fontFamily">Font Family</Label>
-                <Input
-                  type="text"
-                  id="fontFamily"
-                  defaultValue={settings.fontFamily}
-                  onChange={(e) => handleSettingsChange({ ...settings, fontFamily: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="fontSize">Font Size</Label>
-                <Input
-                  type="number"
-                  id="fontSize"
-                  defaultValue={settings.fontSize}
-                  onChange={(e) => handleSettingsChange({ ...settings, fontSize: parseInt(e.target.value) })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="primaryColor">Primary Color</Label>
-                <Input
-                  type="color"
-                  id="primaryColor"
-                  defaultValue={settings.primaryColor}
-                  onChange={(e) => handleSettingsChange({ ...settings, primaryColor: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="margins">Margins</Label>
-                <Textarea
-                  id="margins"
-                  defaultValue={settings.margins}
-                  onChange={(e) => handleSettingsChange({ ...settings, margins: e.target.value })}
-                />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <h2 className="text-lg font-semibold">AI Assistant</h2>
-                <p className="text-sm text-muted-foreground">
-                  Get help from AI to improve your resume.
-                </p>
-              </div>
-              <Switch id="ai" checked={aiAssistantEnabled} onCheckedChange={(checked) => setAiAssistantEnabled(checked)} />
-            </div>
-          </Card>
-
-          {aiAssistantEnabled && (
-            <Card className="p-4">
-              <AIAssistant resumeData={data} enabled={aiAssistantEnabled} />
-            </Card>
-          )}
-        </div>
-      </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
