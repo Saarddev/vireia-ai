@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
@@ -249,7 +250,7 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
             <PopoverContent className="w-auto p-0">
               <ChromePicker 
                 color={currentStyles.color} 
-                onChange={(color) => handleStyleChange(segment, 'color', color.hex)} 
+                onChange={(colorResult) => handleStyleChange(segment, 'color', colorResult.hex)} 
               />
             </PopoverContent>
           </Popover>
@@ -271,7 +272,7 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
             <PopoverContent className="w-auto p-0">
               <ChromePicker 
                 color={currentStyles.backgroundColor} 
-                onChange={(color) => handleStyleChange(segment, 'backgroundColor', color.hex)} 
+                onChange={(colorResult) => handleStyleChange(segment, 'backgroundColor', colorResult.hex)} 
               />
             </PopoverContent>
           </Popover>

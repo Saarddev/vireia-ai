@@ -1,10 +1,11 @@
+
 import React from 'react';
-import EditableField from './EditableField';
 import { useResumeAI } from '@/hooks/use-resume-ai';
+import { Experience, Education } from '@/types/resume';
 
 interface ProfessionalTemplateProps {
   data: any;
-  settings?: any; // Add the missing settings prop
+  settings?: any; 
   onUpdateData?: (key: string, value: any) => void;
   onGenerateWithAI?: (section: string) => Promise<string>;
   isEditMode?: boolean;
@@ -19,37 +20,41 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
 }) => {
   const { improveDescription, isGenerating } = useResumeAI();
 
-  // Update handlers for each section
-  const handleUpdateSummary = (value: string) => {
-    onUpdateData('summary', value);
+  const handleUpdateData = (key: string, value: any) => {
+    onUpdateData(key, value);
   };
 
-  const handleUpdateExperience = (index: number, field: string, value: string) => {
-    const updatedExperiences = [...data.experience];
-    updatedExperiences[index] = { ...updatedExperiences[index], [field]: value };
-    onUpdateData('experience', updatedExperiences);
+  const handlePrimaryColor = () => {
+    return settings?.primaryColor || "#5d4dcd";
   };
 
-  const handleUpdateEducation = (index: number, field: string, value: string) => {
-    const updatedEducation = [...data.education];
-    updatedEducation[index] = { ...updatedEducation[index], [field]: value };
-    onUpdateData('education', updatedEducation);
+  const handleSecondaryColor = () => {
+    return settings?.secondaryColor || "#333333";
   };
 
-  const handleUpdateSkill = (type: 'technical' | 'soft', index: number, value: string) => {
-    const updatedSkills = { ...data.skills };
-    updatedSkills[type][index] = value;
-    onUpdateData('skills', updatedSkills);
+  const handleDescriptionBlur = async (exp: Experience, newDescription: string) => {
+    if (exp.description === newDescription || !newDescription) {
+      return;
+    }
+
+    try {
+      // Update the local state immediately
+      const updatedExp = { ...exp, description: newDescription };
+      const updatedExperiences = data.experience.map((e: Experience) => 
+        e.id === exp.id ? updatedExp : e
+      );
+      handleUpdateData("experience", updatedExperiences);
+    } catch (error) {
+      console.error('Error updating description:', error);
+    }
   };
 
-  const handleUpdateProject = (index: number, field: string, value: string) => {
-    const updatedProjects = [...data.projects];
-    updatedProjects[index] = { ...updatedProjects[index], [field]: value };
-    onUpdateData('projects', updatedProjects);
+  const formatDate = (startDate?: string, endDate?: string) => {
+    if (!startDate) return '';
+    return `${startDate}${endDate ? ` - ${endDate}` : ''}`;
   };
 
-  // Generate AI-enhanced description for an experience entry
-  const handleGenerateWithAI = (description: string) => {
+  const handleGenerateDescription = async (description: string): Promise<string> => {
     return improveDescription(description);
   };
 
@@ -62,378 +67,194 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
   };
 
   return (
-    <div className="max-w-[800px] mx-auto p-4 pb-12 bg-white print:p-0 print:pb-0" style={{
-      fontFamily: 'Segoe UI, sans-serif',
-      lineHeight: 1.6,
-      color: '#333'
-    }}>
-      {/* Header */}
-      <div className="text-center mb-6">
-        <h1 className="text-3xl font-bold mb-1" style={{ color: '#004466' }}>
-          {isEditMode ? (
-            <EditableField
-              value={data.personal.name}
-              placeholder="Your Name"
-              className="text-center"
-              onSave={(value) => onUpdateData('personal', { ...data.personal, name: value })}
-              inputStyle={{ fontSize: '1.875rem', fontWeight: 'bold', textAlign: 'center' }}
-            />
-          ) : (
-            data.personal.name
-          )}
+    <div className="print:p-0" style={{ fontSize: `${settings.fontSize || 11}pt` }}>
+      {/* Header Section */}
+      <div className="text-center mb-4">
+        <h1 className="text-2xl font-bold" style={{ color: handlePrimaryColor() }}>
+          {data.personal.name || "Your Name"}
         </h1>
-        <div className="text-lg text-gray-600">
-          {isEditMode ? (
-            <EditableField
-              value={data.personal.title}
-              placeholder="Professional Title"
-              className="text-center"
-              onSave={(value) => onUpdateData('personal', { ...data.personal, title: value })}
-              inputStyle={{ textAlign: 'center' }}
-            />
-          ) : (
-            data.personal.title
-          )}
-        </div>
-        <div className="mt-2 flex flex-wrap justify-center gap-x-2 text-sm">
+        <p className="text-base font-semibold" style={{ color: handleSecondaryColor() }}>
+          {data.personal.title || "Professional Title"}
+        </p>
+        <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-sm mt-2">
           {data.personal.email && (
-            <span className="text-[#007acc] hover:underline">
-              {data.personal.email}
+            <span className="flex items-center">
+              <span className="mr-1">📧</span> {data.personal.email}
             </span>
           )}
           {data.personal.phone && (
-            <span className="text-[#007acc] hover:underline">
-              {data.personal.phone}
+            <span className="flex items-center">
+              <span className="mr-1">📱</span> {data.personal.phone}
             </span>
           )}
           {data.personal.location && (
-            <span className="text-[#007acc] hover:underline">
-              {data.personal.location}
+            <span className="flex items-center">
+              <span className="mr-1">📍</span> {data.personal.location}
             </span>
           )}
           {data.personal.linkedin && (
-            <a href={data.personal.linkedin} target="_blank" rel="noopener noreferrer" className="text-[#007acc] hover:underline">
-              LinkedIn
-            </a>
+            <span className="flex items-center">
+              <span className="mr-1">🔗</span> LinkedIn
+            </span>
           )}
           {data.personal.website && (
-            <a href={data.personal.website} target="_blank" rel="noopener noreferrer" className="text-[#007acc] hover:underline">
-              Portfolio
-            </a>
+            <span className="flex items-center">
+              <span className="mr-1">🌐</span> Portfolio
+            </span>
           )}
         </div>
       </div>
 
-      {/* Summary */}
+      {/* Summary Section */}
       {data.summary && (
-        <div className="mb-6">
-          <h2 className="text-xl font-bold mb-2" style={{ color: '#004466' }}>Summary</h2>
-          {isEditMode ? (
-            <EditableField
-              value={data.summary}
-              placeholder="Your professional summary"
-              className="text-gray-700"
-              onSave={handleUpdateSummary}
-              onGenerateWithAI={() => handleGenerateWithAI(data.summary)}
-              minRows={2}
-              maxRows={5}
-              outputStyle={{ color: '#444' }}
-            />
-          ) : (
-            <p className="text-gray-700">{data.summary}</p>
-          )}
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+            Summary
+          </h2>
+          <p className="text-sm">
+            {data.summary}
+          </p>
         </div>
       )}
 
-      {/* Skills */}
-      {(data.skills.technical.length > 0 || data.skills.soft.length > 0) && (
-        <div className="mb-6">
-          <h2 className="text-xl font-bold mb-2" style={{ color: '#004466' }}>Skills</h2>
-          {data.skills.technical.length > 0 && (
-            <div className="mb-2">
-              <div className="flex flex-wrap gap-2">
-                {data.skills.technical.map((skill: string, index: number) => (
-                  <span key={index} className="px-2 py-1 bg-gray-100 rounded text-sm text-gray-700">
-                    {isEditMode ? (
-                      <EditableField
-                        value={skill}
-                        placeholder="Skill"
-                        className="inline-block"
-                        onSave={(value) => handleUpdateSkill('technical', index, value)}
-                      />
-                    ) : skill}
-                  </span>
+      {/* Experience Section */}
+      {data.experience && data.experience.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+            Experience
+          </h2>
+          {data.experience.map((exp: Experience) => (
+            <div key={exp.id} className="mb-3">
+              <div className="flex justify-between items-baseline">
+                <h3 className="text-base font-semibold" style={{ color: handleSecondaryColor() }}>
+                  {exp.title || "Position Title"}
+                </h3>
+                <span className="text-sm italic">
+                  {formatDate(exp.startDate, exp.endDate)}
+                </span>
+              </div>
+              <p className="text-sm font-medium">
+                {exp.company}{exp.location ? `, ${exp.location}` : ''}
+              </p>
+              <ul className="list-disc pl-5 text-sm mt-1 space-y-1">
+                {exp.description.split('\n').map((bullet, idx) => (
+                  <li key={idx} className="text-sm">
+                    {bullet.replace(/^[•-]\s*/, '')}
+                  </li>
                 ))}
-              </div>
-            </div>
-          )}
-          {data.skills.soft.length > 0 && (
-            <div className="mb-2">
-              <div className="flex flex-wrap gap-2">
-                {data.skills.soft.map((skill: string, index: number) => (
-                  <span key={index} className="px-2 py-1 bg-gray-50 rounded text-sm text-gray-600">
-                    {isEditMode ? (
-                      <EditableField
-                        value={skill}
-                        placeholder="Skill"
-                        className="inline-block"
-                        onSave={(value) => handleUpdateSkill('soft', index, value)}
-                      />
-                    ) : skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Experience */}
-      {data.experience.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-xl font-bold mb-2" style={{ color: '#004466' }}>Experience</h2>
-          {data.experience.map((exp: any, index: number) => (
-            <div key={index} className="mb-4 last:mb-0">
-              <div className="flex flex-col sm:flex-row sm:justify-between">
-                <div className="font-bold text-gray-800">
-                  {isEditMode ? (
-                    <EditableField
-                      value={exp.title}
-                      placeholder="Job Title"
-                      className="font-bold"
-                      onSave={(value) => handleUpdateExperience(index, 'title', value)}
-                    />
-                  ) : exp.title}
-                </div>
-                <div className="text-gray-600 italic">
-                  {isEditMode ? (
-                    <EditableField
-                      value={`${exp.startDate} - ${exp.endDate}`}
-                      placeholder="Date Range"
-                      className="italic"
-                      onSave={(value) => {
-                        const dates = value.split(' - ');
-                        if (dates.length === 2) {
-                          handleUpdateExperience(index, 'startDate', dates[0]);
-                          handleUpdateExperience(index, 'endDate', dates[1]);
-                        }
-                      }}
-                    />
-                  ) : `${exp.startDate} - ${exp.endDate}`}
-                </div>
-              </div>
-              <div className="text-gray-700 italic">
-                {isEditMode ? (
-                  <EditableField
-                    value={`${exp.company}, ${exp.location}`}
-                    placeholder="Company, Location"
-                    className="italic"
-                    onSave={(value) => {
-                      const parts = value.split(', ');
-                      if (parts.length === 2) {
-                        handleUpdateExperience(index, 'company', parts[0]);
-                        handleUpdateExperience(index, 'location', parts[1]);
-                      }
-                    }}
-                  />
-                ) : `${exp.company}, ${exp.location}`}
-              </div>
-              <div className="mt-1">
-                {isEditMode ? (
-                  <EditableField
-                    value={exp.description}
-                    placeholder="Job responsibilities and achievements"
-                    className="text-gray-700"
-                    onSave={(value) => handleUpdateExperience(index, 'description', value)}
-                    onGenerateWithAI={() => handleGenerateWithAI(exp.description)}
-                    minRows={2}
-                    maxRows={6}
-                  />
-                ) : (
-                  <ul className="list-disc pl-5 text-gray-700">
-                    {exp.description.split('\n').filter((line: string) => line.trim() !== '').map((point: string, i: number) => (
-                      <li key={i} className="mb-1">{point.replace(/^[-•*]\s*/, '')}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+              </ul>
             </div>
           ))}
         </div>
       )}
 
-      {/* Education */}
-      {data.education.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-xl font-bold mb-2" style={{ color: '#004466' }}>Education</h2>
-          {data.education.map((edu: any, index: number) => (
-            <div key={index} className="mb-4 last:mb-0">
-              <div className="flex flex-col sm:flex-row sm:justify-between">
-                <div className="font-bold text-gray-800">
-                  {isEditMode ? (
-                    <EditableField
-                      value={edu.degree}
-                      placeholder="Degree"
-                      className="font-bold"
-                      onSave={(value) => handleUpdateEducation(index, 'degree', value)}
-                    />
-                  ) : edu.degree}
-                </div>
-                <div className="text-gray-600 italic">
-                  {isEditMode ? (
-                    <EditableField
-                      value={`${edu.startDate} - ${edu.endDate}`}
-                      placeholder="Date Range"
-                      className="italic"
-                      onSave={(value) => {
-                        const dates = value.split(' - ');
-                        if (dates.length === 2) {
-                          handleUpdateEducation(index, 'startDate', dates[0]);
-                          handleUpdateEducation(index, 'endDate', dates[1]);
-                        }
-                      }}
-                    />
-                  ) : `${edu.startDate} - ${edu.endDate}`}
-                </div>
+      {/* Education Section */}
+      {data.education && data.education.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+            Education
+          </h2>
+          {data.education.map((edu: Education) => (
+            <div key={edu.id} className="mb-3">
+              <div className="flex justify-between items-baseline">
+                <h3 className="text-base font-semibold" style={{ color: handleSecondaryColor() }}>
+                  {edu.degree}{edu.field ? ` in ${edu.field}` : ''}
+                </h3>
+                <span className="text-sm italic">
+                  {formatDate(edu.startDate, edu.endDate)}
+                </span>
               </div>
-              <div className="text-gray-700 italic">
-                {isEditMode ? (
-                  <EditableField
-                    value={`${edu.institution}, ${edu.location}`}
-                    placeholder="Institution, Location"
-                    className="italic"
-                    onSave={(value) => {
-                      const parts = value.split(', ');
-                      if (parts.length === 2) {
-                        handleUpdateEducation(index, 'institution', parts[0]);
-                        handleUpdateEducation(index, 'location', parts[1]);
-                      }
-                    }}
-                  />
-                ) : `${edu.institution}, ${edu.location}`}
-              </div>
+              <p className="text-sm font-medium">
+                {edu.institution}{edu.location ? `, ${edu.location}` : ''}
+              </p>
               {edu.description && (
-                <div className="mt-1">
-                  {isEditMode ? (
-                    <EditableField
-                      value={edu.description}
-                      placeholder="Education details"
-                      className="text-gray-700"
-                      onSave={(value) => handleUpdateEducation(index, 'description', value)}
-                      onGenerateWithAI={() => handleGenerateWithAI(edu.description)}
-                      minRows={2}
-                      maxRows={4}
-                    />
-                  ) : (
-                    <ul className="list-disc pl-5 text-gray-700">
-                      {edu.description.split('\n').filter((line: string) => line.trim() !== '').map((point: string, i: number) => (
-                        <li key={i} className="mb-1">{point.replace(/^[-•*]\s*/, '')}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
+                <p className="text-sm mt-1">
+                  {edu.description}
+                </p>
               )}
             </div>
           ))}
         </div>
       )}
 
-      {/* Projects */}
+      {/* Skills Section */}
+      {data.skills && (data.skills.technical?.length > 0 || data.skills.soft?.length > 0) && (
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+            Skills
+          </h2>
+          {data.skills.technical?.length > 0 && (
+            <div className="mb-2">
+              <h3 className="text-sm font-semibold">Technical</h3>
+              <p className="text-sm">
+                {data.skills.technical.join(', ')}
+              </p>
+            </div>
+          )}
+          {data.skills.soft?.length > 0 && (
+            <div>
+              <h3 className="text-sm font-semibold">Soft Skills</h3>
+              <p className="text-sm">
+                {data.skills.soft.join(', ')}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Projects Section */}
       {data.projects && data.projects.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-xl font-bold mb-2" style={{ color: '#004466' }}>Projects</h2>
-          {data.projects.map((project: any, index: number) => (
-            <div key={index} className="mb-4 last:mb-0">
-              <div className="flex flex-col sm:flex-row sm:justify-between">
-                <div className="font-bold text-gray-800">
-                  {isEditMode ? (
-                    <EditableField
-                      value={project.title}
-                      placeholder="Project Title"
-                      className="font-bold"
-                      onSave={(value) => handleUpdateProject(index, 'title', value)}
-                    />
-                  ) : project.title}
-                </div>
-                {(project.startDate || project.endDate) && (
-                  <div className="text-gray-600 italic">
-                    {isEditMode ? (
-                      <EditableField
-                        value={`${project.startDate || ''} - ${project.endDate || ''}`}
-                        placeholder="Date Range"
-                        className="italic"
-                        onSave={(value) => {
-                          const dates = value.split(' - ');
-                          if (dates.length === 2) {
-                            handleUpdateProject(index, 'startDate', dates[0]);
-                            handleUpdateProject(index, 'endDate', dates[1]);
-                          }
-                        }}
-                      />
-                    ) : `${project.startDate || ''} - ${project.endDate || ''}`}
-                  </div>
-                )}
-              </div>
-              <div className="mt-1">
-                {isEditMode ? (
-                  <EditableField
-                    value={project.description}
-                    placeholder="Project description"
-                    className="text-gray-700"
-                    onSave={(value) => handleUpdateProject(index, 'description', value)}
-                    onGenerateWithAI={() => handleGenerateWithAI(project.description)}
-                    minRows={2}
-                    maxRows={4}
-                  />
-                ) : (
-                  <ul className="list-disc pl-5 text-gray-700">
-                    {project.description.split('\n').filter((line: string) => line.trim() !== '').map((point: string, i: number) => (
-                      <li key={i} className="mb-1">{point.replace(/^[-•*]\s*/, '')}</li>
-                    ))}
-                  </ul>
-                )}
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+            Projects
+          </h2>
+          {data.projects.map((project: any) => (
+            <div key={project.id} className="mb-3">
+              <div className="flex justify-between items-baseline">
+                <h3 className="text-base font-semibold" style={{ color: handleSecondaryColor() }}>
+                  {project.title || "Project Name"}
+                </h3>
+                <span className="text-sm italic">
+                  {formatDate(project.startDate, project.endDate)}
+                </span>
               </div>
               {project.technologies && project.technologies.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {project.technologies.map((tech: string, techIndex: number) => (
-                    <span key={techIndex} className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">
-                      {isEditMode ? (
-                        <EditableField
-                          value={tech}
-                          placeholder="Tech"
-                          className="inline-block text-xs"
-                          onSave={(value) => {
-                            const updatedTech = [...project.technologies];
-                            updatedTech[techIndex] = value;
-                            handleUpdateProject(index, 'technologies', updatedTech);
-                          }}
-                        />
-                      ) : tech}
-                    </span>
-                  ))}
-                </div>
+                <p className="text-sm font-medium">
+                  Technologies: {formatTechnologies(project.technologies)}
+                </p>
               )}
+              <ul className="list-disc pl-5 text-sm mt-1 space-y-1">
+                {project.description.split('\n').map((bullet: string, idx: number) => (
+                  <li key={idx} className="text-sm">
+                    {bullet.replace(/^[•-]\s*/, '')}
+                  </li>
+                ))}
+              </ul>
               {project.link && (
-                <div className="mt-1">
-                  <a 
-                    href={project.link} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="text-sm text-[#007acc] hover:underline"
-                  >
-                    {isEditMode ? (
-                      <EditableField
-                        value={project.link}
-                        placeholder="Project URL"
-                        className="text-sm text-[#007acc]"
-                        onSave={(value) => handleUpdateProject(index, 'link', value)}
-                      />
-                    ) : "View Project →"}
-                  </a>
-                </div>
+                <a 
+                  href={project.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-sm hover:underline" 
+                  style={{ color: handlePrimaryColor() }}
+                >
+                  View Project →
+                </a>
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Languages Section */}
+      {data.languages && data.languages.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+            Languages
+          </h2>
+          <p className="text-sm">
+            {data.languages.map((lang: any) => `${lang.language} (${lang.proficiency})`).join(', ')}
+          </p>
         </div>
       )}
     </div>

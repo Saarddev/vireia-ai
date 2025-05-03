@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -48,7 +49,10 @@ const ColorPickerTab: React.FC<ColorPickerProps> = ({ colors, onChange }) => {
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-3">
-                <ChromePicker color={color} onChange={(newColor) => onChange(newColor, type as any)} />
+                <ChromePicker 
+                  color={color} 
+                  onChange={(colorResult) => onChange(colorResult.hex, type as any)} 
+                />
                 <Input
                   value={color}
                   onChange={(e) => onChange(e.target.value, type as any)}
