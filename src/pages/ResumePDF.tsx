@@ -2,7 +2,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useResumeData } from '@/hooks/use-resume-data';
-import { Project } from '@/types/resume';
+import { Project, SegmentStyles } from '@/types/resume';
 
 const ResumePDF = () => {
   const { resumeId } = useParams();
@@ -35,12 +35,37 @@ const ResumePDF = () => {
     return limit ? points.slice(0, limit) : points;
   };
 
+  // Get styles for sections
+  const getHeaderStyles = () => {
+    const customStyles = resumeSettings?.customStyles?.header;
+    return {
+      color: customStyles?.color || '#5d4dcd',
+      textAlign: customStyles?.textAlign || 'center',
+      fontWeight: customStyles?.fontWeight || 'bold',
+      fontSize: customStyles?.fontSize ? `calc(${customStyles.fontSize} * 1.2)` : 'inherit',
+      fontStyle: customStyles?.fontStyle || 'normal',
+      textDecoration: customStyles?.textDecoration || 'none'
+    };
+  };
+
+  const getSectionTitleStyles = (section: string) => {
+    const customStyles = resumeSettings?.customStyles?.[section];
+    return {
+      color: customStyles?.color || '#5d4dcd',
+      textAlign: customStyles?.textAlign || 'left',
+      borderColor: customStyles?.color || '#5d4dcd',
+      fontWeight: 'semibold',
+      fontStyle: customStyles?.fontStyle || 'normal',
+      textDecoration: customStyles?.textDecoration || 'none'
+    };
+  };
+
   return (
     <div 
       className="max-w-[800px] mx-auto p-8 bg-white print:p-0 my-8 shadow-lg" 
       style={{
-        fontFamily: resumeSettings.fontFamily || 'Inter',
-        fontSize: `${resumeSettings.fontSize || 10}pt`,
+        fontFamily: resumeSettings?.fontFamily || 'Inter',
+        fontSize: `${resumeSettings?.fontSize || 10}pt`,
         lineHeight: "1.5",
         // Properties to help with page sizing
         pageBreakInside: "avoid",
@@ -50,12 +75,26 @@ const ResumePDF = () => {
       }}
     >
       {/* Header */}
-      <div className="pb-2 border-b-2 border-[#5d4dcd] mb-3">
-        <h1 className="text-2xl font-bold text-gray-900 leading-tight tracking-tight pb-0 mb-1">
+      <div className="pb-2 border-b-2 border-[#5d4dcd] mb-3" style={{ borderColor: getHeaderStyles().color }}>
+        <h1 
+          className="text-2xl font-bold text-gray-900 leading-tight tracking-tight pb-0 mb-1"
+          style={{
+            ...getHeaderStyles(),
+            textAlign: getHeaderStyles().textAlign as 'left' | 'center' | 'right'
+          }}
+        >
           {resumeData.personal.name}
         </h1>
-        <p className="text-lg font-medium text-[#5d4dcd] mt-0.5">{resumeData.personal.title}</p>
-        <div className="flex flex-wrap text-sm text-gray-700 mt-1.5 gap-x-2 gap-y-1 items-center">
+        <p 
+          className="text-lg font-medium mt-0.5"
+          style={{
+            color: getHeaderStyles().color,
+            textAlign: getHeaderStyles().textAlign as 'left' | 'center' | 'right'
+          }}
+        >
+          {resumeData.personal.title}
+        </p>
+        <div className="flex flex-wrap text-sm text-gray-700 mt-1.5 gap-x-2 gap-y-1 items-center justify-center">
           {resumeData.personal.email && (
             <span className="inline-flex items-center">
               <span>{resumeData.personal.email}</span>
@@ -82,7 +121,7 @@ const ResumePDF = () => {
               <span className="text-gray-400">•</span>
               <span className="inline-flex items-center">
                 <a href={resumeData.personal.linkedin} target="_blank" rel="noopener noreferrer" 
-                   className="text-[#5d4dcd] hover:text-[#4a3da3]">
+                   className="text-[#5d4dcd] hover:text-[#4a3da3]" style={{ color: getHeaderStyles().color }}>
                   LinkedIn
                 </a>
               </span>
@@ -93,7 +132,7 @@ const ResumePDF = () => {
               <span className="text-gray-400">•</span>
               <span className="inline-flex items-center">
                 <a href={resumeData.personal.website} target="_blank" rel="noopener noreferrer"
-                   className="text-[#5d4dcd] hover:text-[#4a3da3]">
+                   className="text-[#5d4dcd] hover:text-[#4a3da3]" style={{ color: getHeaderStyles().color }}>
                   Portfolio
                 </a>
               </span>
@@ -105,7 +144,8 @@ const ResumePDF = () => {
       {/* Summary - Limited to exactly 3 bullet points */}
       {resumeData.summary && (
         <div className="mb-4">
-          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide">
+          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide"
+              style={getSectionTitleStyles('summary')}>
             Summary
           </h2>
           <ul className="list-disc pl-4 text-sm text-gray-700 font-normal leading-relaxed">
@@ -119,7 +159,8 @@ const ResumePDF = () => {
       {/* Experience - Slightly more compact */}
       {resumeData.experience.length > 0 && (
         <div className="mb-4">
-          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide">
+          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide"
+              style={getSectionTitleStyles('experience')}>
             Experience
           </h2>
           {resumeData.experience.map((exp, index) => (
@@ -132,7 +173,7 @@ const ResumePDF = () => {
                   {exp.startDate} - {exp.endDate}
                 </span>
               </div>
-              <p className="text-sm text-[#5d4dcd] font-medium my-0.5">
+              <p className="text-sm text-[#5d4dcd] font-medium my-0.5" style={{ color: getHeaderStyles().color }}>
                 {exp.company}, {exp.location}
               </p>
               <ul className="list-disc pl-4 text-sm text-gray-700 mt-1 font-normal leading-relaxed">
@@ -148,7 +189,8 @@ const ResumePDF = () => {
       {/* Projects - More compact */}
       {resumeData.projects && resumeData.projects.length > 0 && (
         <div className="mb-4">
-          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide">
+          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide"
+              style={getSectionTitleStyles('projects')}>
             Projects
           </h2>
           {resumeData.projects.map((project: Project, index) => (
@@ -181,6 +223,7 @@ const ResumePDF = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-[#5d4dcd] hover:text-[#4a3da3] mt-1 inline-block"
+                  style={{ color: getHeaderStyles().color }}
                 >
                   View Project →
                 </a>
@@ -193,7 +236,8 @@ const ResumePDF = () => {
       {/* Education - More compact */}
       {resumeData.education.length > 0 && (
         <div className="mb-4">
-          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide">
+          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide"
+              style={getSectionTitleStyles('education')}>
             Education
           </h2>
           {resumeData.education.map((edu, index) => (
@@ -206,7 +250,7 @@ const ResumePDF = () => {
                   {edu.startDate} - {edu.endDate}
                 </span>
               </div>
-              <p className="text-sm text-[#5d4dcd] font-medium my-0.5">
+              <p className="text-sm text-[#5d4dcd] font-medium my-0.5" style={{ color: getHeaderStyles().color }}>
                 {edu.institution}, {edu.location}
               </p>
               {edu.description && (
@@ -224,7 +268,8 @@ const ResumePDF = () => {
       {/* Skills - More compact */}
       {(resumeData.skills.technical.length > 0 || resumeData.skills.soft.length > 0) && (
         <div className="mb-4">
-          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide">
+          <h2 className="text-sm font-semibold text-gray-800 mb-1 border-b border-gray-200 pb-0.5 uppercase tracking-wide"
+              style={getSectionTitleStyles('skills')}>
             Skills
           </h2>
           {resumeData.skills.technical.length > 0 && (

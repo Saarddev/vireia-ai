@@ -1,11 +1,12 @@
 
 import React from 'react';
 import { useResumeAI } from '@/hooks/use-resume-ai';
-import { Experience, Education } from '@/types/resume';
+import { Experience, Education, ResumeSettings, SegmentStyles } from '@/types/resume';
+import ContactInfo from './ContactInfo';
 
 interface ProfessionalTemplateProps {
   data: any;
-  settings?: any; 
+  settings?: ResumeSettings & { customStyles?: Record<string, SegmentStyles> };
   onUpdateData?: (key: string, value: any) => void;
   onGenerateWithAI?: (section: string) => Promise<string>;
   isEditMode?: boolean;
@@ -66,49 +67,68 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
     return technologies.join(', ');
   };
 
+  // Apply custom styles if available
+  const applyHeaderStyles = () => {
+    if (settings?.customStyles?.header) {
+      const headerStyle = settings.customStyles.header;
+      return {
+        color: headerStyle.color || handlePrimaryColor(),
+        textAlign: headerStyle.textAlign || 'center',
+        fontWeight: headerStyle.fontWeight || 'bold',
+        fontSize: headerStyle.fontSize || '1.25rem',
+        fontStyle: headerStyle.fontStyle || 'normal',
+        textDecoration: headerStyle.textDecoration || 'none'
+      };
+    }
+    return {
+      color: handlePrimaryColor(),
+      textAlign: 'center' as const
+    };
+  };
+
+  // Apply section title styles
+  const applySectionTitleStyles = (section: string) => {
+    if (settings?.customStyles?.[section]) {
+      const sectionStyle = settings.customStyles[section];
+      return {
+        color: sectionStyle.color || handlePrimaryColor(),
+        textAlign: sectionStyle.textAlign || 'left',
+        borderColor: sectionStyle.color || handlePrimaryColor()
+      };
+    }
+    return {
+      color: handlePrimaryColor(),
+      textAlign: 'left' as const,
+      borderColor: handlePrimaryColor()
+    };
+  };
+
   return (
     <div className="print:p-0" style={{ fontSize: `${settings.fontSize || 11}pt` }}>
       {/* Header Section */}
       <div className="text-center mb-4">
-        <h1 className="text-2xl font-bold" style={{ color: handlePrimaryColor() }}>
+        <h1 className="text-2xl font-bold" style={applyHeaderStyles()}>
           {data.personal.name || "Your Name"}
         </h1>
-        <p className="text-base font-semibold" style={{ color: handleSecondaryColor() }}>
+        <p className="text-base font-semibold" style={{ 
+          color: handleSecondaryColor(),
+          textAlign: (settings?.customStyles?.header?.textAlign || 'center') as 'left' | 'center' | 'right'
+        }}>
           {data.personal.title || "Professional Title"}
         </p>
-        <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-sm mt-2">
-          {data.personal.email && (
-            <span className="flex items-center">
-              <span className="mr-1">📧</span> {data.personal.email}
-            </span>
-          )}
-          {data.personal.phone && (
-            <span className="flex items-center">
-              <span className="mr-1">📱</span> {data.personal.phone}
-            </span>
-          )}
-          {data.personal.location && (
-            <span className="flex items-center">
-              <span className="mr-1">📍</span> {data.personal.location}
-            </span>
-          )}
-          {data.personal.linkedin && (
-            <span className="flex items-center">
-              <span className="mr-1">🔗</span> LinkedIn
-            </span>
-          )}
-          {data.personal.website && (
-            <span className="flex items-center">
-              <span className="mr-1">🌐</span> Portfolio
-            </span>
-          )}
-        </div>
+        <ContactInfo 
+          personal={data.personal} 
+          onUpdateData={onUpdateData} 
+          onGenerateWithAI={onGenerateWithAI}
+          compact={true}
+        />
       </div>
 
       {/* Summary Section */}
       {data.summary && (
         <div className="mb-4">
-          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+          <h2 className="text-lg font-semibold border-b-2 mb-2" 
+            style={applySectionTitleStyles('summary')}>
             Summary
           </h2>
           <p className="text-sm">
@@ -120,7 +140,8 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
       {/* Experience Section */}
       {data.experience && data.experience.length > 0 && (
         <div className="mb-4">
-          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+          <h2 className="text-lg font-semibold border-b-2 mb-2" 
+            style={applySectionTitleStyles('experience')}>
             Experience
           </h2>
           {data.experience.map((exp: Experience) => (
@@ -151,7 +172,8 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
       {/* Education Section */}
       {data.education && data.education.length > 0 && (
         <div className="mb-4">
-          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+          <h2 className="text-lg font-semibold border-b-2 mb-2" 
+            style={applySectionTitleStyles('education')}>
             Education
           </h2>
           {data.education.map((edu: Education) => (
@@ -180,7 +202,8 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
       {/* Skills Section */}
       {data.skills && (data.skills.technical?.length > 0 || data.skills.soft?.length > 0) && (
         <div className="mb-4">
-          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+          <h2 className="text-lg font-semibold border-b-2 mb-2" 
+            style={applySectionTitleStyles('skills')}>
             Skills
           </h2>
           {data.skills.technical?.length > 0 && (
@@ -205,7 +228,8 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
       {/* Projects Section */}
       {data.projects && data.projects.length > 0 && (
         <div className="mb-4">
-          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+          <h2 className="text-lg font-semibold border-b-2 mb-2" 
+            style={applySectionTitleStyles('projects')}>
             Projects
           </h2>
           {data.projects.map((project: any) => (
@@ -249,7 +273,8 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
       {/* Languages Section */}
       {data.languages && data.languages.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold border-b-2 mb-2" style={{ borderColor: handlePrimaryColor(), color: handlePrimaryColor() }}>
+          <h2 className="text-lg font-semibold border-b-2 mb-2" 
+            style={applySectionTitleStyles('languages')}>
             Languages
           </h2>
           <p className="text-sm">

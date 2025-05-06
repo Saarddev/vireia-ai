@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { cn } from "@/lib/utils";
@@ -6,7 +7,7 @@ import ModernTemplate from './resume-preview/ModernTemplate';
 import CustomizableTemplate from './resume-preview/CustomizableTemplate';
 import ProfessionalTemplate from './resume-preview/ProfessionalTemplate';
 import PreviewControls from './resume-preview/PreviewControls';
-import { ResumeData } from '@/types/resume.d';
+import { ResumeData } from '@/types/resume';
 import AIAnalysisDrawer from './resume-builder/AIAnalysisDrawer';
 
 interface ResumePreviewProps {

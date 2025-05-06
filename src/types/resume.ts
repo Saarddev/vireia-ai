@@ -66,6 +66,22 @@ export interface ResumeSettings {
   margins: string;
 }
 
+export interface SegmentStyles {
+  color: string;
+  backgroundColor: string;
+  textAlign: 'left' | 'center' | 'right';
+  fontSize: string;
+  fontWeight: string;
+  fontStyle: string;
+  textDecoration: string;
+  padding: string;
+  margin: string;
+}
+
+export interface CustomTemplateSettings {
+  segmentStyles?: Record<string, SegmentStyles>;
+}
+
 export interface LinkedInData {
   full_name?: string;
   headline?: string;

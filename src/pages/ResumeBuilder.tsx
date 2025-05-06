@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -23,7 +24,7 @@ import { useResumeAI } from '@/hooks/use-resume-ai';
 import { supabase } from '@/integrations/supabase/client';
 import ProjectForm from '@/components/resume-builder/ProjectForm';
 import { Paintbrush } from 'lucide-react';
-// Import the Education and ResumeData types from types/resume.ts, not types/resume.d.ts to avoid conflicts
+// Import the types from types/resume.ts
 import { Education, ResumeData } from '@/types/resume';
 
 interface AISuggestionData {

@@ -1,11 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
 import AddSectionItem from './AddSectionItem';
 import ContactInfo from './ContactInfo';
 import { v4 as uuidv4 } from 'uuid';
-import { Experience, Education, Project } from '@/types/resume.d';
+import { Experience, Education, Project, SegmentStyles } from '@/types/resume';
 import { ChromePicker } from 'react-color';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { 
@@ -35,18 +35,6 @@ interface CustomizableTemplateProps {
   onGenerateWithAI?: (section: string) => Promise<string>;
 }
 
-interface SegmentStyles {
-  color: string;
-  backgroundColor: string;
-  textAlign: 'left' | 'center' | 'right';
-  fontSize: string;
-  fontWeight: string;
-  fontStyle: string;
-  textDecoration: string;
-  padding: string;
-  margin: string;
-}
-
 const defaultSegmentStyles: SegmentStyles = {
   color: '#333333',
   backgroundColor: 'transparent',
@@ -67,7 +55,7 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
 }) => {
   // Default segment styles
   const [segmentStyles, setSegmentStyles] = useState<Record<string, SegmentStyles>>({
-    header: { ...defaultSegmentStyles, color: '#5d4dcd', fontSize: '1.25rem', fontWeight: 'bold' },
+    header: { ...defaultSegmentStyles, color: '#5d4dcd', fontSize: '1.25rem', fontWeight: 'bold', textAlign: 'center' },
     summary: { ...defaultSegmentStyles },
     experience: { ...defaultSegmentStyles },
     education: { ...defaultSegmentStyles },
@@ -76,6 +64,27 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
   });
   
   const [activeSegment, setActiveSegment] = useState<string | null>(null);
+
+  // Initialize with saved styles if available
+  useEffect(() => {
+    if (settings?.customStyles) {
+      setSegmentStyles(prev => ({
+        ...prev,
+        ...settings.customStyles
+      }));
+    }
+  }, [settings?.customStyles]);
+
+  // Save styles when they change
+  useEffect(() => {
+    if (onUpdateData && JSON.stringify(segmentStyles) !== JSON.stringify(settings?.customStyles || {})) {
+      const updatedSettings = {
+        ...settings,
+        customStyles: segmentStyles
+      };
+      onUpdateData("settings", updatedSettings);
+    }
+  }, [segmentStyles]);
 
   // Ensure data has all required properties with defaults
   const safeData = React.useMemo(() => {
@@ -158,14 +167,14 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
     setSegmentStyles(prev => ({
       ...prev,
       [segment]: {
-        ...prev[segment],
+        ...(prev[segment] || defaultSegmentStyles),
         [property]: value
       }
     }));
   };
 
   const StyleControls = ({ segment }: { segment: string }) => {
-    const currentStyles = segmentStyles[segment];
+    const currentStyles = segmentStyles[segment] || { ...defaultSegmentStyles };
 
     return (
       <div className="absolute top-0 right-0 z-10 bg-white dark:bg-gray-850 shadow-lg rounded-lg p-3 border border-gray-200 dark:border-gray-700 flex flex-wrap gap-2 w-64">
@@ -225,13 +234,13 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
           <span className="text-xs">Font Size</span>
           <Slider 
             className="flex-1" 
-            defaultValue={[parseFloat(currentStyles.fontSize)]} 
+            defaultValue={[parseFloat(currentStyles.fontSize) || 1]} 
             min={0.75} 
             max={2} 
             step={0.05} 
             onValueChange={(values) => handleStyleChange(segment, 'fontSize', `${values[0]}rem`)} 
           />
-          <span className="text-xs">{parseFloat(currentStyles.fontSize).toFixed(2)}</span>
+          <span className="text-xs">{parseFloat(currentStyles.fontSize || '1').toFixed(2)}</span>
         </div>
         
         <div className="flex items-center gap-2 w-full mt-2">
@@ -242,14 +251,14 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
               <Button 
                 variant="outline" 
                 className="w-8 h-8 p-0 ml-auto" 
-                style={{ backgroundColor: currentStyles.color }}
+                style={{ backgroundColor: currentStyles.color || '#333333' }}
               >
                 <span className="sr-only">Pick color</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
               <ChromePicker 
-                color={currentStyles.color} 
+                color={currentStyles.color || '#333333'} 
                 onChange={(colorResult) => handleStyleChange(segment, 'color', colorResult.hex)} 
               />
             </PopoverContent>
@@ -264,14 +273,14 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
               <Button 
                 variant="outline" 
                 className="w-8 h-8 p-0 ml-auto" 
-                style={{ backgroundColor: currentStyles.backgroundColor }}
+                style={{ backgroundColor: currentStyles.backgroundColor || 'transparent' }}
               >
                 <span className="sr-only">Pick background</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
               <ChromePicker 
-                color={currentStyles.backgroundColor} 
+                color={currentStyles.backgroundColor || 'transparent'} 
                 onChange={(colorResult) => handleStyleChange(segment, 'backgroundColor', colorResult.hex)} 
               />
             </PopoverContent>
@@ -282,17 +291,31 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
   };
 
   const applySegmentStyles = (segment: string) => {
-    const style = segmentStyles[segment];
+    const style = segmentStyles[segment] || defaultSegmentStyles;
     return {
-      color: style.color,
-      backgroundColor: style.backgroundColor,
-      textAlign: style.textAlign,
-      fontSize: style.fontSize,
-      fontWeight: style.fontWeight,
-      fontStyle: style.fontStyle,
-      textDecoration: style.textDecoration,
-      padding: style.padding,
-      margin: style.margin
+      color: style.color || defaultSegmentStyles.color,
+      backgroundColor: style.backgroundColor || defaultSegmentStyles.backgroundColor,
+      textAlign: style.textAlign || defaultSegmentStyles.textAlign,
+      fontSize: style.fontSize || defaultSegmentStyles.fontSize,
+      fontWeight: style.fontWeight || defaultSegmentStyles.fontWeight,
+      fontStyle: style.fontStyle || defaultSegmentStyles.fontStyle,
+      textDecoration: style.textDecoration || defaultSegmentStyles.textDecoration,
+      padding: style.padding || defaultSegmentStyles.padding,
+      margin: style.margin || defaultSegmentStyles.margin
+    };
+  };
+
+  // For section titles only (not the content)
+  const applySectionTitleStyles = (segment: string) => {
+    const style = segmentStyles[segment] || defaultSegmentStyles;
+    return {
+      color: style.color || defaultSegmentStyles.color,
+      backgroundColor: style.backgroundColor || defaultSegmentStyles.backgroundColor,
+      textAlign: style.textAlign || defaultSegmentStyles.textAlign,
+      fontWeight: 'semibold', // Always semibold for section titles
+      fontStyle: style.fontStyle || defaultSegmentStyles.fontStyle,
+      textDecoration: style.textDecoration || defaultSegmentStyles.textDecoration,
+      borderColor: style.color || defaultSegmentStyles.color,
     };
   };
 
@@ -347,11 +370,15 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
           personal={safeData.personal}
           onUpdateData={onUpdateData}
           onGenerateWithAI={onGenerateWithAI}
+          compact={true}
         />
       </SegmentWrapper>
 
       <SegmentWrapper id="summary">
-        <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">Summary</h2>
+        <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide"
+            style={applySectionTitleStyles("summary")}>
+          Summary
+        </h2>
         <EditableField 
           value={safeData.summary} 
           placeholder="Experienced software engineer with 5+ years of experience in full-stack development. ..." 
@@ -364,7 +391,10 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
       </SegmentWrapper>
 
       <SegmentWrapper id="experience">
-        <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">Experience</h2>
+        <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide"
+            style={applySectionTitleStyles("experience")}>
+          Experience
+        </h2>
         {safeData.experience.map((exp: Experience) => (
           <div key={exp.id} className="mb-5 last:mb-0 resume-item">
             <div className="flex items-baseline justify-between flex-wrap gap-x-2">
@@ -422,7 +452,10 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
       </SegmentWrapper>
 
       <SegmentWrapper id="education">
-        <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">Education</h2>
+        <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide"
+            style={applySectionTitleStyles("education")}>
+          Education
+        </h2>
         {safeData.education.map((edu: Education) => (
           <div key={edu.id} className="mb-5 last:mb-0 resume-item">
             <div className="flex items-baseline justify-between flex-wrap gap-x-2">
@@ -480,7 +513,10 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
       </SegmentWrapper>
 
       <SegmentWrapper id="skills">
-        <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">Skills</h2>
+        <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide"
+            style={applySectionTitleStyles("skills")}>
+          Skills
+        </h2>
         <div className="mb-3">
           <div className="font-medium text-gray-700 text-sm mb-1.5">Technical Skills</div>
           <div className="flex flex-wrap gap-1.5 mt-1">
@@ -505,7 +541,10 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
 
       {safeData.projects && safeData.projects.length > 0 && (
         <SegmentWrapper id="projects">
-          <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide">Projects</h2>
+          <h2 className="text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide"
+              style={applySectionTitleStyles("projects")}>
+            Projects
+          </h2>
           {safeData.projects.map((project: Project) => (
             <div key={project.id} className="mb-5 last:mb-0 resume-item">
               <div className="flex items-baseline justify-between flex-wrap gap-x-2">
