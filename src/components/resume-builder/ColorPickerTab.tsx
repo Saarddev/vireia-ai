@@ -1,67 +1,117 @@
-
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { ChromePicker } from "react-color"; // Correct import from react-color
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Circle, Palette } from 'lucide-react';
+import { HexColorPicker } from "react-colorful";
+import { cn } from "@/lib/utils";
 
-interface ColorPickerProps {
-  colors: {
-    primaryColor: string;
-    secondaryColor: string;
-    accentColor: string;
-  };
-  onChange: (color: string, type: 'primary' | 'secondary' | 'accent') => void;
+interface ColorPickerTabProps {
+  colors: Partial<ResumeSettings>;
+  onChange: (settings: Partial<ResumeSettings>) => void;
+  compact?: boolean;
 }
 
-const ColorPickerTab: React.FC<ColorPickerProps> = ({ colors, onChange }) => {
-  const colorConfigs = [
-    { type: 'primary', label: 'Primary Color', color: colors.primaryColor },
-    { type: 'secondary', label: 'Secondary Color', color: colors.secondaryColor },
-    { type: 'accent', label: 'Accent Color', color: colors.accentColor }
-  ];
+const ColorPickerTab: React.FC<ColorPickerTabProps> = ({ 
+  colors, 
+  onChange,
+  compact = false 
+}) => {
+  const [showPicker, setShowPicker] = useState<string | null>(null);
+  const colorPickerRef = useRef<HTMLDivElement>(null);
+
+  const handleColorPickerToggle = (field: string) => {
+    setShowPicker(showPicker === field ? null : field);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node)) {
+        setShowPicker(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-4">
-        <Palette className="h-4 w-4 text-resume-purple" />
-        <h3 className="font-medium">Theme Colors</h3>
-      </div>
-      
-      <div className="grid gap-4">
-        {colorConfigs.map(({ type, label, color }) => (
-          <div key={type} className="space-y-2">
-            <Label className="text-sm font-medium">{label}</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  className="w-full h-10 rounded-md border border-input bg-background hover:bg-accent/10 transition-colors flex items-center justify-between px-3 py-2 relative overflow-hidden"
-                >
-                  <div className="flex items-center gap-2">
-                    <Circle className="h-4 w-4" style={{ color: color }} fill={color} />
-                    <span className="text-sm text-muted-foreground">{color}</span>
-                  </div>
-                  <div 
-                    className="absolute inset-0 opacity-0 hover:opacity-10 transition-opacity" 
-                    style={{ backgroundColor: color }}
-                  />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-3">
-                <ChromePicker 
-                  color={color} 
-                  onChange={(colorResult) => onChange(colorResult.hex, type as any)} 
+      <div className={cn("grid gap-4", compact ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-3")}>
+        <div className="space-y-2">
+          <Label htmlFor="primaryColor">Primary Color</Label>
+          <div className="flex items-center">
+            <div
+              className="w-8 h-8 rounded border mr-2"
+              style={{ backgroundColor: colors.primaryColor || '#5d4dcd' }}
+              onClick={() => handleColorPickerToggle('primary')}
+            />
+            <Input
+              id="primaryColor"
+              value={colors.primaryColor || '#5d4dcd'}
+              onChange={(e) => onChange({ primaryColor: e.target.value })}
+              className="font-mono"
+            />
+            {showPicker === 'primary' && (
+              <div className="absolute z-50 mt-2" ref={colorPickerRef}>
+                <HexColorPicker
+                  color={colors.primaryColor || '#5d4dcd'}
+                  onChange={(color) => onChange({ primaryColor: color })}
                 />
-                <Input
-                  value={color}
-                  onChange={(e) => onChange(e.target.value, type as any)}
-                  className="h-8 mt-2"
-                />
-              </PopoverContent>
-            </Popover>
+              </div>
+            )}
           </div>
-        ))}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="secondaryColor">Secondary Color</Label>
+          <div className="flex items-center">
+            <div
+              className="w-8 h-8 rounded border mr-2"
+              style={{ backgroundColor: colors.secondaryColor || '#3a3a3c' }}
+              onClick={() => handleColorPickerToggle('secondary')}
+            />
+            <Input
+              id="secondaryColor"
+              value={colors.secondaryColor || '#3a3a3c'}
+              onChange={(e) => onChange({ secondaryColor: e.target.value })}
+              className="font-mono"
+            />
+            {showPicker === 'secondary' && (
+              <div className="absolute z-50 mt-2" ref={colorPickerRef}>
+                <HexColorPicker
+                  color={colors.secondaryColor || '#3a3a3c'}
+                  onChange={(color) => onChange({ secondaryColor: color })}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="accentColor">Accent Color</Label>
+          <div className="flex items-center">
+            <div
+              className="w-8 h-8 rounded border mr-2"
+              style={{ backgroundColor: colors.accentColor || '#f7f7f7' }}
+              onClick={() => handleColorPickerToggle('accent')}
+            />
+            <Input
+              id="accentColor"
+              value={colors.accentColor || '#f7f7f7'}
+              onChange={(e) => onChange({ accentColor: e.target.value })}
+              className="font-mono"
+            />
+            {showPicker === 'accent' && (
+              <div className="absolute z-50 mt-2" ref={colorPickerRef}>
+                <HexColorPicker
+                  color={colors.accentColor || '#f7f7f7'}
+                  onChange={(color) => onChange({ accentColor: color })}
+                />
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

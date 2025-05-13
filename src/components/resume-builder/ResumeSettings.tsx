@@ -1,180 +1,136 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ColorPickerTab from './ColorPickerTab';
-import { Type, Layout, Palette } from 'lucide-react';
 
-interface ResumeSettingsProps {
-  settings: {
-    fontFamily: string;
-    fontSize: number;
-    primaryColor: string;
-    secondaryColor: string;
-    accentColor: string;
-    paperSize: string;
-    margins: string;
-  };
-  onChange: (newSettings: any) => void;
+interface ResumeSettings {
+  fontFamily: string;
+  fontSize: number;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  paperSize: string;
+  margins: string;
 }
 
-const ResumeSettings: React.FC<ResumeSettingsProps> = ({ settings, onChange }) => {
-  const [fontSizeValue, setFontSizeValue] = useState(settings.fontSize);
+interface ResumeSettingsProps {
+  settings: ResumeSettings;
+  onChange: (settings: Partial<ResumeSettings>) => void;
+  compact?: boolean;
+}
 
-  const handleColorChange = (color: string, type: 'primary' | 'secondary' | 'accent') => {
-    onChange({ ...settings, [`${type}Color`]: color });
-  };
-  
-  // Add the missing handler functions
-  const handleFontFamilyChange = (value: string) => {
-    onChange({ ...settings, fontFamily: value });
-  };
+const fontOptions = [
+  { value: "Inter", label: "Inter" },
+  { value: "Arial", label: "Arial" },
+  { value: "Helvetica", label: "Helvetica" },
+  { value: "Times New Roman", label: "Times New Roman" },
+  { value: "Courier New", label: "Courier New" },
+];
 
-  const handleFontSizeChange = (values: number[]) => {
-    const newSize = values[0];
-    setFontSizeValue(newSize);
-    onChange({ ...settings, fontSize: newSize });
-  };
+const paperSizeOptions = [
+  { value: "letter", label: "Letter (8.5 x 11 in)" },
+  { value: "a4", label: "A4 (210 x 297 mm)" },
+];
 
-  const handlePaperSizeChange = (value: string) => {
-    onChange({ ...settings, paperSize: value });
-  };
+const marginOptions = [
+  { value: "normal", label: "Normal" },
+  { value: "narrow", label: "Narrow" },
+  { value: "wide", label: "Wide" },
+];
 
-  const handleMarginsChange = (value: string) => {
-    onChange({ ...settings, margins: value });
-  };
-
+const ResumeSettings: React.FC<ResumeSettingsProps> = ({ 
+  settings, 
+  onChange,
+  compact = false 
+}) => {
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold mb-2">Resume Settings</h2>
-        <p className="text-sm text-muted-foreground">
-          Customize your resume's appearance and layout.
-        </p>
-      </div>
+      {!compact && (
+        <div>
+          <h2 className="text-xl font-semibold mb-2">Resume Settings</h2>
+          <p className="text-sm text-muted-foreground">
+            Customize the appearance of your resume
+          </p>
+        </div>
+      )}
 
-      <Tabs defaultValue="typography" className="w-full">
-        <TabsList className="w-full grid grid-cols-3">
-          <TabsTrigger value="typography" className="flex items-center gap-2">
-            <Type className="h-4 w-4" />
-            <span>Type</span>
-          </TabsTrigger>
-          <TabsTrigger value="colors" className="flex items-center gap-2">
-            <Palette className="h-4 w-4" />
-            <span>Colors</span>
-          </TabsTrigger>
-          <TabsTrigger value="layout" className="flex items-center gap-2">
-            <Layout className="h-4 w-4" />
-            <span>Layout</span>
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="typography" className="space-y-4 mt-4">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="font-family">Font Family</Label>
-              <Select 
-                value={settings.fontFamily} 
-                onValueChange={handleFontFamilyChange}
-              >
-                <SelectTrigger id="font-family" className="w-full">
-                  <SelectValue placeholder="Select font" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Inter">Inter</SelectItem>
-                  <SelectItem value="Roboto">Roboto</SelectItem>
-                  <SelectItem value="Open+Sans">Open Sans</SelectItem>
-                  <SelectItem value="Lato">Lato</SelectItem>
-                  <SelectItem value="Poppins">Poppins</SelectItem>
-                  <SelectItem value="Montserrat">Montserrat</SelectItem>
-                  <SelectItem value="Source+Sans+Pro">Source Sans Pro</SelectItem>
-                  <SelectItem value="Playfair+Display">Playfair Display</SelectItem>
-                  <SelectItem value="Merriweather">Merriweather</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="font-size">Font Size</Label>
-                <span className="text-sm text-muted-foreground">{fontSizeValue}pt</span>
-              </div>
-              <Slider 
-                id="font-size"
-                min={8} 
-                max={14} 
-                step={0.5}
-                value={[settings.fontSize]} 
-                onValueChange={handleFontSizeChange}
-              />
-            </div>
-          </div>
-        </TabsContent>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="fontFamily">Font Family</Label>
+          <Select
+            value={settings.fontFamily || "Inter"}
+            onValueChange={(value) => onChange({ fontFamily: value })}
+          >
+            <SelectTrigger id="fontFamily">
+              <SelectValue placeholder="Select a font" />
+            </SelectTrigger>
+            <SelectContent>
+              {fontOptions.map((font) => (
+                <SelectItem key={font.value} value={font.value}>
+                  {font.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <TabsContent value="colors" className="mt-4">
-          <ColorPickerTab 
-            colors={{
-              primaryColor: settings.primaryColor,
-              secondaryColor: settings.secondaryColor,
-              accentColor: settings.accentColor
-            }}
-            onChange={handleColorChange}
+        <div className="space-y-2">
+          <Label htmlFor="fontSize">Font Size: {settings.fontSize || 11}pt</Label>
+          <Slider
+            id="fontSize"
+            min={8}
+            max={14}
+            step={0.5}
+            value={[settings.fontSize || 11]}
+            onValueChange={(value) => onChange({ fontSize: value[0] })}
           />
-        </TabsContent>
+        </div>
 
-        <TabsContent value="layout" className="space-y-4 mt-4">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="paper-size">Paper Size</Label>
-              <Select 
-                value={settings.paperSize} 
-                onValueChange={handlePaperSizeChange}
-              >
-                <SelectTrigger id="paper-size" className="w-full">
-                  <SelectValue placeholder="Select paper size" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="a4">A4</SelectItem>
-                  <SelectItem value="letter">Letter</SelectItem>
-                  <SelectItem value="legal">Legal</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Margins</Label>
-              <RadioGroup 
-                value={settings.margins}
-                onValueChange={handleMarginsChange}
-                className="flex space-x-2"
-              >
-                <div className="flex items-center space-x-1">
-                  <RadioGroupItem value="narrow" id="narrow" />
-                  <Label htmlFor="narrow">Narrow</Label>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <RadioGroupItem value="normal" id="normal" />
-                  <Label htmlFor="normal">Normal</Label>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <RadioGroupItem value="wide" id="wide" />
-                  <Label htmlFor="wide">Wide</Label>
-                </div>
-              </RadioGroup>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+        <ColorPickerTab 
+          colors={settings}
+          onChange={onChange}
+          compact={compact}
+        />
+
+        <div className="space-y-2">
+          <Label htmlFor="paperSize">Paper Size</Label>
+          <Select
+            value={settings.paperSize || "letter"}
+            onValueChange={(value) => onChange({ paperSize: value })}
+          >
+            <SelectTrigger id="paperSize">
+              <SelectValue placeholder="Select a paper size" />
+            </SelectTrigger>
+            <SelectContent>
+              {paperSizeOptions.map((size) => (
+                <SelectItem key={size.value} value={size.value}>
+                  {size.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="margins">Margins</Label>
+          <Select
+            value={settings.margins || "normal"}
+            onValueChange={(value) => onChange({ margins: value })}
+          >
+            <SelectTrigger id="margins">
+              <SelectValue placeholder="Select margins" />
+            </SelectTrigger>
+            <SelectContent>
+              {marginOptions.map((margin) => (
+                <SelectItem key={margin.value} value={margin.value}>
+                  {margin.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
     </div>
   );
 };
