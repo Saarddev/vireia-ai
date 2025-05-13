@@ -7,28 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Layout, Palette, SidebarClose, Sparkles } from 'lucide-react';
+import { Edit, Plus, Layout, Palette } from 'lucide-react';
 import CanvasControlButtons from '@/components/resume-builder/CanvasControlButtons';
 import ResumePreview from '@/components/ResumePreview';
 import TemplateSelector from '@/components/resume-builder/TemplateSelector';
 import ResumeSettings from '@/components/resume-builder/ResumeSettings';
 import { useResumeData } from '@/hooks/use-resume-data';
 import { useResumeAI } from '@/hooks/use-resume-ai';
-import { ResumeData, ResumeSettings as ResumeSettingsType } from '@/types/resume';
-
-// Add the template selector to the sidebar options
-const canvasSidebarOptions = [
-  { id: 'templates', name: 'Templates', icon: Layout },
-  { id: 'style', name: 'Style', icon: Palette },
-  { id: 'sections', name: 'Sections', icon: SidebarClose },
-  { id: 'ai', name: 'AI', icon: Sparkles }
-];
+import { ResumeData } from '@/types/resume';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ResumeCanvas = () => {
   const { resumeId } = useParams<{ resumeId: string }>();
   const { isMobile } = useIsMobile();
-  const [activeTab, setActiveTab] = useState<string>('templates');
-  const [selectedSections, setSelectedSections] = useState<string[]>([]);
+  const [activeSection, setActiveSection] = useState<string>('templates');
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
@@ -36,7 +28,6 @@ const ResumeCanvas = () => {
     isGenerating,
     generateSummary,
     extractSkills,
-    improveDescription
   } = useResumeAI();
 
   const { 
@@ -116,77 +107,14 @@ const ResumeCanvas = () => {
     handleSave();
   };
 
-  // Update the sidebar content to include the template selector
-  const renderSidebarContent = () => {
-    switch (activeTab) {
-      case 'templates':
-        return (
-          <div className="p-4">
-            <h3 className="text-lg font-medium mb-4">Select Template</h3>
-            <TemplateSelector 
-              selectedTemplate={selectedTemplate} 
-              onSelect={handleTemplateChange}
-              compact={true}
-              className="mb-6"
-            />
-            <div className="mt-4">
-              <h4 className="text-sm font-medium mb-2">Template Settings</h4>
-              <ResumeSettings
-                settings={resumeSettings || {}}
-                onChange={(newSettings: Partial<ResumeSettingsType>) => {
-                  setResumeSettings({
-                    ...resumeSettings,
-                    ...newSettings
-                  } as ResumeSettingsType);
-                }}
-                compact={true}
-              />
-            </div>
-          </div>
-        );
-      case 'style':
-        return (
-          <div className="p-4">
-            <h3 className="text-lg font-medium mb-4">Style Settings</h3>
-            <ResumeSettings
-              settings={resumeSettings || {}}
-              onChange={(newSettings: Partial<ResumeSettingsType>) => {
-                setResumeSettings({
-                  ...resumeSettings,
-                  ...newSettings
-                } as ResumeSettingsType);
-              }}
-              compact={true}
-            />
-          </div>
-        );
-      case 'sections':
-        return (
-          <div className="p-4">
-            <h3 className="text-lg font-medium mb-4">Section Visibility</h3>
-            {/* Example: Toggle visibility of sections */}
-            <div className="space-y-2">
-              <Label htmlFor="personal">Personal Info</Label>
-              <Input type="checkbox" id="personal" checked={selectedSections.includes('personal')} onChange={() => {}} />
-
-              <Label htmlFor="experience">Experience</Label>
-              <Input type="checkbox" id="experience" checked={selectedSections.includes('experience')} onChange={() => {}} />
-
-              {/* Add more sections as needed */}
-            </div>
-          </div>
-        );
-      case 'ai':
-        return (
-          <div className="p-4">
-            <h3 className="text-lg font-medium mb-4">AI Assistant</h3>
-            {/* Add AI assistant controls here */}
-            <p className="text-sm text-muted-foreground">AI features coming soon.</p>
-          </div>
-        );
-      default:
-        return null;
-    }
+  // Handle settings change
+  const handleSettingsChange = (newSettings: any) => {
+    setResumeSettings({
+      ...resumeSettings,
+      ...newSettings
+    });
+    // Auto-save when settings change
+    handleSave();
   };
 
   if (isLoading) {
@@ -196,6 +124,15 @@ const ResumeCanvas = () => {
       </div>
     );
   }
+
+  const resumeSections = [
+    { id: 'personal', name: 'Personal Info', hasContent: !!resumeData.personal },
+    { id: 'summary', name: 'Summary', hasContent: !!resumeData.summary },
+    { id: 'experience', name: 'Experience', hasContent: Array.isArray(resumeData.experience) && resumeData.experience.length > 0 },
+    { id: 'education', name: 'Education', hasContent: Array.isArray(resumeData.education) && resumeData.education.length > 0 },
+    { id: 'skills', name: 'Skills', hasContent: !!resumeData.skills },
+    { id: 'projects', name: 'Projects', hasContent: Array.isArray(resumeData.projects) && resumeData.projects.length > 0 },
+  ];
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50/80 via-background to-purple-50/60 dark:from-gray-900/90 dark:via-gray-900/50 dark:to-gray-900/90">
@@ -220,27 +157,57 @@ const ResumeCanvas = () => {
       <div className="flex-1 flex overflow-hidden">
         <SidebarProvider defaultOpen={!isMobile}>
           <Sidebar className="bg-white dark:bg-gray-950 border-r" side="left">
-            <div className="flex flex-col h-full">
-              <div className="p-2 border-b">
-                <div className="flex space-x-1">
-                  {canvasSidebarOptions.map((option) => (
-                    <Button
-                      key={option.id}
-                      variant={activeTab === option.id ? "default" : "ghost"}
-                      size="sm"
-                      className="flex-1 justify-start"
-                      onClick={() => setActiveTab(option.id)}
-                    >
-                      <option.icon className="h-4 w-4 mr-2" />
-                      {option.name}
-                    </Button>
+            <Tabs defaultValue="content" className="w-full h-full flex flex-col">
+              <TabsList className="grid grid-cols-2 mx-4 mt-4">
+                <TabsTrigger value="content">Content</TabsTrigger>
+                <TabsTrigger value="style">Style</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="content" className="flex-1 overflow-auto p-4 mt-2">
+                <h3 className="font-medium mb-4">Sections</h3>
+                <div className="space-y-2">
+                  {resumeSections.map(section => (
+                    <div key={section.id} className="flex items-center justify-between py-2 border-b border-gray-100">
+                      <span className="text-sm">{section.name}</span>
+                      <div>
+                        {section.hasContent ? (
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
                   ))}
                 </div>
-              </div>
-              <div className="flex-1 overflow-auto">
-                {renderSidebarContent()}
-              </div>
-            </div>
+              </TabsContent>
+              
+              <TabsContent value="style" className="flex-1 overflow-auto p-4 mt-2">
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="font-medium mb-4">Template</h3>
+                    <TemplateSelector
+                      selectedTemplate={selectedTemplate}
+                      onSelect={handleTemplateChange}
+                      compact={true}
+                      className="mb-6"
+                    />
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium mb-4">Appearance</h3>
+                    <ResumeSettings
+                      settings={resumeSettings || {}}
+                      onChange={handleSettingsChange}
+                      compact={true}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </Sidebar>
 
           <div className="flex-1 flex flex-col overflow-hidden">
