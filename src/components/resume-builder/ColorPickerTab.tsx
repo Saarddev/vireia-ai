@@ -1,8 +1,10 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { HexColorPicker } from "react-colorful";
 import { cn } from "@/lib/utils";
+import { ResumeSettings } from '@/types/resume';
 
 interface ColorPickerTabProps {
   colors: Partial<ResumeSettings>;

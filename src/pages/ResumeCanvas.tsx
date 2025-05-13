@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -5,9 +6,7 @@ import { SidebarProvider, Sidebar } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { toast } from "sonner";
 import { Layout, Palette, SidebarClose, Sparkles } from 'lucide-react';
 import CanvasControlButtons from '@/components/resume-builder/CanvasControlButtons';
 import ResumePreview from '@/components/ResumePreview';
@@ -15,7 +14,7 @@ import TemplateSelector from '@/components/resume-builder/TemplateSelector';
 import ResumeSettings from '@/components/resume-builder/ResumeSettings';
 import { useResumeData } from '@/hooks/use-resume-data';
 import { useResumeAI } from '@/hooks/use-resume-ai';
-import { ResumeData } from '@/types/resume';
+import { ResumeData, ResumeSettings as ResumeSettingsType } from '@/types/resume';
 
 // Add the template selector to the sidebar options
 const canvasSidebarOptions = [
@@ -40,7 +39,18 @@ const ResumeCanvas = () => {
     improveDescription
   } = useResumeAI();
 
-  const { resumeData, isLoading, setResumeData, resumeTitle, selectedTemplate, setSelectedTemplate, resumeSettings, setResumeSettings, handleSave, calculateProgress } = useResumeData(resumeId);
+  const { 
+    resumeData, 
+    isLoading, 
+    setResumeData, 
+    resumeTitle, 
+    selectedTemplate, 
+    setSelectedTemplate, 
+    resumeSettings, 
+    setResumeSettings, 
+    handleSave, 
+    calculateProgress 
+  } = useResumeData(resumeId);
   
   const handleSectionDataChange = (section: string, data: any) => {
     setResumeData(prev => ({
@@ -123,11 +133,11 @@ const ResumeCanvas = () => {
               <h4 className="text-sm font-medium mb-2">Template Settings</h4>
               <ResumeSettings
                 settings={resumeSettings || {}}
-                onChange={(newSettings) => {
+                onChange={(newSettings: Partial<ResumeSettingsType>) => {
                   setResumeSettings({
                     ...resumeSettings,
                     ...newSettings
-                  });
+                  } as ResumeSettingsType);
                 }}
                 compact={true}
               />
@@ -140,11 +150,11 @@ const ResumeCanvas = () => {
             <h3 className="text-lg font-medium mb-4">Style Settings</h3>
             <ResumeSettings
               settings={resumeSettings || {}}
-              onChange={(newSettings) => {
+              onChange={(newSettings: Partial<ResumeSettingsType>) => {
                 setResumeSettings({
                   ...resumeSettings,
                   ...newSettings
-                });
+                } as ResumeSettingsType);
               }}
               compact={true}
             />
@@ -209,7 +219,7 @@ const ResumeCanvas = () => {
 
       <div className="flex-1 flex overflow-hidden">
         <SidebarProvider defaultOpen={!isMobile}>
-          <Sidebar side="left" size="sm" className="bg-white dark:bg-gray-950 border-r">
+          <Sidebar className="bg-white dark:bg-gray-950 border-r" side="left">
             <div className="flex flex-col h-full">
               <div className="p-2 border-b">
                 <div className="flex space-x-1">
