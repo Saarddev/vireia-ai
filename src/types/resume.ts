@@ -1,4 +1,3 @@
-
 export interface PersonalInfo {
   name: string;
   title: string;
@@ -57,13 +56,14 @@ export interface ResumeData {
 }
 
 export interface ResumeSettings {
-  fontFamily: string;
-  fontSize: number;
-  primaryColor: string;
-  secondaryColor: string;
-  accentColor: string;
-  paperSize: string;
-  margins: string;
+  fontFamily?: string;
+  fontSize?: number;
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  paperSize?: 'a4' | 'letter' | 'legal';
+  margins?: 'narrow' | 'normal' | 'wide';
+  customStyles?: Record<string, SegmentStyles>;
 }
 
 export interface SegmentStyles {

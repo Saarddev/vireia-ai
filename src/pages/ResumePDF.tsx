@@ -2,7 +2,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useResumeData } from '@/hooks/use-resume-data';
-import { Project, SegmentStyles } from '@/types/resume';
+import { Project } from '@/types/resume';
 
 const ResumePDF = () => {
   const { resumeId } = useParams();
@@ -35,7 +35,7 @@ const ResumePDF = () => {
     return limit ? points.slice(0, limit) : points;
   };
 
-  // Get styles for sections
+  // Get styles for sections - now with proper type checks
   const getHeaderStyles = () => {
     const customStyles = resumeSettings?.customStyles?.header;
     return {
