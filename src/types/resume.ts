@@ -1,4 +1,3 @@
-
 export interface PersonalInfo {
   name: string;
   title: string;
@@ -64,6 +63,7 @@ export interface ResumeSettings {
   accentColor: string;
   paperSize: string;
   margins: string;
+  template: string;
 }
 
 export interface SegmentStyles {
