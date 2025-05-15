@@ -4,8 +4,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import Image from '../ui/image';
-import { FileImage } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface TemplateSelectorProps {
   selectedTemplate: string;
@@ -40,15 +38,17 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
 }) => {
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 mb-4">
-        <FileImage className="h-4 w-4 text-resume-purple" />
-        <h3 className="font-medium">Resume Templates</h3>
+      <div>
+        <h2 className="text-xl font-semibold mb-3">Template Selection</h2>
+        <p className="text-sm text-muted-foreground">
+          Choose a template that best represents your style and experience
+        </p>
       </div>
 
       <RadioGroup 
         value={selectedTemplate} 
         onValueChange={(value) => onSelect(value)}
-        className="grid grid-cols-3 gap-3"
+        className="grid grid-cols-1 md:grid-cols-3 gap-4"
       >
         {templates.map((template) => (
           <div key={template.id} className="relative">
@@ -59,28 +59,26 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
             />
             <Label
               htmlFor={`template-${template.id}`}
-              className={cn(
-                "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-2",
-                "hover:bg-accent hover:text-accent-foreground",
-                "peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
-                "cursor-pointer transition-all duration-200"
-              )}
+              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
             >
-              <div className="mb-2 overflow-hidden rounded-md border border-gray-200 w-full h-24 relative">
+              <div className="mb-3 overflow-hidden rounded-md border border-gray-200 w-full h-40 relative">
                 <Image
                   src={template.image}
                   alt={template.name}
-                  className="object-cover w-full h-full"
+                  className="object-contain w-full h-full"
                 />
               </div>
               <div className="w-full text-center">
-                <div className="font-medium relative text-sm">
+                <div className="font-medium relative">
                   {template.name}
                   {template.new && (
-                    <span className="absolute -top-1 -right-4 bg-resume-purple text-white text-xs px-1 py-0.5 rounded">
+                    <span className="absolute -top-1 -right-8 bg-resume-purple text-white text-xs px-1 py-0.5 rounded">
                       NEW
                     </span>
                   )}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {template.description}
                 </div>
               </div>
             </Label>
