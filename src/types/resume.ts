@@ -64,6 +64,8 @@ export interface ResumeSettings {
   accentColor: string;
   paperSize: string;
   margins: string;
+  template: string;
+  customStyles?: Record<string, SegmentStyles>;
 }
 
 export interface SegmentStyles {

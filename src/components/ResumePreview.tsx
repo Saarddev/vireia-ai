@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { cn } from "@/lib/utils";
@@ -7,13 +6,13 @@ import ModernTemplate from './resume-preview/ModernTemplate';
 import CustomizableTemplate from './resume-preview/CustomizableTemplate';
 import ProfessionalTemplate from './resume-preview/ProfessionalTemplate';
 import PreviewControls from './resume-preview/PreviewControls';
-import { ResumeData } from '@/types/resume';
+import { ResumeData, ResumeSettings, SegmentStyles } from '@/types/resume';
 import AIAnalysisDrawer from './resume-builder/AIAnalysisDrawer';
 
 interface ResumePreviewProps {
   data: ResumeData;
-  template: string;
-  settings?: any;
+  template?: string;
+  settings?: ResumeSettings;
   onDataChange?: (section: string, data: any) => void;
   onGenerateWithAI?: (section: string) => Promise<string>;
   showAIAnalysis?: boolean;
@@ -21,8 +20,17 @@ interface ResumePreviewProps {
 
 const ResumePreview: React.FC<ResumePreviewProps> = ({
   data,
-  template,
-  settings = {},
+  template = 'modern',
+  settings = {
+    fontFamily: 'Inter',
+    fontSize: 11,
+    primaryColor: '#5d4dcd',
+    secondaryColor: '#333333',
+    accentColor: '#d6bcfa',
+    paperSize: 'letter',
+    margins: 'normal',
+    template: 'modern'
+  },
   onDataChange,
   onGenerateWithAI,
   showAIAnalysis = false
@@ -284,7 +292,10 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
 
   // Function to render the selected template
   const renderTemplate = () => {
-    switch (template) {
+    // Use the template prop if provided, or fall back to settings.template
+    const templateToUse = template || settings.template || 'modern';
+    
+    switch (templateToUse) {
       case 'modern':
         return (
           <ModernTemplate
@@ -316,7 +327,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
         return (
           <div className="h-full flex items-center justify-center">
             <p className="text-gray-500">
-              {template.charAt(0).toUpperCase() + template.slice(1)} template preview
+              {templateToUse.charAt(0).toUpperCase() + templateToUse.slice(1)} template preview
             </p>
           </div>
         );
