@@ -6,7 +6,7 @@ import ContactInfo from './ContactInfo';
 
 interface ProfessionalTemplateProps {
   data: any;
-  settings?: ResumeSettings;
+  settings?: ResumeSettings & { customStyles?: Record<string, SegmentStyles> };
   onUpdateData?: (key: string, value: any) => void;
   onGenerateWithAI?: (section: string) => Promise<string>;
   isEditMode?: boolean;
