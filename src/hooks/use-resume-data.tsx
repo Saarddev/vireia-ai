@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
@@ -27,7 +26,7 @@ const defaultResumeData: ResumeData = {
   projects: []
 };
 
-export function useResumeData(resumeId: string | undefined) {
+export const useResumeData = (resumeId?: string) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
@@ -35,13 +34,14 @@ export function useResumeData(resumeId: string | undefined) {
   const [resumeTitle, setResumeTitle] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState("modern");
   const [resumeSettings, setResumeSettings] = useState<ResumeSettings>({
-    fontFamily: "Inter",
-    fontSize: 10,
-    primaryColor: "#9b87f5",
-    secondaryColor: "#6E59A5",
-    accentColor: "#D6BCFA",
-    paperSize: "a4",
-    margins: "normal"
+    fontFamily: 'Inter',
+    fontSize: 11,
+    primaryColor: '#5d4dcd',
+    secondaryColor: '#333333',
+    accentColor: '#d6bcfa',
+    paperSize: 'letter',
+    margins: 'normal',
+    template: 'modern'
   });
 
   useEffect(() => {

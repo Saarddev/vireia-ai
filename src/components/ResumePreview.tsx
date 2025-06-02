@@ -292,14 +292,14 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
 
   // Function to render the selected template
   const renderTemplate = () => {
-    // Use the template prop if provided, or fall back to settings.template
-    const templateToUse = template || settings.template || 'modern';
+    // Use the template from settings first, then fall back to the template prop
+    const templateToUse = settings.template || template || 'modern';
     
     switch (templateToUse) {
       case 'modern':
         return (
           <ModernTemplate
-            data={data}
+            data={safeData}
             settings={settings}
             onUpdateData={onDataChange}
             onGenerateWithAI={onGenerateWithAI}
@@ -308,7 +308,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
       case 'professional':
         return (
           <ProfessionalTemplate
-            data={data}
+            data={safeData}
             settings={settings}
             onUpdateData={onDataChange}
             onGenerateWithAI={onGenerateWithAI}
@@ -317,7 +317,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
       case 'customizable':
         return (
           <CustomizableTemplate
-            data={data}
+            data={safeData}
             settings={settings}
             onUpdateData={onDataChange}
             onGenerateWithAI={onGenerateWithAI}
@@ -325,11 +325,12 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
         );
       default:
         return (
-          <div className="h-full flex items-center justify-center">
-            <p className="text-gray-500">
-              {templateToUse.charAt(0).toUpperCase() + templateToUse.slice(1)} template preview
-            </p>
-          </div>
+          <ModernTemplate
+            data={safeData}
+            settings={settings}
+            onUpdateData={onDataChange}
+            onGenerateWithAI={onGenerateWithAI}
+          />
         );
     }
   };

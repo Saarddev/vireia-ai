@@ -5,10 +5,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import Image from '@/components/ui/image';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Type, Layout, Palette } from 'lucide-react';
+import { Type, LayoutTemplate, Palette } from 'lucide-react';
 import ColorPickerTab from '../resume-builder/ColorPickerTab';
 import { ResumeSettings } from '@/types/resume';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 interface ResumeCanvasStyleTabProps {
   settings: ResumeSettings;
@@ -20,19 +20,19 @@ const templates = [
     id: 'modern',
     name: 'Modern',
     description: 'Clean and professional design with a modern touch.',
-    image: '/placeholder.svg'
+    image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=300&h=400&fit=crop'
   },
   {
     id: 'professional',
     name: 'Professional',
     description: 'Classic and traditional layout for formal applications.',
-    image: '/placeholder.svg'
+    image: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=300&h=400&fit=crop'
   },
   {
     id: 'customizable',
     name: 'Customizable',
     description: 'Fully customizable template with adjustable segments.',
-    image: '/placeholder.svg',
+    image: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=300&h=400&fit=crop',
     new: true
   }
 ];
@@ -81,7 +81,7 @@ const ResumeCanvasStyleTab: React.FC<ResumeCanvasStyleTabProps> = ({
       <Tabs defaultValue="templates" className="w-full">
         <TabsList className="w-full grid grid-cols-3">
           <TabsTrigger value="templates" className="flex items-center gap-2">
-            <Layout className="h-4 w-4" />
+            <LayoutTemplate className="h-4 w-4" />
             <span>Templates</span>
           </TabsTrigger>
           <TabsTrigger value="colors" className="flex items-center gap-2">
@@ -115,14 +115,14 @@ const ResumeCanvasStyleTab: React.FC<ResumeCanvasStyleTabProps> = ({
                     <Image
                       src={template.image}
                       alt={template.name}
-                      className="object-contain w-full h-full"
+                      className="object-cover w-full h-full"
                     />
                   </div>
                   <div className="w-full text-center">
                     <div className="font-medium relative">
                       {template.name}
                       {template.new && (
-                        <span className="absolute -top-1 -right-8 bg-resume-purple text-white text-xs px-1 py-0.5 rounded">
+                        <span className="absolute -top-1 -right-8 bg-[#5d4dcd] text-white text-xs px-1 py-0.5 rounded">
                           NEW
                         </span>
                       )}

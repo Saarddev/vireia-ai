@@ -1,68 +1,94 @@
 
 import React from 'react';
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { ChromePicker } from "react-color"; // Correct import from react-color
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Circle, Palette } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { ChromePicker } from 'react-color';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
 
-interface ColorPickerProps {
+interface ColorPickerTabProps {
   colors: {
     primaryColor: string;
     secondaryColor: string;
     accentColor: string;
   };
-  onChange: (color: string, type: 'primary' | 'secondary' | 'accent') => void;
+  onChange: (colors: { primaryColor?: string; secondaryColor?: string; accentColor?: string }) => void;
 }
 
-const ColorPickerTab: React.FC<ColorPickerProps> = ({ colors, onChange }) => {
-  const colorConfigs = [
-    { type: 'primary', label: 'Primary Color', color: colors.primaryColor },
-    { type: 'secondary', label: 'Secondary Color', color: colors.secondaryColor },
-    { type: 'accent', label: 'Accent Color', color: colors.accentColor }
-  ];
+const ColorPickerTab: React.FC<ColorPickerTabProps> = ({ colors, onChange }) => {
+  const handleColorChange = (colorType: 'primaryColor' | 'secondaryColor' | 'accentColor', color: string) => {
+    onChange({ [colorType]: color });
+  };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-4">
-        <Palette className="h-4 w-4 text-resume-purple" />
-        <h3 className="font-medium">Theme Colors</h3>
-      </div>
-      
-      <div className="grid gap-4">
-        {colorConfigs.map(({ type, label, color }) => (
-          <div key={type} className="space-y-2">
-            <Label className="text-sm font-medium">{label}</Label>
+    <div className="space-y-6">
+      <Card className="p-4">
+        <h3 className="text-lg font-semibold mb-4">Color Scheme</h3>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="primary-color">Primary Color</Label>
             <Popover>
               <PopoverTrigger asChild>
-                <button
-                  className="w-full h-10 rounded-md border border-input bg-background hover:bg-accent/10 transition-colors flex items-center justify-between px-3 py-2 relative overflow-hidden"
+                <Button
+                  variant="outline"
+                  className="w-12 h-8 p-0"
+                  style={{ backgroundColor: colors.primaryColor }}
                 >
-                  <div className="flex items-center gap-2">
-                    <Circle className="h-4 w-4" style={{ color: color }} fill={color} />
-                    <span className="text-sm text-muted-foreground">{color}</span>
-                  </div>
-                  <div 
-                    className="absolute inset-0 opacity-0 hover:opacity-10 transition-opacity" 
-                    style={{ backgroundColor: color }}
-                  />
-                </button>
+                  <span className="sr-only">Pick primary color</span>
+                </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-3">
-                <ChromePicker 
-                  color={color} 
-                  onChange={(colorResult) => onChange(colorResult.hex, type as any)} 
-                />
-                <Input
-                  value={color}
-                  onChange={(e) => onChange(e.target.value, type as any)}
-                  className="h-8 mt-2"
+              <PopoverContent className="w-auto p-0">
+                <ChromePicker
+                  color={colors.primaryColor}
+                  onChange={(colorResult) => handleColorChange('primaryColor', colorResult.hex)}
                 />
               </PopoverContent>
             </Popover>
           </div>
-        ))}
-      </div>
+
+          <div className="flex items-center justify-between">
+            <Label htmlFor="secondary-color">Secondary Color</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-12 h-8 p-0"
+                  style={{ backgroundColor: colors.secondaryColor }}
+                >
+                  <span className="sr-only">Pick secondary color</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <ChromePicker
+                  color={colors.secondaryColor}
+                  onChange={(colorResult) => handleColorChange('secondaryColor', colorResult.hex)}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Label htmlFor="accent-color">Accent Color</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-12 h-8 p-0"
+                  style={{ backgroundColor: colors.accentColor }}
+                >
+                  <span className="sr-only">Pick accent color</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <ChromePicker
+                  color={colors.accentColor}
+                  onChange={(colorResult) => handleColorChange('accentColor', colorResult.hex)}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+      </Card>
     </div>
   );
 };

@@ -119,8 +119,17 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
           items[itemIndex] = updatedItem;
           onUpdateData(section, items);
         }
+      } else if (section === "personal") {
+        // Handling personal info updates
+        onUpdateData(section, {
+          ...safeData.personal,
+          [field]: value
+        });
+      } else if (section === "summary") {
+        // Handling summary updates
+        onUpdateData(section, value);
       } else {
-        // Handling other sections (personal, summary, skills)
+        // Handling other sections
         onUpdateData(section, {
           ...safeData[section],
           [field]: value
@@ -352,7 +361,7 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
           value={safeData.personal.name}
           placeholder="John Smith"
           className="text-xl font-bold text-gray-900 leading-tight tracking-tight pb-0 mb-1"
-          onSave={val => onUpdateData?.("personal", { ...safeData.personal, name: val })}
+          onSave={val => handleFieldUpdate("personal", "name", val)}
           onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-name") : undefined}
           minRows={1}
           maxRows={1}
@@ -361,7 +370,7 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
           value={safeData.personal.title}
           placeholder="Software Engineer"
           className="text-lg font-medium mt-1 transition-all"
-          onSave={val => onUpdateData?.("personal", { ...safeData.personal, title: val })}
+          onSave={val => handleFieldUpdate("personal", "title", val)}
           onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-title") : undefined}
           minRows={1}
           maxRows={1}
@@ -382,7 +391,7 @@ const CustomizableTemplate: React.FC<CustomizableTemplateProps> = ({
         <EditableField 
           value={safeData.summary} 
           placeholder="Experienced software engineer with 5+ years of experience in full-stack development. ..." 
-          onSave={val => onUpdateData?.("summary", val)} 
+          onSave={val => handleFieldUpdate("summary", "", val)} 
           className="text-sm text-gray-700 font-normal leading-relaxed" 
           onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("summary") : undefined} 
           minRows={2} 
