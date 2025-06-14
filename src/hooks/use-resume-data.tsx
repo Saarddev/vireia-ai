@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
@@ -112,7 +113,7 @@ export const useResumeData = (resumeId?: string) => {
 
         setResumeData(content);
         setResumeSettings(settings);
-        setSelectedTemplate(resume.template || "modern");
+        setSelectedTemplate(resume.template || settings.template || "modern");
 
         if ((!content.personal.name || !content.summary) && session.user) {
           const { data: profile, error: profileError } = await supabase
@@ -209,7 +210,7 @@ export const useResumeData = (resumeId?: string) => {
         .from('resumes')
         .update({
           content: resumeData as any,
-          title: resumeTitle, // Ensure title is saved
+          title: resumeTitle,
           template: selectedTemplate,
           settings: resumeSettings as any,
           updated_at: new Date().toISOString()
@@ -232,14 +233,19 @@ export const useResumeData = (resumeId?: string) => {
     }
   };
 
+  const handleTemplateChange = (template: string) => {
+    setSelectedTemplate(template);
+    setResumeSettings(prev => ({ ...prev, template }));
+  };
+
   return {
     isLoading,
     resumeData,
     setResumeData,
     resumeTitle,
-    setResumeTitle, // Export the setResumeTitle function
+    setResumeTitle,
     selectedTemplate,
-    setSelectedTemplate,
+    setSelectedTemplate: handleTemplateChange,
     resumeSettings,
     setResumeSettings,
     calculateProgress,

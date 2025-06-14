@@ -13,6 +13,8 @@ import { toast } from '@/hooks/use-toast';
 interface ResumeCanvasStyleTabProps {
   settings: ResumeSettings;
   onSettingsChange: (settings: Partial<ResumeSettings>) => void;
+  selectedTemplate: string;
+  onTemplateChange: (template: string) => void;
 }
 
 const templates = [
@@ -39,10 +41,15 @@ const templates = [
 
 const ResumeCanvasStyleTab: React.FC<ResumeCanvasStyleTabProps> = ({ 
   settings, 
-  onSettingsChange 
+  onSettingsChange,
+  selectedTemplate,
+  onTemplateChange
 }) => {
   const handleTemplateSelect = (templateId: string) => {
+    // Update both the template and settings
+    onTemplateChange(templateId);
     onSettingsChange({ template: templateId });
+    
     toast({
       title: "Template changed",
       description: `Resume template updated to ${templateId.charAt(0).toUpperCase() + templateId.slice(1)}`,
@@ -96,7 +103,7 @@ const ResumeCanvasStyleTab: React.FC<ResumeCanvasStyleTabProps> = ({
         
         <TabsContent value="templates" className="space-y-4 mt-4">
           <RadioGroup 
-            value={settings.template} 
+            value={selectedTemplate} 
             onValueChange={handleTemplateSelect}
             className="grid grid-cols-1 md:grid-cols-3 gap-4"
           >
@@ -109,7 +116,7 @@ const ResumeCanvasStyleTab: React.FC<ResumeCanvasStyleTabProps> = ({
                 />
                 <Label
                   htmlFor={`template-${template.id}`}
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all duration-200"
                 >
                   <div className="mb-3 overflow-hidden rounded-md border border-gray-200 w-full h-40 relative">
                     <Image

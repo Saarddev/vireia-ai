@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { cn } from "@/lib/utils";
@@ -292,8 +293,10 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
 
   // Function to render the selected template
   const renderTemplate = () => {
-    // Use the template from settings first, then fall back to the template prop
+    // Use template priority: settings.template > template prop > default
     const templateToUse = settings.template || template || 'modern';
+    
+    console.log('Rendering template:', templateToUse, 'Settings template:', settings.template, 'Template prop:', template);
     
     switch (templateToUse) {
       case 'modern':
