@@ -102,46 +102,57 @@ const ResumeCanvasStyleTab: React.FC<ResumeCanvasStyleTabProps> = ({
         </TabsList>
         
         <TabsContent value="templates" className="space-y-4 mt-4">
-          <RadioGroup 
-            value={selectedTemplate} 
-            onValueChange={handleTemplateSelect}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4"
-          >
-            {templates.map((template) => (
-              <div key={template.id} className="relative">
-                <RadioGroupItem
-                  value={template.id}
-                  id={`template-${template.id}`}
-                  className="peer sr-only"
-                />
-                <Label
-                  htmlFor={`template-${template.id}`}
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all duration-200"
-                >
-                  <div className="mb-3 overflow-hidden rounded-md border border-gray-200 w-full h-40 relative">
-                    <Image
-                      src={template.image}
-                      alt={template.name}
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
-                  <div className="w-full text-center">
-                    <div className="font-medium relative">
-                      {template.name}
-                      {template.new && (
-                        <span className="absolute -top-1 -right-8 bg-[#5d4dcd] text-white text-xs px-1 py-0.5 rounded">
-                          NEW
-                        </span>
-                      )}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Choose Template</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Select a template that best fits your style and industry
+              </p>
+            </div>
+            
+            <RadioGroup 
+              value={selectedTemplate} 
+              onValueChange={handleTemplateSelect}
+              className="grid grid-cols-1 gap-4"
+            >
+              {templates.map((template) => (
+                <div key={template.id} className="relative">
+                  <RadioGroupItem
+                    value={template.id}
+                    id={`template-${template.id}`}
+                    className="peer sr-only"
+                  />
+                  <Label
+                    htmlFor={`template-${template.id}`}
+                    className="flex items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all duration-200"
+                  >
+                    <div className="flex items-center space-x-4 w-full">
+                      <div className="overflow-hidden rounded-md border border-gray-200 w-16 h-20 relative flex-shrink-0">
+                        <Image
+                          src={template.image}
+                          alt={template.name}
+                          className="object-cover w-full h-full"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium relative flex items-center">
+                          {template.name}
+                          {template.new && (
+                            <span className="ml-2 bg-[#5d4dcd] text-white text-xs px-2 py-0.5 rounded">
+                              NEW
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          {template.description}
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {template.description}
-                    </div>
-                  </div>
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
         </TabsContent>
         
         <TabsContent value="colors" className="mt-4">
