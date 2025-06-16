@@ -6,6 +6,7 @@ import ModernTemplate from './resume-preview/ModernTemplate';
 import CustomizableTemplate from './resume-preview/CustomizableTemplate';
 import ProfessionalTemplate from './resume-preview/ProfessionalTemplate';
 import PreviewControls from './resume-preview/PreviewControls';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { ResumeData, ResumeSettings, SegmentStyles } from '@/types/resume';
 import AIAnalysisDrawer from './resume-builder/AIAnalysisDrawer';
 
@@ -364,24 +365,32 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
         </span>
       </PreviewControls>
       
-      <div className="flex-1 overflow-auto relative scroll-smooth scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        <div className="min-h-full flex items-start justify-center p-4">
-          <Card
-            className={cn(
-              "resume-content bg-white rounded-lg shadow-md transition-all duration-200 mx-auto",
-              "border border-gray-200 w-full max-w-[21cm]"
-            )}
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea className="h-full w-full">
+          <div 
+            className="flex items-start justify-center p-4"
             style={{
-              transform: `scale(${zoomLevel})`,
-              transformOrigin: 'top center',
-              minHeight: 'auto'
+              minHeight: `${100 * zoomLevel}vh`,
+              paddingBottom: `${zoomLevel > 1 ? (zoomLevel - 1) * 50 : 0}vh`
             }}
           >
-            <div ref={resumeContentRef} className="resume-content p-6 md:p-8">
-              {renderTemplate()}
-            </div>
-          </Card>
-        </div>
+            <Card
+              className={cn(
+                "resume-content bg-white rounded-lg shadow-md transition-all duration-200 mx-auto",
+                "border border-gray-200 w-full max-w-[21cm]"
+              )}
+              style={{
+                transform: `scale(${zoomLevel})`,
+                transformOrigin: 'top center',
+                minHeight: 'auto'
+              }}
+            >
+              <div ref={resumeContentRef} className="resume-content p-6 md:p-8">
+                {renderTemplate()}
+              </div>
+            </Card>
+          </div>
+        </ScrollArea>
       </div>
     </div>
   );
