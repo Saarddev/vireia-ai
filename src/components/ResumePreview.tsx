@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -61,6 +61,62 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
   const { isMobile } = useIsMobile();
   const [zoomLevel, setZoomLevel] = React.useState(1);
   const resumeContentRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Zoom functions
+  const handleZoomIn = useCallback(() => {
+    setZoomLevel(prev => Math.min(prev + 0.25, 2));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setZoomLevel(prev => Math.max(prev - 0.25, 0.5));
+  }, []);
+
+  // Handle wheel zoom with Ctrl key
+  const handleWheelZoom = useCallback((e: WheelEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      
+      if (e.deltaY < 0) {
+        handleZoomIn();
+      } else {
+        handleZoomOut();
+      }
+    }
+  }, [handleZoomIn, handleZoomOut]);
+
+  // Handle keyboard shortcuts
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey)) {
+      if (e.key === '=' || e.key === '+') {
+        e.preventDefault();
+        handleZoomIn();
+      } else if (e.key === '-') {
+        e.preventDefault();
+        handleZoomOut();
+      } else if (e.key === '0') {
+        e.preventDefault();
+        setZoomLevel(1);
+      }
+    }
+  }, [handleZoomIn, handleZoomOut]);
+
+  // Add event listeners
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Add wheel event listener
+    container.addEventListener('wheel', handleWheelZoom, { passive: false });
+    
+    // Add keyboard event listener
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      container.removeEventListener('wheel', handleWheelZoom);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleWheelZoom, handleKeyDown]);
 
   const handleGenerateWithAI = async (section: string): Promise<string> => {
     if (onGenerateWithAI) {
@@ -338,16 +394,8 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
     }
   };
 
-  const handleZoomIn = () => {
-    setZoomLevel(prev => Math.min(prev + 0.25, 2));
-  };
-
-  const handleZoomOut = () => {
-    setZoomLevel(prev => Math.max(prev - 0.25, 0.5));
-  };
-
   return (
-    <div className="relative h-full flex flex-col overflow-hidden">
+    <div ref={containerRef} className="relative h-full flex flex-col overflow-hidden">
       <PreviewControls
         zoomLevel={zoomLevel}
         onZoomIn={handleZoomIn}
@@ -361,7 +409,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
           </div>
         )}
         <span className="text-sm text-gray-600 ml-2">
-          {Math.round(zoomLevel * 100)}%
+          {Math.round(zoomLevel * 100)}% • Ctrl+Scroll to zoom
         </span>
       </PreviewControls>
       
