@@ -22,34 +22,47 @@ interface ResumeSettingsProps {
       accentColor?: string;
     };
   };
-  onSettingsChange: (settings: any) => void;
+  onSettingsChange?: (settings: any) => void;
+  onChange?: (newSettings: any) => void;
 }
 
-const ResumeSettings: React.FC<ResumeSettingsProps> = ({ settings, onSettingsChange }) => {
+const ResumeSettings: React.FC<ResumeSettingsProps> = ({ settings, onSettingsChange, onChange }) => {
+  const handleChange = onSettingsChange || onChange;
+
   const handleTemplateChange = (template: string) => {
-    onSettingsChange({ ...settings, template });
+    if (handleChange) {
+      handleChange({ ...settings, template });
+    }
   };
 
   const handleFontSizeChange = (fontSize: number[]) => {
-    onSettingsChange({ ...settings, fontSize: fontSize[0] });
+    if (handleChange) {
+      handleChange({ ...settings, fontSize: fontSize[0] });
+    }
   };
 
   const handleLineHeightChange = (lineHeight: number[]) => {
-    onSettingsChange({ ...settings, lineHeight: lineHeight[0] });
+    if (handleChange) {
+      handleChange({ ...settings, lineHeight: lineHeight[0] });
+    }
   };
 
   const handlePhotoToggle = (showPhoto: boolean) => {
-    onSettingsChange({ ...settings, showPhoto });
+    if (handleChange) {
+      handleChange({ ...settings, showPhoto });
+    }
   };
 
   const handleColorsChange = (colors: { primaryColor?: string; secondaryColor?: string; accentColor?: string }) => {
-    onSettingsChange({ 
-      ...settings, 
-      colors: { 
-        ...settings.colors, 
-        ...colors 
-      } 
-    });
+    if (handleChange) {
+      handleChange({ 
+        ...settings, 
+        colors: { 
+          ...settings.colors, 
+          ...colors 
+        } 
+      });
+    }
   };
 
   return (

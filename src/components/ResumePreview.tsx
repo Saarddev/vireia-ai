@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { cn } from "@/lib/utils";
@@ -365,20 +364,20 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({
         </span>
       </PreviewControls>
       
-      <div className="flex-1 overflow-auto p-4 relative scroll-smooth scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        <div className="min-h-full flex items-start justify-center pb-20">
+      <div className="flex-1 overflow-auto relative scroll-smooth scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+        <div className="min-h-full flex items-start justify-center p-4">
           <Card
             className={cn(
-              "resume-content bg-white rounded-lg shadow-md p-6 md:p-8 transition-all duration-200 mx-auto",
+              "resume-content bg-white rounded-lg shadow-md transition-all duration-200 mx-auto",
               "border border-gray-200 w-full max-w-[21cm]"
             )}
             style={{
               transform: `scale(${zoomLevel})`,
               transformOrigin: 'top center',
-              marginBottom: `${(zoomLevel - 1) * 100}%`
+              minHeight: 'auto'
             }}
           >
-            <div ref={resumeContentRef} className="resume-content">
+            <div ref={resumeContentRef} className="resume-content p-6 md:p-8">
               {renderTemplate()}
             </div>
           </Card>
