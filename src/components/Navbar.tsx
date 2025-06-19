@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { FileText, Menu } from 'lucide-react';
@@ -60,7 +59,7 @@ const Navbar = () => {
           <div className={`bg-resume-purple rounded-lg p-1.5 transition-transform duration-300 ${scrolled ? 'scale-90' : ''}`}>
             <FileText className={`h-5 w-5 text-white transition-all duration-300 ${scrolled ? 'scale-110' : ''}`} />
           </div>
-          <Link to="/" className="font-bold text-xl bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">ResumeAI</Link>
+          <Link to="/" className="font-bold text-xl bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">Cadina AI</Link>
         </div>
         <div className="hidden md:flex space-x-8 animate-slide-in-right animate-delay-200">
           <a href="#features" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">Features</a>

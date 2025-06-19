@@ -24,7 +24,7 @@ const Index = () => {
                 Developed by
               </h2>
               <p className="max-w-[700px] text-resume-gray md:text-lg">
-                Meet the developer behind ResumeAI
+                Meet the developer behind Cadina AI
               </p>
             </div>
             
