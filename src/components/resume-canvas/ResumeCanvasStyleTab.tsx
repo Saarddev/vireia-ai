@@ -57,7 +57,14 @@ const ResumeCanvasStyleTab: React.FC<ResumeCanvasStyleTabProps> = ({
   };
 
   const handleColorChange = (colors: { primaryColor?: string, secondaryColor?: string, accentColor?: string }) => {
-    onSettingsChange(colors);
+    // Update colors in settings, ensuring both root level and nested properties are updated
+    onSettingsChange({ 
+      ...colors,
+      colors: {
+        ...settings.colors,
+        ...colors
+      }
+    });
   };
 
   const handleFontFamilyChange = (value: string) => {
@@ -158,9 +165,9 @@ const ResumeCanvasStyleTab: React.FC<ResumeCanvasStyleTabProps> = ({
         <TabsContent value="colors" className="mt-4">
           <ColorPickerTab 
             colors={{
-              primaryColor: settings.primaryColor,
-              secondaryColor: settings.secondaryColor,
-              accentColor: settings.accentColor
+              primaryColor: settings.primaryColor || '#5d4dcd',
+              secondaryColor: settings.secondaryColor || '#333333',
+              accentColor: settings.accentColor || '#d6bcfa'
             }}
             onChange={handleColorChange}
           />
@@ -172,7 +179,7 @@ const ResumeCanvasStyleTab: React.FC<ResumeCanvasStyleTabProps> = ({
               <Label htmlFor="font-family">Font Family</Label>
               <select 
                 id="font-family"
-                value={settings.fontFamily} 
+                value={settings.fontFamily || 'Inter'} 
                 onChange={(e) => handleFontFamilyChange(e.target.value)}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
               >
@@ -191,7 +198,7 @@ const ResumeCanvasStyleTab: React.FC<ResumeCanvasStyleTabProps> = ({
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <Label htmlFor="font-size">Font Size</Label>
-                <span className="text-sm text-muted-foreground">{settings.fontSize}pt</span>
+                <span className="text-sm text-muted-foreground">{settings.fontSize || 11}pt</span>
               </div>
               <input 
                 id="font-size"
@@ -199,7 +206,7 @@ const ResumeCanvasStyleTab: React.FC<ResumeCanvasStyleTabProps> = ({
                 min={8}
                 max={14}
                 step={0.5}
-                value={settings.fontSize} 
+                value={settings.fontSize || 11} 
                 onChange={(e) => handleFontSizeChange([parseFloat(e.target.value)])}
                 className="w-full"
               />
@@ -209,7 +216,7 @@ const ResumeCanvasStyleTab: React.FC<ResumeCanvasStyleTabProps> = ({
               <Label htmlFor="paper-size">Paper Size</Label>
               <select 
                 id="paper-size"
-                value={settings.paperSize} 
+                value={settings.paperSize || 'letter'} 
                 onChange={(e) => handlePaperSizeChange(e.target.value)}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
               >

@@ -16,6 +16,12 @@ interface ResumeSettingsProps {
     fontSize?: number;
     lineHeight?: number;
     showPhoto?: boolean;
+    fontFamily?: string;
+    primaryColor?: string;
+    secondaryColor?: string;
+    accentColor?: string;
+    paperSize?: string;
+    margins?: string;
     colors?: {
       primaryColor?: string;
       secondaryColor?: string;
@@ -55,13 +61,33 @@ const ResumeSettings: React.FC<ResumeSettingsProps> = ({ settings, onSettingsCha
 
   const handleColorsChange = (colors: { primaryColor?: string; secondaryColor?: string; accentColor?: string }) => {
     if (handleChange) {
+      // Update both the nested colors object and the root level color properties for compatibility
       handleChange({ 
         ...settings, 
+        ...colors, // Apply colors directly to root level
         colors: { 
           ...settings.colors, 
           ...colors 
         } 
       });
+    }
+  };
+
+  const handleFontFamilyChange = (fontFamily: string) => {
+    if (handleChange) {
+      handleChange({ ...settings, fontFamily });
+    }
+  };
+
+  const handlePaperSizeChange = (paperSize: string) => {
+    if (handleChange) {
+      handleChange({ ...settings, paperSize });
+    }
+  };
+
+  const handleMarginsChange = (margins: string) => {
+    if (handleChange) {
+      handleChange({ ...settings, margins });
     }
   };
 
@@ -100,13 +126,41 @@ const ResumeSettings: React.FC<ResumeSettingsProps> = ({ settings, onSettingsCha
                 <SelectContent>
                   <SelectItem value="modern">Modern</SelectItem>
                   <SelectItem value="professional">Professional</SelectItem>
-                  <SelectItem value="creative">Creative</SelectItem>
+                  <SelectItem value="customizable">Customizable</SelectItem>
                   <SelectItem value="minimal">Minimal</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <Separator />
+
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Paper Size</Label>
+              <Select value={settings.paperSize || 'letter'} onValueChange={handlePaperSizeChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select paper size" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="a4">A4</SelectItem>
+                  <SelectItem value="letter">Letter</SelectItem>
+                  <SelectItem value="legal">Legal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Margins</Label>
+              <Select value={settings.margins || 'normal'} onValueChange={handleMarginsChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select margins" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="narrow">Narrow</SelectItem>
+                  <SelectItem value="normal">Normal</SelectItem>
+                  <SelectItem value="wide">Wide</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -126,6 +180,23 @@ const ResumeSettings: React.FC<ResumeSettingsProps> = ({ settings, onSettingsCha
           </TabsContent>
 
           <TabsContent value="typography" className="space-y-6 mt-4">
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Font Family</Label>
+              <Select value={settings.fontFamily || 'Inter'} onValueChange={handleFontFamilyChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select font family" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Inter">Inter</SelectItem>
+                  <SelectItem value="Roboto">Roboto</SelectItem>
+                  <SelectItem value="Open+Sans">Open Sans</SelectItem>
+                  <SelectItem value="Lato">Lato</SelectItem>
+                  <SelectItem value="Poppins">Poppins</SelectItem>
+                  <SelectItem value="Montserrat">Montserrat</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-3">
               <Label className="text-sm font-medium">
                 Font Size: {settings.fontSize || 14}px
@@ -157,7 +228,11 @@ const ResumeSettings: React.FC<ResumeSettingsProps> = ({ settings, onSettingsCha
 
           <TabsContent value="colors" className="mt-4">
             <ColorPickerTab 
-              colors={settings.colors || {}}
+              colors={{
+                primaryColor: settings.primaryColor || settings.colors?.primaryColor || '#5d4dcd',
+                secondaryColor: settings.secondaryColor || settings.colors?.secondaryColor || '#333333',
+                accentColor: settings.accentColor || settings.colors?.accentColor || '#d6bcfa'
+              }}
               onChange={handleColorsChange}
             />
           </TabsContent>
