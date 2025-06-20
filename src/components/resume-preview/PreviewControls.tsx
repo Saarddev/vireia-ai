@@ -60,15 +60,7 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
           </Button>
         )}
         {onPrint && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onPrint}
-            className="text-gray-600 hover:bg-gray-50 border-gray-200"
-          >
-            <Printer className="w-4 h-4 mr-1.5" />
-            <span className="hidden sm:inline">Print</span>
-          </Button>
+          <></>
         )}
         <Button
           variant="outline"

@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { useResumeData } from '@/hooks/use-resume-data';
 import { useResumeAI } from '@/hooks/use-resume-ai';
 import { summarizeText } from '@/utils/summarizeText';
-import { 
-  Download, 
-  Undo, 
-  Redo, 
-  Move, 
-  PanelLeft, 
+import {
+  Download,
+  Undo,
+  Redo,
+  Move,
+  PanelLeft,
   ChevronLeft,
   Share2,
   Plus,
@@ -45,11 +45,11 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -78,19 +78,19 @@ const ResumeCanvas = () => {
   const [showSidebar, setShowSidebar] = useState(true);
   const [isInEditMode, setIsInEditMode] = useState(false);
   const [isSectionEditorOpen, setIsSectionEditorOpen] = useState(false);
-  const [editingField, setEditingField] = useState<{section: string; field?: string; itemId?: string; value: string}>({section: '', value: ''});
+  const [editingField, setEditingField] = useState<{ section: string; field?: string; itemId?: string; value: string }>({ section: '', value: '' });
   const { isGenerating, improveDescription, generateSummary, extractSkills } = useResumeAI();
   const [isAIAnalysisOpen, setIsAIAnalysisOpen] = useState(false);
 
-  const { 
-    isLoading, 
-    resumeData, 
-    setResumeData, 
-    resumeTitle, 
+  const {
+    isLoading,
+    resumeData,
+    setResumeData,
+    resumeTitle,
     setResumeTitle,
-    selectedTemplate, 
-    setSelectedTemplate, 
-    resumeSettings, 
+    selectedTemplate,
+    setSelectedTemplate,
+    resumeSettings,
     setResumeSettings,
     calculateProgress,
     handleSave
@@ -131,22 +131,22 @@ const ResumeCanvas = () => {
 
   const handleUndo = () => {
     if (undoStack.length === 0) return;
-    
+
     const lastState = undoStack[undoStack.length - 1];
     setUndoStack(undoStack.slice(0, -1));
     setRedoStack([...redoStack, JSON.stringify(resumeData)]);
-    
+
     // Apply the undo action
     setResumeData(JSON.parse(lastState));
   };
 
   const handleRedo = () => {
     if (redoStack.length === 0) return;
-    
+
     const nextState = redoStack[redoStack.length - 1];
     setRedoStack(redoStack.slice(0, -1));
     setUndoStack([...undoStack, JSON.stringify(resumeData)]);
-    
+
     // Apply the redo action
     setResumeData(JSON.parse(nextState));
   };
@@ -253,7 +253,7 @@ const ResumeCanvas = () => {
 
   const handleSaveField = async () => {
     const { section, field, itemId, value } = editingField;
-    
+
     if (section === 'summary') {
       handleDataChange('summary', value);
     } else if (section === 'personal' && field) {
@@ -264,14 +264,14 @@ const ResumeCanvas = () => {
     } else if (itemId && field && ['experience', 'education', 'projects'].includes(section)) {
       const items = [...resumeData[section]];
       const itemIndex = items.findIndex(item => item.id === itemId);
-      
+
       if (itemIndex >= 0) {
         const updatedItem = { ...items[itemIndex], [field]: value };
         items[itemIndex] = updatedItem;
         handleDataChange(section, items);
       }
     }
-    
+
     setIsSectionEditorOpen(false);
   };
 
@@ -282,19 +282,19 @@ const ResumeCanvas = () => {
         const experienceText = resumeData.experience
           .map(exp => exp.description)
           .join('\n\n');
-          
+
         if (!experienceText || experienceText.trim() === '') {
           toast.error("Please add some experience details first to generate a better summary");
           return "";
         }
-          
+
         const skills = [...resumeData.skills.technical, ...resumeData.skills.soft];
-        
+
         const generatedSummary = await generateSummary(
-          resumeData.experience.map(e => e.description), 
+          resumeData.experience.map(e => e.description),
           skills
         );
-        
+
         if (generatedSummary) {
           handleDataChange('summary', generatedSummary);
           return generatedSummary;
@@ -303,12 +303,12 @@ const ResumeCanvas = () => {
         const experience = resumeData.experience.find(e => e.id === editingField.itemId);
         if (experience) {
           const currentText = editingField.value || experience.description;
-          
+
           if (!currentText || currentText.trim() === '') {
             toast.error("Please add some content first to improve");
             return "";
           }
-          
+
           const improved = await improveDescription(currentText);
           if (improved) {
             // Update in the editing field rather than immediately saving
@@ -320,12 +320,12 @@ const ResumeCanvas = () => {
         const education = resumeData.education.find(e => e.id === editingField.itemId);
         if (education) {
           const currentText = editingField.value || education.description || '';
-          
+
           if (!currentText || currentText.trim() === '') {
             toast.error("Please add some content first to improve");
             return "";
           }
-          
+
           // We'll also use improveDescription for education descriptions
           const improved = await improveDescription(currentText);
           if (improved) {
@@ -334,7 +334,7 @@ const ResumeCanvas = () => {
           }
         }
       }
-      
+
       return "";
     } catch (error) {
       console.error('AI generation error:', error);
@@ -350,7 +350,7 @@ const ResumeCanvas = () => {
         handleSave().catch(console.error);
       }
     }, 30000);
-    
+
     return () => clearInterval(saveInterval);
   }, [resumeData, resumeId]);
 
@@ -376,8 +376,8 @@ const ResumeCanvas = () => {
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm h-14">
         <div className="flex items-center gap-3">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="icon"
             onClick={handleBackToBuilder}
             className="flex items-center text-gray-600 dark:text-gray-300 hover:text-resume-purple"
@@ -389,9 +389,9 @@ const ResumeCanvas = () => {
             <h1 className="text-lg font-medium text-gray-800 dark:text-white truncate max-w-[200px]">
               {resumeTitle || "Untitled Resume"}
             </h1>
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="h-6 w-6 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
               onClick={() => {
                 const newTitle = prompt("Enter a new title for your resume", resumeTitle);
@@ -405,7 +405,7 @@ const ResumeCanvas = () => {
             Canvas Editor
           </Badge>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <TooltipProvider>
             <Tooltip>
@@ -418,7 +418,7 @@ const ResumeCanvas = () => {
               <TooltipContent>Undo</TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          
+
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -430,7 +430,7 @@ const ResumeCanvas = () => {
               <TooltipContent>Redo</TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          
+
           <div className="flex items-center space-x-1 px-2 py-1 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800">
             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleZoomOut}>
               <ZoomOut className="h-3.5 w-3.5" />
@@ -440,24 +440,24 @@ const ResumeCanvas = () => {
               <ZoomIn className="h-3.5 w-3.5" />
             </Button>
           </div>
-          
-          <AIAnalysisDrawer 
+
+          <AIAnalysisDrawer
             resumeData={resumeData}
             isOpen={isAIAnalysisOpen}
             onOpenChange={setIsAIAnalysisOpen}
           />
-          
-          <Button 
-            variant="outline" 
-            className="ml-2 border-resume-purple/30 text-resume-purple dark:text-resume-purple-light hover:bg-resume-purple/10" 
+
+          <Button
+            variant="outline"
+            className="ml-2 border-resume-purple/30 text-resume-purple dark:text-resume-purple-light hover:bg-resume-purple/10"
             onClick={handleSaveChanges}
           >
             <Save className="mr-2 h-4 w-4" />
             Save
           </Button>
-          <Button 
-            variant="default" 
-            className="bg-resume-purple hover:bg-resume-purple/90 text-white" 
+          <Button
+            variant="default"
+            className="bg-resume-purple hover:bg-resume-purple/90 text-white"
             onClick={handleDownload}
           >
             <Download className="mr-2 h-4 w-4" />
@@ -465,40 +465,40 @@ const ResumeCanvas = () => {
           </Button>
         </div>
       </header>
-      
+
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar - Toggleable */}
         {showSidebar && (
           <div className="w-72 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-y-auto transition-all duration-200 ease-in-out shadow-md">
             <Tabs defaultValue="content" className="w-full">
               <TabsList className="w-full grid grid-cols-2 p-1 m-2 bg-gray-100 dark:bg-gray-700 rounded-md">
-                <TabsTrigger 
-                  value="content" 
+                <TabsTrigger
+                  value="content"
                   className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-resume-purple dark:data-[state=active]:text-resume-purple-light data-[state=active]:shadow-sm"
                 >
                   Content
                 </TabsTrigger>
-                <TabsTrigger 
+                <TabsTrigger
                   value="style"
                   className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-resume-purple dark:data-[state=active]:text-resume-purple-light data-[state=active]:shadow-sm"
                 >
                   Style
                 </TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="content" className="p-3 space-y-4">
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Sections</h3>
                   {Object.entries({
                     personal: "Personal Info",
-                    summary: "Summary", 
+                    summary: "Summary",
                     experience: "Experience",
                     education: "Education",
                     skills: "Skills",
                     projects: "Projects"
                   }).map(([key, label]) => (
-                    <div 
-                      key={key} 
+                    <div
+                      key={key}
                       className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors ${activeSection === key ? 'bg-purple-100 dark:bg-purple-900/40 text-resume-purple dark:text-resume-purple-light' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
                       onClick={() => setActiveSection(key)}
                     >
@@ -534,12 +534,12 @@ const ResumeCanvas = () => {
                     </div>
                   ))}
                 </div>
-                
+
                 {activeSection === 'personal' && (
                   <div className="space-y-2 pl-2 animate-fade-in">
                     <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Personal Information</h4>
                     {Object.entries(resumeData.personal).map(([field, value]) => (
-                      <div 
+                      <div
                         key={field}
                         className="flex items-center justify-between text-sm p-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
                       >
@@ -557,12 +557,12 @@ const ResumeCanvas = () => {
                     ))}
                   </div>
                 )}
-                
+
                 {activeSection === 'experience' && (
                   <div className="space-y-2 pl-2 animate-fade-in">
                     <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Experience Items</h4>
                     {resumeData.experience.map((exp) => (
-                      <div 
+                      <div
                         key={exp.id}
                         className="flex flex-col space-y-1 p-2 border border-gray-100 dark:border-gray-700 rounded hover:border-gray-200 dark:hover:border-gray-600 transition-colors bg-white dark:bg-gray-800 shadow-sm"
                       >
@@ -601,12 +601,12 @@ const ResumeCanvas = () => {
                     </Button>
                   </div>
                 )}
-                
+
                 {activeSection === 'education' && (
                   <div className="space-y-2 pl-2 animate-fade-in">
                     <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Education Items</h4>
                     {resumeData.education.map((edu) => (
-                      <div 
+                      <div
                         key={edu.id}
                         className="flex flex-col space-y-1 p-2 border border-gray-100 dark:border-gray-700 rounded hover:border-gray-200 dark:hover:border-gray-600 transition-colors bg-white dark:bg-gray-800 shadow-sm"
                       >
@@ -645,12 +645,12 @@ const ResumeCanvas = () => {
                     </Button>
                   </div>
                 )}
-                
+
                 {activeSection === 'projects' && (
                   <div className="space-y-2 pl-2 animate-fade-in">
                     <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Project Items</h4>
                     {resumeData.projects.map((project) => (
-                      <div 
+                      <div
                         key={project.id}
                         className="flex flex-col space-y-1 p-2 border border-gray-100 dark:border-gray-700 rounded hover:border-gray-200 dark:hover:border-gray-600 transition-colors bg-white dark:bg-gray-800 shadow-sm"
                       >
@@ -689,7 +689,7 @@ const ResumeCanvas = () => {
                     </Button>
                   </div>
                 )}
-                
+
                 {activeSection === 'skills' && (
                   <div className="space-y-3 pl-2 animate-fade-in">
                     <div>
@@ -700,7 +700,7 @@ const ResumeCanvas = () => {
                             <span className="px-2 py-1 bg-[#efeafc] dark:bg-[#352a70] rounded-sm text-xs border-[0.5px] border-[#dad3f8] dark:border-[#4b3e96] text-violet-600 dark:text-violet-300 font-medium">
                               {skill}
                             </span>
-                            <button 
+                            <button
                               className="absolute -right-1 -top-1 h-4 w-4 bg-red-500 rounded-full text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                               onClick={() => {
                                 const newTechnical = [...resumeData.skills.technical];
@@ -734,7 +734,7 @@ const ResumeCanvas = () => {
                         </Button>
                       </div>
                     </div>
-                    
+
                     <div>
                       <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Soft Skills</h4>
                       <div className="flex flex-wrap gap-1.5 mt-1">
@@ -743,7 +743,7 @@ const ResumeCanvas = () => {
                             <span className="px-2 py-1 bg-[#f3f3f3] dark:bg-[#333333] rounded-sm text-xs border-[0.5px] border-[#e5e5e5] dark:border-[#444444] text-gray-700 dark:text-gray-300 font-medium">
                               {skill}
                             </span>
-                            <button 
+                            <button
                               className="absolute -right-1 -top-1 h-4 w-4 bg-red-500 rounded-full text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                               onClick={() => {
                                 const newSoft = [...resumeData.skills.soft];
@@ -777,7 +777,7 @@ const ResumeCanvas = () => {
                         </Button>
                       </div>
                     </div>
-                    
+
                     <Button
                       variant="outline"
                       size="sm"
@@ -788,7 +788,7 @@ const ResumeCanvas = () => {
                           const extractedSkills = await extractSkills(
                             resumeData.experience.map(e => e.description)
                           );
-                          
+
                           if (extractedSkills) {
                             handleDataChange('skills', extractedSkills);
                             toast.success("Skills extracted successfully!");
@@ -806,12 +806,12 @@ const ResumeCanvas = () => {
                   </div>
                 )}
               </TabsContent>
-              
+
               <TabsContent value="style" className="p-3 space-y-4">
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Template</h3>
                   <div className="grid grid-cols-2 gap-2">
-                    <div 
+                    <div
                       className={`p-2 border rounded-md cursor-pointer transition-all duration-200 ${selectedTemplate === 'modern' ? 'border-resume-purple dark:border-resume-purple-light bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-resume-purple/50 dark:hover:border-resume-purple-light/50'}`}
                       onClick={() => setSelectedTemplate('modern')}
                     >
@@ -826,7 +826,7 @@ const ResumeCanvas = () => {
                       </div>
                       <p className="text-xs text-center text-gray-700 dark:text-gray-300">Modern</p>
                     </div>
-                    <div 
+                    <div
                       className={`p-2 border rounded-md cursor-pointer transition-all duration-200 ${selectedTemplate === 'classic' ? 'border-resume-purple dark:border-resume-purple-light bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-resume-purple/50 dark:hover:border-resume-purple-light/50'}`}
                       onClick={() => setSelectedTemplate('classic')}
                     >
@@ -843,50 +843,50 @@ const ResumeCanvas = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Colors</h3>
                   <div className="flex flex-wrap gap-2">
-                    <div 
+                    <div
                       className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600 cursor-pointer transition-transform hover:scale-110"
                       style={{ backgroundColor: resumeSettings.primaryColor }}
                       onClick={() => {
                         const color = prompt("Enter primary color (hex format)", resumeSettings.primaryColor);
                         if (color && /^#[0-9A-Fa-f]{6}$/.test(color)) {
-                          setResumeSettings({...resumeSettings, primaryColor: color});
+                          setResumeSettings({ ...resumeSettings, primaryColor: color });
                         }
                       }}
                     ></div>
-                    <div 
+                    <div
                       className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600 cursor-pointer transition-transform hover:scale-110"
                       style={{ backgroundColor: resumeSettings.secondaryColor }}
                       onClick={() => {
                         const color = prompt("Enter secondary color (hex format)", resumeSettings.secondaryColor);
                         if (color && /^#[0-9A-Fa-f]{6}$/.test(color)) {
-                          setResumeSettings({...resumeSettings, secondaryColor: color});
+                          setResumeSettings({ ...resumeSettings, secondaryColor: color });
                         }
                       }}
                     ></div>
-                    <div 
+                    <div
                       className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600 cursor-pointer transition-transform hover:scale-110"
                       style={{ backgroundColor: resumeSettings.accentColor }}
                       onClick={() => {
                         const color = prompt("Enter accent color (hex format)", resumeSettings.accentColor);
                         if (color && /^#[0-9A-Fa-f]{6}$/.test(color)) {
-                          setResumeSettings({...resumeSettings, accentColor: color});
+                          setResumeSettings({ ...resumeSettings, accentColor: color });
                         }
                       }}
                     ></div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Typography</h3>
                   <div>
                     <Label className="text-xs text-gray-600 dark:text-gray-400">Font Family</Label>
-                    <Select 
-                      value={resumeSettings.fontFamily} 
-                      onValueChange={(value) => setResumeSettings({...resumeSettings, fontFamily: value})}
+                    <Select
+                      value={resumeSettings.fontFamily}
+                      onValueChange={(value) => setResumeSettings({ ...resumeSettings, fontFamily: value })}
                     >
                       <SelectTrigger className="h-8 mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                         <SelectValue placeholder="Select font" />
@@ -901,27 +901,27 @@ const ResumeCanvas = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-gray-600 dark:text-gray-400">Font Size</span>
                       <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{resumeSettings.fontSize}pt</span>
                     </div>
-                    <Slider 
-                      defaultValue={[resumeSettings.fontSize]} 
-                      min={8} 
-                      max={14} 
-                      step={0.5} 
+                    <Slider
+                      defaultValue={[resumeSettings.fontSize]}
+                      min={8}
+                      max={14}
+                      step={0.5}
                       className="w-full"
-                      onValueChange={(value) => setResumeSettings({...resumeSettings, fontSize: value[0]})}
+                      onValueChange={(value) => setResumeSettings({ ...resumeSettings, fontSize: value[0] })}
                     />
                   </div>
-                  
+
                   <div>
                     <Label className="text-xs text-gray-600 dark:text-gray-400">Paper Size</Label>
-                    <Select 
-                      value={resumeSettings.paperSize} 
-                      onValueChange={(value: "a4" | "letter" | "legal") => setResumeSettings({...resumeSettings, paperSize: value})}
+                    <Select
+                      value={resumeSettings.paperSize}
+                      onValueChange={(value: "a4" | "letter" | "legal") => setResumeSettings({ ...resumeSettings, paperSize: value })}
                     >
                       <SelectTrigger className="h-8 mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                         <SelectValue placeholder="Select size" />
@@ -933,12 +933,12 @@ const ResumeCanvas = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div>
                     <Label className="text-xs text-gray-600 dark:text-gray-400">Margins</Label>
-                    <Select 
-                      value={resumeSettings.margins} 
-                      onValueChange={(value: "narrow" | "normal" | "wide") => setResumeSettings({...resumeSettings, margins: value})}
+                    <Select
+                      value={resumeSettings.margins}
+                      onValueChange={(value: "narrow" | "normal" | "wide") => setResumeSettings({ ...resumeSettings, margins: value })}
                     >
                       <SelectTrigger className="h-8 mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                         <SelectValue placeholder="Select margins" />
@@ -955,27 +955,27 @@ const ResumeCanvas = () => {
             </Tabs>
           </div>
         )}
-        
+
         {/* Main Canvas Area */}
         <div className="flex-1 overflow-hidden bg-gray-100 dark:bg-gray-900/50 relative">
           <div className="absolute top-2 left-2 z-10">
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Button
+              variant="outline"
+              size="icon"
               className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-sm"
               onClick={() => setShowSidebar(!showSidebar)}
             >
               <PanelLeft className="h-4 w-4" />
             </Button>
           </div>
-          
+
           <div className="absolute top-2 right-2 z-10 flex space-x-1">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
-                    variant={activeTool === 'select' ? 'default' : 'outline'} 
-                    size="icon" 
+                  <Button
+                    variant={activeTool === 'select' ? 'default' : 'outline'}
+                    size="icon"
                     className={activeTool === 'select' ? 'bg-resume-purple' : 'bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm'}
                     onClick={() => handleChangeTool('select')}
                   >
@@ -985,13 +985,13 @@ const ResumeCanvas = () => {
                 <TooltipContent>Select Tool</TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            
+
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
-                    variant={activeTool === 'layout' ? 'default' : 'outline'} 
-                    size="icon" 
+                  <Button
+                    variant={activeTool === 'layout' ? 'default' : 'outline'}
+                    size="icon"
                     className={activeTool === 'layout' ? 'bg-resume-purple' : 'bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm'}
                     onClick={() => handleChangeTool('layout')}
                   >
@@ -1001,13 +1001,13 @@ const ResumeCanvas = () => {
                 <TooltipContent>Layout Tool</TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            
+
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
+                  <Button
+                    variant="outline"
+                    size="icon"
                     className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm"
                     onClick={toggleAIAnalysis}
                   >
@@ -1017,15 +1017,15 @@ const ResumeCanvas = () => {
                 <TooltipContent>AI Analysis</TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            
+
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
+                      <Button
+                        variant="outline"
+                        size="icon"
                         className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm"
                       >
                         <Eye className="h-4 w-4" />
@@ -1034,9 +1034,9 @@ const ResumeCanvas = () => {
                     <DialogContent className="max-w-4xl w-[95vw] h-[90vh]">
                       <div className="h-full flex flex-col">
                         <div className="flex justify-end gap-2 mb-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={handleDownload}
                             className="border-resume-purple/30 text-resume-purple hover:bg-resume-purple/10"
                           >
@@ -1058,25 +1058,25 @@ const ResumeCanvas = () => {
               </Tooltip>
             </TooltipProvider>
           </div>
-          
-          <div 
-            className="h-full w-full overflow-auto p-8 flex items-center justify-center"
+
+          <div
+            className="h-full w-full overflow-auto p-8 flex justify-center"
             style={{ cursor: activeTool === 'move' ? 'move' : 'default' }}
           >
-            <div 
+            <div
               ref={canvasRef}
-              className="bg-white dark:bg-gray-800 shadow-xl transition-transform duration-200 overflow-hidden my-4"
-              style={{ 
+              className="bg-white dark:bg-gray-800 shadow-xl  transition-transform duration-200 overflow-hidden my-4"
+              style={{
                 transform: `scale(${zoom / 100})`,
                 width: paperSize.width,
                 height: 'auto', // Changed to auto to respect content height
-                minHeight: '90vh', // Added min-height for better visibility on tablets/desktop
-                maxHeight: '100%',
+                minHeight: 'max-content', // Added min-height for better visibility on tablets/desktop
+                maxHeight: 'max-content',
                 transformOrigin: 'center top',
                 boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)'
               }}
             >
-              <div className="w-full h-full p-6">
+              <div className="w-full h-max  p-6">
                 {isLoading ? (
                   <ResumeLoadingSkeleton />
                 ) : (
@@ -1099,28 +1099,28 @@ const ResumeCanvas = () => {
           <div className="flex flex-col space-y-4">
             <h2 className="text-xl font-semibold text-gray-800 dark:text-white">{
               editingField.section === 'summary' ? 'Edit Summary' :
-              editingField.section === 'personal' ? `Edit ${editingField.field}` :
-              editingField.section.includes('experience') ? 'Edit Experience' :
-              editingField.section.includes('education') ? 'Edit Education' :
-              'Edit Content'
+                editingField.section === 'personal' ? `Edit ${editingField.field}` :
+                  editingField.section.includes('experience') ? 'Edit Experience' :
+                    editingField.section.includes('education') ? 'Edit Education' :
+                      'Edit Content'
             }</h2>
-            
+
             <div className="flex flex-col space-y-2">
               <Label className="text-gray-700 dark:text-gray-300">Content</Label>
-              <Textarea 
+              <Textarea
                 value={editingField.value}
-                onChange={(e) => setEditingField({...editingField, value: e.target.value})}
+                onChange={(e) => setEditingField({ ...editingField, value: e.target.value })}
                 className="min-h-[200px] bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
               />
             </div>
-            
+
             {(editingField.section === 'experience-desc' || editingField.section.includes('experience')) && (
               <Button
                 variant="outline"
                 onClick={async () => {
                   const improved = await handleGenerateWithAI('experience-desc');
                   if (improved) {
-                    setEditingField({...editingField, value: improved});
+                    setEditingField({ ...editingField, value: improved });
                   }
                 }}
                 disabled={isGenerating}
@@ -1130,14 +1130,14 @@ const ResumeCanvas = () => {
                 {isGenerating ? 'Improving...' : 'Improve with AI'}
               </Button>
             )}
-            
+
             {(editingField.section === 'education-desc' || editingField.section.includes('education')) && (
               <Button
                 variant="outline"
                 onClick={async () => {
                   const improved = await handleGenerateWithAI('education-desc');
                   if (improved) {
-                    setEditingField({...editingField, value: improved});
+                    setEditingField({ ...editingField, value: improved });
                   }
                 }}
                 disabled={isGenerating}
@@ -1147,14 +1147,14 @@ const ResumeCanvas = () => {
                 {isGenerating ? 'Improving...' : 'Improve with AI'}
               </Button>
             )}
-            
+
             {editingField.section === 'summary' && (
               <Button
                 variant="outline"
                 onClick={async () => {
                   const summary = await handleGenerateWithAI('summary');
                   if (summary) {
-                    setEditingField({...editingField, value: summary});
+                    setEditingField({ ...editingField, value: summary });
                   }
                 }}
                 disabled={isGenerating}
@@ -1164,7 +1164,7 @@ const ResumeCanvas = () => {
                 {isGenerating ? 'Generating...' : 'Generate Summary with AI'}
               </Button>
             )}
-            
+
             <div className="flex justify-end space-x-2">
               <Button
                 variant="outline"
