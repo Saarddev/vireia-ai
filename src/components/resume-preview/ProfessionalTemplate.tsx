@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useResumeAI } from '@/hooks/use-resume-ai';
 import { Experience, Education, ResumeSettings, SegmentStyles } from '@/types/resume';
@@ -25,15 +26,15 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
   };
 
   const handlePrimaryColor = () => {
-    return settings?.primaryColor || settings?.colors?.primaryColor || "#5d4dcd";
+    return settings?.primaryColor || "#5d4dcd";
   };
 
   const handleSecondaryColor = () => {
-    return settings?.secondaryColor || settings?.colors?.secondaryColor || "#333333";
+    return settings?.secondaryColor || "#333333";
   };
 
   const handleAccentColor = () => {
-    return settings?.accentColor || settings?.colors?.accentColor || "#d6bcfa";
+    return settings?.accentColor || "#d6bcfa";
   };
 
   const handleDescriptionBlur = async (exp: Experience, newDescription: string) => {

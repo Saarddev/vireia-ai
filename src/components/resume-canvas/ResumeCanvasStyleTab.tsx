@@ -57,14 +57,8 @@ const ResumeCanvasStyleTab: React.FC<ResumeCanvasStyleTabProps> = ({
   };
 
   const handleColorChange = (colors: { primaryColor?: string, secondaryColor?: string, accentColor?: string }) => {
-    // Update colors in settings, ensuring both root level and nested properties are updated
-    onSettingsChange({ 
-      ...colors,
-      colors: {
-        ...settings.colors,
-        ...colors
-      }
-    });
+    // Update colors in settings directly as individual properties
+    onSettingsChange(colors);
   };
 
   const handleFontFamilyChange = (value: string) => {
