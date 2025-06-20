@@ -68,13 +68,13 @@ const HeroSection = () => {
           <div className="flex flex-col justify-center space-y-6">
             <div className={`inline-flex items-center rounded-full bg-resume-purple/10 px-3 py-1 text-sm text-resume-purple max-w-fit transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               <Sparkles className="mr-1 h-3 w-3" />
-              <span>Cadina AI-Powered Resume Builder</span>
+              <span>AI-Powered Resume Builder</span>
             </div>
             <h1 className={`text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl leading-tight transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              Build Your <span className="bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">Perfect Resume</span> with Cadina AI
+              Build Your <span className="bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">Perfect Resume</span> with AI
             </h1>
             <p className={`max-w-[600px] text-resume-gray-dark md:text-xl transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              Create professional, ATS-friendly resumes in minutes. Our Cadina AI analyzes job descriptions to tailor your resume for higher interview success rates.
+              Create professional, ATS-friendly resumes in minutes. Our AI analyzes job descriptions to tailor your resume for higher interview success rates.
             </p>
             
             <div className={`flex items-center p-3 rounded-lg bg-gradient-to-r from-resume-purple/10 to-resume-violet/10 border border-resume-purple/20 transition-all duration-700 delay-250 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
