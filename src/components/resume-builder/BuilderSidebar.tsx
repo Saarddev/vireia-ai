@@ -51,7 +51,7 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
       <SidebarHeader className="px-5 py-4 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-indigo-500 bg-clip-text text-transparent font-display">
-            Resume Builder
+            Cadina AI
           </h3>
           <SidebarTrigger />
         </div>
@@ -259,7 +259,7 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
                       <span className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-purple-600 to-indigo-500 rounded-full" />
                     )}
                   </div>
-                  <span>AI Assistant</span>
+                  <span>Cadina AI</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -289,7 +289,7 @@ const BuilderSidebar: React.FC<BuilderSidebarProps> = ({
           ) : (
             <>
               <Wand2 className="h-4 w-4" />
-              <span>Generate with AI</span>
+              <span>Generate with Cadina AI</span>
             </>
           )}
         </Button>

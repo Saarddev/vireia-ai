@@ -1,6 +1,7 @@
+
 import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, Star, Building, User, ArrowRight, Sparkles, Clock, AlertCircle } from 'lucide-react';
+import { Check, Star, Building, User, ArrowRight, Sparkles, Clock, AlertCircle, Gift } from 'lucide-react';
 
 const PricingSection = () => {
   const titleRef = useRef(null);
@@ -72,16 +73,16 @@ const PricingSection = () => {
           </p>
         </div>
 
-        <div className="mb-10 bg-gradient-to-r from-resume-purple/20 to-resume-violet/20 rounded-lg p-4 shadow-md flex items-center justify-between animate-pulse">
+        <div className="mb-10 bg-gradient-to-r from-green-100 to-emerald-100 border border-green-200 rounded-lg p-4 shadow-md flex items-center justify-between animate-pulse">
           <div className="flex items-center">
-            <AlertCircle className="h-5 w-5 text-resume-purple mr-2" />
-            <span className="font-medium">
-              Limited Time Offer: <span className="text-resume-purple font-bold">50% OFF</span> first 3 months on Pro plan
+            <Gift className="h-5 w-5 text-green-600 mr-2" />
+            <span className="font-medium text-green-800">
+              🎉 Special Launch Offer: <span className="text-green-600 font-bold">FREE Pro Access</span> for all early users!
             </span>
           </div>
           <div className="flex items-center">
-            <Clock className="h-5 w-5 text-resume-purple mr-2" />
-            <span className="font-medium">Expires in: <span ref={timerRef} className="text-resume-purple font-bold">30:00</span></span>
+            <Clock className="h-5 w-5 text-green-600 mr-2" />
+            <span className="font-medium text-green-800">Limited time: <span ref={timerRef} className="text-green-600 font-bold">30:00</span></span>
           </div>
         </div>
 
@@ -132,60 +133,61 @@ const PricingSection = () => {
 
           <div 
             ref={el => plansRef.current[1] = el}
-            className="flex flex-col p-8 rounded-xl shadow-xl relative border border-resume-purple/20 bg-white scale-105 z-20 opacity-0 translate-y-10 transition-all duration-700 delay-100"
+            className="flex flex-col p-8 rounded-xl shadow-xl relative border-2 border-green-400 bg-white scale-105 z-20 opacity-0 translate-y-10 transition-all duration-700 delay-100 overflow-hidden"
           >
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-resume-purple to-resume-violet"></div>
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-500 to-emerald-500"></div>
             <div className="absolute -top-4 left-0 w-full flex justify-center">
-              <div className="bg-gradient-to-r from-resume-purple to-resume-violet text-white text-sm font-medium px-4 py-1 rounded-full flex items-center shadow-md">
-                <Star className="mr-1 h-3.5 w-3.5" />
-                Popular Choice
+              <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-medium px-4 py-1 rounded-full flex items-center shadow-md">
+                <Gift className="mr-1 h-3.5 w-3.5" />
+                FREE Launch Offer!
               </div>
             </div>
             <div className="mb-5">
-              <h3 className="text-xl font-semibold text-resume-purple">Pro</h3>
+              <h3 className="text-xl font-semibold text-green-600">Pro</h3>
               <div className="mt-2 flex items-baseline">
-                <span className="text-4xl font-bold">$15</span>
+                <span className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">$0</span>
+                <span className="ml-1 text-resume-gray line-through text-sm">was $15</span>
                 <span className="ml-1 text-resume-gray">/month</span>
               </div>
               <p className="mt-4 text-resume-gray">Ideal for professionals actively job hunting</p>
             </div>
             <ul className="space-y-4 py-6 text-resume-gray-dark flex-grow">
               <li className="flex">
-                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-resume-purple/10 shrink-0">
-                  <Check className="h-3.5 w-3.5 text-resume-purple" />
+                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-green-100 shrink-0">
+                  <Check className="h-3.5 w-3.5 text-green-600" />
                 </div>
                 <span>10 premium templates</span>
               </li>
               <li className="flex">
-                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-resume-purple/10 shrink-0">
-                  <Check className="h-3.5 w-3.5 text-resume-purple" />
+                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-green-100 shrink-0">
+                  <Check className="h-3.5 w-3.5 text-green-600" />
                 </div>
-                <span>Advanced AI job matching</span>
+                <span>Advanced Cadina AI job matching</span>
               </li>
               <li className="flex">
-                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-resume-purple/10 shrink-0">
-                  <Check className="h-3.5 w-3.5 text-resume-purple" />
+                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-green-100 shrink-0">
+                  <Check className="h-3.5 w-3.5 text-green-600" />
                 </div>
                 <span>Multiple export formats</span>
               </li>
               <li className="flex">
-                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-resume-purple/10 shrink-0">
-                  <Check className="h-3.5 w-3.5 text-resume-purple" />
+                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-green-100 shrink-0">
+                  <Check className="h-3.5 w-3.5 text-green-600" />
                 </div>
                 <span>Up to 5 different resumes</span>
               </li>
               <li className="flex">
-                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-resume-purple/10 shrink-0">
-                  <Check className="h-3.5 w-3.5 text-resume-purple" />
+                <div className="mr-3 h-6 w-6 flex items-center justify-center rounded-full bg-green-100 shrink-0">
+                  <Check className="h-3.5 w-3.5 text-green-600" />
                 </div>
                 <span>Cover letter assistance</span>
               </li>
             </ul>
-            <div className="absolute top-12 right-0 bg-resume-purple text-white text-xs font-bold px-3 py-1 rounded-l-full shadow-lg transform rotate-0 transition-transform group-hover:rotate-3">
-              SAVE 50%
+            <div className="absolute top-12 right-0 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-l-full shadow-lg transform rotate-0 transition-transform group-hover:rotate-3 animate-pulse">
+              100% FREE
             </div>
-            <Button className="mt-auto bg-gradient-to-r from-resume-purple to-resume-violet hover:from-resume-purple-dark hover:to-resume-violet shadow-lg shadow-resume-purple/20 transition-all duration-300 hover:shadow-xl hover:shadow-resume-purple/30 group">
-              Subscribe Now
+            <Button className="mt-auto bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg shadow-green-500/20 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/30 group">
+              Claim Free Access
               <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
@@ -251,8 +253,8 @@ const PricingSection = () => {
           ref={ctaRef} 
           className="mt-16 text-center opacity-0 translate-y-10 transition-all duration-700 delay-300"
         >
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-resume-purple/10 max-w-3xl mx-auto">
-            <h3 className="text-xl font-semibold mb-3">Ready to boost your career with AI-powered resumes?</h3>
+          <div className="bg-white rounded-xl p-6 shadow-lg border border-green-100 max-w-3xl mx-auto">
+            <h3 className="text-xl font-semibold mb-3">Ready to boost your career with Cadina AI-powered resumes?</h3>
             <p className="text-resume-gray mb-4">Join thousands of professionals who've landed interviews at top companies</p>
             <div className="flex flex-wrap justify-center gap-4 mt-6">
               <div className="flex -space-x-4">
@@ -261,8 +263,8 @@ const PricingSection = () => {
                 <div className="w-10 h-10 rounded-full bg-resume-purple/30 flex items-center justify-center border-2 border-white text-xs font-medium">AR</div>
                 <div className="w-10 h-10 rounded-full bg-resume-violet/30 flex items-center justify-center border-2 border-white text-xs font-medium">+2K</div>
               </div>
-              <Button className="bg-gradient-to-r from-resume-purple to-resume-violet hover:from-resume-purple-dark hover:to-resume-violet shadow-lg shadow-resume-purple/20 transition-all duration-300 hover:shadow-xl hover:shadow-resume-purple/30 group">
-                Get Started Now
+              <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg shadow-green-500/20 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/30 group">
+                Get Started Free
                 <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </div>
