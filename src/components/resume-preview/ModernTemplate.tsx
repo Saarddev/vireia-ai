@@ -1,14 +1,15 @@
+
 import React from 'react';
 import { cn } from "@/lib/utils";
 import EditableField from './EditableField';
 import AddSectionItem from './AddSectionItem';
 import ContactInfo from './ContactInfo';
 import { v4 as uuidv4 } from 'uuid';
-import { Experience, Education, Project } from '@/types/resume.d';
+import { Experience, Education, Project, ResumeSettings } from '@/types/resume.d';
 
 interface ModernTemplateProps {
   data: any;
-  settings?: any;
+  settings?: ResumeSettings;
   onUpdateData?: (section: string, value: any) => void;
   onGenerateWithAI?: (section: string) => Promise<string>;
 }
@@ -96,9 +97,20 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
     }
   };
 
+  // Color helper functions
+  const getPrimaryColor = () => {
+    return settings?.primaryColor || '#5d4dcd';
+  };
+
+  const getSecondaryColor = () => {
+    return settings?.secondaryColor || '#333333';
+  };
+
+  const getAccentColor = () => {
+    return settings?.accentColor || '#d6bcfa';
+  };
+
   const nameClass = "text-xl font-bold text-gray-900 leading-tight tracking-tight pb-0 mb-1";
-  const subtitleClass = "text-lg font-medium text-[#5d4dcd] mt-1 transition-all";
-  const sectionHeaderClass = "text-sm font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide";
   const experienceTitleClass = "font-medium text-gray-800 text-sm";
   const experienceDateClass = "text-sm text-gray-600 ml-3 whitespace-nowrap min-w-[100px] max-w-[160px]";
   const experienceDescriptionClass = "text-sm text-gray-700 mt-1 font-normal leading-relaxed";
@@ -111,7 +123,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         fontSize: `${settings.fontSize || 11}pt`,
         lineHeight: "1.5"
       }}>
-      <div className="pb-4 border-b-2 border-[#5d4dcd] mb-4">
+      <div className="pb-4 border-b-2 mb-4" style={{ borderColor: getPrimaryColor() }}>
         <EditableField
           value={safeData.personal.name}
           placeholder="John Smith"
@@ -124,13 +136,13 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         <EditableField
           value={safeData.personal.title}
           placeholder="Software Engineer"
-          className={subtitleClass}
+          className="text-lg font-medium mt-1 transition-all"
           onSave={val => onUpdateData?.("personal", { ...safeData.personal, title: val })}
           onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("personal-title") : undefined}
           minRows={1}
           maxRows={1}
-          inputStyle={{ color: '#5d4dcd', fontWeight: 500 }}
-          outputStyle={{ color: '#5d4dcd', fontWeight: 500 }}
+          inputStyle={{ color: getPrimaryColor(), fontWeight: 500 }}
+          outputStyle={{ color: getPrimaryColor(), fontWeight: 500 }}
         />
         <ContactInfo
           personal={safeData.personal}
@@ -140,7 +152,10 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
       </div>
 
       <div className="mb-6 resume-section">
-        <h2 className={sectionHeaderClass}>Summary</h2>
+        <h2 className="text-sm font-semibold mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide" 
+          style={{ color: getSecondaryColor() }}>
+          Summary
+        </h2>
         <EditableField 
           value={safeData.summary} 
           placeholder="Experienced software engineer with 5+ years of experience in full-stack development. ..." 
@@ -153,7 +168,10 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
       </div>
 
       <div className="mb-6 resume-section">
-        <h2 className={sectionHeaderClass}>Experience</h2>
+        <h2 className="text-sm font-semibold mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide"
+          style={{ color: getSecondaryColor() }}>
+          Experience
+        </h2>
         {safeData.experience.map((exp: Experience) => (
           <div key={exp.id} className="mb-5 last:mb-0 resume-item">
             <div className="flex items-baseline justify-between flex-wrap gap-x-2">
@@ -189,7 +207,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
             <EditableField
               value={exp.company && exp.location ? `${exp.company}, ${exp.location}` : exp.company || exp.location || ""}
               placeholder="Tech Solutions Inc., San Francisco, CA"
-              className="text-sm text-[#5d4dcd] font-medium my-0.5"
+              className="text-sm font-medium my-0.5"
               onSave={val => {
                 let [company, ...locParts] = val.split(",");
                 const location = locParts.join(",").trim();
@@ -203,6 +221,8 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
               onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-company`) : undefined}
               minRows={1}
               maxRows={1}
+              inputStyle={{ color: getPrimaryColor() }}
+              outputStyle={{ color: getPrimaryColor() }}
             />
             <EditableField
               value={exp.description}
@@ -219,7 +239,10 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
       </div>
 
       <div className="mb-6 resume-section">
-        <h2 className={sectionHeaderClass}>Education</h2>
+        <h2 className="text-sm font-semibold mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide"
+          style={{ color: getSecondaryColor() }}>
+          Education
+        </h2>
         {safeData.education.map((edu: Education) => (
           <div key={edu.id} className="mb-5 last:mb-0 resume-item">
             <div className="flex items-baseline justify-between flex-wrap gap-x-2">
@@ -236,7 +259,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                 <EditableField
                   value={edu.institution && edu.location ? `${edu.institution}, ${edu.location}` : edu.institution || edu.location || ""}
                   placeholder="Stanford University, Stanford, CA"
-                  className="text-sm text-[#5d4dcd] font-medium my-0.5"
+                  className="text-sm font-medium my-0.5"
                   onSave={val => {
                     let [inst, ...locParts] = val.split(",");
                     const location = locParts.join(",").trim();
@@ -250,6 +273,8 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                   onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`education-institution`) : undefined}
                   minRows={1}
                   maxRows={1}
+                  inputStyle={{ color: getPrimaryColor() }}
+                  outputStyle={{ color: getPrimaryColor() }}
                 />
               </div>
               <EditableField
@@ -285,12 +310,23 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
       </div>
 
       <div className="mb-2 pb-2 border-b border-gray-200 resume-section">
-        <h2 className={sectionHeaderClass}>Skills</h2>
+        <h2 className="text-sm font-semibold mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide"
+          style={{ color: getSecondaryColor() }}>
+          Skills
+        </h2>
         <div className="mb-3">
           <div className="font-medium text-gray-700 text-sm mb-1.5">Technical Skills</div>
           <div className="flex flex-wrap gap-1.5 mt-1">
             {safeData.skills.technical.map((skill: string, i: number) => (
-              <span key={i} className="px-2 py-0.5 bg-[#efeafc] rounded-sm text-sm border-[0.5px] border-[#dad3f8] shadow-xs transition whitespace-nowrap text-violet-400 font-normal">
+              <span 
+                key={i} 
+                className="px-2 py-0.5 rounded-sm text-sm border-[0.5px] shadow-xs transition whitespace-nowrap font-normal"
+                style={{ 
+                  backgroundColor: `${getPrimaryColor()}20`, 
+                  borderColor: `${getPrimaryColor()}40`,
+                  color: getPrimaryColor()
+                }}
+              >
                 {skill}
               </span>
             ))}
@@ -310,7 +346,10 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
 
       {safeData.projects && safeData.projects.length > 0 && (
         <div className="mb-6 resume-section">
-          <h2 className={sectionHeaderClass}>Projects</h2>
+          <h2 className="text-sm font-semibold mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide"
+            style={{ color: getSecondaryColor() }}>
+            Projects
+          </h2>
           {safeData.projects.map((project: Project) => (
             <div key={project.id} className="mb-5 last:mb-0 resume-item">
               <div className="flex items-baseline justify-between flex-wrap gap-x-2">
@@ -348,7 +387,15 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
               {project.technologies && project.technologies.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {project.technologies.map((tech: string, i: number) => (
-                    <span key={i} className="px-2 py-0.5 bg-[#efeafc] rounded-sm text-sm border-[0.5px] border-[#dad3f8] shadow-xs transition whitespace-nowrap text-violet-400 font-normal">
+                    <span 
+                      key={i} 
+                      className="px-2 py-0.5 rounded-sm text-sm border-[0.5px] shadow-xs transition whitespace-nowrap font-normal"
+                      style={{ 
+                        backgroundColor: `${getPrimaryColor()}20`, 
+                        borderColor: `${getPrimaryColor()}40`,
+                        color: getPrimaryColor()
+                      }}
+                    >
                       {tech}
                     </span>
                   ))}
@@ -359,7 +406,8 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                   href={project.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-resume-purple hover:text-resume-purple-dark mt-1 inline-block"
+                  className="text-sm hover:underline mt-1 inline-block"
+                  style={{ color: getPrimaryColor() }}
                 >
                   View Project →
                 </a>

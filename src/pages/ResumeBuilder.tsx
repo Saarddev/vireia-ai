@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -95,8 +94,8 @@ const ResumeBuilder = () => {
   const handleGenerateWithAI = async (section: string): Promise<string> => {
     if (!aiEnabled) {
       toast({
-        title: "AI is disabled",
-        description: "Please enable AI to use this feature",
+        title: "Cadina AI is disabled",
+        description: "Please enable Cadina AI to use this feature",
         variant: "destructive"
       });
       return "";
@@ -248,10 +247,10 @@ const ResumeBuilder = () => {
           return "";
       }
     } catch (error) {
-      console.error('Error generating with AI:', error);
+      console.error('Error generating with Cadina AI:', error);
       toast({
         title: "Error",
-        description: "Failed to generate with AI. Please try again.",
+        description: "Failed to generate with Cadina AI. Please try again.",
         variant: "destructive"
       });
       return "";
@@ -262,7 +261,7 @@ const ResumeBuilder = () => {
     try {
       await handleGenerateWithAI(activeSection);
     } catch (error) {
-      console.error('Error generating with AI:', error);
+      console.error('Error generating with Cadina AI:', error);
     }
   };
 
