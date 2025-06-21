@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, Star, Building, User, ArrowRight, Sparkles, Clock, AlertCircle } from 'lucide-react';
@@ -76,7 +77,7 @@ const PricingSection = () => {
           <div className="flex items-center">
             <AlertCircle className="h-5 w-5 text-resume-purple mr-2" />
             <span className="font-medium">
-              Limited Time Offer: <span className="text-resume-purple font-bold">50% OFF</span> first 3 months on Pro plan
+              Limited Time Offer: <span className="text-resume-purple font-bold">FREE</span> Pro plan for everyone
             </span>
           </div>
           <div className="flex items-center">
@@ -144,8 +145,13 @@ const PricingSection = () => {
             <div className="mb-5">
               <h3 className="text-xl font-semibold text-resume-purple">Pro</h3>
               <div className="mt-2 flex items-baseline">
-                <span className="text-4xl font-bold">$15</span>
+                <span className="text-4xl font-bold">$0</span>
                 <span className="ml-1 text-resume-gray">/month</span>
+              </div>
+              <div className="mt-1">
+                <span className="text-sm text-resume-purple font-medium bg-resume-purple/10 px-2 py-1 rounded-full">
+                  Limited Time Offer
+                </span>
               </div>
               <p className="mt-4 text-resume-gray">Ideal for professionals actively job hunting</p>
             </div>
@@ -181,11 +187,11 @@ const PricingSection = () => {
                 <span>Cover letter assistance</span>
               </li>
             </ul>
-            <div className="absolute top-12 right-0 bg-resume-purple text-white text-xs font-bold px-3 py-1 rounded-l-full shadow-lg transform rotate-0 transition-transform group-hover:rotate-3">
-              SAVE 50%
+            <div className="absolute top-12 right-0 bg-gradient-to-r from-green-500 to-green-600 text-white text-xs font-bold px-3 py-1 rounded-l-full shadow-lg transform rotate-0 transition-transform group-hover:rotate-3">
+              100% FREE
             </div>
             <Button className="mt-auto bg-gradient-to-r from-resume-purple to-resume-violet hover:from-resume-purple-dark hover:to-resume-violet shadow-lg shadow-resume-purple/20 transition-all duration-300 hover:shadow-xl hover:shadow-resume-purple/30 group">
-              Subscribe Now
+              Get Started Free
               <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
