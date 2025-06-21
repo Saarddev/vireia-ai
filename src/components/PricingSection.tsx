@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, Star, Building, User, ArrowRight, Sparkles, Clock, AlertCircle } from 'lucide-react';
@@ -187,7 +186,7 @@ const PricingSection = () => {
                 <span>Cover letter assistance</span>
               </li>
             </ul>
-            <div className="absolute top-12 right-0 bg-gradient-to-r from-green-500 to-green-600 text-white text-xs font-bold px-3 py-1 rounded-l-full shadow-lg transform rotate-0 transition-transform group-hover:rotate-3">
+            <div className="absolute top-12 right-0 bg-gradient-to-r from-resume-purple to-resume-violet text-white text-xs font-bold px-3 py-1 rounded-l-full shadow-lg transform rotate-0 transition-transform group-hover:rotate-3">
               100% FREE
             </div>
             <Button className="mt-auto bg-gradient-to-r from-resume-purple to-resume-violet hover:from-resume-purple-dark hover:to-resume-violet shadow-lg shadow-resume-purple/20 transition-all duration-300 hover:shadow-xl hover:shadow-resume-purple/30 group">

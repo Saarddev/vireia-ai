@@ -1,4 +1,5 @@
 
+
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, Sparkles, ArrowRight, Award, Clock, BarChart } from 'lucide-react';
@@ -80,7 +81,7 @@ const HeroSection = () => {
             <div className={`flex items-center p-3 rounded-lg bg-gradient-to-r from-resume-purple/10 to-resume-violet/10 border border-resume-purple/20 transition-all duration-700 delay-250 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               <Award className="h-5 w-5 text-resume-purple mr-2 flex-shrink-0" />
               <p className="text-sm font-medium">
-                <span className="text-resume-purple font-bold">New Users Special:</span> 7-day free trial with all Pro features + Resume review by HR experts
+                <span className="text-resume-purple font-bold">Special Launch Offer:</span> Get full Pro access completely FREE - All premium features unlocked for everyone
               </p>
             </div>
             
@@ -175,3 +176,4 @@ const HeroSection = () => {
 };
 
 export default HeroSection;
+
