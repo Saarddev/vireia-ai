@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import ResumePDF from "./pages/ResumePDF";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const App = () => (
   <div className="flex min-h-screen flex-col">
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/sign-in/*" element={<SignIn />} />
             <Route path="/sign-up/*" element={<SignUp />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             
             {/* Protected routes */}
             <Route path="/dashboard" element={<Dashboard />} />
