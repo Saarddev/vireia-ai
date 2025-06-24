@@ -96,7 +96,7 @@ const SignUp = () => {
             <FileText className="h-5 w-5 md:h-6 md:w-6 text-white" />
           </div>
           <span className="font-bold text-lg md:text-xl bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">
-            Cadina AI
+            Vireia AI
           </span>
         </div>
       </div>
@@ -111,7 +111,7 @@ const SignUp = () => {
               <User className="h-6 w-6 md:h-8 md:w-8 text-white" />
             </div>
             <CardTitle className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2">
-              Join Cadina AI
+              Join Vireia AI
             </CardTitle>
             <CardDescription className="text-gray-600 text-sm md:text-lg">
               Create your account and start building amazing resumes

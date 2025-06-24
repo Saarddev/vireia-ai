@@ -70,7 +70,7 @@ const SignIn = () => {
             <FileText className="h-5 w-5 md:h-6 md:w-6 text-white" />
           </div>
           <span className="font-bold text-lg md:text-xl bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">
-            Cadina AI
+            Vireia AI
           </span>
         </div>
       </div>
