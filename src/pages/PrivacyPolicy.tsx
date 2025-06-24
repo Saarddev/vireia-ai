@@ -41,7 +41,7 @@ const PrivacyPolicy = () => {
               <h2 className="text-xl font-semibold text-resume-purple">About This Project</h2>
             </div>
             <p className="text-resume-gray-dark leading-relaxed">
-              Cadina AI is a personal side project built for fun and learning purposes. This is not a commercial enterprise or corporation, 
+              Vireia AI is a personal side project built for fun and learning purposes. This is not a commercial enterprise or corporation, 
               but rather a passion project created to help people build better resumes while exploring AI technologies. 
               Please enjoy it as such! <Heart className="inline h-4 w-4 text-resume-purple" />
             </p>
@@ -137,7 +137,7 @@ const PrivacyPolicy = () => {
 
           <div className="pt-8 border-t border-gray-200 text-center">
             <p className="text-resume-gray-dark font-medium">
-              Thank you for using Cadina AI! 🚀
+              Thank you for using Vireia AI! 🚀
             </p>
             <p className="text-resume-gray text-sm mt-2">
               Built with ❤️ as a learning project • Not affiliated with any corporation

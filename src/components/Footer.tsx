@@ -12,7 +12,7 @@ const Footer = () => {
               <div className="bg-resume-purple rounded-lg p-1.5">
                 <FileText className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold text-xl bg-gradient-to-r from-resume-purple-light to-resume-violet bg-clip-text text-transparent">Cadina AI</span>
+              <span className="font-bold text-xl bg-gradient-to-r from-resume-purple-light to-resume-violet bg-clip-text text-transparent">Vireia AI</span>
             </div>
             <p className="text-resume-gray-light text-sm">
               AI-powered resume builder helping job seekers stand out and get hired faster.
@@ -70,12 +70,12 @@ const Footer = () => {
         
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 animate-fade-in">
           <p className="text-resume-gray-light text-sm">
-            © {new Date().getFullYear()} Cadina AI. All rights reserved.
+            © {new Date().getFullYear()} Vireia AI. All rights reserved.
           </p>
           <div className="flex items-center gap-2">
             <Mail className="h-4 w-4 text-resume-gray-light" />
-            <a href="mailto:support@cadinaai.com" className="text-resume-gray-light hover:text-white transition-colors text-sm hover:underline">
-              support@cadinaai.com
+            <a href="mailto:support@vireiaai.com" className="text-resume-gray-light hover:text-white transition-colors text-sm hover:underline">
+              support@vireiaai.com
             </a>
           </div>
         </div>
