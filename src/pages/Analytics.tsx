@@ -1,25 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
-import { BarChart3, FileText, PieChart, TrendingUp, Calendar, Users, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { BarChart3, Calendar, Users, CheckCircle, Clock, TrendingUp } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarProvider,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
-  SidebarSeparator,
   SidebarInset,
 } from "@/components/ui/sidebar";
-import { Home, Cog, User, BookOpen, Layers, Briefcase, LogOut } from 'lucide-react';
+import AppSidebar from '@/components/AppSidebar';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as PieChartComponent, Pie, Cell } from 'recharts';
 
 const Analytics = () => {
@@ -74,95 +63,7 @@ const Analytics = () => {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-purple-50 dark:from-gray-950 dark:to-purple-950">
-        <Sidebar>
-          <SidebarHeader>
-            <div className="flex items-center gap-2 px-4 py-2">
-              <div className="bg-resume-purple rounded-lg p-1.5">
-                <FileText className="h-5 w-5 text-white" />
-              </div>
-              <span className="font-bold text-xl bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">ResumeAI</span>
-            </div>
-          </SidebarHeader>
-          
-          <SidebarContent className="px-2">
-            <SidebarGroup>
-              <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Home">
-                      <Home className="h-5 w-5" />
-                      <span>Home</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="My Resumes">
-                      <FileText className="h-5 w-5" />
-                      <span>My Resumes</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Applications">
-                      <Briefcase className="h-5 w-5" />
-                      <span>Applications</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Analytics" isActive={true}>
-                      <BarChart3 className="h-5 w-5" />
-                      <span>Analytics</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-            
-            <SidebarSeparator />
-            
-            <SidebarGroup>
-              <SidebarGroupLabel>Resources</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Learn">
-                      <BookOpen className="h-5 w-5" />
-                      <span>Learning Center</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Templates">
-                      <Layers className="h-5 w-5" />
-                      <span>Templates</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-          
-          <SidebarFooter>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Settings">
-                  <Cog className="h-5 w-5" />
-                  <span>Settings</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Account">
-                  <User className="h-5 w-5" />
-                  <span>Account</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Log Out">
-                  <LogOut className="h-5 w-5" />
-                  <span>Log Out</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarFooter>
-        </Sidebar>
+        <AppSidebar activeSection="/analytics" />
         
         <SidebarInset>
           <div className="container max-w-7xl mx-auto px-4 py-8">
