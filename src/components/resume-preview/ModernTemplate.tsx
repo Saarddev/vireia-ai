@@ -5,9 +5,11 @@ import { ResumeData, ResumeSettings } from '@/types/resume';
 interface ModernTemplateProps {
   data: ResumeData;
   settings: ResumeSettings;
+  onUpdateData?: (section: string, data: any) => void;
+  onGenerateWithAI?: (section: string) => Promise<string>;
 }
 
-const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, settings }) => {
+const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, settings, onUpdateData, onGenerateWithAI }) => {
   return (
     <div className="modern-template">
       {/* Header Section */}
@@ -59,10 +61,31 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, settings }) => {
       <section className="skills">
         <h2>Skills</h2>
         <div className="skills-list">
-          {Array.isArray(data.skills) ? data.skills.map((skill, index) => (
-            <span key={index} className="skill-item">{skill}</span>
-          )) : (
-            <span className="skill-item">{data.skills}</span>
+          {data.skills && typeof data.skills === 'object' ? (
+            <>
+              {data.skills.technical && data.skills.technical.length > 0 && (
+                <div className="skill-category">
+                  <h4>Technical Skills</h4>
+                  {data.skills.technical.map((skill, index) => (
+                    <span key={index} className="skill-item">{skill}</span>
+                  ))}
+                </div>
+              )}
+              {data.skills.soft && data.skills.soft.length > 0 && (
+                <div className="skill-category">
+                  <h4>Soft Skills</h4>
+                  {data.skills.soft.map((skill, index) => (
+                    <span key={index} className="skill-item">{skill}</span>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : Array.isArray(data.skills) ? (
+            data.skills.map((skill, index) => (
+              <span key={index} className="skill-item">{skill}</span>
+            ))
+          ) : (
+            <span className="skill-item">{String(data.skills || '')}</span>
           )}
         </div>
       </section>
