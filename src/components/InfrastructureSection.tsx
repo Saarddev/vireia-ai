@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { 
   Brain, 
@@ -10,12 +9,7 @@ import {
   Zap,
   Database,
   Code,
-  Timer,
-  Network,
-  Cpu,
-  Globe,
-  Cloud,
-  Activity
+  Timer
 } from 'lucide-react';
 
 const InfrastructureSection = () => {
@@ -149,88 +143,43 @@ const InfrastructureSection = () => {
                 </li>
               </ul>
             </div>
-            
-            {/* AI Connection Animation */}
             <div className="relative">
-              <div className="aspect-square bg-gradient-to-br from-resume-gray-light/50 to-white rounded-xl overflow-hidden flex items-center justify-center p-6 border border-gray-100 shadow-inner">
-                
-                {/* Central AI Brain */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-resume-purple to-resume-violet rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                    <Brain className="h-10 w-10 text-white" />
+              <div className="aspect-video bg-gradient-to-br from-resume-gray-light/50 to-white rounded-xl overflow-hidden flex items-center justify-center p-6 border border-gray-100 shadow-inner">
+                <div className="grid grid-cols-2 gap-4 w-full max-w-[400px]">
+                  <div className="space-y-4">
+                    <div className="h-24 bg-white rounded-lg p-3 shadow-md transform hover:scale-105 transition-transform duration-300">
+                      <div className="h-4 w-1/2 bg-gradient-to-r from-resume-purple/30 to-resume-violet/30 rounded mb-2"></div>
+                      <div className="h-3 w-full bg-resume-gray-light rounded mb-1"></div>
+                      <div className="h-3 w-3/4 bg-resume-gray-light rounded"></div>
+                    </div>
+                    <div className="h-24 bg-white rounded-lg p-3 shadow-md transform hover:scale-105 transition-transform duration-300">
+                      <LineChart className="h-6 w-6 text-resume-purple mb-2" />
+                      <div className="h-3 w-full bg-resume-gray-light rounded mb-1"></div>
+                      <div className="h-3 w-2/3 bg-resume-gray-light rounded"></div>
+                    </div>
                   </div>
-                  
-                  {/* Pulsing rings around central brain */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-32 h-32 border-2 border-resume-purple/20 rounded-full animate-ping"></div>
-                  </div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-44 h-44 border border-resume-violet/10 rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
-                  </div>
-                </div>
-
-                {/* Orbiting AI Components */}
-                <div className="absolute inset-0">
-                  {/* Database Component */}
-                  <div className="absolute top-8 left-8 w-10 h-10 bg-white rounded-lg shadow-md flex items-center justify-center animate-float">
-                    <Database className="h-5 w-5 text-resume-purple" />
-                  </div>
-                  
-                  {/* Cloud Component */}
-                  <div className="absolute top-8 right-8 w-10 h-10 bg-white rounded-lg shadow-md flex items-center justify-center animate-float" style={{ animationDelay: '1s' }}>
-                    <Cloud className="h-5 w-5 text-resume-violet" />
-                  </div>
-                  
-                  {/* Network Component */}
-                  <div className="absolute bottom-8 left-8 w-10 h-10 bg-white rounded-lg shadow-md flex items-center justify-center animate-float" style={{ animationDelay: '2s' }}>
-                    <Network className="h-5 w-5 text-resume-purple" />
-                  </div>
-                  
-                  {/* CPU Component */}
-                  <div className="absolute bottom-8 right-8 w-10 h-10 bg-white rounded-lg shadow-md flex items-center justify-center animate-float" style={{ animationDelay: '1.5s' }}>
-                    <Cpu className="h-5 w-5 text-resume-violet" />
-                  </div>
-                  
-                  {/* Globe Component */}
-                  <div className="absolute top-1/2 left-2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center animate-float" style={{ animationDelay: '0.5s' }}>
-                    <Globe className="h-4 w-4 text-resume-purple" />
-                  </div>
-                  
-                  {/* Activity Component */}
-                  <div className="absolute top-1/2 right-2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center animate-float" style={{ animationDelay: '2.5s' }}>
-                    <Activity className="h-4 w-4 text-resume-violet" />
+                  <div className="h-[180px] bg-white rounded-lg p-3 shadow-md flex flex-col transform hover:scale-105 transition-transform duration-300">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-resume-purple" />
+                      <div className="h-3 w-1/2 bg-resume-purple/20 rounded"></div>
+                    </div>
+                    <div className="space-y-1.5 flex-grow mt-3">
+                      <div className="h-2.5 w-full bg-resume-gray-light rounded"></div>
+                      <div className="h-2.5 w-3/4 bg-resume-gray-light rounded"></div>
+                      <div className="h-2.5 w-5/6 bg-resume-gray-light rounded"></div>
+                      <div className="h-2.5 w-2/3 bg-resume-gray-light rounded"></div>
+                    </div>
+                    <div className="h-6 w-full bg-gradient-to-r from-resume-purple/20 to-resume-violet/20 rounded-full mt-auto"></div>
                   </div>
                 </div>
-
-                {/* Connecting Lines (animated) */}
-                <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                  <defs>
-                    <linearGradient id="connectionGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#9b87f5" stopOpacity="0.6" />
-                      <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.2" />
-                    </linearGradient>
-                  </defs>
-                  
-                  {/* Animated connection lines */}
-                  <line x1="50%" y1="50%" x2="15%" y2="20%" stroke="url(#connectionGradient)" strokeWidth="2" strokeDasharray="5,5" className="animate-pulse">
-                    <animate attributeName="stroke-dashoffset" values="0;10" dur="2s" repeatCount="indefinite" />
-                  </line>
-                  <line x1="50%" y1="50%" x2="85%" y2="20%" stroke="url(#connectionGradient)" strokeWidth="2" strokeDasharray="5,5" className="animate-pulse" style={{ animationDelay: '0.5s' }}>
-                    <animate attributeName="stroke-dashoffset" values="0;10" dur="2s" repeatCount="indefinite" begin="0.5s" />
-                  </line>
-                  <line x1="50%" y1="50%" x2="15%" y2="80%" stroke="url(#connectionGradient)" strokeWidth="2" strokeDasharray="5,5" className="animate-pulse" style={{ animationDelay: '1s' }}>
-                    <animate attributeName="stroke-dashoffset" values="0;10" dur="2s" repeatCount="indefinite" begin="1s" />
-                  </line>
-                  <line x1="50%" y1="50%" x2="85%" y2="80%" stroke="url(#connectionGradient)" strokeWidth="2" strokeDasharray="5,5" className="animate-pulse" style={{ animationDelay: '1.5s' }}>
-                    <animate attributeName="stroke-dashoffset" values="0;10" dur="2s" repeatCount="indefinite" begin="1.5s" />
-                  </line>
-                  <line x1="50%" y1="50%" x2="5%" y2="50%" stroke="url(#connectionGradient)" strokeWidth="2" strokeDasharray="5,5" className="animate-pulse" style={{ animationDelay: '2s' }}>
-                    <animate attributeName="stroke-dashoffset" values="0;10" dur="2s" repeatCount="indefinite" begin="2s" />
-                  </line>
-                  <line x1="50%" y1="50%" x2="95%" y2="50%" stroke="url(#connectionGradient)" strokeWidth="2" strokeDasharray="5,5" className="animate-pulse" style={{ animationDelay: '2.5s' }}>
-                    <animate attributeName="stroke-dashoffset" values="0;10" dur="2s" repeatCount="indefinite" begin="2.5s" />
-                  </line>
-                </svg>
+              </div>
+              
+              <div className="absolute -top-5 -left-5 w-10 h-10 rounded-full bg-resume-purple/10 flex items-center justify-center shadow-md animate-float animate-delay-100">
+                <Database className="h-5 w-5 text-resume-purple" />
+              </div>
+              
+              <div className="absolute -bottom-5 -right-5 w-10 h-10 rounded-full bg-resume-violet/10 flex items-center justify-center shadow-md animate-float animate-delay-500">
+                <Code className="h-5 w-5 text-resume-violet" />
               </div>
             </div>
           </div>
