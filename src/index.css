@@ -143,6 +143,11 @@
   .translate-y-10 {
     transform: translateY(40px);
   }
+
+  /* Fade animations for onboarding */
+  .animate-fade-out {
+    animation: fade-out 0.3s ease-out forwards;
+  }
   
   /* Scroll reveal utilities */
   .reveal-on-scroll {

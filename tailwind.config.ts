@@ -125,6 +125,16 @@ export default {
 						opacity: '1'
 					}
 				},
+				'fade-out': {
+					'0%': {
+						opacity: '1',
+						transform: 'scale(1)'
+					},
+					'100%': {
+						opacity: '0',
+						transform: 'scale(0.95)'
+					}
+				},
 				'slide-in-right': {
 					'0%': {
 						transform: 'translateX(50px)',
@@ -162,6 +172,7 @@ export default {
 				'float': 'float 6s ease-in-out infinite',
 				'slide-up': 'slide-up 0.6s ease-out forwards',
 				'fade-in': 'fade-in 0.8s ease-out forwards',
+				'fade-out': 'fade-out 0.3s ease-out forwards',
 				'slide-in-right': 'slide-in-right 0.5s ease-out forwards',
 				'slide-in-left': 'slide-in-left 0.5s ease-out forwards',
 				'scale-up': 'scale-up 0.5s ease-out forwards'
