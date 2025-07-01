@@ -209,7 +209,7 @@ const HeroSection = () => {
           
           <div className={`flex items-center justify-center transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
             <div className="relative w-full max-w-[500px]">
-              <div className={`rounded-xl border bg-white shadow-xl p-6 relative z-10 backdrop-blur-sm bg-white/90 transition-all duration-500 ${scrolled ? 'scale-105' : 'hover:scale-105'}`}>
+              <div className={`rounded-xl border bg-white/80 backdrop-blur-md shadow-2xl p-6 relative z-10 transition-all duration-500 hover:shadow-3xl hover:bg-white/90 ${scrolled ? 'scale-105' : ''}`}>
                 <div className="space-y-5">
                   {/* Name with typewriter effect */}
                   <div className="h-8 flex items-center">
@@ -308,11 +308,14 @@ const HeroSection = () => {
                   </div>
                 </div>
               </div>
+              
+              {/* Glass morphism background layers */}
               <div className={`absolute -bottom-6 -right-6 w-[90%] h-[90%] rounded-xl bg-gradient-to-br from-resume-purple/20 to-resume-violet/20 z-0 transition-all duration-1000 ${scrolled ? 'animate-float' : ''}`}></div>
               <div className="absolute -top-3 -left-3 w-24 h-24 bg-resume-purple/10 rounded-full blur-xl"></div>
+              <div className="absolute top-1/2 -right-8 w-16 h-16 bg-resume-violet/10 rounded-full blur-lg"></div>
               
-              {/* AI Generation indicator */}
-              <div className="absolute -top-2 -right-2 bg-resume-purple text-white px-2 py-1 rounded-full text-xs font-medium shadow-lg">
+              {/* AI Generation indicator - hidden on mobile */}
+              <div className="hidden md:block absolute -top-2 -right-2 bg-resume-purple text-white px-2 py-1 rounded-full text-xs font-medium shadow-lg">
                 <div className="flex items-center gap-1">
                   <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
                   AI Generating...
