@@ -1,9 +1,11 @@
+
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Mail, Phone, MapPin, Globe, Linkedin, Github } from 'lucide-react';
-import { Resume } from '@/types/resume';
-import { ResumeSettings } from '@/types/resume';
+import { cn } from "@/lib/utils";
+import EditableField from './EditableField';
+import AddSectionItem from './AddSectionItem';
+import ContactInfo from './ContactInfo';
+import { v4 as uuidv4 } from 'uuid';
+import { Experience, Education, Project, ResumeSettings } from '@/types/resume.d';
 
 interface ModernTemplateProps {
   data: any;
