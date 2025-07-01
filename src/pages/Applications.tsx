@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Briefcase, Plus, Search, Filter, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
@@ -6,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AppSidebar } from '@/components/AppSidebar';
+import AppSidebar from '@/components/AppSidebar';
 
 const Applications = () => {
   const [isLoaded, setIsLoaded] = useState(false);
