@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ResumeData, ResumeSettings } from '@/types/resume';
 
@@ -11,14 +12,14 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, settings }) => {
     <div className="modern-template">
       {/* Header Section */}
       <header className="header">
-        <h1>{data.personalInfo.name}</h1>
-        <p className="title">{data.personalInfo.title}</p>
+        <h1>{data.personal.name}</h1>
+        <p className="title">{data.personal.title}</p>
         {/* Contact Information */}
         <div className="contact-info">
-          <p>Email: {data.personalInfo.email}</p>
-          <p>Phone: {data.personalInfo.phone}</p>
-          <p>LinkedIn: {data.personalInfo.linkedin}</p>
-          <p>Location: {data.personalInfo.location}</p>
+          <p>Email: {data.personal.email}</p>
+          <p>Phone: {data.personal.phone}</p>
+          <p>LinkedIn: {data.personal.linkedin}</p>
+          <p>Location: {data.personal.location}</p>
         </div>
       </header>
 
@@ -47,7 +48,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, settings }) => {
         {data.education.map((edu, index) => (
           <div key={index} className="education-item">
             <h3>{edu.degree}</h3>
-            <p className="school">{edu.school} | {edu.location}</p>
+            <p className="school">{edu.institution} | {edu.location}</p>
             <p className="dates">{edu.startDate} - {edu.endDate}</p>
             <p>{edu.description}</p>
           </div>
@@ -58,9 +59,11 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, settings }) => {
       <section className="skills">
         <h2>Skills</h2>
         <ul className="skills-list">
-          {data.skills.map((skill, index) => (
+          {Array.isArray(data.skills) ? data.skills.map((skill, index) => (
             <li key={index}>{skill}</li>
-          ))}
+          )) : (
+            <li>{data.skills}</li>
+          )}
         </ul>
       </section>
 
@@ -69,7 +72,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, settings }) => {
         <h2>Projects</h2>
         {data.projects.map((project, index) => (
           <div key={index} className="project-item">
-            <h3>{project.name}</h3>
+            <h3>{project.title}</h3>
             <p className="dates">{project.startDate} - {project.endDate}</p>
             <p>{project.description}</p>
             <p>Link: {project.link}</p>
@@ -82,10 +85,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, settings }) => {
         <h2>Certifications</h2>
         {data.certifications.map((cert, index) => (
           <div key={index} className="certification-item">
-            <h3>{cert.name}</h3>
-            <p className="issuer">{cert.issuer}</p>
-            <p className="dates">{cert.date}</p>
-            <p>Link: {cert.link}</p>
+            <h3>{cert}</h3>
           </div>
         ))}
       </section>

@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, Sparkles, ArrowRight, Award, Clock, BarChart } from 'lucide-react';
+import { Check, Sparkles, ArrowRight, Award, Clock, BarChart, Database, Code, Brain, Zap, Network, Cpu, Globe, Cloud } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -216,11 +216,11 @@ const HeroSection = () => {
           <div className={`flex items-center justify-center order-1 lg:order-2 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
             <div className="relative w-full max-w-[420px] lg:max-w-[500px]">
               {/* Background decorative elements */}
-              <div className={`absolute -bottom-4 -right-4 w-[85%] h-[85%] rounded-xl bg-gradient-to-br from-resume-purple/20 to-resume-violet/20 z-0 transition-all duration-1000 ${scrolled ? 'animate-float' : ''}`}></div>
-              <div className="absolute -top-3 -left-3 w-16 h-16 md:w-24 md:h-24 bg-resume-purple/10 rounded-full blur-xl"></div>
+              <div className={`absolute -bottom-4 -right-4 w-[85%] h-[85%] rounded-xl bg-gradient-to-br from-resume-purple/15 to-resume-violet/15 z-0 transition-all duration-1000 ${scrolled ? 'animate-float' : ''}`}></div>
+              <div className="absolute -top-3 -left-3 w-16 h-16 md:w-24 md:h-24 bg-resume-purple/5 rounded-full blur-xl"></div>
               
-              {/* Main Resume Card */}
-              <div className={`rounded-xl border bg-white shadow-2xl p-4 md:p-6 relative z-10 backdrop-blur-sm bg-white/95 transition-all duration-500 ${scrolled ? 'scale-105' : 'hover:scale-105'}`}>
+              {/* Main Resume Card with glass effect */}
+              <div className={`rounded-xl border border-white/20 bg-white/80 backdrop-blur-md shadow-2xl p-4 md:p-6 relative z-10 transition-all duration-500 ${scrolled ? 'scale-105' : 'hover:scale-105'}`}>
                 <div className="space-y-4 md:space-y-5">
                   {/* Name with typewriter effect */}
                   <div className="min-h-[32px] flex items-center">
@@ -248,8 +248,8 @@ const HeroSection = () => {
 
                   {/* Contact info placeholder */}
                   <div className="space-y-2">
-                    <div className="h-2.5 md:h-3 w-[70%] rounded-full bg-muted opacity-60"></div>
-                    <div className="h-2.5 md:h-3 w-[60%] rounded-full bg-muted opacity-60"></div>
+                    <div className="h-2.5 md:h-3 w-[70%] rounded-full bg-gray-200/60 opacity-60"></div>
+                    <div className="h-2.5 md:h-3 w-[60%] rounded-full bg-gray-200/60 opacity-60"></div>
                   </div>
                   
                   {/* Summary section */}
@@ -301,7 +301,7 @@ const HeroSection = () => {
                   </div>
                   
                   {/* ATS Score Section */}
-                  <div className="mt-4 border-t pt-3">
+                  <div className="mt-4 border-t border-gray-200/50 pt-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <BarChart className="h-3 w-3 md:h-4 md:w-4 text-resume-purple mr-1" />
