@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, Sparkles, ArrowRight, Award, Clock, BarChart, Database, Code, Brain, Zap, Network, Cpu, Globe, Cloud } from 'lucide-react';
@@ -220,7 +219,7 @@ const HeroSection = () => {
               <div className="absolute -top-3 -left-3 w-16 h-16 md:w-24 md:h-24 bg-resume-purple/5 rounded-full blur-xl"></div>
               
               {/* Main Resume Card with glass effect */}
-              <div className={`rounded-xl border border-white/20 bg-white/80 backdrop-blur-md shadow-2xl p-4 md:p-6 relative z-10 transition-all duration-500 ${scrolled ? 'scale-105' : 'hover:scale-105'}`}>
+              <div className={`rounded-xl border border-white/20 bg-white/70 backdrop-blur-sm shadow-2xl p-4 md:p-6 relative z-10 transition-all duration-500 ${scrolled ? 'scale-105' : 'hover:scale-105'}`}>
                 <div className="space-y-4 md:space-y-5">
                   {/* Name with typewriter effect */}
                   <div className="min-h-[32px] flex items-center">
@@ -321,8 +320,8 @@ const HeroSection = () => {
                 </div>
               </div>
               
-              {/* AI Generation indicator */}
-              <div className="absolute -top-2 -right-2 bg-resume-purple text-white px-2 py-1 rounded-full text-xs font-medium shadow-lg z-20">
+              {/* AI Generation indicator - Hidden on mobile */}
+              <div className="absolute -top-2 -right-2 bg-resume-purple text-white px-2 py-1 rounded-full text-xs font-medium shadow-lg z-20 hidden md:block">
                 <div className="flex items-center gap-1">
                   <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
                   AI Generating...

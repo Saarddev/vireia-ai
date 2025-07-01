@@ -58,13 +58,13 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, settings }) => {
       {/* Skills Section */}
       <section className="skills">
         <h2>Skills</h2>
-        <ul className="skills-list">
+        <div className="skills-list">
           {Array.isArray(data.skills) ? data.skills.map((skill, index) => (
-            <li key={index}>{skill}</li>
+            <span key={index} className="skill-item">{skill}</span>
           )) : (
-            <li>{data.skills}</li>
+            <span className="skill-item">{data.skills}</span>
           )}
-        </ul>
+        </div>
       </section>
 
       {/* Projects Section */}
