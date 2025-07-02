@@ -6,6 +6,7 @@ import HeroSection from '@/components/HeroSection';
 import InfrastructureSection from '@/components/InfrastructureSection';
 import PricingSection from '@/components/PricingSection';
 import Footer from '@/components/Footer';
+import DemoSection from '@/components/DemoSection';
 import { Github, ExternalLink } from 'lucide-react';
 
 const Index = () => {
@@ -14,6 +15,7 @@ const Index = () => {
       <Navbar />
       <main>
         <HeroSection />
+        <DemoSection />
         <InfrastructureSection />
         
         <section className="py-16 relative overflow-hidden">
