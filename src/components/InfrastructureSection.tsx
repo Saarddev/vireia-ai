@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { 
   Brain, 
@@ -12,7 +11,13 @@ import {
   Code,
   Timer,
   Network,
-  Cpu
+  Cpu,
+  GitBranch,
+  Globe,
+  Shield,
+  Target,
+  Layers,
+  Workflow
 } from 'lucide-react';
 
 const InfrastructureSection = () => {
@@ -164,18 +169,147 @@ const InfrastructureSection = () => {
           <div className="absolute -top-24 -right-24 w-64 h-64 bg-resume-violet/5 rounded-full blur-2xl"></div>
           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-resume-purple/5 rounded-full blur-2xl"></div>
           
-          {/* Animated AI connection network */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-10 left-10 w-2 h-2 bg-resume-purple/40 rounded-full animate-pulse"></div>
-            <div className="absolute top-20 right-20 w-1.5 h-1.5 bg-resume-violet/40 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-            <div className="absolute bottom-20 left-20 w-2.5 h-2.5 bg-resume-purple/30 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-            <div className="absolute bottom-10 right-10 w-1 h-1 bg-resume-violet/50 rounded-full animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+          {/* Enhanced AI connection network animation */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {/* Central AI Brain */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-r from-resume-purple to-resume-violet rounded-full flex items-center justify-center shadow-lg animate-pulse z-20">
+              <Brain className="h-8 w-8 text-white" />
+            </div>
             
-            {/* Connection lines */}
-            <svg className="absolute inset-0 w-full h-full opacity-30">
-              <line x1="40" y1="40" x2="calc(100% - 80px)" y2="80" stroke="url(#connectionGradient)" strokeWidth="1" className="animate-pulse" />
-              <line x1="80" y1="calc(100% - 80px)" x2="calc(100% - 40px)" y2="calc(100% - 40px)" stroke="url(#connectionGradient)" strokeWidth="1" className="animate-pulse" style={{ animationDelay: '0.7s' }} />
+            {/* Orbiting Components */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              {/* Database Component */}
+              <div 
+                className="absolute w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center animate-float"
+                style={{ 
+                  top: '-80px', 
+                  left: '-80px',
+                  animationDelay: '0s',
+                  animationDuration: '4s'
+                }}
+              >
+                <Database className="h-6 w-6 text-blue-600" />
+              </div>
+              
+              {/* Network Component */}
+              <div 
+                className="absolute w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center animate-float"
+                style={{ 
+                  top: '-90px', 
+                  right: '-60px',
+                  animationDelay: '0.8s',
+                  animationDuration: '3.5s'
+                }}
+              >
+                <Network className="h-5 w-5 text-green-600" />
+              </div>
+              
+              {/* Code Component */}
+              <div 
+                className="absolute w-11 h-11 bg-purple-500/20 rounded-full flex items-center justify-center animate-float"
+                style={{ 
+                  bottom: '-75px', 
+                  right: '-85px',
+                  animationDelay: '1.6s',
+                  animationDuration: '4.2s'
+                }}
+              >
+                <Code className="h-6 w-6 text-purple-600" />
+              </div>
+              
+              {/* CPU Component */}
+              <div 
+                className="absolute w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center animate-float"
+                style={{ 
+                  bottom: '-80px', 
+                  left: '-70px',
+                  animationDelay: '2.4s',
+                  animationDuration: '3.8s'
+                }}
+              >
+                <Cpu className="h-5 w-5 text-orange-600" />
+              </div>
+              
+              {/* Additional orbiting components */}
+              <div 
+                className="absolute w-8 h-8 bg-pink-500/20 rounded-full flex items-center justify-center animate-float"
+                style={{ 
+                  top: '10px', 
+                  left: '-100px',
+                  animationDelay: '3.2s',
+                  animationDuration: '5s'
+                }}
+              >
+                <Target className="h-4 w-4 text-pink-600" />
+              </div>
+              
+              <div 
+                className="absolute w-9 h-9 bg-indigo-500/20 rounded-full flex items-center justify-center animate-float"
+                style={{ 
+                  top: '-20px', 
+                  right: '-95px',
+                  animationDelay: '4s',
+                  animationDuration: '4.5s'
+                }}
+              >
+                <Globe className="h-5 w-5 text-indigo-600" />
+              </div>
+            </div>
+            
+            {/* Connection lines with animation */}
+            <svg className="absolute inset-0 w-full h-full opacity-40">
+              <defs>
+                <linearGradient id="connectionGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#9b87f5" stopOpacity="0.8"/>
+                  <stop offset="50%" stopColor="#8B5CF6" stopOpacity="0.6"/>
+                  <stop offset="100%" stopColor="#7C3AED" stopOpacity="0.3"/>
+                </linearGradient>
+                <filter id="connectionGlow">
+                  <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                  <feMerge> 
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+              
+              {/* Animated connection lines from center to components */}
+              <g className="animate-pulse" style={{ animationDuration: '2s' }}>
+                <line x1="50%" y1="50%" x2="calc(50% - 80px)" y2="calc(50% - 80px)" stroke="url(#connectionGlow)" strokeWidth="2" filter="url(#connectionGlow)" />
+                <line x1="50%" y1="50%" x2="calc(50% + 60px)" y2="calc(50% - 90px)" stroke="url(#connectionGlow)" strokeWidth="1.5" filter="url(#connectionGlow)" />
+                <line x1="50%" y1="50%" x2="calc(50% + 85px)" y2="calc(50% + 75px)" stroke="url(#connectionGlow)" strokeWidth="2" filter="url(#connectionGlow)" />
+                <line x1="50%" y1="50%" x2="calc(50% - 70px)" y2="calc(50% + 80px)" stroke="url(#connectionGlow)" strokeWidth="1.5" filter="url(#connectionGlow)" />
+                <line x1="50%" y1="50%" x2="calc(50% - 100px)" y2="calc(50% + 10px)" stroke="url(#connectionGlow)" strokeWidth="1" filter="url(#connectionGlow)" />
+                <line x1="50%" y1="50%" x2="calc(50% + 95px)" y2="calc(50% - 20px)" stroke="url(#connectionGlow)" strokeWidth="1" filter="url(#connectionGlow)" />
+              </g>
+              
+              {/* Data flow particles */}
+              <g className="animate-pulse" style={{ animationDuration: '1.5s', animationDelay: '0.5s' }}>
+                <circle cx="45%" cy="45%" r="2" fill="#9b87f5" opacity="0.8">
+                  <animateMotion dur="3s" repeatCount="indefinite">
+                    <path d="M 0 0 Q -30 -30 -60 -60" />
+                  </animateMotion>
+                </circle>
+                <circle cx="55%" cy="45%" r="1.5" fill="#8B5CF6" opacity="0.6">
+                  <animateMotion dur="2.5s" repeatCount="indefinite">
+                    <path d="M 0 0 Q 40 -40 80 -80" />
+                  </animateMotion>
+                </circle>
+                <circle cx="55%" cy="55%" r="2" fill="#7C3AED" opacity="0.7">
+                  <animateMotion dur="3.5s" repeatCount="indefinite">
+                    <path d="M 0 0 Q 50 50 100 100" />
+                  </animateMotion>
+                </circle>
+              </g>
             </svg>
+            
+            {/* Pulsing data indicators */}
+            <div className="absolute top-20 left-20 w-3 h-3 bg-resume-purple/40 rounded-full animate-ping" style={{ animationDelay: '0s' }}></div>
+            <div className="absolute top-32 right-24 w-2 h-2 bg-resume-violet/40 rounded-full animate-ping" style={{ animationDelay: '0.7s' }}></div>
+            <div className="absolute bottom-28 right-20 w-4 h-4 bg-resume-purple/30 rounded-full animate-ping" style={{ animationDelay: '1.4s' }}></div>
+            <div className="absolute bottom-20 left-24 w-2.5 h-2.5 bg-resume-violet/50 rounded-full animate-ping" style={{ animationDelay: '2.1s' }}></div>
+            <div className="absolute top-1/2 left-16 w-1.5 h-1.5 bg-blue-500/40 rounded-full animate-ping" style={{ animationDelay: '2.8s' }}></div>
+            <div className="absolute top-1/3 right-16 w-2 h-2 bg-green-500/40 rounded-full animate-ping" style={{ animationDelay: '3.5s' }}></div>
           </div>
           
           <div className="grid gap-8 md:grid-cols-2 items-center relative">
@@ -209,6 +343,7 @@ const InfrastructureSection = () => {
                 </li>
               </ul>
             </div>
+            
             <div className="relative">
               <div className="aspect-video bg-gradient-to-br from-resume-gray-light/30 to-white/80 backdrop-blur-sm rounded-xl overflow-hidden flex items-center justify-center p-6 border border-gray-100 shadow-inner">
                 <div className="grid grid-cols-2 gap-4 w-full max-w-[400px]">
@@ -240,20 +375,28 @@ const InfrastructureSection = () => {
                 </div>
               </div>
               
-              <div className="absolute -top-5 -left-5 w-10 h-10 rounded-full bg-resume-purple/10 backdrop-blur-md flex items-center justify-center shadow-md animate-float animate-delay-100">
-                <Database className="h-5 w-5 text-resume-purple" />
+              <div className="absolute -top-5 -left-5 w-12 h-12 rounded-full bg-resume-purple/10 backdrop-blur-md flex items-center justify-center shadow-md animate-float animate-delay-100">
+                <Database className="h-6 w-6 text-resume-purple" />
               </div>
               
-              <div className="absolute -bottom-5 -right-5 w-10 h-10 rounded-full bg-resume-violet/10 backdrop-blur-md flex items-center justify-center shadow-md animate-float animate-delay-500">
-                <Code className="h-5 w-5 text-resume-violet" />
+              <div className="absolute -bottom-5 -right-5 w-12 h-12 rounded-full bg-resume-violet/10 backdrop-blur-md flex items-center justify-center shadow-md animate-float animate-delay-500">
+                <Code className="h-6 w-6 text-resume-violet" />
               </div>
               
-              <div className="absolute top-1/2 -left-8 w-8 h-8 rounded-full bg-resume-purple/15 backdrop-blur-md flex items-center justify-center shadow-md animate-float animate-delay-300">
-                <Network className="h-4 w-4 text-resume-purple" />
+              <div className="absolute top-1/2 -left-8 w-10 h-10 rounded-full bg-resume-purple/15 backdrop-blur-md flex items-center justify-center shadow-md animate-float animate-delay-300">
+                <Network className="h-5 w-5 text-resume-purple" />
               </div>
               
-              <div className="absolute top-1/4 -right-8 w-8 h-8 rounded-full bg-resume-violet/15 backdrop-blur-md flex items-center justify-center shadow-md animate-float animate-delay-700">
-                <Cpu className="h-4 w-4 text-resume-violet" />
+              <div className="absolute top-1/4 -right-8 w-10 h-10 rounded-full bg-resume-violet/15 backdrop-blur-md flex items-center justify-center shadow-md animate-float animate-delay-700">
+                <Cpu className="h-5 w-5 text-resume-violet" />
+              </div>
+              
+              <div className="absolute bottom-1/4 -left-6 w-8 h-8 rounded-full bg-blue-500/15 backdrop-blur-md flex items-center justify-center shadow-md animate-float animate-delay-900">
+                <Workflow className="h-4 w-4 text-blue-600" />
+              </div>
+              
+              <div className="absolute top-3/4 -right-6 w-8 h-8 rounded-full bg-green-500/15 backdrop-blur-md flex items-center justify-center shadow-md animate-float animate-delay-1100">
+                <GitBranch className="h-4 w-4 text-green-600" />
               </div>
             </div>
           </div>
