@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -155,9 +156,9 @@ const Dashboard = () => {
   };
 
   const EmptyStateCard = ({ title, description, icon: Icon, action }: any) => (
-    <Card className="border-2 border-dashed border-purple-200 bg-gradient-to-br from-purple-50/50 to-purple-50/50 hover:from-purple-100/50 hover:to-purple-100/50 transition-all duration-300 group">
+    <Card className="border-2 border-dashed border-gray-200 bg-gradient-to-br from-gray-50/50 to-gray-50/50 hover:from-gray-100/50 hover:to-gray-100/50 transition-all duration-300 group">
       <CardContent className="p-8 text-center">
-        <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+        <div className="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
           <Icon className="h-8 w-8 text-white" />
         </div>
         <h3 className="text-lg font-semibold text-gray-800 mb-2">{title}</h3>
@@ -175,14 +176,14 @@ const Dashboard = () => {
       
       {!showOnboarding && (
         <SidebarProvider defaultOpen={true}>
-          <div className="min-h-screen flex w-full bg-gradient-to-br from-purple-50 via-purple-50 to-purple-100">
+          <div className="min-h-screen flex w-full" style={{ backgroundColor: '#f4f1f8' }}>
             <Sidebar>
               <SidebarHeader>
                 <div className="flex items-center gap-2 px-4 py-2">
-                  <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-1.5">
+                  <div className="rounded-lg p-1.5" style={{ backgroundColor: '#7c3bed' }}>
                     <FileText className="h-5 w-5 text-white" />
                   </div>
-                  <span className="font-bold text-xl bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">Vireia AI</span>
+                  <span className="font-bold text-xl text-[#7c3bed]">Vireia AI</span>
                 </div>
               </SidebarHeader>
               
@@ -279,7 +280,7 @@ const Dashboard = () => {
                 {/* Dashboard Header */}
                 <div className={`flex items-center justify-between mb-8 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}>
                   <div>
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-purple-500 to-purple-600 bg-clip-text text-transparent">
+                    <h1 className="text-4xl font-bold text-[#7c3bed]">
                       Dashboard
                     </h1>
                     <p className="text-gray-600 mt-2 text-lg">
@@ -291,7 +292,8 @@ const Dashboard = () => {
                   </div>
                   <div className="flex gap-3">
                     <Button 
-                      className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300"
+                      className="text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                      style={{ backgroundColor: '#7c3bed' }}
                       onClick={() => setShowCreateDialog(true)}
                     >
                       <Plus className="h-4 w-4 mr-2" />
@@ -302,14 +304,14 @@ const Dashboard = () => {
 
                 {/* Stats Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                  <Card className={`border-0 shadow-lg bg-gradient-to-br from-purple-500 to-purple-600 text-white hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}>
+                  <Card className={`border-0 shadow-lg text-white hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ backgroundColor: '#7c3bed' }}>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium text-purple-100">Resumes Created</CardTitle>
-                      <FileText className="h-5 w-5 text-purple-200" />
+                      <CardTitle className="text-sm font-medium text-white/90">Resumes Created</CardTitle>
+                      <FileText className="h-5 w-5 text-white/80" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-3xl font-bold">{stats.resumesCreated}</div>
-                      <div className="text-xs text-purple-200 mt-1 flex items-center">
+                      <div className="text-xs text-white/80 mt-1 flex items-center">
                         <Sparkles className="h-3 w-3 mr-1" />
                         <span>Ready to impress!</span>
                       </div>
@@ -319,12 +321,12 @@ const Dashboard = () => {
                   <Card className={`border-0 shadow-lg bg-white text-gray-700 hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '100ms' }}>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                       <CardTitle className="text-sm font-medium text-gray-600">Interview Invites</CardTitle>
-                      <Users className="h-5 w-5 text-gray-500" />
+                      <Users className="h-5 w-5" style={{ color: '#7c3bed' }} />
                     </CardHeader>
                     <CardContent>
                       <div className="text-3xl font-bold text-gray-900">{stats.interviewInvites}</div>
                       <div className="text-xs text-gray-500 mt-1 flex items-center">
-                        <Heart className="h-3 w-3 mr-1" />
+                        <Heart className="h-3 w-3 mr-1" style={{ color: '#7c3bed' }} />
                         <span>Companies love you!</span>
                       </div>
                     </CardContent>
@@ -333,12 +335,12 @@ const Dashboard = () => {
                   <Card className={`border-0 shadow-lg bg-white text-gray-700 hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '200ms' }}>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                       <CardTitle className="text-sm font-medium text-gray-600">Applications</CardTitle>
-                      <BarChart3 className="h-5 w-5 text-gray-500" />
+                      <BarChart3 className="h-5 w-5" style={{ color: '#7c3bed' }} />
                     </CardHeader>
                     <CardContent>
                       <div className="text-3xl font-bold text-gray-900">{stats.totalApplications}</div>
                       <div className="text-xs text-gray-500 mt-1 flex items-center">
-                        <Zap className="h-3 w-3 mr-1" />
+                        <Zap className="h-3 w-3 mr-1" style={{ color: '#7c3bed' }} />
                         <span>Keep applying!</span>
                       </div>
                     </CardContent>
@@ -347,12 +349,12 @@ const Dashboard = () => {
                   <Card className={`border-0 shadow-lg bg-white text-gray-700 hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '300ms' }}>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                       <CardTitle className="text-sm font-medium text-gray-600">Time Saved</CardTitle>
-                      <Clock className="h-5 w-5 text-gray-500" />
+                      <Clock className="h-5 w-5" style={{ color: '#7c3bed' }} />
                     </CardHeader>
                     <CardContent>
                       <div className="text-3xl font-bold text-gray-900">{stats.timeSaved}h</div>
                       <div className="text-xs text-gray-500 mt-1 flex items-center">
-                        <Star className="h-3 w-3 mr-1" />
+                        <Star className="h-3 w-3 mr-1" style={{ color: '#7c3bed' }} />
                         <span>Efficiency master!</span>
                       </div>
                     </CardContent>
@@ -364,7 +366,7 @@ const Dashboard = () => {
                   {/* Recent Activity */}
                   <Card className={`lg:col-span-1 border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '400ms' }}>
                     <CardHeader>
-                      <CardTitle className="bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent">Recent Activity</CardTitle>
+                      <CardTitle className="text-[#7c3bed]">Recent Activity</CardTitle>
                       <CardDescription>Your latest updates and milestones</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -372,8 +374,8 @@ const Dashboard = () => {
                         <div className="space-y-4">
                           {applications.slice(0, 3).map(app => (
                             <div key={app.id} className="flex items-start border-b border-gray-100 pb-3 last:border-0">
-                              <div className="rounded-full p-2 mr-3 bg-gradient-to-r from-purple-100 to-purple-200">
-                                <Briefcase className="h-4 w-4 text-purple-600" />
+                              <div className="rounded-full p-2 mr-3" style={{ backgroundColor: '#f4f1f8' }}>
+                                <Briefcase className="h-4 w-4" style={{ color: '#7c3bed' }} />
                               </div>
                               <div>
                                 <div className="font-medium text-gray-800">{app.position}</div>
@@ -385,7 +387,7 @@ const Dashboard = () => {
                         </div>
                       ) : (
                         <div className="text-center py-8">
-                          <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#7c3bed' }}>
                             <Sparkles className="h-8 w-8 text-white" />
                           </div>
                           <p className="text-gray-600 mb-2">No applications yet!</p>
@@ -394,7 +396,7 @@ const Dashboard = () => {
                       )}
                     </CardContent>
                     <CardFooter>
-                      <Button variant="ghost" className="w-full hover:bg-purple-50 text-purple-600 hover:text-purple-700">
+                      <Button variant="ghost" className="w-full text-[#7c3bed] hover:bg-[#f4f1f8]">
                         View All Activity
                       </Button>
                     </CardFooter>
@@ -403,7 +405,7 @@ const Dashboard = () => {
                   {/* Resumes Section */}
                   <Card className={`lg:col-span-2 border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '500ms' }}>
                     <CardHeader>
-                      <CardTitle className="bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent">Your Resumes</CardTitle>
+                      <CardTitle className="text-[#7c3bed]">Your Resumes</CardTitle>
                       <CardDescription>
                         {resumes.length > 0 
                           ? `${resumes.length} resume${resumes.length > 1 ? 's' : ''} ready to land your dream job!`
@@ -417,19 +419,20 @@ const Dashboard = () => {
                           {resumes.slice(0, 4).map((resume) => (
                             <div 
                               key={resume.id}
-                              className="group relative p-4 rounded-lg border border-purple-100 hover:border-purple-300 bg-gradient-to-br from-white to-purple-50/30 transition-all duration-300 hover:shadow-md cursor-pointer"
+                              className="group relative p-4 rounded-lg border border-gray-100 hover:border-gray-300 bg-white transition-all duration-300 hover:shadow-md cursor-pointer"
+                              style={{ backgroundColor: '#f4f1f8' }}
                             >
                               <div className="flex justify-between items-start">
                                 <div>
-                                  <h3 className="font-medium group-hover:text-purple-600 transition-colors">{resume.title}</h3>
+                                  <h3 className="font-medium text-gray-800 group-hover:text-[#7c3bed] transition-colors">{resume.title}</h3>
                                   <p className="text-xs text-gray-500 mt-1">Last edited: {formatDate(resume.updated_at)}</p>
                                 </div>
-                                <div className="rounded-full p-2 bg-gradient-to-r from-purple-100 to-purple-200 group-hover:from-purple-200 group-hover:to-purple-300 transition-colors">
-                                  <FileText className="h-4 w-4 text-purple-600" />
+                                <div className="rounded-full p-2" style={{ backgroundColor: '#7c3bed' }}>
+                                  <FileText className="h-4 w-4 text-white" />
                                 </div>
                               </div>
                               <div className="mt-3">
-                                <span className="inline-block text-xs bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full px-2 py-1 capitalize">
+                                <span className="inline-block text-xs text-white rounded-full px-2 py-1 capitalize" style={{ backgroundColor: '#7c3bed' }}>
                                   {resume.template}
                                 </span>
                               </div>
@@ -443,7 +446,8 @@ const Dashboard = () => {
                           icon={FileText}
                           action={
                             <Button 
-                              className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
+                              className="text-white"
+                              style={{ backgroundColor: '#7c3bed' }}
                               onClick={() => setShowCreateDialog(true)}
                             >
                               <Plus className="h-4 w-4 mr-2" />
@@ -455,12 +459,13 @@ const Dashboard = () => {
                     </CardContent>
                     <CardFooter className="flex justify-between">
                       <Link to="/resume">
-                        <Button variant="ghost" className="hover:bg-purple-50 text-purple-600 hover:text-purple-700">
+                        <Button variant="ghost" className="text-[#7c3bed] hover:bg-[#f4f1f8]">
                           View All Resumes
                         </Button>
                       </Link>
                       <Button 
-                        className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 shadow-lg"
+                        className="text-white shadow-lg"
+                        style={{ backgroundColor: '#7c3bed' }}
                         onClick={() => setShowCreateDialog(true)}
                       >
                         <Plus className="h-4 w-4 mr-2" />
