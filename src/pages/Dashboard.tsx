@@ -3,9 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, ChevronUp, Users, BarChart3, Clock, Briefcase, Home, Cog, User, BookOpen, Layers, LogOut } from 'lucide-react';
+import { FileText, ChevronUp, Users, BarChart3, Clock, Briefcase, Home, Cog, User, BookOpen, Layers, LogOut, Plus, Sparkles, Heart, Star, Zap } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import OnboardingFlow from '@/components/OnboardingFlow';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Sidebar,
   SidebarContent,
@@ -23,14 +24,72 @@ import {
 } from "@/components/ui/sidebar";
 import CreateResumeDialog from '@/components/CreateResumeDialog';
 
+interface Resume {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  template: string;
+}
+
+interface JobApplication {
+  id: string;
+  company_name: string;
+  position: string;
+  status: string;
+  applied_date: string;
+}
+
 const Dashboard = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [firstVisit, setFirstVisit] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [resumes, setResumes] = useState<Resume[]>([]);
+  const [applications, setApplications] = useState<JobApplication[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
   const { toast } = useToast();
   
   useEffect(() => {
+    const initializeDashboard = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          // Fetch user's resumes
+          const { data: resumesData, error: resumesError } = await supabase
+            .from('resumes')
+            .select('id, title, created_at, updated_at, template')
+            .eq('user_id', session.user.id)
+            .order('updated_at', { ascending: false });
+
+          if (resumesError) {
+            console.error('Error fetching resumes:', resumesError);
+          } else {
+            setResumes(resumesData || []);
+          }
+
+          // Fetch user's job applications
+          const { data: applicationsData, error: applicationsError } = await supabase
+            .from('job_applications')
+            .select('id, company_name, position, status, applied_date')
+            .eq('user_id', session.user.id)
+            .order('applied_date', { ascending: false })
+            .limit(5);
+
+          if (applicationsError) {
+            console.error('Error fetching applications:', applicationsError);
+          } else {
+            setApplications(applicationsData || []);
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing dashboard:', error);
+      } finally {
+        setLoadingData(false);
+      }
+    };
+
     // Check if this is the first time user is visiting the dashboard
     const hasVisitedBefore = localStorage.getItem('dashboardVisited');
     
@@ -42,18 +101,19 @@ const Dashboard = () => {
     }
     
     setIsLoaded(true);
+    initializeDashboard();
     
     // Add a small delay before showing any toast notifications for better UX
     const timer = setTimeout(() => {
       if (!hasVisitedBefore) {
         toast({
-          title: "Welcome to your ResumeAI dashboard!",
-          description: "We'll guide you through creating your first resume."
+          title: "Welcome to your ResumeAI dashboard! ✨",
+          description: "Let's create something amazing together!"
         });
       } else {
         toast({
-          title: "Welcome back!",
-          description: "Continue building your career journey with ResumeAI."
+          title: "Welcome back! 🎉",
+          description: "Ready to boost your career today?"
         });
       }
     }, 1000);
@@ -61,28 +121,52 @@ const Dashboard = () => {
     return () => clearTimeout(timer);
   }, [toast]);
 
-  // Mock data for the dashboard
-  const stats = [
-    { id: 1, title: "Resumes Created", value: "12", icon: FileText, change: "+3", changeType: "increase" },
-    { id: 2, title: "Interview Invites", value: "8", icon: Users, change: "+5", changeType: "increase" },
-    { id: 3, title: "Application Tracking", value: "24", icon: BarChart3, change: "-2", changeType: "decrease" },
-    { id: 4, title: "Time Saved", value: "18h", icon: Clock, change: "+4h", changeType: "increase" },
-  ];
+  const calculateStats = () => {
+    const interviewInvites = applications.filter(app => 
+      app.status === 'interview_scheduled' || app.status === 'interview_completed'
+    ).length;
+    
+    const totalApplications = applications.length;
+    
+    return {
+      resumesCreated: resumes.length,
+      interviewInvites,
+      totalApplications,
+      timeSaved: Math.max(resumes.length * 2, 1) // Assume 2 hours saved per resume
+    };
+  };
 
-  const recentActivity = [
-    { id: 1, type: "Resume", title: "Software Engineer Resume", date: "Today, 10:30 AM" },
-    { id: 2, type: "Application", title: "Google - Front-end Developer", date: "Yesterday, 3:45 PM" },
-    { id: 3, type: "Resume", title: "Product Manager Resume", date: "Apr 10, 2:15 PM" },
-  ];
+  const stats = calculateStats();
 
   const completeOnboarding = () => {
     setShowOnboarding(false);
     localStorage.setItem('dashboardVisited', 'true');
     toast({
-      title: "Onboarding completed!",
-      description: "You're all set to create amazing resumes."
+      title: "You're all set! 🚀",
+      description: "Time to create your first amazing resume!"
     });
   };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  const EmptyStateCard = ({ title, description, icon: Icon, action }: any) => (
+    <Card className="border-2 border-dashed border-purple-200 bg-gradient-to-br from-purple-50/50 to-pink-50/50 hover:from-purple-100/50 hover:to-pink-100/50 transition-all duration-300 group">
+      <CardContent className="p-8 text-center">
+        <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+          <Icon className="h-8 w-8 text-white" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">{title}</h3>
+        <p className="text-gray-600 mb-4">{description}</p>
+        {action}
+      </CardContent>
+    </Card>
+  );
 
   return (
     <>
@@ -92,14 +176,14 @@ const Dashboard = () => {
       
       {!showOnboarding && (
         <SidebarProvider defaultOpen={true}>
-          <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-purple-50 dark:from-gray-950 dark:to-purple-950">
+          <div className="min-h-screen flex w-full bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
             <Sidebar>
               <SidebarHeader>
                 <div className="flex items-center gap-2 px-4 py-2">
-                  <div className="bg-resume-purple rounded-lg p-1.5">
+                  <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-1.5">
                     <FileText className="h-5 w-5 text-white" />
                   </div>
-                  <span className="font-bold text-xl bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">ResumeAI</span>
+                  <span className="font-bold text-xl bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">ResumeAI</span>
                 </div>
               </SidebarHeader>
               
@@ -196,16 +280,22 @@ const Dashboard = () => {
                 {/* Dashboard Header */}
                 <div className={`flex items-center justify-between mb-8 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}>
                   <div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
                       Dashboard
                     </h1>
-                    <p className="text-resume-gray mt-1">Welcome back! Here's your resume progress</p>
+                    <p className="text-gray-600 mt-2 text-lg">
+                      {resumes.length > 0 
+                        ? `Welcome back! You have ${resumes.length} resume${resumes.length > 1 ? 's' : ''} ready to go! 🚀`
+                        : "Ready to create something amazing? Let's build your first resume! ✨"
+                      }
+                    </p>
                   </div>
-                  <div>
+                  <div className="flex gap-3">
                     <Button 
-                      className="bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20"
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300"
                       onClick={() => setShowCreateDialog(true)}
                     >
+                      <Plus className="h-4 w-4 mr-2" />
                       Create Resume
                     </Button>
                   </div>
@@ -213,112 +303,168 @@ const Dashboard = () => {
 
                 {/* Stats Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                  {stats.map((stat, index) => (
-                    <Card 
-                      key={stat.id} 
-                      className={`border border-purple-100 hover:border-purple-200 shadow-sm hover:shadow transition-all duration-300 backdrop-blur-sm bg-white/80 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}
-                      style={{ animationDelay: `${index * 100}ms` }}
-                    >
-                      <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-resume-gray">{stat.title}</CardTitle>
-                        <stat.icon className="h-5 w-5 text-resume-purple" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">{stat.value}</div>
-                        <div className={`text-xs flex items-center mt-1 ${
-                          stat.changeType === 'increase' ? 'text-green-500' : 'text-red-500'
-                        }`}>
-                          <ChevronUp className={`h-4 w-4 ${
-                            stat.changeType === 'decrease' && 'rotate-180'
-                          }`} />
-                          <span>{stat.change} this week</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                {/* Recent Activity & Resume List */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <Card 
-                    className={`lg:col-span-1 border border-purple-100 hover:border-purple-200 shadow-sm hover:shadow transition-all duration-300 backdrop-blur-sm bg-white/80 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}
-                    style={{ animationDelay: '400ms' }}
-                  >
-                    <CardHeader>
-                      <CardTitle>Recent Activity</CardTitle>
-                      <CardDescription>Your latest resume updates and applications</CardDescription>
+                  <Card className={`border-0 shadow-lg bg-gradient-to-br from-purple-500 to-purple-600 text-white hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                      <CardTitle className="text-sm font-medium text-purple-100">Resumes Created</CardTitle>
+                      <FileText className="h-5 w-5 text-purple-200" />
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4">
-                        {recentActivity.map(activity => (
-                          <div key={activity.id} className="flex items-start border-b border-gray-100 pb-3 last:border-0">
-                            <div className={`rounded-full p-2 mr-3 ${
-                              activity.type === 'Resume' ? 'bg-purple-100' : 'bg-blue-100'
-                            }`}>
-                              {activity.type === 'Resume' ? (
-                                <FileText className="h-4 w-4 text-resume-purple" />
-                              ) : (
-                                <Briefcase className="h-4 w-4 text-blue-500" />
-                              )}
-                            </div>
-                            <div>
-                              <div className="font-medium">{activity.title}</div>
-                              <div className="text-xs text-resume-gray">{activity.date}</div>
-                            </div>
-                          </div>
-                        ))}
+                      <div className="text-3xl font-bold">{stats.resumesCreated}</div>
+                      <div className="text-xs text-purple-200 mt-1 flex items-center">
+                        <Sparkles className="h-3 w-3 mr-1" />
+                        <span>Ready to impress!</span>
                       </div>
                     </CardContent>
+                  </Card>
+
+                  <Card className={`border-0 shadow-lg bg-gradient-to-br from-pink-500 to-pink-600 text-white hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '100ms' }}>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                      <CardTitle className="text-sm font-medium text-pink-100">Interview Invites</CardTitle>
+                      <Users className="h-5 w-5 text-pink-200" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold">{stats.interviewInvites}</div>
+                      <div className="text-xs text-pink-200 mt-1 flex items-center">
+                        <Heart className="h-3 w-3 mr-1" />
+                        <span>Companies love you!</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className={`border-0 shadow-lg bg-gradient-to-br from-orange-500 to-orange-600 text-white hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '200ms' }}>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                      <CardTitle className="text-sm font-medium text-orange-100">Applications</CardTitle>
+                      <BarChart3 className="h-5 w-5 text-orange-200" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold">{stats.totalApplications}</div>
+                      <div className="text-xs text-orange-200 mt-1 flex items-center">
+                        <Zap className="h-3 w-3 mr-1" />
+                        <span>Keep applying!</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className={`border-0 shadow-lg bg-gradient-to-br from-green-500 to-green-600 text-white hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '300ms' }}>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                      <CardTitle className="text-sm font-medium text-green-100">Time Saved</CardTitle>
+                      <Clock className="h-5 w-5 text-green-200" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold">{stats.timeSaved}h</div>
+                      <div className="text-xs text-green-200 mt-1 flex items-center">
+                        <Star className="h-3 w-3 mr-1" />
+                        <span>Efficiency master!</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Main Content */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Recent Activity */}
+                  <Card className={`lg:col-span-1 border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '400ms' }}>
+                    <CardHeader>
+                      <CardTitle className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Recent Activity</CardTitle>
+                      <CardDescription>Your latest updates and milestones</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {applications.length > 0 ? (
+                        <div className="space-y-4">
+                          {applications.slice(0, 3).map(app => (
+                            <div key={app.id} className="flex items-start border-b border-gray-100 pb-3 last:border-0">
+                              <div className="rounded-full p-2 mr-3 bg-gradient-to-r from-purple-100 to-pink-100">
+                                <Briefcase className="h-4 w-4 text-purple-600" />
+                              </div>
+                              <div>
+                                <div className="font-medium text-gray-800">{app.position}</div>
+                                <div className="text-sm text-gray-600">{app.company_name}</div>
+                                <div className="text-xs text-gray-500">{formatDate(app.applied_date)}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Sparkles className="h-8 w-8 text-white" />
+                          </div>
+                          <p className="text-gray-600 mb-2">No applications yet!</p>
+                          <p className="text-sm text-gray-500">Start applying to see your activity here</p>
+                        </div>
+                      )}
+                    </CardContent>
                     <CardFooter>
-                      <Button variant="ghost" className="w-full hover:bg-resume-purple/10 text-resume-gray hover:text-resume-purple">
+                      <Button variant="ghost" className="w-full hover:bg-purple-50 text-purple-600 hover:text-purple-700">
                         View All Activity
                       </Button>
                     </CardFooter>
                   </Card>
                   
-                  <Card 
-                    className={`lg:col-span-2 border border-purple-100 hover:border-purple-200 shadow-sm hover:shadow transition-all duration-300 backdrop-blur-sm bg-white/80 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}
-                    style={{ animationDelay: '500ms' }}
-                  >
+                  {/* Resumes Section */}
+                  <Card className={`lg:col-span-2 border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '500ms' }}>
                     <CardHeader>
-                      <CardTitle>Your Resumes</CardTitle>
-                      <CardDescription>Manage and update your resume collection</CardDescription>
+                      <CardTitle className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Your Resumes</CardTitle>
+                      <CardDescription>
+                        {resumes.length > 0 
+                          ? `${resumes.length} resume${resumes.length > 1 ? 's' : ''} ready to land your dream job!`
+                          : "Ready to create your first masterpiece?"
+                        }
+                      </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4">
+                      {resumes.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {[1, 2, 3, 4].map(id => (
+                          {resumes.slice(0, 4).map((resume) => (
                             <div 
-                              key={id}
-                              className="group relative p-4 rounded-lg border border-purple-100 hover:border-resume-purple bg-white transition-all duration-300 hover:shadow-md cursor-pointer"
+                              key={resume.id}
+                              className="group relative p-4 rounded-lg border border-purple-100 hover:border-purple-300 bg-gradient-to-br from-white to-purple-50/30 transition-all duration-300 hover:shadow-md cursor-pointer"
                             >
                               <div className="flex justify-between items-start">
                                 <div>
-                                  <h3 className="font-medium group-hover:text-resume-purple transition-colors">Software Engineer Resume</h3>
-                                  <p className="text-xs text-resume-gray mt-1">Last edited: Apr {id + 8}, 2025</p>
+                                  <h3 className="font-medium group-hover:text-purple-600 transition-colors">{resume.title}</h3>
+                                  <p className="text-xs text-gray-500 mt-1">Last edited: {formatDate(resume.updated_at)}</p>
                                 </div>
-                                <div className="rounded-full p-2 bg-purple-50 group-hover:bg-resume-purple/20 transition-colors">
-                                  <FileText className="h-4 w-4 text-resume-purple" />
+                                <div className="rounded-full p-2 bg-gradient-to-r from-purple-100 to-pink-100 group-hover:from-purple-200 group-hover:to-pink-200 transition-colors">
+                                  <FileText className="h-4 w-4 text-purple-600" />
                                 </div>
                               </div>
                               <div className="mt-3">
-                                <span className="inline-block text-xs bg-purple-50 text-resume-purple rounded-full px-2 py-1">ATS-Optimized</span>
+                                <span className="inline-block text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full px-2 py-1 capitalize">
+                                  {resume.template}
+                                </span>
                               </div>
                             </div>
                           ))}
                         </div>
-                      </div>
+                      ) : (
+                        <EmptyStateCard
+                          title="No resumes yet? Let's fix that! 🎨"
+                          description="Create your first resume in just a few clicks. Our AI will help you craft something amazing!"
+                          icon={FileText}
+                          action={
+                            <Button 
+                              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                              onClick={() => setShowCreateDialog(true)}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Create My First Resume
+                            </Button>
+                          }
+                        />
+                      )}
                     </CardContent>
                     <CardFooter className="flex justify-between">
                       <Link to="/resume">
-                        <Button variant="ghost" className="hover:bg-resume-purple/10 text-resume-gray hover:text-resume-purple">
+                        <Button variant="ghost" className="hover:bg-purple-50 text-purple-600 hover:text-purple-700">
                           View All Resumes
                         </Button>
                       </Link>
                       <Button 
-                        className="bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20"
+                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg"
                         onClick={() => setShowCreateDialog(true)}
                       >
+                        <Plus className="h-4 w-4 mr-2" />
                         Create New Resume
                       </Button>
                     </CardFooter>
