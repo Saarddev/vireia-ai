@@ -1,11 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
-import { Calendar, Users, CheckCircle, TrendingUp, Clock } from 'lucide-react';
+import { BarChart3, TrendingUp, Sparkles, Target, PieChart } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import AppSidebar from '@/components/AppSidebar';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as PieChartComponent, Pie, Cell } from 'recharts';
 
 const Analytics = () => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -17,179 +17,109 @@ const Analytics = () => {
     // Welcome toast
     const timer = setTimeout(() => {
       toast({
-        title: "Resume Analytics",
-        description: "Track your resume performance and application insights"
+        title: "Coming Soon!",
+        description: "Advanced analytics dashboard is in development"
       });
     }, 500);
     
     return () => clearTimeout(timer);
   }, [toast]);
 
-  // Mock data for charts
-  const applicationData = [
-    { name: 'Jan', applications: 5, interviews: 2, offers: 0 },
-    { name: 'Feb', applications: 8, interviews: 3, offers: 1 },
-    { name: 'Mar', applications: 12, interviews: 5, offers: 2 },
-    { name: 'Apr', applications: 15, interviews: 7, offers: 3 },
-  ];
-
-  const statusData = [
-    { name: 'Applied', value: 45 },
-    { name: 'Interview', value: 25 },
-    { name: 'Rejected', value: 20 },
-    { name: 'Offer', value: 10 },
-  ];
-
-  const resumePerformanceData = [
-    { name: 'Technical Resume', views: 42, downloads: 12, interviews: 5 },
-    { name: 'Creative Portfolio', views: 28, downloads: 8, interviews: 3 },
-    { name: 'Management Resume', views: 36, downloads: 15, interviews: 7 },
-  ];
-
-  const COLORS = ['#9B87F5', '#36B9CC', '#E74A3B', '#1CC88A'];
-
-  // Stats data
-  const stats = [
-    { id: 1, title: 'Total Applications', value: '72', icon: <Clock className="h-6 w-6 text-resume-purple" /> },
-    { id: 2, title: 'Interview Invites', value: '23', icon: <Users className="h-6 w-6 text-blue-500" /> },
-    { id: 3, title: 'Job Offers', value: '6', icon: <CheckCircle className="h-6 w-6 text-green-500" /> },
-    { id: 4, title: 'Response Rate', value: '32%', icon: <TrendingUp className="h-6 w-6 text-yellow-500" /> },
-  ];
-
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-purple-50 dark:from-gray-950 dark:to-purple-950">
+      <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-950 dark:to-blue-950">
         <AppSidebar currentPage="analytics" />
         
         <SidebarInset>
-          <div className="container max-w-7xl mx-auto px-4 py-8">
-            {/* Page Header */}
-            <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}>
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">
-                  Analytics
-                </h1>
-                <p className="text-resume-gray mt-1">Track your resume performance and application insights</p>
-              </div>
-              <div>
-                <Button variant="outline" className="border-resume-purple text-resume-purple">
-                  <Calendar className="mr-2 h-4 w-4" /> Last 30 Days
-                </Button>
-              </div>
-            </div>
-
-            {/* Stats Cards */}
-            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '100ms' }}>
-              {stats.map((stat, index) => (
-                <Card 
-                  key={stat.id} 
-                  className="border border-purple-100 hover:border-purple-200 shadow-sm hover:shadow transition-all duration-300 backdrop-blur-sm bg-white/80"
-                  style={{ animationDelay: `${index * 50 + 100}ms` }}
-                >
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium text-resume-gray">{stat.title}</CardTitle>
-                    {stat.icon}
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold">{stat.value}</div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Charts Row 1 */}
-            <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '300ms' }}>
-              {/* Application Trend */}
-              <Card className="lg:col-span-2 border border-purple-100 hover:border-purple-200 shadow-sm hover:shadow transition-all duration-300 backdrop-blur-sm bg-white/80">
-                <CardHeader>
-                  <CardTitle className="text-xl">Application Trend</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={applicationData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="applications" name="Applications" fill="#9B87F5" />
-                        <Bar dataKey="interviews" name="Interviews" fill="#36B9CC" />
-                        <Bar dataKey="offers" name="Offers" fill="#1CC88A" />
-                      </BarChart>
-                    </ResponsiveContainer>
+          <div className="container max-w-7xl mx-auto px-4 py-8 flex items-center justify-center min-h-screen">
+            <Card className={`max-w-2xl w-full border border-blue-100 shadow-2xl backdrop-blur-sm bg-white/80 ${isLoaded ? 'animate-scale-up' : 'opacity-0'}`}>
+              <CardContent className="p-12 text-center">
+                {/* Animated Icon */}
+                <div className="relative mb-8">
+                  <div className="w-24 h-24 mx-auto bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center animate-float">
+                    <BarChart3 className="h-12 w-12 text-white" />
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Application Status */}
-              <Card className="border border-purple-100 hover:border-purple-200 shadow-sm hover:shadow transition-all duration-300 backdrop-blur-sm bg-white/80">
-                <CardHeader>
-                  <CardTitle className="text-xl">Application Status</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px] flex items-center justify-center">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChartComponent>
-                        <Pie
-                          data={statusData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={90}
-                          fill="#8884d8"
-                          paddingAngle={5}
-                          dataKey="value"
-                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {statusData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChartComponent>
-                    </ResponsiveContainer>
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-400 rounded-full flex items-center justify-center animate-pulse">
+                    <Sparkles className="h-4 w-4 text-green-600" />
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
 
-            {/* Resume Performance */}
-            <div className={`${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '500ms' }}>
-              <Card className="border border-purple-100 hover:border-purple-200 shadow-sm hover:shadow transition-all duration-300 backdrop-blur-sm bg-white/80">
-                <CardHeader>
-                  <CardTitle className="text-xl">Resume Performance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr>
-                          <th className="text-left py-3 px-4 border-b">Resume</th>
-                          <th className="text-center py-3 px-4 border-b">Views</th>
-                          <th className="text-center py-3 px-4 border-b">Downloads</th>
-                          <th className="text-center py-3 px-4 border-b">Interviews</th>
-                          <th className="text-center py-3 px-4 border-b">Conversion Rate</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {resumePerformanceData.map((item, index) => (
-                          <tr key={index} className="hover:bg-gray-50">
-                            <td className="py-3 px-4 border-b">{item.name}</td>
-                            <td className="text-center py-3 px-4 border-b">{item.views}</td>
-                            <td className="text-center py-3 px-4 border-b">{item.downloads}</td>
-                            <td className="text-center py-3 px-4 border-b">{item.interviews}</td>
-                            <td className="text-center py-3 px-4 border-b">
-                              {((item.interviews / item.views) * 100).toFixed(1)}%
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                {/* Main Content */}
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent mb-2">
+                      Coming Soon
+                    </h1>
+                    <h2 className="text-2xl font-semibold text-gray-700">
+                      Analytics Dashboard
+                    </h2>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+
+                  <p className="text-lg text-resume-gray leading-relaxed">
+                    Get ready for powerful insights into your resume performance, application success rates, 
+                    and career progress with our advanced analytics platform.
+                  </p>
+
+                  {/* Features Preview */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                      <div className="flex items-center gap-3 mb-2">
+                        <TrendingUp className="h-5 w-5 text-blue-600" />
+                        <span className="font-medium text-gray-700">Success Metrics</span>
+                      </div>
+                      <p className="text-sm text-resume-gray">Track application response rates and trends</p>
+                    </div>
+                    
+                    <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Target className="h-5 w-5 text-green-600" />
+                        <span className="font-medium text-gray-700">Goal Tracking</span>
+                      </div>
+                      <p className="text-sm text-resume-gray">Set and monitor your career objectives</p>
+                    </div>
+
+                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-100">
+                      <div className="flex items-center gap-3 mb-2">
+                        <PieChart className="h-5 w-5 text-purple-600" />
+                        <span className="font-medium text-gray-700">Resume Performance</span>
+                      </div>
+                      <p className="text-sm text-resume-gray">Analyze which resumes get the best results</p>
+                    </div>
+                    
+                    <div className="p-4 bg-orange-50 rounded-lg border border-orange-100">
+                      <div className="flex items-center gap-3 mb-2">
+                        <BarChart3 className="h-5 w-5 text-orange-600" />
+                        <span className="font-medium text-gray-700">Industry Insights</span>
+                      </div>
+                      <p className="text-sm text-resume-gray">Compare your progress with industry standards</p>
+                    </div>
+                  </div>
+
+                  {/* CTA Button */}
+                  <div className="pt-6">
+                    <Button 
+                      size="lg" 
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-lg shadow-blue-500/20 px-8"
+                      onClick={() => toast({
+                        title: "Thanks for your interest!",
+                        description: "We'll notify you when analytics are ready"
+                      })}
+                    >
+                      Get Early Access
+                    </Button>
+                  </div>
+
+                  {/* Progress Indicator */}
+                  <div className="pt-4">
+                    <div className="flex items-center justify-center gap-2 text-sm text-resume-gray">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                      <span>Building Amazing Analytics</span>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </SidebarInset>
       </div>
