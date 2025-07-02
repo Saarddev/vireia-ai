@@ -183,7 +183,7 @@ const Dashboard = () => {
                   <div className="bg-primary rounded-lg p-1.5">
                     <FileText className="h-5 w-5 text-primary-foreground" />
                   </div>
-                  <span className="font-bold text-xl text-primary">Vireia AI</span>
+                  <span className="font-bold text-xl text-primary">ResumeAI</span>
                 </div>
               </SidebarHeader>
               

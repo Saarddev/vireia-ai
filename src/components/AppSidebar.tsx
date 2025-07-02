@@ -38,7 +38,7 @@ const AppSidebar = ({ currentPage }: AppSidebarProps) => {
             <FileText className="h-5 w-5 text-white" />
           </div>
           <Link to="/" className="font-bold text-xl bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">
-            Vireia AI
+            ResumeAI
           </Link>
         </div>
       </SidebarHeader>
