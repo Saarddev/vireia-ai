@@ -1,53 +1,73 @@
 
+export interface PersonalInfo {
+  fullName: string;
+  email: string;
+  phone: string;
+  location: string;
+  linkedin?: string;
+  github?: string;
+  website?: string;
+}
+
 export interface Experience {
   id: string;
   company: string;
-  title: string;
+  position: string;
   location: string;
   startDate: string;
   endDate: string;
-  description: string;
+  current: boolean;
+  description: string[];
 }
 
 export interface Education {
   id: string;
   institution: string;
   degree: string;
+  field: string;
   location: string;
-  field?: string;
   startDate: string;
   endDate: string;
-  description: string;
+  current: boolean;
+  gpa?: string;
 }
 
 export interface Project {
   id: string;
-  title: string;
+  name: string;
   description: string;
   technologies: string[];
-  startDate: string;
-  endDate: string;
   link?: string;
+  github?: string;
+}
+
+export interface Skill {
+  category: string;
+  items: string[];
 }
 
 export interface ResumeData {
-  personal: {
-    name: string;
-    title: string;
-    email: string;
-    phone: string;
-    location: string;
-    linkedin: string;
-    website: string;
-  };
+  personalInfo: PersonalInfo;
   summary: string;
   experience: Experience[];
   education: Education[];
-  skills: {
-    technical: string[];
-    soft: string[];
-  };
-  languages: string[];
-  certifications: string[];
   projects: Project[];
+  skills: Skill[];
+}
+
+export interface ResumeSettings {
+  template: 'modern' | 'professional' | 'creative';
+  primaryColor: string;
+  fontSize: 'small' | 'medium' | 'large';
+  spacing: 'compact' | 'normal' | 'relaxed';
+  showPhoto: boolean;
+}
+
+export interface Resume {
+  id: string;
+  title: string;
+  data: ResumeData;
+  settings: ResumeSettings;
+  createdAt: string;
+  updatedAt: string;
 }
