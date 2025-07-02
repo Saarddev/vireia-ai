@@ -15,7 +15,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarProvider,
   SidebarGroup,
   SidebarGroupLabel,
   SidebarGroupContent,
@@ -180,10 +179,10 @@ const Dashboard = () => {
             <Sidebar>
               <SidebarHeader>
                 <div className="flex items-center gap-2 px-4 py-2">
-                  <div className="bg-indigo-600 rounded-lg p-1.5">
+                  <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg p-1.5">
                     <FileText className="h-5 w-5 text-white" />
                   </div>
-                  <span className="font-bold text-xl text-indigo-600">Vireia AI</span>
+                  <span className="font-bold text-xl bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Vireia AI</span>
                 </div>
               </SidebarHeader>
               
@@ -280,7 +279,7 @@ const Dashboard = () => {
                 {/* Dashboard Header */}
                 <div className={`flex items-center justify-between mb-8 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}>
                   <div>
-                    <h1 className="text-4xl font-bold text-indigo-600">Dashboard</h1>
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Dashboard</h1>
                     <p className="text-gray-600 mt-2 text-lg">
                       {resumes.length > 0 
                         ? `Welcome back! You have ${resumes.length} resume${resumes.length > 1 ? 's' : ''} ready to go! 🚀`
@@ -290,7 +289,7 @@ const Dashboard = () => {
                   </div>
                   <div className="flex gap-3">
                     <Button 
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                      className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
                       onClick={() => setShowCreateDialog(true)}
                     >
                       <Plus className="h-4 w-4 mr-2" />
@@ -301,14 +300,14 @@ const Dashboard = () => {
 
                 {/* Stats Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                  <Card className={`border-0 shadow-lg bg-indigo-600 text-white hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}>
+                  <Card className={`border-0 shadow-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium text-indigo-100">Resumes Created</CardTitle>
-                      <FileText className="h-5 w-5 text-indigo-200" />
+                      <CardTitle className="text-sm font-medium text-purple-100">Resumes Created</CardTitle>
+                      <FileText className="h-5 w-5 text-purple-200" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-3xl font-bold">{stats.resumesCreated}</div>
-                      <div className="text-xs text-indigo-200 mt-1 flex items-center">
+                      <div className="text-xs text-purple-200 mt-1 flex items-center">
                         <Sparkles className="h-3 w-3 mr-1" />
                         <span>Ready to impress!</span>
                       </div>
@@ -363,7 +362,7 @@ const Dashboard = () => {
                   {/* Recent Activity */}
                   <Card className={`lg:col-span-1 border-0 shadow-lg bg-white hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '400ms' }}>
                     <CardHeader>
-                      <CardTitle className="text-indigo-600">Recent Activity</CardTitle>
+                      <CardTitle className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Recent Activity</CardTitle>
                       <CardDescription>Your latest updates and milestones</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -371,8 +370,8 @@ const Dashboard = () => {
                         <div className="space-y-4">
                           {applications.slice(0, 3).map(app => (
                             <div key={app.id} className="flex items-start border-b border-gray-100 pb-3 last:border-0">
-                              <div className="rounded-full p-2 mr-3 bg-indigo-100">
-                                <Briefcase className="h-4 w-4 text-indigo-600" />
+                              <div className="rounded-full p-2 mr-3 bg-gradient-to-r from-purple-100 to-indigo-100">
+                                <Briefcase className="h-4 w-4 text-purple-600" />
                               </div>
                               <div>
                                 <div className="font-medium text-gray-800">{app.position}</div>
@@ -393,7 +392,7 @@ const Dashboard = () => {
                       )}
                     </CardContent>
                     <CardFooter>
-                      <Button variant="ghost" className="w-full hover:bg-indigo-50 text-indigo-600 hover:text-indigo-700">
+                      <Button variant="ghost" className="w-full hover:bg-purple-50 text-purple-600 hover:text-purple-700">
                         View All Activity
                       </Button>
                     </CardFooter>
@@ -402,7 +401,7 @@ const Dashboard = () => {
                   {/* Resumes Section */}
                   <Card className={`lg:col-span-2 border-0 shadow-lg bg-white hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '500ms' }}>
                     <CardHeader>
-                      <CardTitle className="text-indigo-600">Your Resumes</CardTitle>
+                      <CardTitle className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Your Resumes</CardTitle>
                       <CardDescription>
                         {resumes.length > 0 
                           ? `${resumes.length} resume${resumes.length > 1 ? 's' : ''} ready to land your dream job!`
@@ -416,19 +415,19 @@ const Dashboard = () => {
                           {resumes.slice(0, 4).map((resume) => (
                             <div 
                               key={resume.id}
-                              className="group relative p-4 rounded-lg border border-gray-200 hover:border-indigo-300 bg-white hover:bg-indigo-50/30 transition-all duration-300 hover:shadow-md cursor-pointer"
+                              className="group relative p-4 rounded-lg border border-gray-200 hover:border-purple-300 bg-white hover:bg-gradient-to-r hover:from-purple-50/30 hover:to-indigo-50/30 transition-all duration-300 hover:shadow-md cursor-pointer"
                             >
                               <div className="flex justify-between items-start">
                                 <div>
-                                  <h3 className="font-medium group-hover:text-indigo-600 transition-colors">{resume.title}</h3>
+                                  <h3 className="font-medium group-hover:text-purple-600 transition-colors">{resume.title}</h3>
                                   <p className="text-xs text-gray-500 mt-1">Last edited: {formatDate(resume.updated_at)}</p>
                                 </div>
-                                <div className="rounded-full p-2 bg-indigo-100 group-hover:bg-indigo-200 transition-colors">
-                                  <FileText className="h-4 w-4 text-indigo-600" />
+                                <div className="rounded-full p-2 bg-gradient-to-r from-purple-100 to-indigo-100 group-hover:from-purple-200 group-hover:to-indigo-200 transition-colors">
+                                  <FileText className="h-4 w-4 text-purple-600" />
                                 </div>
                               </div>
                               <div className="mt-3">
-                                <span className="inline-block text-xs bg-indigo-600 text-white rounded-full px-2 py-1 capitalize">
+                                <span className="inline-block text-xs bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full px-2 py-1 capitalize">
                                   {resume.template}
                                 </span>
                               </div>
@@ -442,7 +441,7 @@ const Dashboard = () => {
                           icon={FileText}
                           action={
                             <Button 
-                              className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
                               onClick={() => setShowCreateDialog(true)}
                             >
                               <Plus className="h-4 w-4 mr-2" />
@@ -454,12 +453,12 @@ const Dashboard = () => {
                     </CardContent>
                     <CardFooter className="flex justify-between">
                       <Link to="/resume">
-                        <Button variant="ghost" className="hover:bg-indigo-50 text-indigo-600 hover:text-indigo-700">
+                        <Button variant="ghost" className="hover:bg-purple-50 text-purple-600 hover:text-purple-700">
                           View All Resumes
                         </Button>
                       </Link>
                       <Button 
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg"
+                        className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg"
                         onClick={() => setShowCreateDialog(true)}
                       >
                         <Plus className="h-4 w-4 mr-2" />
