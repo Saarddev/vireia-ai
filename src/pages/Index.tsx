@@ -7,10 +7,60 @@ import InfrastructureSection from '@/components/InfrastructureSection';
 import PricingSection from '@/components/PricingSection';
 import Footer from '@/components/Footer';
 import { Github, ExternalLink } from 'lucide-react';
+import { Helmet } from 'react-helmet';
 
 const Index = () => {
   return (
     <>
+      <Helmet>
+        <title>Vireia AI - AI-Powered Resume Builder | Create Professional Resumes</title>
+        <meta name="description" content="Create professional, ATS-friendly resumes with Vireia AI's powerful resume builder. Build standout resumes in minutes with AI assistance, multiple templates, and expert guidance." />
+        <meta name="keywords" content="resume builder, AI resume, professional resume, ATS resume, job application, career builder, resume maker, CV builder" />
+        <meta name="author" content="Vireia AI" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://cadina.vercel.app/" />
+        <meta property="og:title" content="Vireia AI - AI-Powered Resume Builder" />
+        <meta property="og:description" content="Create professional, ATS-friendly resumes with our AI-powered resume builder. Get hired faster with Vireia AI." />
+        <meta property="og:image" content="https://cadina.vercel.app/og-image.png" />
+        <meta property="og:site_name" content="Vireia AI" />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://cadina.vercel.app/" />
+        <meta property="twitter:title" content="Vireia AI - AI-Powered Resume Builder" />
+        <meta property="twitter:description" content="Create professional, ATS-friendly resumes with our AI-powered resume builder. Get hired faster with Vireia AI." />
+        <meta property="twitter:image" content="https://cadina.vercel.app/og-image.png" />
+
+        {/* Additional SEO tags */}
+        <meta name="robots" content="index, follow" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="canonical" href="https://cadina.vercel.app/" />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Vireia AI",
+            "description": "AI-powered resume builder for creating professional, ATS-friendly resumes",
+            "url": "https://cadina.vercel.app",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Web Browser",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "creator": {
+              "@type": "Organization",
+              "name": "Vireia AI"
+            }
+          })}
+        </script>
+      </Helmet>
+      
       <Navbar />
       <main>
         <HeroSection />

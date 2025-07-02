@@ -186,7 +186,7 @@ const Resume = () => {
               <div className="bg-resume-purple rounded-lg p-1.5">
                 <FileText className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold text-xl bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">ResumeAI</span>
+              <span className="font-bold text-xl bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">Vireia AI</span>
             </div>
           </SidebarHeader>
           
