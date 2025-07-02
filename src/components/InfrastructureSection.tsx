@@ -12,13 +12,7 @@ import {
   Code,
   Timer,
   Network,
-  Cpu,
-  GitBranch,
-  Globe,
-  Shield,
-  Target,
-  Layers,
-  Workflow
+  Cpu
 } from 'lucide-react';
 
 const InfrastructureSection = () => {
@@ -170,6 +164,20 @@ const InfrastructureSection = () => {
           <div className="absolute -top-24 -right-24 w-64 h-64 bg-resume-violet/5 rounded-full blur-2xl"></div>
           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-resume-purple/5 rounded-full blur-2xl"></div>
           
+          {/* Animated AI connection network */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-10 left-10 w-2 h-2 bg-resume-purple/40 rounded-full animate-pulse"></div>
+            <div className="absolute top-20 right-20 w-1.5 h-1.5 bg-resume-violet/40 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+            <div className="absolute bottom-20 left-20 w-2.5 h-2.5 bg-resume-purple/30 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+            <div className="absolute bottom-10 right-10 w-1 h-1 bg-resume-violet/50 rounded-full animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+            
+            {/* Connection lines */}
+            <svg className="absolute inset-0 w-full h-full opacity-30">
+              <line x1="40" y1="40" x2="calc(100% - 80px)" y2="80" stroke="url(#connectionGradient)" strokeWidth="1" className="animate-pulse" />
+              <line x1="80" y1="calc(100% - 80px)" x2="calc(100% - 40px)" y2="calc(100% - 40px)" stroke="url(#connectionGradient)" strokeWidth="1" className="animate-pulse" style={{ animationDelay: '0.7s' }} />
+            </svg>
+          </div>
+          
           <div className="grid gap-8 md:grid-cols-2 items-center relative">
             <div className="space-y-5">
               <div className="inline-flex items-center rounded-full bg-resume-violet/10 px-3 py-1 text-sm text-resume-violet">
@@ -201,133 +209,52 @@ const InfrastructureSection = () => {
                 </li>
               </ul>
             </div>
-            
-            {/* AI/ML Node Network Visualization */}
-            <div className="relative h-96 bg-gradient-to-br from-gray-900/5 to-slate-900/10 rounded-2xl overflow-hidden border border-gray-200/50 backdrop-blur-sm">
-              {/* Background grid pattern */}
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute inset-0" style={{
-                  backgroundImage: `linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px)`,
-                  backgroundSize: '20px 20px'
-                }}></div>
+            <div className="relative">
+              <div className="aspect-video bg-gradient-to-br from-resume-gray-light/30 to-white/80 backdrop-blur-sm rounded-xl overflow-hidden flex items-center justify-center p-6 border border-gray-100 shadow-inner">
+                <div className="grid grid-cols-2 gap-4 w-full max-w-[400px]">
+                  <div className="space-y-4">
+                    <div className="h-24 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-md transform hover:scale-105 transition-transform duration-300">
+                      <div className="h-4 w-1/2 bg-gradient-to-r from-resume-purple/30 to-resume-violet/30 rounded mb-2"></div>
+                      <div className="h-3 w-full bg-resume-gray-light rounded mb-1"></div>
+                      <div className="h-3 w-3/4 bg-resume-gray-light rounded"></div>
+                    </div>
+                    <div className="h-24 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-md transform hover:scale-105 transition-transform duration-300">
+                      <LineChart className="h-6 w-6 text-resume-purple mb-2" />
+                      <div className="h-3 w-full bg-resume-gray-light rounded mb-1"></div>
+                      <div className="h-3 w-2/3 bg-resume-gray-light rounded"></div>
+                    </div>
+                  </div>
+                  <div className="h-[180px] bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-md flex flex-col transform hover:scale-105 transition-transform duration-300">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-resume-purple" />
+                      <div className="h-3 w-1/2 bg-resume-purple/20 rounded"></div>
+                    </div>
+                    <div className="space-y-1.5 flex-grow mt-3">
+                      <div className="h-2.5 w-full bg-resume-gray-light rounded"></div>
+                      <div className="h-2.5 w-3/4 bg-resume-gray-light rounded"></div>
+                      <div className="h-2.5 w-5/6 bg-resume-gray-light rounded"></div>
+                      <div className="h-2.5 w-2/3 bg-resume-gray-light rounded"></div>
+                    </div>
+                    <div className="h-6 w-full bg-gradient-to-r from-resume-purple/20 to-resume-violet/20 rounded-full mt-auto"></div>
+                  </div>
+                </div>
               </div>
-
-              {/* Central AI Core */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-gradient-to-br from-resume-purple to-resume-violet rounded-full flex items-center justify-center shadow-2xl border-4 border-white/20 animate-pulse">
-                <Brain className="h-10 w-10 text-white" />
-                <div className="absolute inset-0 rounded-full bg-resume-purple/20 animate-ping"></div>
-                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs font-semibold text-resume-purple whitespace-nowrap">AI Core</div>
+              
+              <div className="absolute -top-5 -left-5 w-10 h-10 rounded-full bg-resume-purple/10 backdrop-blur-md flex items-center justify-center shadow-md animate-float animate-delay-100">
+                <Database className="h-5 w-5 text-resume-purple" />
               </div>
-
-              {/* ML Component Nodes */}
-              {/* Natural Language Processing */}
-              <div className="absolute top-8 left-8 w-14 h-14 bg-gradient-to-br from-blue-500/80 to-blue-600/90 rounded-xl flex items-center justify-center shadow-lg border border-blue-300/30 animate-float">
-                <FileText className="h-7 w-7 text-white" />
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
-                <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-blue-700 whitespace-nowrap">NLP Engine</div>
+              
+              <div className="absolute -bottom-5 -right-5 w-10 h-10 rounded-full bg-resume-violet/10 backdrop-blur-md flex items-center justify-center shadow-md animate-float animate-delay-500">
+                <Code className="h-5 w-5 text-resume-violet" />
               </div>
-
-              {/* Pattern Recognition */}
-              <div className="absolute top-8 right-8 w-14 h-14 bg-gradient-to-br from-green-500/80 to-green-600/90 rounded-xl flex items-center justify-center shadow-lg border border-green-300/30 animate-float" style={{ animationDelay: '0.5s' }}>
-                <Target className="h-7 w-7 text-white" />
-                <div className="absolute -top-1 -left-1 w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
-                <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-green-700 whitespace-nowrap">Pattern AI</div>
+              
+              <div className="absolute top-1/2 -left-8 w-8 h-8 rounded-full bg-resume-purple/15 backdrop-blur-md flex items-center justify-center shadow-md animate-float animate-delay-300">
+                <Network className="h-4 w-4 text-resume-purple" />
               </div>
-
-              {/* Data Pipeline */}
-              <div className="absolute bottom-8 left-8 w-14 h-14 bg-gradient-to-br from-purple-500/80 to-purple-600/90 rounded-xl flex items-center justify-center shadow-lg border border-purple-300/30 animate-float" style={{ animationDelay: '1s' }}>
-                <Database className="h-7 w-7 text-white" />
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-purple-400 rounded-full animate-pulse"></div>
-                <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-purple-700 whitespace-nowrap">Data Pipeline</div>
+              
+              <div className="absolute top-1/4 -right-8 w-8 h-8 rounded-full bg-resume-violet/15 backdrop-blur-md flex items-center justify-center shadow-md animate-float animate-delay-700">
+                <Cpu className="h-4 w-4 text-resume-violet" />
               </div>
-
-              {/* Optimization Engine */}
-              <div className="absolute bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-orange-500/80 to-orange-600/90 rounded-xl flex items-center justify-center shadow-lg border border-orange-300/30 animate-float" style={{ animationDelay: '1.5s' }}>
-                <Zap className="h-7 w-7 text-white" />
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full animate-ping"></div>
-                <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-orange-700 whitespace-nowrap">Optimizer</div>
-              </div>
-
-              {/* Skill Analyzer */}
-              <div className="absolute top-24 left-1/2 transform -translate-x-1/2 w-12 h-12 bg-gradient-to-br from-pink-500/80 to-pink-600/90 rounded-lg flex items-center justify-center shadow-lg border border-pink-300/30 animate-float" style={{ animationDelay: '2s' }}>
-                <Layers className="h-6 w-6 text-white" />
-                <div className="absolute -right-1 -bottom-1 w-2 h-2 bg-pink-400 rounded-full animate-pulse"></div>
-                <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-pink-700 whitespace-nowrap">Skills AI</div>
-              </div>
-
-              {/* ATS Simulator */}
-              <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 w-12 h-12 bg-gradient-to-br from-teal-500/80 to-teal-600/90 rounded-lg flex items-center justify-center shadow-lg border border-teal-300/30 animate-float" style={{ animationDelay: '2.5s' }}>
-                <Shield className="h-6 w-6 text-white" />
-                <div className="absolute -left-1 -top-1 w-2 h-2 bg-teal-400 rounded-full animate-ping"></div>
-                <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-teal-700 whitespace-nowrap">ATS Sim</div>
-              </div>
-
-              {/* Dynamic Connection Lines */}
-              <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                <defs>
-                  <linearGradient id="connectionLine1" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.6"/>
-                    <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.3"/>
-                  </linearGradient>
-                  <linearGradient id="connectionLine2" x1="100%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#10B981" stopOpacity="0.6"/>
-                    <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.3"/>
-                  </linearGradient>
-                  <filter id="lineGlow">
-                    <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                    <feMerge>
-                      <feMergeNode in="coloredBlur"/>
-                      <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                  </filter>
-                </defs>
-                
-                {/* Central hub connections */}
-                <g className="animate-pulse" style={{ animationDuration: '3s' }}>
-                  <line x1="50%" y1="50%" x2="15%" y2="15%" stroke="url(#connectionLine1)" strokeWidth="2" filter="url(#lineGlow)" opacity="0.8" />
-                  <line x1="50%" y1="50%" x2="85%" y2="15%" stroke="url(#connectionLine2)" strokeWidth="2" filter="url(#lineGlow)" opacity="0.8" />
-                  <line x1="50%" y1="50%" x2="15%" y2="85%" stroke="url(#connectionLine1)" strokeWidth="2" filter="url(#lineGlow)" opacity="0.8" />
-                  <line x1="50%" y1="50%" x2="85%" y2="85%" stroke="url(#connectionLine2)" strokeWidth="2" filter="url(#lineGlow)" opacity="0.8" />
-                  <line x1="50%" y1="50%" x2="50%" y2="25%" stroke="url(#connectionLine1)" strokeWidth="2" filter="url(#lineGlow)" opacity="0.8" />
-                  <line x1="50%" y1="50%" x2="50%" y2="75%" stroke="url(#connectionLine2)" strokeWidth="2" filter="url(#lineGlow)" opacity="0.8" />
-                </g>
-                
-                {/* Inter-node connections */}
-                <g className="animate-pulse" style={{ animationDuration: '4s', animationDelay: '1s' }}>
-                  <path d="M 15% 15% Q 50% 10% 85% 15%" stroke="#8B5CF6" strokeWidth="1.5" opacity="0.5" filter="url(#lineGlow)" fill="none" />
-                  <path d="M 15% 85% Q 50% 90% 85% 85%" stroke="#3B82F6" strokeWidth="1.5" opacity="0.5" filter="url(#lineGlow)" fill="none" />
-                </g>
-                
-                {/* Data flow particles */}
-                <g>
-                  <circle r="2" fill="#8B5CF6" opacity="0.8">
-                    <animateMotion dur="3s" repeatCount="indefinite">
-                      <path d="M 15,15 L 50,50" />
-                    </animateMotion>
-                  </circle>
-                  <circle r="2" fill="#10B981" opacity="0.8">
-                    <animateMotion dur="3.5s" repeatCount="indefinite" begin="0.5s">
-                      <path d="M 85,15 L 50,50" />
-                    </animateMotion>
-                  </circle>
-                  <circle r="2" fill="#F59E0B" opacity="0.8">
-                    <animateMotion dur="4s" repeatCount="indefinite" begin="1s">
-                      <path d="M 15,85 L 50,50" />
-                    </animateMotion>
-                  </circle>
-                  <circle r="2" fill="#EF4444" opacity="0.8">
-                    <animateMotion dur="3.2s" repeatCount="indefinite" begin="1.5s">
-                      <path d="M 85,85 L 50,50" />
-                    </animateMotion>
-                  </circle>
-                </g>
-              </svg>
-
-              {/* Processing indicators */}
-              <div className="absolute top-16 left-16 w-1.5 h-1.5 bg-blue-400/60 rounded-full animate-ping"></div>
-              <div className="absolute top-16 right-16 w-1.5 h-1.5 bg-green-400/60 rounded-full animate-ping" style={{ animationDelay: '0.8s' }}></div>
-              <div className="absolute bottom-16 left-16 w-1.5 h-1.5 bg-purple-400/60 rounded-full animate-ping" style={{ animationDelay: '1.6s' }}></div>
-              <div className="absolute bottom-16 right-16 w-1.5 h-1.5 bg-orange-400/60 rounded-full animate-ping" style={{ animationDelay: '2.4s' }}></div>
             </div>
           </div>
         </div>
