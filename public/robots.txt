@@ -10,5 +10,17 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+User-agent: GeminiBot
+Allow: /
+
+User-agent: GPTBotsa
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
 User-agent: *
 Allow: /
