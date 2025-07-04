@@ -65,30 +65,42 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "WebApplication",
+        "@type": "Organization",
         "name": "Vireia AI",
-        "description": "AI-powered resume builder that creates professional, ATS-friendly resumes to help job seekers get hired faster",
         "url": "https://vireia.com",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web Browser",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
-        },
-        "creator": {
-          "@type": "Organization",
-          "name": "Vireia AI",
-          "url": "https://vireia.com"
-        },
-        "keywords": "resume builder, AI resume, ATS resume, professional resume, job application, career tools, resume maker, CV builder, AI-powered resume, job search tools, resume templates, career advancement tools",
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.8",
-          "ratingCount": "1250"
+        "logo": "https://vireia.com/logo.png",
+        "sameAs": [
+          "https://www.linkedin.com/company/vireia",
+          "https://twitter.com/vireiaai"
+        ]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Vireia AI",
+        "url": "https://vireia.com",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://vireia.com/search?q={search_term_string}",
+          "query-input": "required name=search_term_string"
         }
       }
     </script>
+
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      <url>
+        <loc>https://vireia.com/</loc>
+        <priority>1.0</priority>
+      </url>
+      <url>
+        <loc>https://vireia.com/#features</loc>
+      </url>
+      <url>
+        <loc>https://vireia.com/#pricing</loc>
+      </url>
+    </urlset>
 
     <!-- Preconnect to external domains for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

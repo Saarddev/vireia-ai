@@ -49,12 +49,12 @@ const Dashboard = () => {
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const { toast } = useToast();
-  
+
   useEffect(() => {
     const initializeDashboard = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        
+
         if (session?.user) {
           // Fetch user's resumes
           const { data: resumesData, error: resumesError } = await supabase
@@ -92,17 +92,17 @@ const Dashboard = () => {
 
     // Check if this is the first time user is visiting the dashboard
     const hasVisitedBefore = localStorage.getItem('dashboardVisited');
-    
+
     if (!hasVisitedBefore) {
       setShowOnboarding(true);
       setFirstVisit(true);
     } else {
       setFirstVisit(false);
     }
-    
+
     setIsLoaded(true);
     initializeDashboard();
-    
+
     // Add a small delay before showing any toast notifications for better UX
     const timer = setTimeout(() => {
       if (!hasVisitedBefore) {
@@ -117,17 +117,17 @@ const Dashboard = () => {
         });
       }
     }, 1000);
-    
+
     return () => clearTimeout(timer);
   }, [toast]);
 
   const calculateStats = () => {
-    const interviewInvites = applications.filter(app => 
+    const interviewInvites = applications.filter(app =>
       app.status === 'interview_scheduled' || app.status === 'interview_completed'
     ).length;
-    
+
     const totalApplications = applications.length;
-    
+
     return {
       resumesCreated: resumes.length,
       interviewInvites,
@@ -173,7 +173,7 @@ const Dashboard = () => {
       {showOnboarding && (
         <OnboardingFlow onComplete={completeOnboarding} />
       )}
-      
+
       {!showOnboarding && (
         <SidebarProvider defaultOpen={true}>
           <div className="min-h-screen flex w-full" style={{ backgroundColor: '#f4f1f8' }}>
@@ -186,7 +186,7 @@ const Dashboard = () => {
                   <span className="font-bold text-xl text-[#7c3bed]">Vireia AI</span>
                 </div>
               </SidebarHeader>
-              
+
               <SidebarContent className="px-2">
                 <SidebarGroup>
                   <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
@@ -225,9 +225,9 @@ const Dashboard = () => {
                     </SidebarMenu>
                   </SidebarGroupContent>
                 </SidebarGroup>
-                
+
                 <SidebarSeparator />
-                
+
                 <SidebarGroup>
                   <SidebarGroupLabel>Resources</SidebarGroupLabel>
                   <SidebarGroupContent>
@@ -250,7 +250,7 @@ const Dashboard = () => {
                   </SidebarGroupContent>
                 </SidebarGroup>
               </SidebarContent>
-              
+
               <SidebarFooter>
                 <SidebarMenu>
                   <SidebarMenuItem>
@@ -274,7 +274,7 @@ const Dashboard = () => {
                 </SidebarMenu>
               </SidebarFooter>
             </Sidebar>
-            
+
             <SidebarInset>
               <div className="container max-w-7xl mx-auto px-4 py-8">
                 {/* Dashboard Header */}
@@ -284,14 +284,14 @@ const Dashboard = () => {
                       Dashboard
                     </h1>
                     <p className="text-gray-600 mt-2 text-lg">
-                      {resumes.length > 0 
+                      {resumes.length > 0
                         ? `Welcome back! You have ${resumes.length} resume${resumes.length > 1 ? 's' : ''} ready to go! 🚀`
                         : "Ready to create something amazing? Let's build your first resume! ✨"
                       }
                     </p>
                   </div>
                   <div className="flex gap-3">
-                    <Button 
+                    <Button
                       className="text-white shadow-lg hover:shadow-xl transition-all duration-300"
                       style={{ backgroundColor: '#7c3bed' }}
                       onClick={() => setShowCreateDialog(true)}
@@ -401,13 +401,13 @@ const Dashboard = () => {
                       </Button>
                     </CardFooter>
                   </Card>
-                  
+
                   {/* Resumes Section */}
                   <Card className={`lg:col-span-2 border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '500ms' }}>
                     <CardHeader>
                       <CardTitle className="text-[#7c3bed]">Your Resumes</CardTitle>
                       <CardDescription>
-                        {resumes.length > 0 
+                        {resumes.length > 0
                           ? `${resumes.length} resume${resumes.length > 1 ? 's' : ''} ready to land your dream job!`
                           : "Ready to create your first masterpiece?"
                         }
@@ -417,7 +417,7 @@ const Dashboard = () => {
                       {resumes.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {resumes.slice(0, 4).map((resume) => (
-                            <div 
+                            <div
                               key={resume.id}
                               className="group relative p-4 rounded-lg border border-gray-100 hover:border-gray-300 bg-white transition-all duration-300 hover:shadow-md cursor-pointer"
                               style={{ backgroundColor: '#f4f1f8' }}
@@ -445,7 +445,7 @@ const Dashboard = () => {
                           description="Create your first resume in just a few clicks. Our AI will help you craft something amazing!"
                           icon={FileText}
                           action={
-                            <Button 
+                            <Button
                               className="text-white"
                               style={{ backgroundColor: '#7c3bed' }}
                               onClick={() => setShowCreateDialog(true)}
@@ -463,7 +463,7 @@ const Dashboard = () => {
                           View All Resumes
                         </Button>
                       </Link>
-                      <Button 
+                      <Button
                         className="text-white shadow-lg"
                         style={{ backgroundColor: '#7c3bed' }}
                         onClick={() => setShowCreateDialog(true)}
@@ -477,7 +477,7 @@ const Dashboard = () => {
               </div>
             </SidebarInset>
           </div>
-          
+
           {/* Create Resume Dialog */}
           <CreateResumeDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} />
         </SidebarProvider>

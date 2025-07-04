@@ -15,7 +15,7 @@ const Index = () => {
       <main>
         <HeroSection />
         <InfrastructureSection />
-        
+
         <section className="py-16 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-resume-purple/5 to-resume-violet/5 z-0"></div>
           <div className="container px-4 md:px-6 relative">
@@ -27,7 +27,7 @@ const Index = () => {
                 Meet the developer behind Vireia AI
               </p>
             </div>
-            
+
             <div className="max-w-3xl mx-auto">
               <div className="bg-white rounded-xl border shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
                 <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -57,7 +57,7 @@ const Index = () => {
             </div>
           </div>
         </section>
-        
+
         <PricingSection />
       </main>
       <Footer />
