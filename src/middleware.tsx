@@ -4,10 +4,10 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 // Define public paths for middleware to use
-export const publicPaths = ['/', '/sign-in', '/sign-up'];
+export const publicPaths = ['/', '/sign-in', '/sign-up', '/privacy-policy'];
 
 const isPublic = (path: string) => {
-  return publicPaths.some(publicPath => 
+  return publicPaths.some(publicPath =>
     path === publicPath || path.startsWith(`${publicPath}/`));
 };
 
@@ -16,7 +16,7 @@ export const RouteMiddleware = ({ children }: { children: React.ReactNode }) => 
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const location = useLocation();
-  
+
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session);
@@ -27,7 +27,7 @@ export const RouteMiddleware = ({ children }: { children: React.ReactNode }) => 
       authListener?.subscription.unsubscribe();
     };
   }, []);
-  
+
   // Wait for auth to load
   if (isLoading) {
     return (
@@ -38,17 +38,17 @@ export const RouteMiddleware = ({ children }: { children: React.ReactNode }) => 
       </div>
     );
   }
-  
+
   // Allow public paths
   if (isPublic(location.pathname)) {
     return <>{children}</>;
   }
-  
+
   // Protect private paths
   if (!isAuthenticated) {
     return <Navigate to="/sign-in" replace />;
   }
-  
+
   // User is authenticated
   return <>{children}</>;
 };
