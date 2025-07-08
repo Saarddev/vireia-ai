@@ -89,27 +89,24 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Vireia AI",
-        "url": "https://vireia.com",
-        "logo": "https://vireia.com/favicon.svg",
-        "sameAs": [
-          "https://www.linkedin.com/company/vireia",
-          "https://twitter.com/vireiaai"
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "name": "Vireia AI",
+            "url": "https://www.vireia.com",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://www.vireia.com/search?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "Organization",
+            "name": "Vireia AI",
+            "url": "https://www.vireia.com",
+            "logo": "https://www.vireia.com/logo.png"
+          }
         ]
-      }
-    </script>
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "Vireia AI",
-        "url": "https://www.vireia.com",
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": "https://www.vireia.com/search?q={search_term_string}",
-          "query-input": "required name=search_term_string"
-        }
       }
     </script>
 
