@@ -107,7 +107,7 @@ const Dashboard = () => {
     const timer = setTimeout(() => {
       if (!hasVisitedBefore) {
         toast({
-          title: "Welcome to your ResumeAI dashboard! ✨",
+          title: "Welcome to your dashboard",
           description: "Let's create something amazing together!"
         });
       } else {
@@ -176,14 +176,14 @@ const Dashboard = () => {
 
       {!showOnboarding && (
         <SidebarProvider defaultOpen={true}>
-          <div className="min-h-screen flex w-full" style={{ backgroundColor: '#f4f1f8' }}>
+          <div className="min-h-screen flex w-full" style={{ backgroundColor: '#9c87fb' }}>
             <Sidebar>
               <SidebarHeader>
                 <div className="flex items-center gap-2 px-4 py-2">
-                  <div className="rounded-lg p-1.5" style={{ backgroundColor: '#7c3bed' }}>
+                  <div className="rounded-lg p-1.5" style={{ backgroundColor: '#9c87fb' }}>
                     <FileText className="h-5 w-5 text-white" />
                   </div>
-                  <span className="font-bold text-xl text-[#7c3bed]">Vireia AI</span>
+                  <span className="font-bold text-xl text-[#9c87fb]">Vireia AI</span>
                 </div>
               </SidebarHeader>
 
@@ -280,12 +280,12 @@ const Dashboard = () => {
                 {/* Dashboard Header */}
                 <div className={`flex items-center justify-between mb-8 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}>
                   <div>
-                    <h1 className="text-4xl font-bold text-[#7c3bed]">
+                    <h1 className="text-4xl font-bold text-[#9c87fb]">
                       Dashboard
                     </h1>
                     <p className="text-gray-600 mt-2 text-lg">
                       {resumes.length > 0
-                        ? `Welcome back! You have ${resumes.length} resume${resumes.length > 1 ? 's' : ''} ready to go! 🚀`
+                        ? `Welcome back! You have ${resumes.length} resume${resumes.length > 1 ? 's' : ''} ready to go! `
                         : "Ready to create something amazing? Let's build your first resume! ✨"
                       }
                     </p>
@@ -293,7 +293,7 @@ const Dashboard = () => {
                   <div className="flex gap-3">
                     <Button
                       className="text-white shadow-lg hover:shadow-xl transition-all duration-300"
-                      style={{ backgroundColor: '#7c3bed' }}
+                      style={{ backgroundColor: '#9c87fb' }}
                       onClick={() => setShowCreateDialog(true)}
                     >
                       <Plus className="h-4 w-4 mr-2" />
@@ -304,7 +304,7 @@ const Dashboard = () => {
 
                 {/* Stats Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                  <Card className={`border-0 shadow-lg text-white hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ backgroundColor: '#7c3bed' }}>
+                  <Card className={`border-0 shadow-lg text-white hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ backgroundColor: '#9b87f6' }}>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                       <CardTitle className="text-sm font-medium text-white/90">Resumes Created</CardTitle>
                       <FileText className="h-5 w-5 text-white/80" />
@@ -326,7 +326,7 @@ const Dashboard = () => {
                     <CardContent>
                       <div className="text-3xl font-bold text-gray-900">{stats.interviewInvites}</div>
                       <div className="text-xs text-gray-500 mt-1 flex items-center">
-                        <Heart className="h-3 w-3 mr-1" style={{ color: '#7c3bed' }} />
+                        <Heart className="h-3 w-3 mr-1" style={{ color: '#9c87fb' }} />
                         <span>Companies love you!</span>
                       </div>
                     </CardContent>
@@ -366,7 +366,7 @@ const Dashboard = () => {
                   {/* Recent Activity */}
                   <Card className={`lg:col-span-1 border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '400ms' }}>
                     <CardHeader>
-                      <CardTitle className="text-[#7c3bed]">Recent Activity</CardTitle>
+                      <CardTitle className="text-[#9c87fb]">Recent Activity</CardTitle>
                       <CardDescription>Your latest updates and milestones</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -387,7 +387,7 @@ const Dashboard = () => {
                         </div>
                       ) : (
                         <div className="text-center py-8">
-                          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#7c3bed' }}>
+                          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#9c87fb' }}>
                             <Sparkles className="h-8 w-8 text-white" />
                           </div>
                           <p className="text-gray-600 mb-2">No applications yet!</p>
@@ -405,7 +405,7 @@ const Dashboard = () => {
                   {/* Resumes Section */}
                   <Card className={`lg:col-span-2 border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '500ms' }}>
                     <CardHeader>
-                      <CardTitle className="text-[#7c3bed]">Your Resumes</CardTitle>
+                      <CardTitle className="text-[#9c87fb]">Your Resumes</CardTitle>
                       <CardDescription>
                         {resumes.length > 0
                           ? `${resumes.length} resume${resumes.length > 1 ? 's' : ''} ready to land your dream job!`
@@ -424,15 +424,15 @@ const Dashboard = () => {
                             >
                               <div className="flex justify-between items-start">
                                 <div>
-                                  <h3 className="font-medium text-gray-800 group-hover:text-[#7c3bed] transition-colors">{resume.title}</h3>
+                                  <h3 className="font-medium text-gray-800 group-hover:text-[#9c87fb] transition-colors">{resume.title}</h3>
                                   <p className="text-xs text-gray-500 mt-1">Last edited: {formatDate(resume.updated_at)}</p>
                                 </div>
-                                <div className="rounded-full p-2" style={{ backgroundColor: '#7c3bed' }}>
+                                <div className="rounded-full p-2" style={{ backgroundColor: '#9c87fb' }}>
                                   <FileText className="h-4 w-4 text-white" />
                                 </div>
                               </div>
                               <div className="mt-3">
-                                <span className="inline-block text-xs text-white rounded-full px-2 py-1 capitalize" style={{ backgroundColor: '#7c3bed' }}>
+                                <span className="inline-block text-xs text-white rounded-full px-2 py-1 capitalize" style={{ backgroundColor: '#9c87fb' }}>
                                   {resume.template}
                                 </span>
                               </div>
@@ -447,7 +447,7 @@ const Dashboard = () => {
                           action={
                             <Button
                               className="text-white"
-                              style={{ backgroundColor: '#7c3bed' }}
+                              style={{ backgroundColor: '#9c87fb' }}
                               onClick={() => setShowCreateDialog(true)}
                             >
                               <Plus className="h-4 w-4 mr-2" />
@@ -465,7 +465,7 @@ const Dashboard = () => {
                       </Link>
                       <Button
                         className="text-white shadow-lg"
-                        style={{ backgroundColor: '#7c3bed' }}
+                        style={{ backgroundColor: '#9b87f6' }}
                         onClick={() => setShowCreateDialog(true)}
                       >
                         <Plus className="h-4 w-4 mr-2" />

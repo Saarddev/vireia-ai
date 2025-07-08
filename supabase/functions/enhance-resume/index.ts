@@ -13,7 +13,7 @@ function generateSummarizationPrompt(text: string) {
   return `
 Convert the following text into clear, concise bullet points that highlight key achievements and skills. Make each point:
 - Start with a strong action verb in past tense (e.g., Implemented, Developed, Led)
-- Be concise and impactful (1-2 lines each)
+- Be concise and impactful (1 line each)
 - Include specific achievements with measurable results (numbers, percentages)
 - Focus on outcomes and value delivered
 - Be ATS-friendly for resume scanning
@@ -21,18 +21,20 @@ Convert the following text into clear, concise bullet points that highlight key 
 Original text:
 ${text}
 
-Return ONLY a clean list of 4-6 bullet points, each starting with "• " (bullet symbol followed by a space), with one bullet point per line. 
+Return ONLY a clean list of 2-3 bullet points, each starting with "• " (bullet symbol followed by a space), with one bullet point per line. 
 Do not include any other text, explanations, or formatting in your response. Just the bullet points.`;
 }
 
 function generateSummaryPrompt(experience: string[], skills: string[], preserveUserContent = false) {
   return `
-As an expert resume writer, create a professional summary that will stand out on an ATS-scanned resume. Focus on:
+As an expert resume writer, create a very short (50 words) professional summary that will stand out on an ATS-scanned resume. Focus on:
 
 1. The candidate's key strengths, experiences, and unique value proposition
 2. Their specific technical abilities and domain expertise
 3. Quantifiable achievements and career progression
 4. Industry-relevant keywords for ATS optimization
+5. A warm, engaging tone that reflects the candidate's personality
+6. Short sentences, active voice, and varied sentence structure
 
 Current experience context:
 ${experience ? experience.join('\n') : 'Not provided'}
@@ -42,8 +44,8 @@ ${skills ? skills.join(', ') : 'Not provided'}
 
 ${preserveUserContent ? "IMPORTANT: Use ONLY information from the provided experience and skills. DO NOT invent new details, roles, or achievements not mentioned in the input. Stick closely to the facts present in the provided experience." : ""}
 
-Write a concise, powerful summary (3-5 sentences) that positions the candidate as a high-value professional.
-Format the summary as 3-4 bullet points, each starting with "• " (bullet symbol followed by a space).
+Write a concise, powerful short summary that positions the candidate as a high-value professional.
+Format the summary as 2-3 bullet points, each starting with "• " (bullet symbol followed by a space).
 Each bullet should start with a strong action verb or adjective.
 
 Return only the bullet-formatted summary text.`;
@@ -83,7 +85,7 @@ ${description || 'Not provided'}
 
 ${preserveUserContent ? "IMPORTANT: Maintain the original meaning and core content of the description. Enhance and restructure but DO NOT add fictional achievements, technologies, or responsibilities that weren't in the original text." : ""}
 
-Format the output as 3-5 bullet points, each starting with "• " (bullet symbol followed by a space).
+Format the output as 2-3 bullet points, each starting with "• " (bullet symbol followed by a space).
 Focus on quality over quantity - each bullet should demonstrate clear value and impact.
 
 Return only the formatted bullet points, with no additional text.`;
@@ -103,7 +105,7 @@ ${context?.description || ''}
 
 ${preserveUserContent ? "IMPORTANT: Enhance what's already provided but DO NOT add fabricated achievements or responsibilities. Stick to the information that can be reasonably inferred from the original text." : ""}
 
-Create 4-6 bullet points that:
+Create 1-2 bullet points that:
 1. Start each bullet with a strong action verb in past tense
 2. Include specific achievements with quantifiable results (%, $, numbers) where appropriate
 3. Highlight technologies, methodologies, and tools used that are mentioned in the original text
@@ -131,6 +133,7 @@ Requirements:
 4. Balance professionalism with personality
 5. Avoid generic corporate language
 6. Highlight relevant skills that tell a story
+7. Use short sentences, active voice, and varied sentence structure
 
 LinkedIn Data:
 ${JSON.stringify(linkedinData, null, 2)}
