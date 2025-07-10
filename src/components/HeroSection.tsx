@@ -152,7 +152,7 @@ const HeroSection = () => {
             </h1>
 
             <p className={`max-w-[600px] mx-auto lg:mx-0 text-resume-gray-dark text-base md:text-lg lg:text-xl transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              Create professional, ATS-friendly resumes in minutes. Our Vireia AI analyzes job descriptions to tailor your resume for higher interview success rates.
+              Tired of ghosted applications? Let Vireia AI craft resumes that match what hiring managers are actually looking for — instantly, and for free.
             </p>
 
             <div className={`flex items-center p-3 rounded-lg bg-gradient-to-r from-resume-purple/10 to-resume-violet/10 border border-resume-purple/20 transition-all duration-700 delay-250 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
@@ -217,7 +217,7 @@ const HeroSection = () => {
           <div className={`flex items-center justify-center transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
             <div className="relative w-full max-w-[400px] md:max-w-[500px]">
               {/* Main resume card */}
-              <div className={`rounded-xl border bg-white/60 backdrop-blur-md shadow-2xl p-4 md:p-6 relative z-20 transition-all duration-500 hover:shadow-3xl hover:bg-white/80 ${scrolled ? 'scale-105' : ''}`}>
+              <div className={`rounded-xl border bg-white/80 backdrop-blur-md shadow-2xl p-4 md:p-6 relative z-20 transition-all duration-500 hover:shadow-3xl hover:bg-white/95 ${scrolled ? 'scale-105' : ''}`}>
                 <div className="space-y-4 md:space-y-5">
                   {/* Name with typewriter effect */}
                   <div className="h-6 md:h-8 flex items-center">

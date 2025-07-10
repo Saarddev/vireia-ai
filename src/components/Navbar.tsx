@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { FileText, Menu } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import Image from './ui/image';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -10,7 +11,7 @@ const Navbar = () => {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const location = useLocation();
   const isOnDashboard = location.pathname === '/dashboard';
-  
+
   // Check auth state
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
@@ -18,15 +19,15 @@ const Navbar = () => {
     });
 
     // Initial check
-    supabase.auth.getSession().then(({ data: { session }}) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setIsSignedIn(!!session);
     });
-    
+
     return () => {
       authListener?.subscription.unsubscribe();
     };
   }, []);
-  
+
   useEffect(() => {
     const handleScroll = () => {
       const offset = window.scrollY;
@@ -36,9 +37,9 @@ const Navbar = () => {
         setScrolled(false);
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll);
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
@@ -56,8 +57,9 @@ const Navbar = () => {
     <nav className={`py-4 border-b sticky top-0 z-50 animate-fade-in transition-all duration-300 ${scrolled ? 'backdrop-blur-md bg-white/90 shadow-sm' : 'backdrop-blur-md bg-white/80'}`}>
       <div className="container flex items-center justify-between">
         <div className="flex items-center gap-2 animate-slide-in-left">
-          <div className={`bg-resume-purple rounded-lg p-1.5 transition-transform duration-300 ${scrolled ? 'scale-90' : ''}`}>
-            <FileText className={`h-5 w-5 text-white transition-all duration-300 ${scrolled ? 'scale-110' : ''}`} />
+          <div className={`bg-resume-purple rounded-full p-0.5  transition-transform duration-300 ${scrolled ? 'scale-75' : ''}`}>
+            {/* <FileText className={`h-5 w-5 text-white transition-all duration-300 ${scrolled ? 'scale-110' : ''}`} /> */}
+            <Image src="logo.png " className={`h-11 w-11 text-white transition-all duration-300 ${scrolled ? 'scale-125' : ''}`} />
           </div>
           <Link to="/" className="font-bold text-xl bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">Vireia AI</Link>
         </div>
@@ -77,9 +79,9 @@ const Navbar = () => {
                   Dashboard
                 </Button>
               </Link>
-              <Button 
-                variant="outline" 
-                className="text-resume-gray" 
+              <Button
+                variant="outline"
+                className="text-resume-gray"
                 onClick={handleSignOut}
               >
                 Sign Out
@@ -99,9 +101,9 @@ const Navbar = () => {
               </Link>
             </>
           )}
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             className="md:hidden text-resume-gray"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
@@ -109,7 +111,7 @@ const Navbar = () => {
           </Button>
         </div>
       </div>
-      
+
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b shadow-md animate-fade-in">
@@ -131,7 +133,7 @@ const Navbar = () => {
             )}
             {isSignedIn && (
               <div className="pt-2 flex">
-                <Button 
+                <Button
                   className="w-full text-resume-gray"
                   variant="outline"
                   onClick={handleSignOut}

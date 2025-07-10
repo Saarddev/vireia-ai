@@ -29,15 +29,15 @@ export const RouteMiddleware = ({ children }: { children: React.ReactNode }) => 
   }, []);
 
   // Wait for auth to load
-  if (isLoading) {
-    return (
-      <div className="h-screen w-full flex items-center justify-center">
-        <div className="animate-pulse bg-resume-purple/20 p-4 rounded-lg">
-          <span className="text-resume-purple font-medium">Loading...</span>
-        </div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="h-screen w-full flex items-center justify-center">
+  //       <div className="animate-pulse bg-resume-purple/20 p-4 rounded-lg">
+  //         <span className="text-resume-purple font-medium">Loading...</span>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   // Allow public paths
   if (isPublic(location.pathname)) {
