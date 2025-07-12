@@ -104,7 +104,7 @@ const ResumeBuilder = () => {
     try {
       switch (section) {
         case "summary": {
-          const experienceDescriptions = Array.isArray(resumeData.experience) 
+          const experienceDescriptions = Array.isArray(resumeData.experience)
             ? resumeData.experience.map(exp => exp.description)
             : [];
 
@@ -112,16 +112,16 @@ const ResumeBuilder = () => {
             ...(Array.isArray(resumeData.skills?.technical) ? resumeData.skills.technical : []),
             ...(Array.isArray(resumeData.skills?.soft) ? resumeData.skills.soft : [])
           ];
-          
+
           const summary = await generateSummary(experienceDescriptions, allSkills);
           if (summary) handleDataChange("summary", summary);
           return summary || "";
         }
         case "skills": {
-          const experienceDescriptions = Array.isArray(resumeData.experience) 
+          const experienceDescriptions = Array.isArray(resumeData.experience)
             ? resumeData.experience.map(exp => exp.description)
             : [];
-            
+
           const skills = await extractSkills(experienceDescriptions);
           if (skills) {
             handleDataChange("skills", skills);
@@ -153,7 +153,7 @@ const ResumeBuilder = () => {
                 // Find the current education in the array and update its description
                 const updatedEducation = [...resumeData.education];
                 const eduIndex = updatedEducation.findIndex(edu => edu.id === currentEdu.id);
-                
+
                 if (eduIndex !== -1) {
                   updatedEducation[eduIndex] = {
                     ...updatedEducation[eduIndex],
@@ -166,41 +166,47 @@ const ResumeBuilder = () => {
           }
           return "";
         }
-        
-        case "experience-desc": {
-          if (Array.isArray(resumeData.experience)) {
-            const currentExp = resumeData.experience.find(exp => exp);
 
-            if (currentExp) {
-              const { data, error } = await supabase.functions.invoke('enhance-resume', {
-                body: {
-                  type: 'experience-description',
-                  experienceContext: {
-                    title: currentExp.title,
-                    company: currentExp.company,
-                    location: currentExp.location,
-                    startDate: currentExp.startDate,
-                    endDate: currentExp.endDate,
-                    description: currentExp.description
+        default: {
+          // Handle experience-desc with specific ID
+          if (section.startsWith("experience-desc:")) {
+            const experienceId = section.split(":")[1];
+            if (Array.isArray(resumeData.experience)) {
+              const currentExp = resumeData.experience.find(exp => exp.id === experienceId);
+
+              if (currentExp) {
+                const { data, error } = await supabase.functions.invoke('enhance-resume', {
+                  body: {
+                    type: 'experience-description',
+                    experienceContext: {
+                      title: currentExp.title,
+                      company: currentExp.company,
+                      location: currentExp.location,
+                      startDate: currentExp.startDate,
+                      endDate: currentExp.endDate,
+                      description: currentExp.description
+                    }
                   }
-                }
-              });
+                });
 
-              if (error) throw error;
-              if (data?.description) {
-                // Find the current experience in the array and update its description
-                const updatedExperience = [...resumeData.experience];
-                const expIndex = updatedExperience.findIndex(exp => exp.id === currentExp.id);
-                
-                if (expIndex !== -1) {
-                  updatedExperience[expIndex] = {
-                    ...updatedExperience[expIndex],
-                    description: data.description
-                  };
-                  handleDataChange("experience", updatedExperience);
+                if (error) throw error;
+                if (data?.description) {
+                  // Find the current experience in the array and update its description
+                  const updatedExperience = [...resumeData.experience];
+                  const expIndex = updatedExperience.findIndex(exp => exp.id === experienceId);
+
+                  if (expIndex !== -1) {
+                    updatedExperience[expIndex] = {
+                      ...updatedExperience[expIndex],
+                      description: data.description
+                    };
+                    handleDataChange("experience", updatedExperience);
+                    return data.description;
+                  }
                 }
               }
             }
+            return "";
           }
           return "";
         }
@@ -229,7 +235,7 @@ const ResumeBuilder = () => {
                 // Find the current project in the array and update its description
                 const updatedProjects = [...resumeData.projects];
                 const projectIndex = updatedProjects.findIndex(proj => proj.id === currentProject.id);
-                
+
                 if (projectIndex !== -1) {
                   updatedProjects[projectIndex] = {
                     ...updatedProjects[projectIndex],
@@ -242,9 +248,6 @@ const ResumeBuilder = () => {
           }
           return "";
         }
-        
-        default:
-          return "";
       }
     } catch (error) {
       console.error('Error generating with Cadina AI:', error);
@@ -379,7 +382,7 @@ const ResumeBuilder = () => {
               onGenerateWithAI={handleGenerateAI}
             />
           </Sidebar>
-          
+
           <SidebarInset className="flex flex-col p-4 lg:p-6 w-full">
             <AISuggestion
               suggestion={aiSuggestion}

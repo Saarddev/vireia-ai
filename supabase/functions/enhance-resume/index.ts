@@ -27,7 +27,7 @@ Do not include any other text, explanations, or formatting in your response. Jus
 
 function generateSummaryPrompt(experience: string[], skills: string[], preserveUserContent = false) {
   return `
-As an expert resume writer, create a very short (50 words) professional summary that will stand out on an ATS-scanned resume. Focus on:
+As an expert resume writer, create a  short (80 words) professional summary that will stand out on an ATS-scanned resume. Focus on:
 
 1. The candidate's key strengths, experiences, and unique value proposition
 2. Their specific technical abilities and domain expertise
@@ -45,7 +45,7 @@ ${skills ? skills.join(', ') : 'Not provided'}
 ${preserveUserContent ? "IMPORTANT: Use ONLY information from the provided experience and skills. DO NOT invent new details, roles, or achievements not mentioned in the input. Stick closely to the facts present in the provided experience." : ""}
 
 Write a concise, powerful short summary that positions the candidate as a high-value professional.
-Format the summary as 2-3 bullet points, each starting with "• " (bullet symbol followed by a space).
+Format the summary as 3-4 bullet points, each starting with "• " (bullet symbol followed by a space).
 Each bullet should start with a strong action verb or adjective.
 
 Return only the bullet-formatted summary text.`;
@@ -105,7 +105,7 @@ ${context?.description || ''}
 
 ${preserveUserContent ? "IMPORTANT: Enhance what's already provided but DO NOT add fabricated achievements or responsibilities. Stick to the information that can be reasonably inferred from the original text." : ""}
 
-Create 1-2 bullet points that:
+Create 2-3 bullet points that:
 1. Start each bullet with a strong action verb in past tense
 2. Include specific achievements with quantifiable results (%, $, numbers) where appropriate
 3. Highlight technologies, methodologies, and tools used that are mentioned in the original text

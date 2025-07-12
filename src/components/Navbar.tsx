@@ -57,9 +57,8 @@ const Navbar = () => {
     <nav className={`py-4 border-b sticky top-0 z-50 animate-fade-in transition-all duration-300 ${scrolled ? 'backdrop-blur-md bg-white/90 shadow-sm' : 'backdrop-blur-md bg-white/80'}`}>
       <div className="container flex items-center justify-between">
         <div className="flex items-center gap-2 animate-slide-in-left">
-          <div className={`bg-resume-purple rounded-full p-0.5  transition-transform duration-300 ${scrolled ? 'scale-75' : ''}`}>
-            {/* <FileText className={`h-5 w-5 text-white transition-all duration-300 ${scrolled ? 'scale-110' : ''}`} /> */}
-            <Image src="logo.png " className={`h-11 w-11 text-white transition-all duration-300 ${scrolled ? 'scale-125' : ''}`} />
+          <div className="bg-gradient-to-r from-resume-purple to-resume-violet rounded-xl p-2 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+            <FileText className="h-5 w-5 md:h-5 md:w-5 text-white" />
           </div>
           <Link to="/" className="font-bold text-xl bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">Vireia AI</Link>
         </div>

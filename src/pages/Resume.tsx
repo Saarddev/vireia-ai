@@ -36,7 +36,7 @@ const Resume = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -46,7 +46,7 @@ const Resume = () => {
           const firstName = user?.user_metadata?.first_name || user?.user_metadata?.name || '';
           const email = user?.email || '';
           setUserData({ firstName, email });
-          
+
           // Fetch user's resumes from the database
           fetchResumes();
         } else {
@@ -61,12 +61,12 @@ const Resume = () => {
           variant: "destructive"
         });
       }
-      
+
       setIsLoaded(true);
     };
-    
+
     fetchUserData();
-    
+
     // Welcome toast
     const timer = setTimeout(() => {
       toast({
@@ -74,37 +74,37 @@ const Resume = () => {
         description: `Welcome ${userData?.firstName || ''}! Create and manage your professional resumes`
       });
     }, 500);
-    
+
     return () => clearTimeout(timer);
   }, [toast, navigate]);
 
   const fetchResumes = async () => {
     setIsLoading(true);
-    
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
-      
+
       const { data, error } = await supabase
         .from('resumes')
         .select('*')
         .order('created_at', { ascending: false });
-        
+
       if (error) {
         throw error;
       }
-      
+
       const formattedResumes = data.map(resume => ({
         id: resume.id,
         name: resume.title,
-        lastEdited: new Date(resume.updated_at).toLocaleDateString('en-US', { 
-          month: 'short', 
-          day: 'numeric', 
-          year: 'numeric' 
+        lastEdited: new Date(resume.updated_at).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
         }),
         tags: resume.template ? [resume.template.charAt(0).toUpperCase() + resume.template.slice(1)] : []
       }));
-      
+
       setResumes(formattedResumes);
     } catch (error) {
       console.error('Error fetching resumes:', error);
@@ -146,11 +146,11 @@ const Resume = () => {
         .from('resumes')
         .delete()
         .eq('id', resumeId);
-        
+
       if (error) throw error;
-      
+
       setResumes(prev => prev.filter(resume => resume.id !== resumeId));
-      
+
       toast({
         title: "Resume Deleted",
         description: "The resume has been deleted successfully",
@@ -183,13 +183,13 @@ const Resume = () => {
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-2 px-4 py-2">
-              <div className="bg-resume-purple rounded-lg p-1.5">
-                <FileText className="h-5 w-5 text-white" />
+              <div className="bg-gradient-to-r from-resume-purple to-resume-violet rounded-xl p-2 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+                <FileText className="h-5 w-5 md:h-5 md:w-5 text-white" />
               </div>
-              <span className="font-bold text-xl bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">ResumeAI</span>
+              <span className="font-bold text-xl bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">VireiaAI</span>
             </div>
           </SidebarHeader>
-          
+
           <SidebarContent className="px-2">
             <SidebarGroup>
               <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
@@ -222,9 +222,9 @@ const Resume = () => {
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
-            
+
             <SidebarSeparator />
-            
+
             <SidebarGroup>
               <SidebarGroupLabel>Resources</SidebarGroupLabel>
               <SidebarGroupContent>
@@ -245,7 +245,7 @@ const Resume = () => {
               </SidebarGroupContent>
             </SidebarGroup>
           </SidebarContent>
-          
+
           <SidebarFooter>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -269,7 +269,7 @@ const Resume = () => {
             </SidebarMenu>
           </SidebarFooter>
         </Sidebar>
-        
+
         <SidebarInset>
           <div className="container max-w-7xl mx-auto px-4 py-8">
             {/* Page Header */}
@@ -283,15 +283,15 @@ const Resume = () => {
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    type="search" 
-                    placeholder="Search resumes..." 
+                  <Input
+                    type="search"
+                    placeholder="Search resumes..."
                     className="pl-8 w-full md:w-[200px] lg:w-[300px]"
                     value={searchTerm}
                     onChange={handleSearch}
                   />
                 </div>
-                <Button 
+                <Button
                   className="bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20"
                   onClick={() => setShowCreateDialog(true)}
                 >
@@ -302,33 +302,33 @@ const Resume = () => {
 
             {/* Filters */}
             <div className={`flex flex-wrap gap-2 mb-6 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '100ms' }}>
-              <Button 
-                variant={activeFilter === 'all' ? "default" : "outline"} 
-                size="sm" 
+              <Button
+                variant={activeFilter === 'all' ? "default" : "outline"}
+                size="sm"
                 className="rounded-full"
                 onClick={() => handleFilterChange('all')}
               >
                 <Filter className="mr-2 h-3 w-3" /> All Resumes
               </Button>
-              <Button 
-                variant={activeFilter === 'Modern' ? "default" : "outline"} 
-                size="sm" 
+              <Button
+                variant={activeFilter === 'Modern' ? "default" : "outline"}
+                size="sm"
                 className="rounded-full"
                 onClick={() => handleFilterChange('Modern')}
               >
                 Modern
               </Button>
-              <Button 
-                variant={activeFilter === 'Creative' ? "default" : "outline"} 
-                size="sm" 
+              <Button
+                variant={activeFilter === 'Creative' ? "default" : "outline"}
+                size="sm"
                 className="rounded-full"
                 onClick={() => handleFilterChange('Creative')}
               >
                 Creative
               </Button>
-              <Button 
-                variant={activeFilter === 'Professional' ? "default" : "outline"} 
-                size="sm" 
+              <Button
+                variant={activeFilter === 'Professional' ? "default" : "outline"}
+                size="sm"
                 className="rounded-full"
                 onClick={() => handleFilterChange('Professional')}
               >
@@ -358,8 +358,8 @@ const Resume = () => {
               ) : filteredResumes.length > 0 ? (
                 // Actual resume cards
                 filteredResumes.map((resume) => (
-                  <ResumeCard 
-                    key={resume.id} 
+                  <ResumeCard
+                    key={resume.id}
                     resume={resume}
                     onEdit={() => handleEditResume(resume.id)}
                     onDelete={() => handleDeleteResume(resume.id)}
@@ -373,7 +373,7 @@ const Resume = () => {
                   <p className="text-resume-gray mt-2 mb-6">
                     {searchTerm ? 'Try a different search term or filter' : 'Create your first resume to get started'}
                   </p>
-                  <Button 
+                  <Button
                     className="bg-resume-purple hover:bg-resume-purple-dark shadow-lg shadow-resume-purple/20"
                     onClick={() => setShowCreateDialog(true)}
                   >
@@ -384,7 +384,7 @@ const Resume = () => {
 
               {/* Add New Resume Card - only show when there are already some resumes */}
               {!isLoading && filteredResumes.length > 0 && (
-                <Card 
+                <Card
                   className="border border-dashed border-purple-200 hover:border-purple-300 bg-transparent hover:bg-purple-50/30 flex flex-col items-center justify-center p-6 cursor-pointer transition-all duration-300 dashboard-card-hover"
                   onClick={() => setShowCreateDialog(true)}
                 >
@@ -399,12 +399,12 @@ const Resume = () => {
           </div>
         </SidebarInset>
       </div>
-      
+
       {/* Create Resume Dialog */}
-      <CreateResumeDialog 
-        open={showCreateDialog} 
-        onOpenChange={setShowCreateDialog} 
-        onResumeCreated={fetchResumes} 
+      <CreateResumeDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onResumeCreated={fetchResumes}
       />
     </SidebarProvider>
   );

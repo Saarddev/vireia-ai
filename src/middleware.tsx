@@ -4,7 +4,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 // Define public paths for middleware to use
-export const publicPaths = ['/', '/sign-in', '/sign-up', '/privacy-policy'];
+export const publicPaths = ['/', '/sign-in', '/sign-up', '/privacy-policy', ''];
 
 const isPublic = (path: string) => {
   return publicPaths.some(publicPath =>
@@ -29,15 +29,15 @@ export const RouteMiddleware = ({ children }: { children: React.ReactNode }) => 
   }, []);
 
   // Wait for auth to load
-  // if (isLoading) {
-  //   return (
-  //     <div className="h-screen w-full flex items-center justify-center">
-  //       <div className="animate-pulse bg-resume-purple/20 p-4 rounded-lg">
-  //         <span className="text-resume-purple font-medium">Loading...</span>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  if (isLoading) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center">
+        <div className="animate-pulse bg-resume-purple/20 p-4 rounded-lg">
+          <span className="text-resume-purple font-medium">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   // Allow public paths
   if (isPublic(location.pathname)) {

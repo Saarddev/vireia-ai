@@ -5,7 +5,7 @@ import EditableField from './EditableField';
 import AddSectionItem from './AddSectionItem';
 import ContactInfo from './ContactInfo';
 import { v4 as uuidv4 } from 'uuid';
-import { Experience, Education, Project, ResumeSettings } from '@/types/resume.d';
+import { Experience, Education, Project, ResumeSettings } from '@/types/resume';
 
 interface ModernTemplateProps {
   data: any;
@@ -47,7 +47,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
         // Handling array items (experience, education, projects)
         const items = [...safeData[section]];
         const itemIndex = items.findIndex((item: any) => item.id === itemId);
-        
+
         if (itemIndex >= 0) {
           const updatedItem = { ...items[itemIndex], [field]: value };
           items[itemIndex] = updatedItem;
@@ -152,18 +152,18 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
       </div>
 
       <div className="mb-6 resume-section">
-        <h2 className="text-sm font-semibold mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide" 
+        <h2 className="text-sm font-semibold mb-2 border-b border-gray-200 pb-1 uppercase tracking-wide"
           style={{ color: getSecondaryColor() }}>
           Summary
         </h2>
-        <EditableField 
-          value={safeData.summary} 
-          placeholder="Experienced software engineer with 5+ years of experience in full-stack development. ..." 
-          onSave={val => onUpdateData?.("summary", val)} 
-          className="text-sm text-gray-700 font-normal leading-relaxed" 
-          onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("summary") : undefined} 
-          minRows={2} 
-          maxRows={4} 
+        <EditableField
+          value={safeData.summary}
+          placeholder="Experienced software engineer with 5+ years of experience in full-stack development. ..."
+          onSave={val => onUpdateData?.("summary", val)}
+          className="text-sm text-gray-700 font-normal leading-relaxed"
+          onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI("summary") : undefined}
+          minRows={2}
+          maxRows={4}
         />
       </div>
 
@@ -192,10 +192,10 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                 className={experienceDateClass}
                 onSave={val => {
                   const [startDate, endDate] = val.split(" - ");
-                  
+
                   // Update start date
                   handleFieldUpdate("experience", "startDate", startDate || "", exp.id);
-                  
+
                   // Update end date
                   handleFieldUpdate("experience", "endDate", endDate || "", exp.id);
                 }}
@@ -211,10 +211,10 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
               onSave={val => {
                 let [company, ...locParts] = val.split(",");
                 const location = locParts.join(",").trim();
-                
+
                 // Update company
                 handleFieldUpdate("experience", "company", company?.trim() || "", exp.id);
-                
+
                 // Update location
                 handleFieldUpdate("experience", "location", location, exp.id);
               }}
@@ -229,7 +229,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
               placeholder="Lead developer for the company's flagship product..."
               className={experienceDescriptionClass}
               onSave={val => handleFieldUpdate("experience", "description", val, exp.id)}
-              onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-desc`) : undefined}
+              onGenerateWithAI={onGenerateWithAI ? () => onGenerateWithAI(`experience-desc:${exp.id}`) : undefined}
               minRows={1}
               maxRows={3}
             />
@@ -263,10 +263,10 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                   onSave={val => {
                     let [inst, ...locParts] = val.split(",");
                     const location = locParts.join(",").trim();
-                    
+
                     // Update institution
                     handleFieldUpdate("education", "institution", inst?.trim() || "", edu.id);
-                    
+
                     // Update location
                     handleFieldUpdate("education", "location", location, edu.id);
                   }}
@@ -283,10 +283,10 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
                 className={experienceDateClass}
                 onSave={val => {
                   const [startDate, endDate] = val.split(" - ");
-                  
+
                   // Update start date
                   handleFieldUpdate("education", "startDate", startDate || "", edu.id);
-                  
+
                   // Update end date
                   handleFieldUpdate("education", "endDate", endDate || "", edu.id);
                 }}
@@ -318,11 +318,11 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
           <div className="font-medium text-gray-700 text-sm mb-1.5">Technical Skills</div>
           <div className="flex flex-wrap gap-1.5 mt-1">
             {safeData.skills.technical.map((skill: string, i: number) => (
-              <span 
-                key={i} 
+              <span
+                key={i}
                 className="px-2 py-0.5 rounded-sm text-sm border-[0.5px] shadow-xs transition whitespace-nowrap font-normal"
-                style={{ 
-                  backgroundColor: `${getPrimaryColor()}20`, 
+                style={{
+                  backgroundColor: `${getPrimaryColor()}20`,
                   borderColor: `${getPrimaryColor()}40`,
                   color: getPrimaryColor()
                 }}
@@ -387,11 +387,11 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({
               {project.technologies && project.technologies.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {project.technologies.map((tech: string, i: number) => (
-                    <span 
-                      key={i} 
+                    <span
+                      key={i}
                       className="px-2 py-0.5 rounded-sm text-sm border-[0.5px] shadow-xs transition whitespace-nowrap font-normal"
-                      style={{ 
-                        backgroundColor: `${getPrimaryColor()}20`, 
+                      style={{
+                        backgroundColor: `${getPrimaryColor()}20`,
                         borderColor: `${getPrimaryColor()}40`,
                         color: getPrimaryColor()
                       }}
