@@ -62,7 +62,7 @@ const SignIn = () => {
 
       {/* Logo - consistent with app branding */}
       <div className="absolute top-4 left-4 md:top-8 md:left-8 z-10">
-        <div 
+        <div
           className="flex items-center gap-2 cursor-pointer group"
           onClick={() => navigate('/')}
         >
@@ -79,7 +79,7 @@ const SignIn = () => {
       <div className="relative z-10 w-full max-w-md mx-auto">
         <Card className="backdrop-blur-xl bg-white/90 border-0 shadow-2xl rounded-2xl md:rounded-3xl overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-white/40 backdrop-blur-sm"></div>
-          
+
           <CardHeader className="relative z-10 text-center pb-6 pt-6 md:pb-8 md:pt-8 px-6 md:px-8">
             <div className="mx-auto w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-resume-purple to-resume-violet rounded-2xl flex items-center justify-center mb-4 shadow-lg">
               <Lock className="h-6 w-6 md:h-8 md:w-8 text-white" />
@@ -168,7 +168,7 @@ const SignIn = () => {
               >
                 Forgot your password?
               </button>
-              
+
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-200"></div>

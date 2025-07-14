@@ -62,13 +62,11 @@ const Navbar = () => {
           </div>
           <Link to="/" className="font-bold text-xl bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">Vireia AI</Link>
         </div>
-        <div className="hidden md:flex space-x-8 animate-slide-in-right animate-delay-200">
+        <div className="hidden md:flex space-x-8 ml-20 animate-slide-in-right animate-delay-200">
           <a href="#features" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">Features</a>
-          <a href="#how-it-works" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">How It Works</a>
+          <a href="/blog" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">Blog Posts</a>
           <a href="#pricing" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">Pricing</a>
-          {isSignedIn && (
-            <Link to="/dashboard" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">Dashboard</Link>
-          )}
+
         </div>
         <div className="flex space-x-3 animate-slide-in-right">
           {isSignedIn ? (
@@ -116,7 +114,7 @@ const Navbar = () => {
         <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b shadow-md animate-fade-in">
           <div className="container py-4 flex flex-col space-y-3">
             <a href="#features" className="text-resume-gray hover:text-resume-purple transition-colors font-medium py-2">Features</a>
-            <a href="#how-it-works" className="text-resume-gray hover:text-resume-purple transition-colors font-medium py-2">How It Works</a>
+            <a href="/blog" className="text-resume-gray hover:text-resume-purple transition-colors font-medium py-2">Blogs</a>
             <a href="#pricing" className="text-resume-gray hover:text-resume-purple transition-colors font-medium py-2">Pricing</a>
             {isSignedIn && (
               <Link to="/dashboard" className="text-resume-gray hover:text-resume-purple transition-colors font-medium py-2">Dashboard</Link>
