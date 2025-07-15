@@ -9,6 +9,7 @@ import { Calendar, User, Clock, Heart, Share2, Bookmark } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Tables } from '@/integrations/supabase/types';
 import Image from '@/components/ui/image';
+import Banner from '../Banner';
 
 type Blog = Tables<'blogs'>;
 
@@ -48,7 +49,7 @@ export const BlogArticleModal: React.FC<BlogArticleModalProps> = ({
                                 </Badge>
                             </div>
                         )}
-
+                        <Banner />
                         {/* Article Content */}
                         <div className="p-6 md:p-8">
                             {/* Header */}
