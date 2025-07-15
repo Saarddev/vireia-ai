@@ -7,6 +7,7 @@ import { Calendar, TrendingUp, Tag, Sparkles } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Tables } from '@/integrations/supabase/types';
 import Image from '@/components/ui/image';
+import Banner from '../Banner';
 
 type Blog = Tables<'blogs'>;
 
@@ -104,13 +105,7 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({ recentBlogs, categorie
             <span className="text-2xl">🚀</span>
           </div>
           <div>
-            <h4 className="font-bold text-lg mb-2">Boost Your Career</h4>
-            <p className="text-sm text-muted-foreground mb-4">
-              Create professional resumes with our AI-powered builder
-            </p>
-            <Button variant="outline" className="w-full font-semibold hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-              Get Started Free
-            </Button>
+            <Banner />
           </div>
         </CardContent>
       </Card>

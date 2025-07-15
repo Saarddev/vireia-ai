@@ -44,21 +44,6 @@ const Blog = () => {
 
     return (
         <div className="min-h-screen bg-background">
-            <head>
-                <title>Vireia Blog </title>
-                <meta name="description" content="Read the latest articles and insights on resume building, job searching, and career development." />
-                <link rel="icon" href="/favicon.ico" />
-                <meta property="og:title" content="Vireia Blog" />
-                <meta property="og:description" content="Read the latest articles and insights on resume building, job searching, and career development." />
-                <meta property="og:image" content="/https://cdn.sanity.io/images/mrfd4see/production/e3f234428152d737495819dd61790c8cb1cbdc3c-1498x878.png?w=2000&fit=max&auto=format" />
-                <meta property="og:url" content="https://www.vireia.com/blog" />
-                <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content="Vireia Blog" />
-                <meta name="twitter:description" content="Read the latest articles and insights on resume building, job searching, and career development." />
-                <meta name="twitter:image" content="https://cdn.sanity.io/images/mrfd4see/production/e3f234428152d737495819dd61790c8cb1cbdc3c-1498x878.png?w=2000&fit=max&auto=format" />
-                <meta name="theme-color" content="#ffffff" />
-                <link rel="canonical" href="https://www.vireia.com/blog" />
-            </head>
             <Navbar />
             <main className="flex-1">
                 <BlogHero featuredBlogs={featuredBlogs || []} />
