@@ -36,7 +36,7 @@ const Footer = () => {
               </a>
             </div>
           </div>
-          
+
           <div className="animate-slide-in-left animate-delay-200">
             <h4 className="font-semibold mb-4 text-white">Product</h4>
             <ul className="space-y-3 text-resume-gray-light">
@@ -46,7 +46,7 @@ const Footer = () => {
               <li><a href="#" className="hover:text-white transition-colors hover:underline">Testimonials</a></li>
             </ul>
           </div>
-          
+
           <div className="animate-slide-in-left animate-delay-300">
             <h4 className="font-semibold mb-4 text-white">Resources</h4>
             <ul className="space-y-3 text-resume-gray-light">
@@ -56,7 +56,7 @@ const Footer = () => {
               <li><a href="#" className="hover:text-white transition-colors hover:underline">Job Search</a></li>
             </ul>
           </div>
-          
+
           <div className="animate-slide-in-left animate-delay-400">
             <h4 className="font-semibold mb-4 text-white">Company</h4>
             <ul className="space-y-3 text-resume-gray-light">
@@ -67,7 +67,7 @@ const Footer = () => {
             </ul>
           </div>
         </div>
-        
+
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 animate-fade-in">
           <p className="text-resume-gray-light text-sm">
             © {new Date().getFullYear()} Vireia AI. All rights reserved.
@@ -75,7 +75,7 @@ const Footer = () => {
           <div className="flex items-center gap-2">
             <Mail className="h-4 w-4 text-resume-gray-light" />
             <a href="mailto:support@vireiaai.com" className="text-resume-gray-light hover:text-white transition-colors text-sm hover:underline">
-              support@vireiaai.com
+              support coming soon
             </a>
           </div>
         </div>
