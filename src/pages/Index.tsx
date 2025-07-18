@@ -231,7 +231,7 @@ const Index = () => {
                       </a>
 
                       <a
-                        href="https://github.com/SaarD00/vireia-ai"
+                        href="https://github.com/Saarddev/vireia-ai"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-3 px-6 py-3 bg-white border-2 border-resume-purple/30 text-resume-purple hover:bg-resume-purple/5 rounded-xl transition-all duration-300 font-semibold"
