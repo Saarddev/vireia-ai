@@ -1,73 +1,95 @@
-# Welcome to your Lovable project
+# Vireia AI Resume Builder
 
-## Project info
+![Vireia AI Logo](https://www.vireia.com/logo.png)
 
-**URL**: https://lovable.dev/projects/032d0f15-80a1-4306-ae0f-6a9f8de460f6
+## 🚀 Overview
 
-## How can I edit this code?
+**Vireia AI** is a modern, AI-powered resume builder designed to help job seekers create professional, ATS-optimized resumes in minutes. With intelligent content suggestions, beautiful templates, and instant feedback, Vireia AI makes it easy to stand out in today’s competitive job market.
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## 🌟 Features
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/032d0f15-80a1-4306-ae0f-6a9f8de460f6) and start prompting.
+- **AI-Powered Resume Optimization**  
+  Get personalized content suggestions and keyword optimization for every job application.
 
-Changes made via Lovable will be committed automatically to this repo.
+- **ATS-Friendly Templates**  
+  Choose from a variety of professionally designed templates that pass Applicant Tracking Systems.
 
-**Use your preferred IDE**
+- **Instant Resume Analysis**  
+  Real-time feedback and scoring to improve your resume’s impact.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Easy Customization**  
+  Edit, preview, and export your resume in multiple formats.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- **Career Blog & Resources**  
+  Access expert tips, interview advice, and career growth articles.
 
-Follow these steps:
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** React, TypeScript, Vite, shadcn-ui, Tailwind CSS
+- **Backend:** Supabase (database & edge functions)
+- **AI:** Integrated resume enhancement via Supabase Functions
+
+---
+
+## 📦 Getting Started
+
+### Prerequisites
+
+- Node.js & npm (recommended via [nvm](https://github.com/nvm-sh/nvm#installing-and-updating))
+
+### Installation
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+git clone https://github.com/Saarddev/vireia-ai.git
+cd vireia-ai
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Local Development
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Visit `http://localhost:3000` (or the port shown in your terminal)
+- Edit files in `/src` and see changes instantly
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🌐 Deployment
 
-## What technologies are used for this project?
+- Deploy instantly via [Vercel](https://vercel.com/)
+- Or use your preferred cloud platform (Vercel, Netlify, etc.)
 
-This project is built with:
+## 📖 Documentation
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- [Supabase Docs](https://supabase.com/docs)
+- [Tailwind CSS Docs](https://tailwindcss.com/docs)
+- [Vireia AI- coming soon]()
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/032d0f15-80a1-4306-ae0f-6a9f8de460f6) and click on Share -> Publish.
+## 🤝 Contributing
 
-## Can I connect a custom domain to my Lovable project?
+We welcome contributions!
 
-Yes it is!
+- Fork the repo
+- Create a feature branch
+- Submit a pull request
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 🛡️ License
+
+This project is licensed under the MIT License.
+
+---
+
+## 📬 Contact & Support
+
+- [Vireia AI Website](https://www.vireia.com)
+
+---
+
+> \*\*Build your future with Vireia AI. Create
