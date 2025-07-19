@@ -8,8 +8,34 @@ import { BlogHero } from '@/components/blog/BlogHero';
 import { BlogGrid } from '@/components/blog/BlogGrid';
 import { BlogSidebar } from '@/components/blog/BlogSidebar';
 import { AlertCircle } from 'lucide-react';
+import { useSEO } from '@/hooks/use-seo';
 
 const Blog = () => {
+    useSEO({
+        title: 'Vireia AI Blog | Career Tips & AI Insights ',
+        description: 'Expert career advice, resume writing tips, and AI-powered job search strategies. Learn how to create winning resumes, ace interviews, and advance your career with Vireia AI insights.',
+        canonical: 'https://www.vireia.com/blog',
+        keywords: 'resume writing tips, career advice, job search strategies, interview tips, AI resume optimization, professional development, career growth, job application tips',
+        structuredData: {
+            "@context": "https://schema.org",
+            "@type": "Blog",
+            "name": "Vireia AI Career Blog",
+            "description": "Expert career advice and resume writing tips powered by AI insights",
+            "url": "https://www.vireia.com/blog",
+            "author": {
+                "@type": "Organization",
+                "name": "Vireia AI"
+            },
+            "publisher": {
+                "@type": "Organization",
+                "name": "Vireia AI",
+                "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://www.vireia.com/logo.png"
+                }
+            }
+        }
+    });
     const { data: blogs, isLoading, error } = useQuery({
         queryKey: ['blogs'],
         queryFn: async () => {

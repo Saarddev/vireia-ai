@@ -6,14 +6,50 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import AppSidebar from '@/components/AppSidebar';
+import { useSEO } from '@/hooks/use-seo';
 
 const Templates = () => {
+  useSEO({
+    title: 'Vireia AI Resume Templates | Professional Designs',
+    description: 'Browse our collection of free, ATS-optimized resume templates. Professional designs for every industry - technical, creative, executive, and academic roles. Download and customize instantly.',
+    canonical: 'https://www.vireia.com/templates',
+    keywords: 'free resume templates, ATS resume templates, professional resume templates, resume designs, CV templates, modern resume templates, technical resume, creative resume, executive resume',
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": "Resume Templates Collection",
+      "description": "Professional ATS-optimized resume templates for all industries",
+      "url": "https://www.vireia.com/templates",
+      "mainEntity": {
+        "@type": "ItemList",
+        "name": "Resume Templates",
+        "numberOfItems": 6,
+        "itemListElement": [
+          {
+            "@type": "CreativeWork",
+            "name": "Modern Professional Template",
+            "description": "ATS-friendly minimalist design for professional roles"
+          },
+          {
+            "@type": "CreativeWork",
+            "name": "Creative Portfolio Template",
+            "description": "Design-focused template for creative professionals"
+          },
+          {
+            "@type": "CreativeWork",
+            "name": "Technical Specialist Template",
+            "description": "Optimized for technical and engineering roles"
+          }
+        ]
+      }
+    }
+  });
   const [isLoaded, setIsLoaded] = useState(false);
   const { toast } = useToast();
-  
+
   useEffect(() => {
     setIsLoaded(true);
-    
+
     // Welcome toast
     const timer = setTimeout(() => {
       toast({
@@ -21,66 +57,66 @@ const Templates = () => {
         description: "Browse and use professional resume templates"
       });
     }, 500);
-    
+
     return () => clearTimeout(timer);
   }, [toast]);
 
   // Mock data for templates
   const templates = [
-    { 
-      id: 1, 
-      name: "Modern Professional", 
-      category: "Professional", 
+    {
+      id: 1,
+      name: "Modern Professional",
+      category: "Professional",
       tags: ["ATS-Friendly", "Minimalist"],
       downloads: 2584,
       rating: 4.8,
       image: "https://source.unsplash.com/random/800x1000?resume=1",
       color: "bg-blue-100"
     },
-    { 
-      id: 2, 
-      name: "Creative Portfolio", 
-      category: "Creative", 
+    {
+      id: 2,
+      name: "Creative Portfolio",
+      category: "Creative",
       tags: ["Design", "Portfolio"],
       downloads: 1862,
       rating: 4.7,
       image: "https://source.unsplash.com/random/800x1000?resume=2",
       color: "bg-purple-100"
     },
-    { 
-      id: 3, 
-      name: "Technical Specialist", 
-      category: "Technical", 
+    {
+      id: 3,
+      name: "Technical Specialist",
+      category: "Technical",
       tags: ["ATS-Friendly", "Technical"],
       downloads: 3241,
       rating: 4.9,
       image: "https://source.unsplash.com/random/800x1000?resume=3",
       color: "bg-green-100"
     },
-    { 
-      id: 4, 
-      name: "Executive Summary", 
-      category: "Professional", 
+    {
+      id: 4,
+      name: "Executive Summary",
+      category: "Professional",
       tags: ["Executive", "Leadership"],
       downloads: 1976,
       rating: 4.6,
       image: "https://source.unsplash.com/random/800x1000?resume=4",
       color: "bg-yellow-100"
     },
-    { 
-      id: 5, 
-      name: "Startup Innovator", 
-      category: "Creative", 
+    {
+      id: 5,
+      name: "Startup Innovator",
+      category: "Creative",
       tags: ["Startup", "Innovation"],
       downloads: 1547,
       rating: 4.5,
       image: "https://source.unsplash.com/random/800x1000?resume=5",
       color: "bg-red-100"
     },
-    { 
-      id: 6, 
-      name: "Academic CV", 
-      category: "Academic", 
+    {
+      id: 6,
+      name: "Academic CV",
+      category: "Academic",
       tags: ["Education", "Research"],
       downloads: 1289,
       rating: 4.7,
@@ -95,7 +131,7 @@ const Templates = () => {
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-purple-50 dark:from-gray-950 dark:to-purple-950">
         <AppSidebar currentPage="templates" />
-        
+
         <SidebarInset>
           <div className="container max-w-7xl mx-auto px-4 py-8">
             {/* Page Header */}
@@ -108,10 +144,10 @@ const Templates = () => {
               </div>
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  type="search" 
-                  placeholder="Search templates..." 
-                  className="pl-8 w-full md:w-[300px]" 
+                <Input
+                  type="search"
+                  placeholder="Search templates..."
+                  className="pl-8 w-full md:w-[300px]"
                 />
               </div>
             </div>
@@ -120,10 +156,10 @@ const Templates = () => {
             <div className={`flex flex-col md:flex-row items-center justify-between gap-4 mb-6 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '100ms' }}>
               <div className="flex flex-wrap gap-2">
                 {categories.map((category, index) => (
-                  <Button 
-                    key={index} 
-                    variant={index === 0 ? "default" : "outline"} 
-                    size="sm" 
+                  <Button
+                    key={index}
+                    variant={index === 0 ? "default" : "outline"}
+                    size="sm"
                     className={index === 0 ? "bg-resume-purple hover:bg-resume-purple-dark" : "rounded-full"}
                   >
                     {category}
@@ -143,8 +179,8 @@ const Templates = () => {
             {/* Templates Grid */}
             <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '200ms' }}>
               {templates.map((template, index) => (
-                <Card 
-                  key={template.id} 
+                <Card
+                  key={template.id}
                   className="border border-purple-100 hover:border-purple-200 shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-sm bg-white/80 dashboard-card-hover overflow-hidden"
                   style={{ animationDelay: `${index * 50 + 200}ms` }}
                 >

@@ -9,10 +9,18 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import ResetPasswordDialog from '@/components/auth/ResetPasswordDialog';
+import { useSEO } from '@/hooks/use-seo';
 
 const SignIn = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  useSEO({
+    title: 'Sign In - Vireia AI Resume Builder',
+    description: 'Sign in to your Vireia AI account to access your resumes, AI-powered optimization tools, and personalized career features. Secure login for professional resume building.',
+    canonical: 'https://www.vireia.com/sign-in',
+    keywords: 'sign in, login, resume builder login, AI resume account, Vireia AI login',
+    noindex: false
+  });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

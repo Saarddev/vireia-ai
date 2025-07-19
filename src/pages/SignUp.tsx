@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { FileText, Mail, Lock, User, Eye, EyeOff, ArrowRight, CheckCircle } from 'lucide-react';
+import { useSEO } from '@/hooks/use-seo';
 
 const signUpSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -32,6 +33,13 @@ type SignUpFormValues = z.infer<typeof signUpSchema>;
 const SignUp = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  useSEO({
+    title: 'Sign Up - Create Your Free Vireia AI Account',
+    description: 'Join thousands of professionals using Vireia AI to create ATS-optimized resumes. Free signup with instant access to AI-powered resume building tools and professional templates.',
+    canonical: 'https://www.vireia.com/sign-up',
+    keywords: 'sign up, create account, free resume builder, AI resume account, Vireia AI registration, professional resume tools',
+    noindex: false
+  });
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
