@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FileText, Plus, Search } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from '@/components/ui/button';
@@ -180,65 +180,77 @@ const Resume = () => {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-purple-50 dark:from-gray-950 dark:to-purple-950">
-        <Sidebar>
+        <Sidebar className="bg-white/50 backdrop-blur-xl border-r border-primary/10">
           <SidebarHeader>
-            <div className="flex items-center gap-2 px-4 py-2">
-              <div className="bg-gradient-to-r from-resume-purple to-resume-violet rounded-xl p-2 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
-                <FileText className="h-5 w-5 md:h-5 md:w-5 text-white" />
+            <div className="flex items-center gap-3 px-4 py-3">
+              <div className="rounded-xl p-2 bg-gradient-to-br from-primary to-primary/80 shadow-lg">
+                <FileText className="h-6 w-6 text-white" />
               </div>
-              <span className="font-bold text-xl bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">VireiaAI</span>
+              <div>
+                <span className="font-bold text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">Vireia AI</span>
+                <p className="text-xs text-muted-foreground">Your career companion</p>
+              </div>
             </div>
           </SidebarHeader>
 
-          <SidebarContent className="px-2">
+          <SidebarContent className="px-3">
             <SidebarGroup>
-              <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
+              <SidebarGroupLabel className="text-primary/70 font-semibold">Dashboard</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Home" onClick={() => navigate('/dashboard')}>
-                      <Home className="h-5 w-5" />
-                      <span>Home</span>
+                    <SidebarMenuButton tooltip="My Resumes" asChild className="hover:bg-primary/5">
+                      <Link to="/dashboard">
+                        <FileText className="h-5 w-5" />
+                        <span>Home</span>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="My Resumes" isActive={true}>
-                      <FileText className="h-5 w-5" />
+
+                    <SidebarMenuButton tooltip="Home" isActive={true} className="bg-primary/10 text-primary border border-primary/20">
+                      <Home className="h-5 w-5" />
                       <span>My Resumes</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Applications" onClick={() => navigate('/applications')}>
-                      <Briefcase className="h-5 w-5" />
-                      <span>Applications</span>
+                    <SidebarMenuButton tooltip="Applications" asChild className="hover:bg-primary/5">
+                      <Link to="/applications">
+                        <Briefcase className="h-5 w-5" />
+                        <span>Applications</span>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Analytics" onClick={() => navigate('/analytics')}>
-                      <BarChart3 className="h-5 w-5" />
-                      <span>Analytics</span>
+                    <SidebarMenuButton tooltip="Analytics" asChild className="hover:bg-primary/5">
+                      <Link to="/analytics">
+                        <BarChart3 className="h-5 w-5" />
+                        <span>Analytics</span>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
 
-            <SidebarSeparator />
+            <SidebarSeparator className="bg-primary/20" />
 
             <SidebarGroup>
-              <SidebarGroupLabel>Resources</SidebarGroupLabel>
+              <SidebarGroupLabel className="text-primary/70 font-semibold">Resources</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Learn">
+                    <SidebarMenuButton tooltip="Learn" className="hover:bg-primary/5">
                       <BookOpen className="h-5 w-5" />
                       <span>Learning Center</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Templates" onClick={() => navigate('/templates')}>
-                      <Layers className="h-5 w-5" />
-                      <span>Templates</span>
+                    <SidebarMenuButton tooltip="Templates" asChild className="hover:bg-primary/5">
+                      <Link to="/templates">
+                        <Layers className="h-5 w-5" />
+                        <span>Templates</span>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
@@ -249,19 +261,19 @@ const Resume = () => {
           <SidebarFooter>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Settings">
+                <SidebarMenuButton tooltip="Settings" className="hover:bg-primary/5">
                   <Cog className="h-5 w-5" />
                   <span>Settings</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Account">
+                <SidebarMenuButton tooltip="Account" className="hover:bg-primary/5">
                   <User className="h-5 w-5" />
                   <span>Account</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Log Out" onClick={handleLogout}>
+                <SidebarMenuButton tooltip="Log Out" className="hover:bg-destructive/10 hover:text-destructive">
                   <LogOut className="h-5 w-5" />
                   <span>Log Out</span>
                 </SidebarMenuButton>
