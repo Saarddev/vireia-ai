@@ -10,13 +10,16 @@ import { Github, ExternalLink, ChevronUp, ArrowRight, Link } from 'lucide-react'
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useSEO } from '@/hooks/use-seo';
+import EnhancedInfrastructureSection from '@/components/EnhancedInfraSection';
+import DemoSection from '@/components/DemoSection';
+import TestimonialsSection from '@/components/Testimonials';
 
 const Index = () => {
   useSEO({
-    title: 'Vireia AI | Free ATS-Optimized Resume Builder with AI',
-    description: 'Create professional, ATS-friendly resumes in minutes with Vireia AI. Free resume builder with AI-powered optimization, job-specific templates, and instant feedback. Land your dream job today!',
+    title: 'Vireia AI: Beautiful Resume in minutes',
+    description: 'Create professional, ATS-friendly resumes in minutes with Vireia AI.  resume builder with AI-powered optimization, job-specific templates, and instant feedback. Land your dream job today!',
     canonical: 'https://www.vireia.com/',
-    keywords: 'resume builder, AI resume, ATS resume, free resume builder, professional resume, job application, resume maker, CV builder, AI-powered resume, job search tools, ATS-optimized, resume templates, online resume builder, career tools',
+    keywords: 'resume builder, AI resume, ATS resume,  resume builder, professional resume, job application, resume maker, CV builder, AI-powered resume, job search tools, ATS-optimized, resume templates, online resume builder, career tools',
     structuredData: {
       "@context": "https://schema.org",
       "@type": "WebApplication",
@@ -167,7 +170,9 @@ const Index = () => {
             </div>
           </div>
         </section>
-        <InfrastructureSection />
+        {/* <InfrastructureSection /> */}
+        <EnhancedInfrastructureSection />
+        <DemoSection />
 
         <section className="py-20 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-resume-purple/5 via-white to-resume-violet/5 z-0"></div>
@@ -303,6 +308,7 @@ const Index = () => {
             </div>
           </div>
         </section>
+        {/* <TestimonialsSection /> */}
 
         <PricingSection />
       </main>
