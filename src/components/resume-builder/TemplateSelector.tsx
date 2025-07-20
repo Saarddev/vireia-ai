@@ -15,24 +15,24 @@ const templates = [
     id: 'modern',
     name: 'Modern',
     description: 'Clean and professional design with a modern touch.',
-    image: '/placeholder.svg'
+    image: 'https://cdn.sanity.io/images/mrfd4see/production/7bee3ab82621809917eb51dcc2f65d2cac32ebb5-1024x1024.jpg?w=2000&fit=max&auto=format'
   },
   {
     id: 'professional',
     name: 'Professional',
     description: 'Classic and traditional layout for formal applications.',
-    image: '/placeholder.svg'
+    image: 'https://cdn.sanity.io/images/mrfd4see/production/65b061ed4d6eff782eb44904ce5ada83ecd7cadf-1024x1024.jpg?w=2000&fit=max&auto=format'
   },
   {
     id: 'customizable',
     name: 'Customizable',
-    description: 'Fully customizable template with adjustable segments.',
-    image: '/placeholder.svg',
+    description: 'Let your creativity shine with a customizable template.',
+    image: 'https://cdn.sanity.io/images/mrfd4see/production/5ce30c8c48bcf7879a2629428e9d2bd93311e2c7-1024x1024.jpg?w=2000&fit=max&auto=format',
     new: true
   }
 ];
 
-const TemplateSelector: React.FC<TemplateSelectorProps> = ({ 
+const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   selectedTemplate,
   onSelect
 }) => {
@@ -45,8 +45,8 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
         </p>
       </div>
 
-      <RadioGroup 
-        value={selectedTemplate} 
+      <RadioGroup
+        value={selectedTemplate}
         onValueChange={(value) => onSelect(value)}
         className="grid grid-cols-1 md:grid-cols-3 gap-4"
       >
@@ -59,7 +59,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
             />
             <Label
               htmlFor={`template-${template.id}`}
-              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-2 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
             >
               <div className="mb-3 overflow-hidden rounded-md border border-gray-200 w-full h-40 relative">
                 <Image
