@@ -67,6 +67,8 @@ const Dashboard = () => {
     }
   );
 
+
+
   useEffect(() => {
     const initializeDashboard = async () => {
       try {
@@ -105,7 +107,7 @@ const Dashboard = () => {
             .from('user_rankings')
             .select('user_id, current_rank, total_score, rank_tier')
             .eq('rank_category', 'overall')
-            .order('current_rank', { ascending: true })
+            .order('total_score', { ascending: false })
             .limit(5);
 
           if (topPlayersError) {
@@ -307,15 +309,19 @@ const Dashboard = () => {
               <SidebarFooter>
                 <SidebarMenu>
                   <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Settings" className="hover:bg-primary/5">
-                      <Cog className="h-5 w-5" />
-                      <span>Settings</span>
+                    <SidebarMenuButton tooltip="Settings" asChild className="hover:bg-primary/5" >
+                      <Link to="/settings">
+                        <Cog className="h-5 w-5" />
+                        <span>Settings</span>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Account" className="hover:bg-primary/5">
-                      <User className="h-5 w-5" />
-                      <span>Account</span>
+                    <SidebarMenuButton tooltip="Account" asChild className="hover:bg-primary/5">
+                      <Link to="/account">
+                        <User className="h-5 w-5" />
+                        <span>Account</span>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
@@ -492,7 +498,7 @@ const Dashboard = () => {
                                 </div>
                                 <div>
                                   <div className="font-semibold text-foreground">
-                                    {player.user_id === userRanking?.user_id ? 'You!' : `Player #${player.current_rank}`}
+                                    {player.user_id === userRanking?.user_id ? 'You!' : `Player #${player.current_rank + 1}`}
                                   </div>
                                   <div className="text-xs text-muted-foreground flex items-center gap-1">
                                     {getTierIcon(player.rank_tier)}
@@ -764,7 +770,7 @@ const Dashboard = () => {
 
           {/* Create Resume Dialog */}
           <CreateResumeDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} />
-        </SidebarProvider>
+        </SidebarProvider >
       )}
     </>
   );

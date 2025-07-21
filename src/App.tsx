@@ -19,6 +19,8 @@ import SignUp from "./pages/SignUp";
 import ResumePDF from "./pages/ResumePDF";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Blog from "./pages/Blog";
+import Settings from "./pages/Settings";
+import Account from "./pages/Account";
 
 const App = () => (
   <div className="flex min-h-screen flex-col">
@@ -34,6 +36,8 @@ const App = () => (
             <Route path="/sign-up/*" element={<SignUp />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/account" element={<Account />} />
 
             {/* Protected routes */}
             <Route path="/dashboard" element={<Dashboard />} />

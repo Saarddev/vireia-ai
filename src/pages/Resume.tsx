@@ -201,7 +201,8 @@ const Resume = () => {
                   <SidebarMenuItem>
                     <SidebarMenuButton tooltip="My Resumes" asChild className="hover:bg-primary/5">
                       <Link to="/dashboard">
-                        <FileText className="h-5 w-5" />
+
+                        <Home className="h-5 w-5" />
                         <span>Home</span>
                       </Link>
                     </SidebarMenuButton>
@@ -209,7 +210,8 @@ const Resume = () => {
                   <SidebarMenuItem>
 
                     <SidebarMenuButton tooltip="Home" isActive={true} className="bg-primary/10 text-primary border border-primary/20">
-                      <Home className="h-5 w-5" />
+                      <FileText className="h-5 w-5" />
+
                       <span>My Resumes</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -261,19 +263,19 @@ const Resume = () => {
           <SidebarFooter>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Settings" className="hover:bg-primary/5">
+                <SidebarMenuButton tooltip="Settings" className="hover:bg-primary/5" onClick={() => navigate('/settings')}>
                   <Cog className="h-5 w-5" />
                   <span>Settings</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Account" className="hover:bg-primary/5">
+                <SidebarMenuButton tooltip="Account" className="hover:bg-primary/5" onClick={() => navigate('/account')}>
                   <User className="h-5 w-5" />
                   <span>Account</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Log Out" className="hover:bg-destructive/10 hover:text-destructive">
+                <SidebarMenuButton tooltip="Log Out" onClick={handleLogout} className="hover:bg-destructive/10 hover:text-destructive">
                   <LogOut className="h-5 w-5" />
                   <span>Log Out</span>
                 </SidebarMenuButton>

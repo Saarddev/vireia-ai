@@ -139,7 +139,6 @@ const Index = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-12 w-full max-w-4xl">
                 <div className="flex flex-col items-center gap-4 p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/15 transition-all duration-300 group">
                   <div className="w-16 h-16 bg-gradient-to-br from-white/30 to-white/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <span className="text-2xl">🏆</span>
                   </div>
                   <div className="text-center">
                     <h3 className="text-lg font-bold text-white mb-2">Competitive Ranking</h3>
@@ -149,7 +148,6 @@ const Index = () => {
 
                 <div className="flex flex-col items-center gap-4 p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/15 transition-all duration-300 group">
                   <div className="w-16 h-16 bg-gradient-to-br from-white/30 to-white/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <span className="text-2xl">🤖</span>
                   </div>
                   <div className="text-center">
                     <h3 className="text-lg font-bold text-white mb-2">AI-Powered Scoring</h3>
@@ -159,7 +157,6 @@ const Index = () => {
 
                 <div className="flex flex-col items-center gap-4 p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/15 transition-all duration-300 group">
                   <div className="w-16 h-16 bg-gradient-to-br from-white/30 to-white/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <span className="text-2xl">⚡</span>
                   </div>
                   <div className="text-center">
                     <h3 className="text-lg font-bold text-white mb-2">Live Leaderboards</h3>
