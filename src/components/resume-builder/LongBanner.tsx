@@ -1,20 +1,20 @@
 import { useEffect, useRef } from "react";
 
-const Banner = () => {
+const AdsterraBannerAd = () => {
     const adRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         (window as any).atOptions = {
-            key: "6c128e8067bebd5aa5594bdedcac2e18",
+            key: "181369c164c92b58961137043571784f",
             format: "iframe",
-            height: 600,
-            width: 160,
+            height: 50,
+            width: 320,
             params: {}
         };
 
         const script = document.createElement("script");
         script.type = "text/javascript";
-        script.src = "//www.highperformanceformat.com/6c128e8067bebd5aa5594bdedcac2e18/invoke.js";
+        script.src = "//www.highperformanceformat.com/181369c164c92b58961137043571784f/invoke.js";
         script.async = true;
 
         if (adRef.current) {
@@ -28,11 +28,13 @@ const Banner = () => {
     }, []);
 
     return (
-        <div className="max-w-[180px] bg-white border border-gray-200 shadow-lg rounded-2xl p-3 flex flex-col items-center">
-            <span className="text-xs text-gray-500 font-medium mb-2">📢 Sponsored</span>
-            <div ref={adRef} className="w-full h-[600px]" />
+        <div className="w-full flex justify-center py-4">
+            <div className="bg-white border border-gray-200 shadow rounded-lg px-4 py-2">
+                <p className="text-xs text-gray-500 font-medium text-center mb-1">🔗 Sponsored</p>
+                <div ref={adRef} className="w-[320px] h-[50px]" />
+            </div>
         </div>
     );
 };
 
-export default Banner;
+export default AdsterraBannerAd;

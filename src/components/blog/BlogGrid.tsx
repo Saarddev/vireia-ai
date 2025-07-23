@@ -6,6 +6,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Tables } from '@/integrations/supabase/types';
 import Image from '@/components/ui/image';
 import { BlogArticleModal } from './BlogArticleModal';
+import PopunderWrapper from '../PopupWrapper';
 
 type Blog = Tables<'blogs'>;
 
@@ -35,7 +36,8 @@ export const BlogGrid: React.FC<BlogGridProps> = ({ blogs }) => {
     }
 
     return (
-        <>
+        <><PopunderWrapper>
+
             <div className="space-y-12 animate-fade-in">
                 <div className="flex items-center justify-between">
                     <div>
@@ -134,6 +136,7 @@ export const BlogGrid: React.FC<BlogGridProps> = ({ blogs }) => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
             />
+        </PopunderWrapper >
         </>
     );
 };

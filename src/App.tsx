@@ -21,6 +21,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Blog from "./pages/Blog";
 import Settings from "./pages/Settings";
 import Account from "./pages/Account";
+import Marketplace from "./pages/MarketPlace";
 
 const App = () => (
   <div className="flex min-h-screen flex-col">
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/resume/canvas/:resumeId" element={<ResumeCanvas />} />
             <Route path="/resume/pdf/:resumeId" element={<ResumePDF />} />
             <Route path="/applications" element={<Applications />} />
+            <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/templates" element={<Templates />} />
 

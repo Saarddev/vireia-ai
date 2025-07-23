@@ -10,6 +10,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Tables } from '@/integrations/supabase/types';
 import Image from '@/components/ui/image';
 import Banner from '../Banner';
+import AdsterraBannerAd from '../resume-builder/LongBanner';
 
 type Blog = Tables<'blogs'>;
 
@@ -49,7 +50,6 @@ export const BlogArticleModal: React.FC<BlogArticleModalProps> = ({
                                 </Badge>
                             </div>
                         )}
-                        <Banner />
                         {/* Article Content */}
                         <div className="p-6 md:p-8">
                             {/* Header */}
@@ -178,6 +178,7 @@ export const BlogArticleModal: React.FC<BlogArticleModalProps> = ({
                                     {blog.content}
                                 </ReactMarkdown>
                             </div>
+                            <AdsterraBannerAd />
 
                             {/* Tags */}
                             {blog.tags && blog.tags.length > 0 && (

@@ -8,6 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Tables } from '@/integrations/supabase/types';
 import Image from '@/components/ui/image';
 import Banner from '../Banner';
+import AdsterraSmallAd from '../AdSmall';
 
 type Blog = Tables<'blogs'>;
 
@@ -104,8 +105,8 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({ recentBlogs, categorie
           <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mx-auto">
             <span className="text-2xl">🚀</span>
           </div>
-          <div>
-            <Banner />
+          <div className='flex justify-center'>
+            <AdsterraSmallAd />
           </div>
         </CardContent>
       </Card>
