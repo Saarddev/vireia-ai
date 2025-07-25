@@ -55,6 +55,7 @@ const Dashboard = () => {
   const [firstVisit, setFirstVisit] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [onboardingData, setOnboardingData] = useState<any>(null);
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [userRanking, setUserRanking] = useState<UserRanking | null>(null);
   const [topPlayers, setTopPlayers] = useState<TopPlayer[]>([]);
@@ -170,15 +171,21 @@ const Dashboard = () => {
 
   const stats = calculateStats();
 
-  const completeOnboarding = () => {
+  const completeOnboarding = (userData?: any) => {
     setShowOnboarding(false);
+    setOnboardingData(userData);
     localStorage.setItem('dashboardVisited', 'true');
+
+    // Store onboarding data in localStorage for CreateResumeDialog to use
+    if (userData) {
+      localStorage.setItem('onboardingData', JSON.stringify(userData));
+    }
+
     toast({
       title: "You're all set! 🚀",
       description: "Time to create your first amazing resume!"
     });
   };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
