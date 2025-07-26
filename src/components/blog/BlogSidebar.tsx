@@ -9,6 +9,7 @@ import { Tables } from '@/integrations/supabase/types';
 import Image from '@/components/ui/image';
 import Banner from '../Banner';
 import AdsterraSmallAd from '../AdSmall';
+import AAdsAd from '../Aads';
 
 type Blog = Tables<'blogs'>;
 
@@ -106,7 +107,8 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({ recentBlogs, categorie
             <span className="text-2xl">🚀</span>
           </div>
           <div className='flex justify-center'>
-            <AdsterraSmallAd />
+            {/* <AdsterraSmallAd /> */}
+            <AAdsAd />
           </div>
         </CardContent>
       </Card>
