@@ -108,7 +108,11 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({ recentBlogs, categorie
           </div>
           <div className='flex justify-center'>
             {/* <AdsterraSmallAd /> */}
-            <AAdsAd />
+            {/* <AAdsAd /> */}
+             <div className="rounded-2xl overflow-hidden bg-white shadow-sm border border-border/80 px-3 w-fit mx-auto">
+              <p className="text-xs text-gray-500 font-semibold mb-2">🎯 Sponsored</p>
+     <iframe data-aa='2404556' src='//ad.a-ads.com/2404556?size=300x250'></iframe><a className='text-accent' id="frame-link" href="https://aads.com/campaigns/new/?source_id=2404556&source_type=ad_unit&partner=2404556">Advertise here</a></div>
+
           </div>
         </CardContent>
       </Card>
