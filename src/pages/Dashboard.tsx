@@ -7,7 +7,6 @@ import { FileText, ChevronUp, Users, BarChart3, Clock, Briefcase, Home, Cog, Use
 import { useToast } from "@/hooks/use-toast";
 import OnboardingFlow from '@/components/OnboardingFlow';
 import { supabase } from '@/integrations/supabase/client';
-import type { User as SupabaseUser } from '@supabase/supabase-js';
 import {
   Sidebar,
   SidebarContent,
@@ -24,6 +23,7 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar";
 import CreateResumeDialog from '@/components/CreateResumeDialog';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface Resume {
   id: string;
@@ -62,13 +62,47 @@ const Dashboard = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const { toast } = useToast();
+
   const { data: { subscription } } = supabase.auth.onAuthStateChange(
+
     (event, session) => {
+
       setUser(session?.user ?? null);
+
     }
+
   );
 
-
+  // Function to calculate correct ranks based on scores
+  const calculateCorrectRanks = (players: TopPlayer[]): TopPlayer[] => {
+    // Sort by score descending, then assign ranks
+    const sortedPlayers = [...players].sort((a, b) => b.total_score - a.total_score);
+    
+    let currentRank = 1;
+    const rankedPlayers: TopPlayer[] = [];
+    
+    for (let i = 0; i < sortedPlayers.length; i++) {
+      const player = sortedPlayers[i];
+      
+      // If this player has the same score as the previous player, use the same rank
+      if (i > 0 && sortedPlayers[i - 1].total_score === player.total_score) {
+        rankedPlayers.push({
+          ...player,
+          current_rank: rankedPlayers[i - 1].current_rank
+        });
+      } else {
+        rankedPlayers.push({
+          ...player,
+          current_rank: currentRank
+        });
+      }
+      
+      // Update current rank for next iteration (handles ties properly)
+      currentRank = i + 2;
+    }
+    
+    return rankedPlayers;
+  };
 
   useEffect(() => {
     const initializeDashboard = async () => {
@@ -89,32 +123,49 @@ const Dashboard = () => {
             setResumes(resumesData || []);
           }
 
-          // Fetch user's ranking data
-          const { data: rankingData, error: rankingError } = await supabase
+          // Fetch all rankings to calculate correct user rank
+          const { data: allRankingsData, error: allRankingsError } = await supabase
             .from('user_rankings')
-            .select('id, user_id, current_rank, total_score, rank_tier, rank_category, last_updated')
-            .eq('user_id', session.user.id)
+            .select('user_id, current_rank, total_score, rank_tier, rank_category, last_updated')
             .eq('rank_category', 'overall')
-            .single();
+            .order('total_score', { ascending: false });
 
-          if (rankingError && rankingError.code !== 'PGRST116') {
-            console.error('Error fetching user ranking:', rankingError);
+          if (allRankingsError) {
+            console.error('Error fetching rankings:', allRankingsError);
           } else {
-            setUserRanking(rankingData);
+            // Calculate correct ranks for all users
+            const allUsersWithCorrectRanks = calculateCorrectRanks(allRankingsData || []);
+            
+            // Find the current user's ranking
+            const userRankingData = allUsersWithCorrectRanks.find(r => r.user_id === session.user.id);
+            
+            if (userRankingData) {
+              setUserRanking({
+                id: userRankingData.user_id,
+                user_id: userRankingData.user_id,
+                current_rank: userRankingData.current_rank,
+                total_score: userRankingData.total_score,
+                rank_tier: userRankingData.rank_tier,
+                rank_category: 'overall',
+                last_updated: new Date().toISOString()
+              });
+            }
           }
 
-          // Fetch top players for leaderboard
+          // Fetch top players for leaderboard - sort by score instead of rank
           const { data: topPlayersData, error: topPlayersError } = await supabase
             .from('user_rankings')
             .select('user_id, current_rank, total_score, rank_tier')
             .eq('rank_category', 'overall')
             .order('total_score', { ascending: false })
-            .limit(5);
+            .limit(20); // Fetch more to handle ties properly
 
           if (topPlayersError) {
             console.error('Error fetching top players:', topPlayersError);
           } else {
-            setTopPlayers(topPlayersData || []);
+            // Calculate correct ranks based on scores
+            const playersWithCorrectRanks = calculateCorrectRanks(topPlayersData || []);
+            setTopPlayers(playersWithCorrectRanks.slice(0, 5));
           }
         }
       } catch (error) {
@@ -175,17 +226,18 @@ const Dashboard = () => {
     setShowOnboarding(false);
     setOnboardingData(userData);
     localStorage.setItem('dashboardVisited', 'true');
-
+    
     // Store onboarding data in localStorage for CreateResumeDialog to use
     if (userData) {
       localStorage.setItem('onboardingData', JSON.stringify(userData));
     }
-
+    
     toast({
       title: "You're all set! 🚀",
       description: "Time to create your first amazing resume!"
     });
   };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -236,149 +288,256 @@ const Dashboard = () => {
       {!showOnboarding && (
         <SidebarProvider defaultOpen={true}>
           <div className="min-h-screen flex w-full bg-gradient-to-br from-primary/5 via-background to-primary/10">
-            <Sidebar className="bg-white/50 backdrop-blur-xl border-r border-primary/10">
+             <Sidebar className="bg-white/50 backdrop-blur-xl border-r border-primary/10">
+
               <SidebarHeader>
+
                 <div className="flex items-center gap-3 px-4 py-3">
+
                   <div className="rounded-xl p-2 bg-gradient-to-br from-primary to-primary/80 shadow-lg">
+
                     <FileText className="h-6 w-6 text-white" />
+
                   </div>
+
                   <div>
+
                     <span className="font-bold text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">Vireia AI</span>
+
                     <p className="text-xs text-muted-foreground">Your career companion</p>
+
                   </div>
+
                 </div>
+
               </SidebarHeader>
 
+
+
               <SidebarContent className="px-3">
+
                 <SidebarGroup>
+
                   <SidebarGroupLabel className="text-primary/70 font-semibold">Dashboard</SidebarGroupLabel>
+
                   <SidebarGroupContent>
+
                     <SidebarMenu>
+
                       <SidebarMenuItem>
+
                         <SidebarMenuButton tooltip="Home" isActive={true} className="bg-primary/10 text-primary border border-primary/20">
+
                           <Home className="h-5 w-5" />
+
                           <span>Home</span>
+
                         </SidebarMenuButton>
+
                       </SidebarMenuItem>
+
                       <SidebarMenuItem>
+
                         <SidebarMenuButton tooltip="My Resumes" asChild className="hover:bg-primary/5">
+
                           <Link to="/resume">
+
                             <FileText className="h-5 w-5" />
+
                             <span>My Resumes</span>
+
                           </Link>
+
                         </SidebarMenuButton>
+
                       </SidebarMenuItem>
+
                       <SidebarMenuItem>
+
                         <SidebarMenuButton tooltip="Applications" asChild className="hover:bg-primary/5">
+
                           <Link to="/applications">
+
                             <Briefcase className="h-5 w-5" />
+
                             <span>Applications</span>
+
                           </Link>
+
                         </SidebarMenuButton>
+
                       </SidebarMenuItem>
+
                       <SidebarMenuItem>
+
                         <SidebarMenuButton tooltip="Analytics" asChild className="hover:bg-primary/5">
+
                           <Link to="/analytics">
+
                             <BarChart3 className="h-5 w-5" />
+
                             <span>Analytics</span>
+
                           </Link>
+
                         </SidebarMenuButton>
+
                       </SidebarMenuItem>
+
                     </SidebarMenu>
+
                   </SidebarGroupContent>
+
                 </SidebarGroup>
+
+
 
                 <SidebarSeparator className="bg-primary/20" />
 
+
+
                 <SidebarGroup>
+
                   <SidebarGroupLabel className="text-primary/70 font-semibold">Resources</SidebarGroupLabel>
+
                   <SidebarGroupContent>
+
                     <SidebarMenu>
+
                       <SidebarMenuItem>
+
                         <SidebarMenuButton tooltip="Learn" className="hover:bg-primary/5">
+
                           <BookOpen className="h-5 w-5" />
+
                           <span>Learning Center</span>
+
                         </SidebarMenuButton>
+
                       </SidebarMenuItem>
+
                       <SidebarMenuItem>
+
                         <SidebarMenuButton tooltip="Templates" asChild className="hover:bg-primary/5">
+
                           <Link to="/templates">
+
                             <Layers className="h-5 w-5" />
+
                             <span>Templates</span>
+
                           </Link>
+
                         </SidebarMenuButton>
+
                       </SidebarMenuItem>
+
                     </SidebarMenu>
+
                   </SidebarGroupContent>
+
                 </SidebarGroup>
+
               </SidebarContent>
 
+
+
               <SidebarFooter>
+
                 <SidebarMenu>
+
                   <SidebarMenuItem>
+
                     <SidebarMenuButton tooltip="Settings" asChild className="hover:bg-primary/5" >
+
                       <Link to="/settings">
+
                         <Cog className="h-5 w-5" />
+
                         <span>Settings</span>
+
                       </Link>
+
                     </SidebarMenuButton>
+
                   </SidebarMenuItem>
+
                   <SidebarMenuItem>
+
                     <SidebarMenuButton tooltip="Account" asChild className="hover:bg-primary/5">
+
                       <Link to="/account">
+
                         <User className="h-5 w-5" />
+
                         <span>Account</span>
+
                       </Link>
+
                     </SidebarMenuButton>
+
                   </SidebarMenuItem>
+
                   <SidebarMenuItem>
+
                     <SidebarMenuButton tooltip="Log Out" className="hover:bg-destructive/10 hover:text-destructive">
+
                       <LogOut className="h-5 w-5" />
+
                       <span>Log Out</span>
+
                     </SidebarMenuButton>
+
                   </SidebarMenuItem>
+
                 </SidebarMenu>
+
               </SidebarFooter>
+
             </Sidebar>
 
             <SidebarInset className="bg-transparent">
-              <div className="container max-w-7xl mx-auto px-6 py-8">
+              <div className="container max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
                 {/* Dynamic Welcome Section */}
-                <div className={`mb-8 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}>
-                  <div className="bg-white/60 backdrop-blur-xl rounded-3xl border border-primary/10 p-8 shadow-xl">
-                    <div className="flex items-center justify-between">
+                <div className={`mb-6 sm:mb-8 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}>
+                  <div className="bg-card/60 backdrop-blur-xl rounded-2xl sm:rounded-3xl border border-border/20 p-4 sm:p-8 shadow-xl">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-0">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-4">
-                          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
-                            <Sparkles className="h-6 w-6 text-white" />
+                          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                            <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
                           </div>
                           <div>
-                            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
-                              Welcome Back {user ? (
+                          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+
+                              Welcome Back, {user ? (
+
                                 user.user_metadata?.full_name || ""
-                              ) : 'User'}
+
+                              ) : ''}!
+
                             </h1>
-                            <p className="text-muted-foreground">
-                              {resumes.length > 0
+                            <p className="text-sm sm:text-base text-muted-foreground">
+                              {resumes.length > 0 
                                 ? `You're making great progress with ${resumes.length} resume${resumes.length > 1 ? 's' : ''}`
                                 : "Let's create your first impressive resume"
                               }
                             </p>
                           </div>
                         </div>
-
+                        
                         {/* Quick Actions */}
-                        <div className="flex flex-wrap gap-3">
+                        <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
                           <Button
                             onClick={() => setShowCreateDialog(true)}
-                            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 text-sm sm:text-base"
                           >
                             <Plus className="h-4 w-4 mr-2" />
                             Create New Resume
                           </Button>
                           {resumes.length > 0 && (
-                            <Button variant="outline" asChild className="border-primary/20 hover:bg-primary/5">
-                              <Link to={`/resume/canvas/${resumes[0].id}`}>
+                            <Button variant="outline" asChild className="border-border hover:bg-accent text-sm sm:text-base">
+                              <Link to={`/resume-builder/${resumes[0].id}`}>
                                 <FileText className="h-4 w-4 mr-2" />
                                 Continue Editing
                               </Link>
@@ -386,16 +545,16 @@ const Dashboard = () => {
                           )}
                         </div>
                       </div>
-
+                      
                       {/* Rank Badge */}
                       {userRanking && (
-                        <div className="ml-8 text-center">
-                          <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-6 border border-primary/20">
+                        <div className="lg:ml-8 text-center">
+                          <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-border/20">
                             <div className="flex justify-center mb-2">
                               {getTierIcon(stats.rankTier)}
                             </div>
-                            <div className="text-2xl font-bold text-primary">#{stats.currentRank}</div>
-                            <div className="text-sm text-muted-foreground capitalize">{stats.rankTier} Tier</div>
+                            <div className="text-xl sm:text-2xl font-bold text-primary">#{stats.currentRank}</div>
+                            <div className="text-xs sm:text-sm text-muted-foreground capitalize">{stats.rankTier} Tier</div>
                             <div className="text-xs text-primary/70 mt-1">{stats.totalScore} points</div>
                           </div>
                         </div>
@@ -405,7 +564,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* Enhanced Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
                   <Card className={`bg-gradient-to-br from-primary to-primary/80 text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}>
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
@@ -496,16 +655,17 @@ const Dashboard = () => {
                           {topPlayers.slice(0, 5).map((player, index) => (
                             <div key={player.user_id} className="group flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-primary/5 to-transparent hover:from-primary/10 hover:to-primary/5 transition-all duration-300 border border-primary/10">
                               <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-lg ${index === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-white' :
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-lg ${
+                                  index === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-white' :
                                   index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-white' :
-                                    index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white' :
-                                      'bg-gradient-to-br from-primary/80 to-primary text-white'
-                                  }`}>
+                                  index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white' :
+                                  'bg-gradient-to-br from-primary/80 to-primary text-white'
+                                }`}>
                                   {index === 0 ? '👑' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
                                 </div>
                                 <div>
                                   <div className="font-semibold text-foreground">
-                                    {player.user_id === userRanking?.user_id ? 'You!' : `Player #${player.current_rank + 1}`}
+                                    {player.user_id === userRanking?.user_id ? 'You!' : `Player #${player.current_rank}`}
                                   </div>
                                   <div className="text-xs text-muted-foreground flex items-center gap-1">
                                     {getTierIcon(player.rank_tier)}
@@ -519,7 +679,7 @@ const Dashboard = () => {
                               </div>
                             </div>
                           ))}
-
+                          
                           {/* Your Position Indicator */}
                           {userRanking && !topPlayers.some(p => p.user_id === userRanking.user_id) && (
                             <div className="mt-6 pt-4 border-t border-primary/20">
@@ -608,7 +768,7 @@ const Dashboard = () => {
                                   asChild
                                   className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-lg"
                                 >
-                                  <Link to={`/resume/canvas/${resumes[0].id}`}>
+                                  <Link to={`/resume-builder/${resumes[0].id}`}>
                                     <FileText className="h-4 w-4 mr-2" />
                                     Continue Editing
                                   </Link>
@@ -626,14 +786,14 @@ const Dashboard = () => {
                               </div>
                             </div>
                           )}
-
+                          
                           {/* Other Resumes Grid */}
                           {resumes.length > 1 && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               {resumes.slice(1, 5).map((resume) => (
                                 <Link
                                   key={resume.id}
-                                  to={`/resume/builder/${resume.id}`}
+                                  to={`/resume-builder/${resume.id}`}
                                   className="group block p-4 rounded-xl border border-primary/10 bg-white/50 hover:bg-white/80 hover:border-primary/20 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
                                 >
                                   <div className="flex items-start justify-between mb-3">
@@ -667,7 +827,7 @@ const Dashboard = () => {
                           </div>
                           <h3 className="text-xl font-semibold text-foreground mb-3">Ready to shine? ✨</h3>
                           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                            Create your first professional resume with our AI-powered builder.
+                            Create your first professional resume with our AI-powered builder. 
                             Stand out from the crowd and land your dream job!
                           </p>
                           <Button
@@ -730,7 +890,7 @@ const Dashboard = () => {
                               </div>
                             </Link>
                           </Button>
-
+                          
                           <Button
                             variant="outline"
                             asChild
@@ -748,7 +908,7 @@ const Dashboard = () => {
                               </div>
                             </Link>
                           </Button>
-
+                          
                           <Button
                             variant="outline"
                             asChild
@@ -777,7 +937,7 @@ const Dashboard = () => {
 
           {/* Create Resume Dialog */}
           <CreateResumeDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} />
-        </SidebarProvider >
+        </SidebarProvider>
       )}
     </>
   );

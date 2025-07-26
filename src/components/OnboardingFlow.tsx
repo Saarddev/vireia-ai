@@ -44,7 +44,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
         { icon: Target, text: "ATS optimization guaranteed" },
         { icon: Sparkles, text: "Professional polish in minutes" }
       ],
-      gradient: "from-primary via-primary/80 to-accent"
+      gradient: "from-resume-purple via-resume-purple to-accent"
     },
     {
       title: "Tell us about yourself",
@@ -52,7 +52,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
       icon: User,
       type: "profession",
       description: "What's your current profession or what role are you aspiring to achieve? This helps us tailor the perfect resume for you.",
-      gradient: "from-blue-500 via-primary to-primary/80"
+      gradient: "from-resume-purple via-resume-purple to-primary/80"
     },
     {
       title: "Your career aspirations",
@@ -60,7 +60,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
       icon: Rocket,
       type: "goals",
       description: "Understanding your career goals helps our AI craft targeted content that aligns with your professional ambitions.",
-      gradient: "from-green-500 via-teal-500 to-primary"
+      gradient: "from-resume-purple via-resume-purple to-primary"
     },
     {
       title: "Share your experience",
@@ -81,7 +81,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
         { icon: Target, text: "Optimized for applicant tracking systems" },
         { icon: Eye, text: "Multiple professional templates" }
       ],
-      gradient: "from-primary via-accent to-secondary"
+      gradient: "from-resume-purple via-resume-purple to-secondary"
     }
   ];
 

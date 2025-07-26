@@ -17,13 +17,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createEnhancedResume, createEnhancedResumeFromExperience } from '@/services/resumeEnhancementService';
 import { toast } from 'sonner';
-import {
-  FileText,
-  Linkedin,
-  Loader,
-  ArrowRight,
-  Sparkles,
-  CheckCircle,
+import { 
+  FileText, 
+  Linkedin, 
+  Loader, 
+  ArrowRight, 
+  Sparkles, 
+  CheckCircle, 
   AlertCircle,
   User,
   Briefcase,
@@ -135,7 +135,7 @@ export default function CreateResumeDialog({
   };
 
   const updateStepStatus = (stepIndex: number, status: CreationStep['status']) => {
-    setSteps(prev => prev.map((step, index) =>
+    setSteps(prev => prev.map((step, index) => 
       index === stepIndex ? { ...step, status } : step
     ));
   };
@@ -147,7 +147,7 @@ export default function CreateResumeDialog({
 
   const handleCreate = async (event: React.FormEvent) => {
     event.preventDefault();
-
+    
     // Validate based on which method the user is using
     if (useWorkExperience) {
       if (!workExperience.trim()) {
@@ -190,24 +190,24 @@ export default function CreateResumeDialog({
 
       // Step 4: Generate Resume
       updateStepStatus(3, 'processing');
-
+      
       // Use appropriate service based on input method
       if (useWorkExperience) {
         await createEnhancedResumeFromExperience(workExperience, resumeName || 'My Professional Resume');
       } else {
         await createEnhancedResume(linkedinUrl, resumeName || 'My Professional Resume');
       }
-
+      
       updateStepStatus(3, 'completed');
-
+      
       toast.success('🎉 Resume created successfully!', {
         description: 'Your AI-enhanced resume is ready for customization'
       });
-
+      
       if (onResumeCreated) {
         await onResumeCreated();
       }
-
+      
       setTimeout(() => {
         handleOpenChange(false);
       }, 1000);
@@ -218,7 +218,7 @@ export default function CreateResumeDialog({
       if (currentStepIndex !== -1) {
         updateStepStatus(currentStepIndex, 'error');
       }
-
+      
       setError(error.message || 'Failed to create resume. Please try again.');
       toast.error('Failed to create resume', {
         description: error.message || 'Please check your input and try again'
@@ -250,7 +250,7 @@ export default function CreateResumeDialog({
           {/* Decorative elements */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-accent/10 rounded-full translate-y-12 -translate-x-12 animate-pulse delay-300"></div>
-
+          
           <DialogHeader className="relative">
             <DialogTitle className="text-4xl font-bold text-foreground flex items-center gap-4 mb-4">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/30 flex items-center justify-center shadow-lg">
@@ -300,7 +300,7 @@ export default function CreateResumeDialog({
                       Describe Experience
                     </TabsTrigger>
                   </TabsList>
-
+                  
                   <TabsContent value="linkedin" className="space-y-4 mt-8">
                     <Label htmlFor="linkedin" className="text-base font-semibold text-foreground flex items-center gap-3">
                       <div className="w-6 h-6 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
@@ -319,7 +319,7 @@ export default function CreateResumeDialog({
                       Ensure your LinkedIn profile is public or accessible for the best results
                     </p>
                   </TabsContent>
-
+                  
                   <TabsContent value="experience" className="space-y-4 mt-8">
                     <Label htmlFor="experience" className="text-base font-semibold text-foreground flex items-center gap-3">
                       <div className="w-6 h-6 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
@@ -329,13 +329,13 @@ export default function CreateResumeDialog({
                     </Label>
                     <Textarea
                       id="experience"
-                      placeholder="Describe your professional experience, key achievements, skills, and notable projects. Include specific examples of your work, technologies you've used, and impact you've made..."
+                      placeholder="Copy and paste your entire LinkedIn profile page here. Our AI will intelligently extract all essential information including your experience, projects, education, contact details, skills, and more to create your resume..."
                       value={workExperience}
                       onChange={(e) => setWorkExperience(e.target.value)}
                       className="min-h-[140px] bg-background/80 backdrop-blur-sm border-2 border-border/50 focus:border-primary/50 transition-all duration-300 text-lg resize-none rounded-xl"
                     />
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Provide a detailed description of your professional background. Our AI will use this to create compelling resume content.
+                      Simply copy your entire LinkedIn profile page and paste it here. Our AI will automatically extract all relevant information including work experience, education, projects, skills, contact details, and other essential resume data.
                     </p>
                   </TabsContent>
                 </Tabs>
@@ -383,8 +383,8 @@ export default function CreateResumeDialog({
 
               {/* Enhanced CTA Button */}
               <DialogFooter>
-                <Button
-                  type="submit"
+                <Button 
+                  type="submit" 
                   disabled={isCreating}
                   className="w-full h-16 bg-gradient-to-r from-primary via-primary to-accent hover:from-primary/90 hover:via-primary/95 hover:to-accent/90 text-primary-foreground font-bold text-lg rounded-xl transition-all duration-500 shadow-xl hover:shadow-primary/30 group border border-primary/20"
                 >
@@ -415,27 +415,29 @@ export default function CreateResumeDialog({
 
               <div className="space-y-4">
                 {steps.map((step, index) => (
-                  <div
+                  <div 
                     key={step.id}
-                    className={`flex items-center gap-4 p-5 rounded-xl border transition-all duration-500 ${step.status === 'completed'
-                        ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800/30'
+                    className={`flex items-center gap-4 p-5 rounded-xl border transition-all duration-500 ${
+                      step.status === 'completed' 
+                        ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800/30' 
                         : step.status === 'processing'
-                          ? 'bg-primary/5 border-primary/20 shadow-sm'
-                          : step.status === 'error'
-                            ? 'bg-destructive/5 border-destructive/20'
-                            : 'bg-muted/30 border-border'
-                      }`}
+                        ? 'bg-primary/5 border-primary/20 shadow-sm'
+                        : step.status === 'error'
+                        ? 'bg-destructive/5 border-destructive/20'
+                        : 'bg-muted/30 border-border'
+                    }`}
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     <div className="flex-shrink-0">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${step.status === 'completed'
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                        step.status === 'completed'
                           ? 'bg-green-100 dark:bg-green-900/30'
                           : step.status === 'processing'
-                            ? 'bg-primary/10'
-                            : step.status === 'error'
-                              ? 'bg-destructive/10'
-                              : 'bg-muted'
-                        }`}>
+                          ? 'bg-primary/10'
+                          : step.status === 'error'
+                          ? 'bg-destructive/10'
+                          : 'bg-muted'
+                      }`}>
                         {getStepIcon(step)}
                       </div>
                     </div>

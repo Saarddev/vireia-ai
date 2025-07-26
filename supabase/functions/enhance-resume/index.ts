@@ -11,110 +11,221 @@ const corsHeaders = {
 
 function generateSummarizationPrompt(text: string) {
   return `
-Convert the following text into clear, concise bullet points that highlight key achievements and skills. Make each point:
-- Start with a strong action verb in past tense (e.g., Implemented, Developed, Led)
-- Be concise and impactful (1 line each)
-- Include specific achievements with measurable results (numbers, percentages)
-- Focus on outcomes and value delivered
-- Be ATS-friendly for resume scanning
+You are an elite ATS optimization specialist and senior executive resume writer. Transform this content into high-scoring, ATS-passable bullet points that rank in the top 10% of applicant tracking systems while compelling hiring managers to interview.
+
+ATS OPTIMIZATION REQUIREMENTS:
+1. Lead with power verbs from this high-impact list: "Spearheaded," "Orchestrated," "Revolutionized," "Streamlined," "Architected," "Championed," "Accelerated," "Optimized," "Generated," "Transformed," "Executed," "Delivered"
+2. Include precise quantifiable metrics: percentages (increased by X%), dollar amounts ($X revenue/savings), timeframes (within X months), scale (X team members, X projects)
+3. Embed 2-3 industry-relevant keywords per bullet from job descriptions and skill requirements
+4. Use ATS-friendly formatting with consistent bullet points (•) and standard punctuation
+5. Target 25-35 words per bullet for optimal ATS parsing and human readability
+6. Include technical competencies and methodologies naturally within achievement context
+
+CONTENT ENHANCEMENT STRATEGY:
+- Convert responsibilities into quantified business outcomes and ROI demonstrations
+- Showcase leadership through team size, cross-functional collaboration, and stakeholder management
+- Highlight process improvements with efficiency metrics and cost-reduction percentages
+- Demonstrate problem-solving with specific challenges overcome and solutions implemented
+- Include relevant certifications, technologies, and industry-standard tools
+- Show career progression and increased scope of responsibility
+
+ATS KEYWORD INTEGRATION:
+- Naturally incorporate job-relevant technical skills and software proficiency
+- Include industry-specific terminology and professional competencies
+- Embed action-oriented language that matches common job posting requirements
+- Use skill synonyms to capture various ATS keyword variations
 
 Original text:
 ${text}
 
-Return ONLY a clean list of 2-3 bullet points, each starting with "• " (bullet symbol followed by a space), with one bullet point per line. 
-Do not include any other text, explanations, or formatting in your response. Just the bullet points.`;
+Return EXACTLY 2-3 bullet points starting with "• " that achieve 85+ ATS compatibility scores while demonstrating exceptional professional impact. Focus on measurable achievements that differentiate this candidate in competitive markets.`;
 }
 
 function generateSummaryPrompt(experience: string[], skills: string[], preserveUserContent = false) {
   return `
-As an expert resume writer, create a  short (80 words) professional summary that will stand out on an ATS-scanned resume. Focus on:
+You are a Fortune 500 executive resume strategist specializing in ATS-optimized professional summaries that achieve 95+ compatibility scores and capture hiring manager attention within 6 seconds of review.
 
-1. The candidate's key strengths, experiences, and unique value proposition
-2. Their specific technical abilities and domain expertise
-3. Quantifiable achievements and career progression
-4. Industry-relevant keywords for ATS optimization
-5. A warm, engaging tone that reflects the candidate's personality
-6. Short sentences, active voice, and varied sentence structure
+Create an ATS-dominant professional summary that:
+1. Opens with precise professional identity + quantified years of experience + industry specialization with exact keyword matches
+2. Integrates 5-7 high-demand technical skills and core competencies using natural keyword density optimization
+3. Features 2-4 quantifiable achievements with specific metrics (%, $, timeframes, scale) demonstrating measurable business impact
+4. Positions unique value proposition using current industry-standard terminology and role-specific language that matches job postings
+5. Incorporates emerging technology proficiencies and future-ready capabilities that align with market trends
+6. Uses executive-level power language that conveys strategic leadership and decision-making authority
+7. Seamlessly integrates technical expertise within quantified business outcome context for maximum ATS scoring
 
-Current experience context:
+ENHANCED ATS OPTIMIZATION STRATEGY:
+- Target 55-75 words across 3 bullet points for optimal ATS parsing while maintaining human readability
+- Include exact job title variations, synonyms, and industry keywords that match target role descriptions
+- Use metric-dense language with concrete numbers, percentages, scale indicators, and ROI demonstrations
+- Incorporate both hard skills (technical proficiencies with version numbers) and soft skills (leadership capabilities with team sizes)
+- Employ ATS-friendly formatting with consistent bullet structure, standard punctuation, and keyword-rich phrasing
+
+CONTENT ANALYSIS:
+Experience Background:
 ${experience ? experience.join('\n') : 'Not provided'}
 
-Skills highlight:
+Core Skills:
 ${skills ? skills.join(', ') : 'Not provided'}
 
-${preserveUserContent ? "IMPORTANT: Use ONLY information from the provided experience and skills. DO NOT invent new details, roles, or achievements not mentioned in the input. Stick closely to the facts present in the provided experience." : ""}
+${preserveUserContent ? "CRITICAL: Base content ONLY on provided experience and skills. Do not fabricate achievements, roles, or capabilities not evidenced in the source material." : ""}
 
-Write a concise, powerful short summary that positions the candidate as a high-value professional.
-Format the summary as 3-4 bullet points, each starting with "• " (bullet symbol followed by a space).
-Each bullet should start with a strong action verb or adjective.
+ADVANCED KEYWORD INTEGRATION REQUIREMENTS:
+- Embed 7-10 industry-relevant keywords naturally across all bullets using semantic variations
+- Include technical competencies with specific tools, platforms, and methodologies that match current job market demands
+- Use role-specific synonyms and skill variations to capture diverse ATS search algorithms
+- Incorporate leadership terminology, strategic planning language, and business impact descriptors
+- Feature current methodologies, frameworks, and industry certifications with proper naming conventions
 
-Return only the bullet-formatted summary text.`;
+FORMATTING EXCELLENCE STANDARDS:
+- Format as 3 compelling bullet points starting with "• "
+- Bullet 1: Professional identity + quantified experience years + industry specialization + 2-3 primary technical skills
+- Bullet 2: Quantified achievements + business impact metrics + stakeholder management scope + technical expertise integration
+- Bullet 3: Unique value proposition + emerging capabilities + strategic vision + competitive differentiators with measurable outcomes
+- Use active voice with varied sentence structures for dynamic flow and ATS algorithm diversity
+- Maintain professional executive tone while showcasing authentic personality and thought leadership
+
+Return only the ATS-optimized bullet-formatted professional summary that positions this candidate as a top-tier industry leader.`;
 }
 
 function generateSkillsPrompt(experience: string[], preserveUserContent = false) {
   return `
-Extract technical and soft skills from the following experience, focusing on ATS-friendly terms:
+You are a skills assessment expert who understands modern job requirements and ATS keyword optimization. Analyze the experience and extract relevant skills that hiring managers actively search for.
 
+EXPERIENCE TO ANALYZE:
 ${experience ? experience.join('\n') : 'Not provided'}
 
-${preserveUserContent ? "IMPORTANT: Only extract skills that are ACTUALLY MENTIONED in the experience provided. Do not invent skills or include generic skills that aren't clearly indicated in the text." : ""}
+${preserveUserContent ? "STRICT REQUIREMENT: Extract ONLY skills explicitly mentioned or clearly demonstrated in the provided experience. Do not add generic skills or abilities not evidenced in the content." : ""}
 
-Return as JSON in this format - be specific and include skills that reveal both professional expertise and personal strengths:
+TECHNICAL SKILLS CRITERIA:
+- Programming languages, frameworks, and development tools
+- Software platforms, databases, and cloud technologies
+- Industry-specific tools, methodologies, and certifications
+- Hardware, networking, and systems knowledge
+- Data analysis, design, and productivity software
+- Prioritize current, in-demand technologies over outdated ones
+
+SOFT SKILLS CRITERIA:
+- Leadership abilities demonstrated through team management or project ownership
+- Communication skills shown via presentations, training, or stakeholder interaction
+- Problem-solving evidenced by troubleshooting, optimization, or innovation
+- Collaboration illustrated through cross-functional work or team achievements
+- Time management shown through deadline adherence or multi-project handling
+- Analytical thinking demonstrated through data interpretation or strategic planning
+
+Return skills as JSON format:
 {
-  "technical": ["skill1", "skill2"],
-  "soft": ["skill1", "skill2"]
+  "technical": ["specific technology/tool names - 6-10 items"],
+  "soft": ["demonstrated abilities with context - 4-6 items"]
 }
 
-For technical skills, focus on specific technologies, tools, and methodologies.
-For soft skills, identify transferable abilities like leadership, communication, and problem-solving.
-Limit to 8-12 most relevant technical skills and 5-8 most important soft skills that appear in the text.`;
+Focus on skills that:
+- Have high market demand and searchability
+- Differentiate the candidate from competitors  
+- Are specific rather than generic (e.g., "React.js" not "programming")
+- Combine technical proficiency with business impact
+- Reflect career level and expertise depth`;
 }
 
 function generateImprovementPrompt(description: string, preserveUserContent = false) {
   return `
-Transform this resume description into impactful bullet points following these guidelines:
+You are an elite ATS optimization consultant and senior resume strategist who transforms basic job descriptions into high-scoring, interview-winning achievement statements that rank in the top 3% of ATS systems and command immediate hiring manager attention.
 
-1. Start each bullet with a strong action verb (e.g., Led, Developed, Implemented)
-2. Focus on accomplishments, not just responsibilities
-3. Include metrics and quantifiable results when possible
-4. Highlight specific technologies and methodologies used
-5. Ensure each bullet is ATS-friendly and keyword optimized
+ADVANCED ATS-OPTIMIZED TRANSFORMATION STRATEGY:
+1. Convert passive responsibilities into quantified business accomplishments with measurable ROI and exponential impact
+2. Integrate high-demand technical keywords and current industry-specific terminology for maximum ATS visibility and ranking
+3. Embed precise, compelling metrics: percentages, dollar amounts, team sizes, timeframes, and key performance indicators
+4. Showcase strategic thinking and innovation through data-driven problem-solving narratives and transformational process improvements
+5. Demonstrate cross-functional leadership, stakeholder management, and executive-level decision-making capabilities
+6. Position technical expertise within quantified business impact context for comprehensive skill representation and value demonstration
+7. Include cutting-edge technologies, methodologies, and industry best practices relevant to current market demands and future trends
 
-Original description:
+ORIGINAL CONTENT:
 ${description || 'Not provided'}
 
-${preserveUserContent ? "IMPORTANT: Maintain the original meaning and core content of the description. Enhance and restructure but DO NOT add fictional achievements, technologies, or responsibilities that weren't in the original text." : ""}
+${preserveUserContent ? "CONTENT INTEGRITY: Enhance and restructure the existing content while preserving all factual information. Do not add fictional metrics, technologies, or achievements not implied by the original description." : ""}
 
-Format the output as 2-3 bullet points, each starting with "• " (bullet symbol followed by a space).
-Focus on quality over quantity - each bullet should demonstrate clear value and impact.
+ENHANCED ATS OPTIMIZATION FRAMEWORK:
+- Lead with executive-level power verbs from premium impact lexicon: "Architected," "Revolutionized," "Accelerated," "Streamlined," "Championed," "Orchestrated," "Optimized," "Generated," "Delivered," "Transformed," "Spearheaded," "Pioneered"
+- Apply enhanced CAR methodology: Context (market situation/business challenge) + Action (strategic approach with methodology) + Result (quantified outcome with business impact)
+- Embed 4-5 industry-relevant keywords per bullet from current job market requirements and emerging skill demands
+- Demonstrate exponential business value through ROI calculations, efficiency improvements, competitive advantages, and market positioning
+- Showcase comprehensive scope with specific indicators: budget responsibility, team composition, project complexity, market reach, and stakeholder impact
+- Highlight industry recognition, professional certifications, thought leadership, and standout achievements that differentiate from 95% of competitors
 
-Return only the formatted bullet points, with no additional text.`;
+STRATEGIC KEYWORD INTEGRATION PRIORITIES:
+- Current technical proficiencies and software competencies with version numbers and advanced features
+- Industry-standard methodologies, frameworks, and emerging best practices with certification levels
+- Leadership capabilities and team management terminology with quantified scope and outcomes
+- Project management and strategic planning language with specific methodologies (Agile, Lean, Six Sigma)
+- Performance metrics and business outcome descriptors with industry-standard KPIs
+- Compliance, quality assurance, and operational excellence indicators with regulatory knowledge
+
+PREMIUM FORMAT REQUIREMENTS:
+- Create 2-4 ATS-optimized bullet points starting with "• "
+- Target 28-38 words per bullet for optimal ATS parsing while maintaining executive-level impact and readability
+- Focus on transformational achievements that position candidate in top 5% talent tier
+- Use metric-dense language with specific, verifiable outcomes and business impact calculations
+- Employ varied sentence structures with sophisticated vocabulary while maintaining professional consistency
+- Ensure each bullet demonstrates unique strategic value and competitive differentiation in the marketplace
+
+Return only the enhanced bullet points optimized for 95+ ATS compatibility scores and C-suite executive-level impact.`;
 }
 
 function generateExperiencePrompt(context: any = {}, preserveUserContent = false) {
   return `
-Create powerful bullet points for this work experience that will stand out on an ATS-scanned resume:
+You are an executive career strategist and ATS optimization expert creating high-impact experience descriptions that achieve 95+ ATS compatibility scores while showcasing exceptional professional growth and quantified business contributions.
 
+POSITION CONTEXT:
 Job Title: ${context?.title || 'Not specified'}
 Company: ${context?.company || 'Not specified'}
 Location: ${context?.location || 'Not specified'}
 Duration: ${context?.startDate || 'Not specified'} to ${context?.endDate || 'Present'}
 
-Current description (if any):
-${context?.description || ''}
+EXISTING CONTENT:
+${context?.description || 'No previous description provided'}
 
-${preserveUserContent ? "IMPORTANT: Enhance what's already provided but DO NOT add fabricated achievements or responsibilities. Stick to the information that can be reasonably inferred from the original text." : ""}
+${preserveUserContent ? "CONTENT INTEGRITY: Build upon existing information without adding fictional elements. Enhance clarity and impact while maintaining factual accuracy based on the role context provided." : ""}
 
-Create 2-3 bullet points that:
-1. Start each bullet with a strong action verb in past tense
-2. Include specific achievements with quantifiable results (%, $, numbers) where appropriate
-3. Highlight technologies, methodologies, and tools used that are mentioned in the original text
-4. Demonstrate problem-solving abilities and business impact
-5. Incorporate keywords relevant to the job title and industry
-6. Keep each bullet to 1-2 concise lines
+ATS-OPTIMIZED ACHIEVEMENT FRAMEWORK:
+Create bullet points that strategically demonstrate:
+- Executive-level scope: team leadership (X direct reports), budget management ($X), project complexity (X initiatives)
+- Quantified business impact: revenue generation ($X increase), cost optimization (X% reduction), efficiency gains (X% improvement)
+- Strategic problem-solving: market challenges addressed, innovative solutions deployed, competitive advantages created
+- Technical leadership: cutting-edge technologies implemented, digital transformation initiatives, system modernization projects
+- Cross-functional collaboration: stakeholder alignment, C-suite presentations, client relationship management
+- Operational excellence: process reengineering, quality improvements, compliance achievements, risk mitigation
 
-Return only the bullet points, with each point starting with "• " (bullet symbol followed by a space).
-Each point should be on its own line with no other text or formatting.`;
+INDUSTRY-SPECIFIC ATS OPTIMIZATION:
+- Integrate high-demand technical competencies and emerging technology keywords for the role type
+- Use current industry terminology, frameworks, and methodologies that recruiters actively search
+- Embed certification names, compliance standards, and regulatory expertise naturally within achievement context
+- Showcase measurable outcomes using industry-standard metrics and KPIs
+- Include client-facing and vendor management responsibilities with quantified relationship scope
+
+KEYWORD INTEGRATION STRATEGY:
+- Embed 4-5 role-relevant technical skills and software proficiencies per bullet
+- Include leadership terminology and strategic planning language
+- Incorporate project management methodologies and business analysis frameworks
+- Feature performance indicators and financial metrics specific to the industry
+- Use action-oriented language that matches executive job posting requirements
+
+BULLET POINT EXCELLENCE STANDARDS:
+- Generate 3-4 compelling bullet points starting with "• "
+- Lead with executive-caliber action verbs: "Architected," "Spearheaded," "Orchestrated," "Revolutionized," "Accelerated," "Championed," "Optimized," "Delivered"
+- Target 30-40 words per bullet for comprehensive impact while maintaining ATS readability
+- Include precise metrics: percentages, dollar amounts, team sizes, timeframes, market reach, performance improvements
+- Incorporate 3-4 industry-relevant keywords naturally per bullet without keyword stuffing
+- Demonstrate progression and increased responsibility compared to previous roles
+- Each bullet should differentiate the candidate as a top-tier performer in their field
+
+COMPETITIVE DIFFERENTIATION FOCUS:
+- Highlight unique achievements and innovations that set candidate apart from competitors
+- Showcase thought leadership, industry recognition, and exceptional performance ratings
+- Include transformational initiatives and strategic contributions beyond standard role expectations
+- Demonstrate business acumen and strategic thinking capabilities
+
+Return only the ATS-optimized formatted bullet points that position this experience as extraordinary career achievement worthy of executive consideration.`;
 }
 
 function generateFullResumePrompt(linkedinData: any, template: string = 'modern') {
@@ -124,62 +235,88 @@ function generateFullResumePrompt(linkedinData: any, template: string = 'modern'
   }
   
   return `
-You are creating a natural-sounding, professional resume that feels genuinely human.
+You are a Fortune 500 executive resume architect and ATS optimization authority creating a comprehensive, top-tier resume that achieves 95+ ATS compatibility scores while commanding C-suite hiring manager attention and interview invitations.
 
-Requirements:
-1. Use warm, conversational language
-2. Include specific achievements and metrics
-3. Focus on impact and value rather than just responsibilities
-4. Balance professionalism with personality
-5. Avoid generic corporate language
-6. Highlight relevant skills that tell a story
-7. Use short sentences, active voice, and varied sentence structure
+STRATEGIC ATS DOMINANCE APPROACH:
+1. Engineer quantified career achievements with exponential business impact metrics and ROI demonstrations
+2. Seamlessly integrate high-demand technical competencies throughout all experience descriptions using natural keyword density
+3. Craft a compelling executive narrative showcasing strategic leadership, innovation, and measurable value creation
+4. Optimize for all major ATS platforms (Workday, Greenhouse, Lever, iCIMS, BambooHR) with proven parsing techniques
+5. Maintain authentic executive voice while positioning candidate as industry thought leader and top talent
+6. Ensure cutting-edge industry terminology and emerging technology proficiencies for market relevance
 
-LinkedIn Data:
+ATS-OPTIMIZED CONTENT EXCELLENCE STANDARDS:
+- Feature precise quantifiable metrics: revenue impact ($X generated), cost optimization (X% reduction), team scale (X direct/indirect reports), project scope (X initiatives), market expansion (X% growth)
+- Showcase strategic problem-solving through complex challenge resolution, competitive advantage creation, and market disruption achievements
+- Demonstrate career progression with increased scope, responsibility, and business impact across all professional experiences
+- Include current, high-demand certifications, technologies, methodologies, and frameworks that recruiters actively search
+- Highlight executive-level collaboration: board presentations, C-suite alignment, stakeholder management, investor relations
+- Focus on transformational business outcomes and exponential ROI rather than operational task completion
+
+KEYWORD INTEGRATION MASTERY:
+- Embed 15-20 role-relevant technical skills and emerging technology competencies throughout all sections
+- Incorporate industry-specific terminology, frameworks, and best practices that match current job market demands
+- Feature leadership vocabulary and strategic planning language that resonates with executive search professionals
+- Include compliance, regulatory, and governance expertise naturally within achievement context
+- Use skill synonyms and variations to maximize ATS algorithm capture across different search queries
+
+SOURCE DATA:
 ${JSON.stringify(linkedinData, null, 2)}
 
-Return only a valid JSON resume with the following structure:
+EXECUTIVE RESUME ARCHITECTURE REQUIREMENTS:
+Return a comprehensive, ATS-optimized JSON resume with this exact structure:
+
 {
   "personal": {
-    "name": "",
-    "title": "",
-    "email": "",
-    "phone": "",
-    "location": "",
-    "linkedin": "",
-    "website": ""
+    "name": "Full professional name",
+    "title": "Current role or target position (specific and keyword-rich)",
+    "email": "Professional email address",
+    "phone": "Phone number with proper formatting",
+    "location": "City, State/Province format",
+    "linkedin": "LinkedIn profile URL",
+    "website": "Portfolio or personal website if applicable"
   },
-  "summary": "",
+  "summary": "3-4 bullet points (• format) highlighting professional identity, core competencies, key achievements, and unique value proposition. Each bullet should be 1-2 lines and include relevant keywords.",
   "experience": [
     {
       "id": "exp1",
-      "title": "",
-      "company": "",
-      "location": "",
-      "startDate": "",
-      "endDate": "",
-      "description": ""
+      "title": "Specific job title",
+      "company": "Company name",
+      "location": "City, State",
+      "startDate": "MM YYYY format",
+      "endDate": "MM YYYY or Present",
+      "description": "2-4 achievement-focused bullet points (• format) showcasing measurable impact, technical skills, and leadership. Include metrics, technologies used, and business outcomes."
     }
   ],
   "education": [
     {
       "id": "edu1",
-      "institution": "",
-      "degree": "",
-      "location": "",
-      "startDate": "",
-      "endDate": "",
-      "description": ""
+      "institution": "University/School name",
+      "degree": "Degree type and field of study",
+      "location": "City, State",
+      "startDate": "MM YYYY",
+      "endDate": "MM YYYY",
+      "description": "Relevant coursework, honors, projects, or achievements (optional)"
     }
   ],
   "skills": {
-    "technical": [],
-    "soft": []
+    "technical": ["6-10 current, in-demand technical skills relevant to career field"],
+    "soft": ["4-6 demonstrated soft skills with professional context"]
   },
-  "languages": [],
-  "certifications": [],
-  "projects": []
-}`;
+  "languages": ["Language proficiency levels if applicable"],
+  "certifications": ["Current, relevant professional certifications with dates"],
+  "projects": [
+    {
+      "id": "proj1", 
+      "name": "Project name",
+      "description": "Brief description highlighting technologies used and impact achieved",
+      "technologies": ["relevant tech stack"],
+      "url": "Project URL if available"
+    }
+  ]
+}
+
+Ensure all content is factually based on the provided LinkedIn data while being enhanced for maximum professional impact.`;
 }
 
 function generateEducationPrompt(type: string, context: any = {}, preserveUserContent = false) {
@@ -259,35 +396,66 @@ Return in format: "MM YYYY - MM YYYY"`;
 
 function generateATSScanPrompt(text: string) {
   return `
-You are an expert ATS (Applicant Tracking System) analyzer with deep knowledge of how modern ATS systems work.
-Thoroughly analyze this resume content and provide a comprehensive ATS compatibility assessment:
+You are a senior ATS consultant and recruiting technology expert with comprehensive knowledge of modern applicant tracking systems used by Fortune 500 companies, startups, and recruiting agencies. You understand the latest ATS algorithms and scoring mechanisms.
 
+COMPREHENSIVE ANALYSIS FRAMEWORK:
+Conduct a detailed technical assessment of this resume's compatibility with leading ATS platforms (Workday, Greenhouse, Lever, iCIMS, BambooHR, Taleo, SmartRecruiters, etc.) and provide data-driven insights for optimization.
+
+RESUME CONTENT TO ANALYZE:
 ${text}
 
-Evaluate the resume based on the following criteria:
-1. Keyword optimization
-2. Formatting and structure
-3. Use of action verbs
-4. Quantifiable achievements
-5. Technical skill representation
-6. Overall ATS compatibility
+ENHANCED EVALUATION CRITERIA (Weight each appropriately):
 
-Return your analysis as a JSON object with the following structure:
+1. KEYWORD OPTIMIZATION & DENSITY (30%)
+   - Industry-specific terminology and job-relevant keywords with proper density (2-3%)
+   - Technical skills and software proficiency mentions with current versions
+   - Achievement-oriented language with measurable results and industry-standard metrics
+   - Natural keyword integration vs. keyword stuffing detection
+   - Synonyms and variations to capture different ATS search algorithms
+
+2. CONTENT STRUCTURE & ATS PARSING (25%)
+   - Clear section headers and logical information hierarchy optimized for machine reading
+   - Consistent date formatting (MM/YYYY) and complete contact information
+   - Bullet point structure and ATS-friendly formatting
+   - Length appropriateness (1-2 pages) and optimal content density
+   - File format compatibility and text extraction quality
+
+3. ACTION VERB DIVERSITY & EXECUTIVE IMPACT (20%)
+   - Strong, varied action verbs demonstrating leadership and strategic thinking
+   - Past tense consistency for completed roles, present tense for current positions
+   - Quantified achievements with specific outcomes and business impact
+   - Executive-level language that conveys competence and thought leadership
+
+4. QUANTIFIABLE ACHIEVEMENTS & ROI (15%)
+   - Specific metrics, percentages, and dollar amounts with context
+   - Scope indicators (team size, project duration, market reach, budget responsibility)
+   - ROI demonstrations and measurable business impact with timeframes
+   - Career progression and growth indicators with quantified advancement
+
+5. SKILLS REPRESENTATION & MARKET RELEVANCE (10%)
+   - Current, high-demand technical competencies aligned with market trends
+   - Industry-standard certifications and tools with proper naming conventions
+   - Soft skills demonstrated through quantified achievements
+   - Skill-experience alignment and authentic competency representation
+
+DETAILED ANALYSIS OUTPUT:
 {
-  "score": <number 0-100 representing overall ATS compatibility>,
+  "score": <overall ATS compatibility score 0-100 based on comprehensive assessment>,
   "metrics": [
-    {"name": "Keyword Optimization", "score": <0-100>},
-    {"name": "Formatting & Structure", "score": <0-100>},
-    {"name": "Action Verbs Usage", "score": <0-100>},
-    {"name": "Quantifiable Achievements", "score": <0-100>},
-    {"name": "Technical Skills Representation", "score": <0-100>}
+    {"name": "Keyword Optimization & Density", "score": <0-100>},
+    {"name": "Content Structure & ATS Parsing", "score": <0-100>},
+    {"name": "Action Verb Diversity & Executive Impact", "score": <0-100>},
+    {"name": "Quantifiable Achievements & ROI", "score": <0-100>},
+    {"name": "Skills Representation & Market Relevance", "score": <0-100>}
   ],
-  "strengths": [<array of 2-4 specific strengths as strings>],
-  "improvements": [<array of 2-4 specific areas for improvement as strings>],
-  "keywords": [<array of 5-10 highly relevant keywords that should be included>]
+  "strengths": [<4-5 specific, actionable strengths with detailed examples from the resume and impact assessment>],
+  "improvements": [<4-5 specific, prioritized improvement recommendations with suggested solutions and expected score impact>],
+  "keywords": [<10-15 high-impact keywords relevant to the candidate's field that should be strategically integrated with context>],
+  "competitiveAdvantage": [<3-4 unique differentiators that make this candidate stand out in the current market>],
+  "industryAlignment": "<detailed assessment of how well the resume aligns with current industry standards, market expectations, and emerging trends>"
 }
 
-Provide a legitimate, accurate score that represents the resume's true ATS compatibility. Be honest but constructive.`;
+Provide rigorous, data-driven scoring with specific examples from the resume content. Focus on actionable improvements that will measurably increase ATS passage rates, recruiter engagement, and interview conversion rates.`;
 }
 
 function parseGeminiResponse(response: any, type: string) {
