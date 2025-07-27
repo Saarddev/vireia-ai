@@ -74,7 +74,7 @@ const Navbar = () => {
           </div>
           <Link to="/" className="font-bold text-xl bg-gradient-to-r from-resume-purple to-resume-violet bg-clip-text text-transparent">Vireia AI</Link>
         </div>
-        <div className="hidden md:flex space-x-8 mr-10 animate-slide-in-right animate-delay-200">
+        <div className={user? "hidden md:flex space-x-8 mr-5 animate-slide-in-right animate-delay-200" : "hidden md:flex space-x-8 ml-20 animate-slide-in-right animate-delay-200"}>
           <a href="#features" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">Features</a>
           <a href="/blog" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">Blog Posts</a>
           <a href="#pricing" className="text-resume-gray hover:text-resume-purple transition-colors font-medium">Pricing</a>

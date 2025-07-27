@@ -1,6 +1,4 @@
-// src/components/ads/AAdsAd.tsx
-
-import React from "react";
+import React, { useEffect, useRef } from "react";
 
 interface AAdsAdProps {
   adId?: string;
@@ -13,24 +11,27 @@ const AAdsAd: React.FC<AAdsAdProps> = ({
   width = 300,
   height = 250,
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    containerRef.current.innerHTML = ""; // clear any placeholder
+
+    const iframe = document.createElement("iframe");
+    iframe.setAttribute("data-aa", adId);
+    iframe.src = `https://ad.a-ads.com/${adId}?size=${width}x${height}`;
+    iframe.width = `${width}`;
+    iframe.height = `${height}`;
+    iframe.style.border = "0";
+    iframe.style.overflow = "hidden";
+    iframe.style.backgroundColor = "transparent";
+    containerRef.current.appendChild(iframe);
+  }, [adId, width, height]);
+
   return (
-    <div className="rounded-2xl overflow-hidden shadow-sm border border-muted bg-transparent w-fit mx-auto">
-      <iframe
-        data-aa={adId}
-        src={`https://ad.a-ads.com/${adId}?size=${width}x${height}`}
-        style={{
-          width: `${width}px`,
-          height: `${height}px`,
-          border: "0px",
-          padding: "0",
-          overflow: "hidden",
-          backgroundColor: "transparent",
-        }}
-        title="A-ADS Banner"
-      ></iframe>
-    </div>
+    <div
+      ref={containerRef}
+      className="rounded-2xl overflow-hidden shadow-sm border border-muted bg-transparent w-fit mx-auto"
+    />
   );
 };
-
-
-export default AAdsAd;
