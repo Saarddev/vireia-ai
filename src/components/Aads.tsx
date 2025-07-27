@@ -17,7 +17,7 @@ const AAdsAd: React.FC<AAdsAdProps> = ({
     <div className="rounded-2xl overflow-hidden shadow-sm border border-muted bg-transparent w-fit mx-auto">
       <iframe
         data-aa={adId}
-        src={`//ad.a-ads.com/${adId}?size=${width}x${height}`}
+        src={`https://ad.a-ads.com/${adId}?size=${width}x${height}`}
         style={{
           width: `${width}px`,
           height: `${height}px`,
@@ -31,5 +31,6 @@ const AAdsAd: React.FC<AAdsAdProps> = ({
     </div>
   );
 };
+
 
 export default AAdsAd;
