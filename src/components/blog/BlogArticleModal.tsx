@@ -178,7 +178,6 @@ export const BlogArticleModal: React.FC<BlogArticleModalProps> = ({
                                     {blog.content}
                                 </ReactMarkdown>
                             </div>
-                            <AdsterraBannerAd />
 
                             {/* Tags */}
                             {blog.tags && blog.tags.length > 0 && (

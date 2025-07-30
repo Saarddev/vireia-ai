@@ -36,7 +36,7 @@ export const BlogGrid: React.FC<BlogGridProps> = ({ blogs }) => {
     }
 
     return (
-        <><PopunderWrapper>
+        <>
 
             <div className="space-y-12 animate-fade-in">
                 <div className="flex items-center justify-between">
@@ -136,7 +136,6 @@ export const BlogGrid: React.FC<BlogGridProps> = ({ blogs }) => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
             />
-        </PopunderWrapper >
         </>
     );
 };
