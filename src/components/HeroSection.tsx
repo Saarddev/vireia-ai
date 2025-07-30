@@ -203,7 +203,7 @@ const HeroSection = () => {
                 <div className="text-xs text-resume-gray-dark">Interview Rate</div>
               </div>
               <div className="text-center">
-                <div className="text-xl md:text-2xl font-bold text-resume-purple">200k+</div>
+                <div className="text-xl md:text-2xl font-bold text-resume-purple">20k+</div>
                 <div className="text-xs text-resume-gray-dark">Resumes Created</div>
               </div>
               <div className="text-center">
