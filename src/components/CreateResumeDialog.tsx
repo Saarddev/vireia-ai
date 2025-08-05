@@ -243,28 +243,28 @@ export default function CreateResumeDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[700px] p-0 overflow-hidden bg-gradient-to-b from-background to-muted/30 border-0 shadow-2xl">
+      <DialogContent className="sm:max-w-[700px] scale-90  p-0 overflow-hidden bg-gradient-to-b from-background to-muted/30 border-0 shadow-2xl">
         {/* Enhanced Header with gradient background */}
-        <div className="relative bg-gradient-to-br from-primary/15 via-primary/10 to-accent/15 p-10 border-b border-border/30">
+        <div className="relative bg-gradient-to-br from-primary/15 via-primary/10 to-accent/15 p-8 border-b border-border/30">
           <div className="absolute inset-0 bg-grid-pattern opacity-20"></div>
           {/* Decorative elements */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-accent/10 rounded-full translate-y-12 -translate-x-12 animate-pulse delay-300"></div>
           
           <DialogHeader className="relative">
-            <DialogTitle className="text-4xl font-bold text-foreground flex items-center gap-4 mb-4">
+            <DialogTitle className="text-3xl font-bold text-foreground flex items-center gap-4 mb-4">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/30 flex items-center justify-center shadow-lg">
-                <Sparkles className="h-6 w-6 text-primary drop-shadow-sm" />
+                <Sparkles className="h-6 w-6  drop-shadow-sm" />
               </div>
-              Create AI-Enhanced Resume
+              Resume Creator
             </DialogTitle>
-            <DialogDescription className="text-muted-foreground text-lg mt-4 leading-relaxed font-medium">
+            <DialogDescription className="text-muted-foreground text-md mt-4 leading-relaxed font-medium">
               Transform your professional experience into an ATS-optimized resume using cutting-edge AI technology
             </DialogDescription>
           </DialogHeader>
         </div>
 
-        <div className="p-10 space-y-10">
+        <div className="p-8 space-y-3">
           {!isCreating ? (
             <form onSubmit={handleCreate} className="space-y-10">
               <div className="space-y-8">
@@ -281,7 +281,7 @@ export default function CreateResumeDialog({
                     placeholder="e.g., Senior Software Engineer Resume"
                     value={resumeName}
                     onChange={(e) => setResumeName(e.target.value)}
-                    className="h-14 bg-background/80 backdrop-blur-sm border-2 border-border/50 focus:border-primary/50 transition-all duration-300 text-lg rounded-xl"
+                    className="h-12 bg-background/80 backdrop-blur-sm border-2 border-border/50 focus:border-primary/50 transition-all duration-300 text-lg rounded-xl"
                   />
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     Give your resume a descriptive name for easy identification
@@ -291,7 +291,7 @@ export default function CreateResumeDialog({
                 {/* Enhanced Tabs for Input Method */}
                 <Tabs value={useWorkExperience ? "experience" : "linkedin"} onValueChange={(value) => setUseWorkExperience(value === "experience")} className="w-full">
                   <TabsList className="grid w-full grid-cols-2 bg-muted/30 p-1 rounded-xl h-14">
-                    <TabsTrigger value="linkedin" className="flex items-center gap-3 data-[state=active]:bg-background data-[state=active]:shadow-md text-base font-medium h-12 rounded-lg">
+                    <TabsTrigger value="linkedin" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-md text-base font-medium h-12 rounded-lg">
                       <Linkedin className="h-5 w-5" />
                       LinkedIn URL
                     </TabsTrigger>
@@ -316,7 +316,7 @@ export default function CreateResumeDialog({
                       className="h-14 bg-background/80 backdrop-blur-sm border-2 border-border/50 focus:border-primary/50 transition-all duration-300 text-lg rounded-xl"
                     />
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Ensure your LinkedIn profile is public or accessible for the best results
+                      LinkedIn url fetch is currently having some issues... 
                     </p>
                   </TabsContent>
                   
@@ -329,10 +329,10 @@ export default function CreateResumeDialog({
                     </Label>
                     <Textarea
                       id="experience"
-                      placeholder="Copy and paste your entire LinkedIn profile page here. Our AI will intelligently extract all essential information including your experience, projects, education, contact details, skills, and more to create your resume..."
+                      placeholder="Copy and paste your entire LinkedIn profile page here."
                       value={workExperience}
                       onChange={(e) => setWorkExperience(e.target.value)}
-                      className="min-h-[140px] bg-background/80 backdrop-blur-sm border-2 border-border/50 focus:border-primary/50 transition-all duration-300 text-lg resize-none rounded-xl"
+                      className="min-h-[100px] bg-background/80 backdrop-blur-sm border-2 border-border/50 focus:border-primary/50 transition-all duration-300 text-lg resize-none rounded-xl"
                     />
                     <p className="text-sm text-muted-foreground leading-relaxed">
                       Simply copy your entire LinkedIn profile page and paste it here. Our AI will automatically extract all relevant information including work experience, education, projects, skills, contact details, and other essential resume data.
@@ -352,7 +352,7 @@ export default function CreateResumeDialog({
               )}
 
               {/* Enhanced Feature Preview Card */}
-              <Card className="border-primary/30 bg-gradient-to-br from-primary/8 to-accent/8 shadow-lg">
+              {/* <Card className="border-primary/30 bg-gradient-to-br from-primary/8 to-accent/8 shadow-lg">
                 <div className="p-8">
                   <h4 className="font-bold text-foreground mb-6 flex items-center gap-3 text-lg">
                     <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/20 to-primary/30 flex items-center justify-center">
@@ -379,23 +379,26 @@ export default function CreateResumeDialog({
                     </div>
                   </div>
                 </div>
-              </Card>
+              </Card> */}
 
               {/* Enhanced CTA Button */}
               <DialogFooter>
+                <div className='flex items-center justify-center w-full'>
+
                 <Button 
                   type="submit" 
                   disabled={isCreating}
-                  className="w-full h-16 bg-gradient-to-r from-primary via-primary to-accent hover:from-primary/90 hover:via-primary/95 hover:to-accent/90 text-primary-foreground font-bold text-lg rounded-xl transition-all duration-500 shadow-xl hover:shadow-primary/30 group border border-primary/20"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-6 h-6 rounded-lg bg-primary-foreground/20 flex items-center justify-center">
+                  className="w-full h-12 w-[80%] bg-gradient-to-r opacity-70 from-primary via-primary to-#7c3bed hover:from-primary/90 hover:via-primary/95 hover:to-[#333333]/20 text-primary-foreground font-bold text-lg rounded-xl transition-all duration-500 shadow-xl hover:shadow-primary/30 group border border-primary/20"
+                  >
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 rounded-lg bg-primary-foreground/20 flex items-center justify-center">
                       <Sparkles className="h-4 w-4" />
                     </div>
-                    Create AI Resume
+                    Create
                     <ArrowRight className="h-5 w-5 group-hover:translate-x-2 transition-all duration-300" />
                   </div>
                 </Button>
+                  </div>
               </DialogFooter>
             </form>
           ) : (

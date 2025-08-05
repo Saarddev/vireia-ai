@@ -25,6 +25,7 @@ import ProjectForm from '@/components/resume-builder/ProjectForm';
 import { Paintbrush } from 'lucide-react';
 // Import the types from types/resume.ts
 import { Education, ResumeData } from '@/types/resume';
+import CertificationsForm from '@/components/resume-builder/CertificationsForm';
 
 interface AISuggestionData {
   type: string;
@@ -326,6 +327,13 @@ const ResumeBuilder = () => {
           <ProjectForm
             data={resumeData.projects || []}
             onChange={(data) => handleDataChange("projects", data)}
+          />
+        );
+      case "certifications":
+        return (
+          <CertificationsForm
+            data={resumeData.certifications || []}
+            onChange={(data) => handleDataChange("certifications", data)}
           />
         );
       case "templates":

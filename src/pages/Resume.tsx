@@ -38,6 +38,7 @@ const Resume = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    
     const fetchUserData = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
